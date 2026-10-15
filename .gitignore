@@ -1,0 +1,7 @@
+/build/
+/data/
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+__pycache__/
