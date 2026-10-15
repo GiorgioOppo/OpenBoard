@@ -3,5 +3,9 @@
 *.db
 *.db-shm
 *.db-wal
+*.bak
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
 .DS_Store
 __pycache__/

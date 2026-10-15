@@ -14,8 +14,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install SQLite headers (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev libssl-dev pkg-config
+      - name: Install OpenSSL build metadata (macOS)
+        if: runner.os == 'macOS'
+        run: brew install openssl@3 pkg-config
       - name: Build
         run: make
       - name: Integration tests
         run: make test
+      - name: Address and undefined behavior sanitizers
+        run: make test-sanitize
