@@ -2,6 +2,8 @@
 
 This checklist prepares the GitHub source repository for public access. Deploying a service requires the separate [deployment checks](DEPLOYMENT.md). The maintainer chooses when to change repository visibility and publish the draft release.
 
+The source repository became public on 16 October 2026 after the owner accepted the residual historical-email exposure. Private Vulnerability Reporting is enabled. See the [publication record](PUBLICATION_REVIEW_2026-10-16.md#public-repository-status--16-october-2026). The reusable checklist below also covers later release and artifact decisions; the prerelease is still a draft.
+
 ## Repository content
 
 - [ ] Commit and push all intended security fixes, documentation, scripts and tests.

@@ -15,7 +15,7 @@ Support status is a maintenance policy, not a claim that the current release has
 
 Use **GitHub Private Vulnerability Reporting**: open the repository's [Security advisories](https://github.com/GiorgioOppo/OpenBoard/security/advisories) and choose **Report a vulnerability**. This is the project's sole private vulnerability-reporting channel; no reporting email is published.
 
-Private reporting must be enabled when the repository becomes public. If the button is unavailable, open a support issue asking the maintainer to enable private reporting, without including vulnerability details. See [GitHub's reporting instructions](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/privately-reporting-a-security-vulnerability).
+Private reporting is enabled for this repository. If the button is unavailable, open a support issue asking the maintainer to restore private reporting, without including vulnerability details. See [GitHub's reporting instructions](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/privately-reporting-a-security-vulnerability).
 
 Include the affected version/commit or image digest, configuration, impact, minimal reproduction and any proposed fix. Use synthetic data. Do not send live credentials, customer databases or personal information. Do not post an exploit or reproduction in public issues before coordinated disclosure.
 
