@@ -79,11 +79,11 @@ class OperationsTests(unittest.TestCase):
         (assets/'leak.js').symlink_to(secret)
         (assets/'bad.js').write_bytes(b'hello\0hidden')
         (assets/'index.html').write_text('<h1>Good</h1>')
-        self.start('--web-root',str(assets))
+        self.start()
         status, _, body=self.request('GET','/leak.js')
         self.assertEqual(status,404);self.assertNotIn(b'private-data',body)
-        self.assertEqual(self.request('GET','/bad.js')[0],500)
-        self.assertEqual(self.request('GET','/')[0],200)
+        self.assertEqual(self.request('GET','/bad.js')[0],404)
+        self.assertEqual(self.request('GET','/')[0],404)
 
     def test_integrity_diagnostics_and_checkpoint_without_migration(self):
         old=Path(self.temp.name)/'old.db'
@@ -102,11 +102,14 @@ class OperationsTests(unittest.TestCase):
         self.assertNotEqual(self.command('--db',str(missing),'--checkpoint').returncode,0)
         self.assertFalse(missing.exists())
 
-    def test_install_supports_staging_and_all_assets(self):
+    def test_install_separates_backend_from_frontend_assets(self):
         stage=Path(self.temp.name)/'stage'
         result=subprocess.run(['make','install',f'DESTDIR={stage}','PREFIX=/opt/openboard'],cwd=ROOT,capture_output=True,timeout=30)
         self.assertEqual(result.returncode,0,result.stderr)
         self.assertTrue((stage/'opt/openboard/bin/openboard').is_file())
+        self.assertFalse((stage/'opt/openboard/share/openboard').exists())
+        result=subprocess.run(['make','install-frontend',f'DESTDIR={stage}','PREFIX=/opt/openboard'],cwd=ROOT,capture_output=True,timeout=30)
+        self.assertEqual(result.returncode,0,result.stderr)
         for asset in (ROOT/'web').iterdir():
             if asset.suffix in ('.js','.css','.html','.svg'):
                 self.assertEqual((stage/'opt/openboard/share/openboard'/asset.name).read_bytes(),asset.read_bytes())

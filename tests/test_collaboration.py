@@ -185,7 +185,7 @@ class OpenBoardCollaboration(unittest.TestCase):
     def test_local_attachments_work_while_account_tools_require_auth_mode(self):
         self.stop()
         self.process = auth_helpers.subprocess.Popen(
-            [str(auth_helpers.BINARY), "--port", str(self.port), "--db", str(self.db), "--web-root", str(auth_helpers.ROOT / "web"), "--quiet"],
+            [str(auth_helpers.BINARY), "--port", str(self.port), "--db", str(self.db), "--no-auth", "--quiet"],
             cwd=auth_helpers.ROOT, stdout=self.log, stderr=auth_helpers.subprocess.STDOUT,
         )
         deadline = auth_helpers.time.monotonic() + 5

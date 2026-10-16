@@ -55,7 +55,43 @@
     lines.push('END:VCALENDAR'); return lines.map(foldLine).join('\r\n')+'\r\n';
   }
   function shouldDiscardDraft(current, owned, ambiguous) { return !!owned && current === owned && !ambiguous; }
-  const helpers = {safeURL,markdown,csvCell,csv,icsText,calendar,foldLine,shouldDiscardDraft};
+  function fieldValue(type, value) {
+    if (value === '' || value === null || value === undefined) return null;
+    if (type === 'number') { const number = Number(value); if (!Number.isFinite(number) || Math.abs(number) > 1e12) throw new Error('Inserisci un numero finito.'); return number; }
+    if (type === 'boolean') { if (value === true || value === 'true') return true; if (value === false || value === 'false') return false; throw new Error('Scegli Sì o No.'); }
+    if (type === 'date' && !validDate(value)) throw new Error('Inserisci una data valida.');
+    return String(value);
+  }
+  function fieldText(value) { return value === true ? 'Sì' : value === false ? 'No' : value === null || value === undefined ? '—' : String(value); }
+  function planningPayload(data, fields, milestones, originalMilestone = '') {
+    const keys = new Set((fields || []).filter((field) => !field.deleted_at).map((field) => field.key));
+    const result = {...data,custom_values:Object.fromEntries(Object.entries(data.custom_values || {}).filter(([key]) => keys.has(key)))};
+    if (result.milestone_key && result.milestone_key === originalMilestone && !(milestones || []).some((item) => !item.deleted_at && item.key === result.milestone_key)) delete result.milestone_key;
+    return result;
+  }
+  function fieldCell(value) { return escape(fieldText(value)); }
+  function fieldMatches(value, query) { return value !== null && value !== undefined && fieldText(value).toLocaleLowerCase('it').includes(String(query).trim().toLocaleLowerCase('it')); }
+  function worklogCSV(rows) {
+    return '\uFEFF'+[['ID','Giorno','Autore','Bacheca','Scheda','Minuti','Nota'],...rows.map((row) => [row.id,row.date,row.author,row.board_name,row.card_title,row.minutes,row.note])].map((row) => row.map(csvCell).join(',')).join('\r\n')+'\r\n';
+  }
+  function catalog(value) {
+    const failure = () => { throw new Error('Catalogo del server non valido.'); };
+    if (!value || typeof value !== 'object' || Array.isArray(value)) failure();
+    function names(map) {
+      if (!map || typeof map !== 'object' || Array.isArray(map)) failure();
+      const entries = Object.entries(map);
+      if (!entries.length || entries.length > 50 || entries.some(([key,name]) => !/^[a-z][a-z0-9_]{0,39}$/.test(key) || ['constructor','prototype'].includes(key) || typeof name !== 'string' || !name.trim() || name.length > 100)) failure();
+      return Object.fromEntries(entries);
+    }
+    const labels = names(value.labels), priorities = names(value.priorities);
+    if (!Object.hasOwn(priorities,'normal')) failure();
+    if (!Array.isArray(value.covers) || !value.covers.includes('') || value.covers.length > 20 || value.covers.some((key) => typeof key !== 'string' || (key && !/^[a-z][a-z0-9_]{0,39}$/.test(key))) || new Set(value.covers).size !== value.covers.length) failure();
+    const supported = ['text','number','date','boolean','select'];
+    if (!Array.isArray(value.custom_field_types) || value.custom_field_types.length !== supported.length || value.custom_field_types.some((item) => !item || !supported.includes(item.value) || typeof item.label !== 'string' || !item.label.trim() || item.label.length > 100) || new Set(value.custom_field_types.map((item) => item.value)).size !== supported.length) failure();
+    return {labels,priorities,covers:[...value.covers],fieldTypes:Object.fromEntries(value.custom_field_types.map((item) => [item.value,item.label]))};
+  }
+  function storageLabel(value) { return value === 'sqlite' ? 'SQLite' : value === 'postgresql+mongodb' ? 'PostgreSQL + MongoDB' : ''; }
+  const helpers = {safeURL,markdown,csvCell,csv,icsText,calendar,foldLine,shouldDiscardDraft,fieldValue,fieldText,planningPayload,fieldCell,fieldMatches,worklogCSV,storageLabel,catalog};
   if (typeof module !== 'undefined' && module.exports) module.exports = helpers;
   root.OpenBoardProductivity = helpers;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -4,6 +4,7 @@
 #define _DARWIN_C_SOURCE
 #endif
 #include "auth.h"
+#include "cloud.h"
 #include "openboard.h"
 #include <arpa/inet.h>
 #include <ctype.h>
@@ -12,7 +13,6 @@
 #include <limits.h>
 #include <netinet/in.h>
 #include <openssl/crypto.h>
-#include <openssl/sha.h>
 #include <poll.h>
 #include <pthread.h>
 #include <signal.h>
@@ -22,14 +22,14 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 
 OBConfig ob_config = {.port = 8080,
                       .workers = 8,
-                      .web_root = "web",
                       .db_path = "data/openboard.db",
+                      .auth_enabled = true,
+                      .bind_address = "127.0.0.1",
                       .busy_timeout_ms = 5000,
                       .body_limit = OB_BODY_LIMIT};
 static volatile sig_atomic_t stopping;
@@ -388,7 +388,7 @@ static const char *reason(int status) {
   }
 }
 static void send_response(int fd, const Request *request, Response *r,
-                          bool head, bool asset) {
+                          bool head) {
   char header[8192];
   size_t length = r->body ? strlen(r->body) : 0;
   int n = snprintf(
@@ -402,84 +402,12 @@ static void send_response(int fd, const Request *request, Response *r,
       "'none'; base-uri 'none'; frame-ancestors 'none'; form-action "
       "'self'\r\n%s\r\n",
       r->status, reason(r->status),
-      r->type ? r->type : "application/json; charset=utf-8", length,
-      asset ? "public, max-age=0, must-revalidate" : "no-store",
+      r->type ? r->type : "application/json; charset=utf-8", length, "no-store",
       request->request_id, r->headers);
   int64_t deadline = milliseconds() + 10000;
   if (n > 0 && (size_t)n < sizeof header &&
       send_until(fd, header, (size_t)n, deadline) && !head && r->status != 304)
     send_until(fd, r->body, length, deadline);
-}
-static Response static_file(Request *r) {
-  if (strcmp(r->method, "GET"))
-    return error_response(405, "Metodo non consentito.");
-  const char *name = !strcmp(r->path, "/") ? "index.html" : r->path + 1;
-  if (!*name || strstr(name, "..") || strchr(name, '/') || strlen(name) > 128)
-    return error_response(404, "Pagina non trovata.");
-  for (const char *p = name; *p; p++)
-    if (!isalnum((unsigned char)*p) && *p != '.' && *p != '-' && *p != '_')
-      return error_response(404, "Pagina non trovata.");
-  const char *extension = strrchr(name, '.'), *type = NULL;
-  if (extension && !strcmp(extension, ".html"))
-    type = "text/html; charset=utf-8";
-  else if (extension && !strcmp(extension, ".css"))
-    type = "text/css; charset=utf-8";
-  else if (extension && !strcmp(extension, ".js"))
-    type = "text/javascript; charset=utf-8";
-  else if (extension && !strcmp(extension, ".svg"))
-    type = "image/svg+xml";
-  if (!type)
-    return error_response(404, "Pagina non trovata.");
-  char path[4096];
-  if (snprintf(path, sizeof path, "%s/%s", ob_config.web_root, name) >=
-      (int)sizeof path)
-    return error_response(500, "Percorso troppo lungo.");
-  int file_fd = open(path, O_RDONLY | O_NOFOLLOW);
-  if (file_fd < 0)
-    return error_response(404, "Asset non trovato.");
-  FILE *file = fdopen(file_fd, "rb");
-  if (!file) {
-    close(file_fd);
-    return error_response(500, "Apertura asset fallita.");
-  }
-  struct stat st;
-  if (fstat(fileno(file), &st) || !S_ISREG(st.st_mode) || st.st_size < 0 ||
-      st.st_size > 2 * 1024 * 1024) {
-    fclose(file);
-    return error_response(500, "Asset non valido.");
-  }
-  size_t size = (size_t)st.st_size;
-  char *body = malloc(size + 1);
-  if (!body) {
-    fclose(file);
-    return error_response(503, "Memoria non disponibile.");
-  }
-  bool read_ok = fread(body, 1, size, file) == size;
-  fclose(file);
-  body[size] = 0;
-  if (!read_ok || memchr(body, 0, size)) {
-    free(body);
-    return error_response(500, "Lettura asset fallita.");
-  }
-  unsigned char digest[SHA256_DIGEST_LENGTH];
-  SHA256((unsigned char *)body, size, digest);
-  char etag[70];
-  etag[0] = '"';
-  for (size_t i = 0; i < sizeof digest; i++)
-    snprintf(etag + 1 + i * 2, 3, "%02x", digest[i]);
-  etag[65] = '"';
-  etag[66] = 0;
-  Response response = {0};
-  response.status = 200;
-  response.body = body;
-  response.type = type;
-  snprintf(response.headers, sizeof response.headers, "ETag: %s\r\n", etag);
-  if (!strcmp(r->if_none_match, etag)) {
-    free(body);
-    response.body = strdup("");
-    response.status = 304;
-  }
-  return response;
 }
 static Response route(Request *r) {
   if (!strcmp(r->path, "/api/health"))
@@ -490,7 +418,8 @@ static Response route(Request *r) {
     if (strcmp(r->method, "GET"))
       return error_response(405, "Metodo non consentito.");
     sqlite3_stmt *statement = NULL;
-    bool ready = db && sqlite3_db_readonly(db, "main") == 0 &&
+    bool ready = cloud_ready() == 0 && db &&
+                 sqlite3_db_readonly(db, "main") == 0 &&
                  sqlite3_prepare_v2(db, "SELECT count(*) FROM metadata", -1,
                                     &statement, NULL) == SQLITE_OK &&
                  sqlite3_step(statement) == SQLITE_ROW;
@@ -505,12 +434,15 @@ static Response route(Request *r) {
     char text[256];
     snprintf(text, sizeof text,
              "{\"version\":\"%s\",\"sqlite\":\"%s\",\"auth_enabled\":%s,"
-             "\"workers\":%d}",
+             "\"workers\":%d,\"storage\":\"%s\"}",
              OB_VERSION, sqlite3_libversion(),
-             ob_config.auth_enabled ? "true" : "false", ob_config.workers);
+             ob_config.auth_enabled ? "true" : "false", ob_config.workers,
+             cloud_enabled() ? "postgresql+mongodb" : "sqlite");
     return json_response(200, text);
   }
-  return !strncmp(r->path, "/api/", 5) ? ob_route(r) : static_file(r);
+  return !strncmp(r->path, "/api/", 5)
+             ? ob_route(r)
+             : error_response(404, "Il backend espone soltanto API.");
 }
 static void quote_log(const char *in, char *out, size_t capacity) {
   size_t n = 0;
@@ -546,8 +478,7 @@ static void handle(int fd) {
                         : status == 403 ? "Origine o host non consentiti."
                                         : "Richiesta HTTP non valida.")
           : route(&request);
-  send_response(fd, &request, &response, head,
-                strncmp(request.path, "/api/", 5) != 0);
+  send_response(fd, &request, &response, head);
   if (!ob_config.quiet) {
     char path[2048];
     quote_log(request.path, path, sizeof path);
@@ -628,22 +559,28 @@ static void *worker(void *unused) {
   return NULL;
 }
 static void usage(const char *name) {
-  printf("OpenBoard %s\nUso: %s [--port 8080] [--db data/openboard.db] "
-         "[--web-root web]\n  --workers 8       Worker HTTP (1..32)\n  --auth  "
-         "          Account, sessioni e permessi\n  --public-url URL  Origine "
-         "pubblica http(s), proxy sullo stesso host\n  --no-demo         "
-         "Database nuovo senza bacheche dimostrative\n  --backup PATH     "
-         "Backup consistente ed uscita\n  --quiet           Disabilita log "
-         "delle richieste\n",
-         OB_VERSION, name);
+  printf(
+      "OpenBoard %s\nUso: %s [--port 8080] [--db data/openboard.db] "
+      "[--bind 127.0.0.1]\n  --workers 8       Worker HTTP (1..32)\n  --auth  "
+      "          Account, sessioni e permessi (default)\n  --no-auth         "
+      "Solo sviluppo locale su loopback\n  --public-url URL  Origine "
+      "pubblica http(s)\n  --bind ADDRESS    127.0.0.1 (default) oppure "
+      "0.0.0.0 per container\n  --no-demo         "
+      "Database nuovo senza bacheche dimostrative\n  --backup PATH     "
+      "Backup consistente ed uscita\n  --quiet           Disabilita log "
+      "delle richieste\n",
+      OB_VERSION, name);
   puts("  --busy-timeout MS Attesa lock SQLite (1..60000, default 5000)\n"
        "  --body-limit N    Limite corpo HTTP in byte (4096..2097152)\n"
        "  --integrity-check Controlla il DB esistente, senza migrazioni\n"
        "  --checkpoint      Checkpoint WAL TRUNCATE del DB esistente\n"
        "  --diagnostics     JSON con versioni, schema e limiti; nessun server\n"
-       "Variabili OPENBOARD_PORT, WORKERS, DB, WEB_ROOT, PUBLIC_URL, AUTH, "
+       "Variabili OPENBOARD_PORT, WORKERS, DB, PUBLIC_URL, BIND, "
+       "AUTH, "
        "NO_DEMO, QUIET, BUSY_TIMEOUT, BODY_LIMIT (tutte con prefisso "
-       "OPENBOARD_). CLI prevale.");
+       "OPENBOARD_). CLI prevale.\n"
+       "OPENBOARD_POSTGRES_URL e OPENBOARD_MONGODB_URI attivano insieme lo "
+       "storage separato.");
 }
 static bool valid_public_url(const char *url) {
   const char *p = !strncmp(url, "https://", 8)  ? url + 8
@@ -693,14 +630,17 @@ static bool environment_config(void) {
   const char *v = getenv("OPENBOARD_DB");
   if (v)
     ob_config.db_path = v;
-  v = getenv("OPENBOARD_WEB_ROOT");
-  if (v)
-    ob_config.web_root = v;
   v = getenv("OPENBOARD_PUBLIC_URL");
   if (v && *v) {
     if (!valid_public_url(v))
       return false;
     ob_config.public_url = v;
+  }
+  v = getenv("OPENBOARD_BIND");
+  if (v) {
+    if (strcmp(v, "127.0.0.1") && strcmp(v, "0.0.0.0"))
+      return false;
+    ob_config.bind_address = v;
   }
   return env_bool("OPENBOARD_AUTH", &ob_config.auth_enabled) &&
          env_bool("OPENBOARD_NO_DEMO", &ob_config.no_demo) &&
@@ -781,6 +721,10 @@ int main(int argc, char **argv) {
       ob_config.auth_enabled = true;
       continue;
     }
+    if (!strcmp(argv[i], "--no-auth")) {
+      ob_config.auth_enabled = false;
+      continue;
+    }
     if (!strcmp(argv[i], "--no-demo")) {
       ob_config.no_demo = true;
       continue;
@@ -818,11 +762,13 @@ int main(int argc, char **argv) {
       ob_config.workers = (int)n;
     } else if (!strcmp(option, "--db"))
       ob_config.db_path = value;
-    else if (!strcmp(option, "--web-root"))
-      ob_config.web_root = value;
     else if (!strcmp(option, "--backup"))
       ob_config.backup_path = value;
-    else if (!strcmp(option, "--busy-timeout")) {
+    else if (!strcmp(option, "--bind")) {
+      if (strcmp(value, "127.0.0.1") && strcmp(value, "0.0.0.0"))
+        return 1;
+      ob_config.bind_address = value;
+    } else if (!strcmp(option, "--busy-timeout")) {
       if (!config_number(value, &ob_config.busy_timeout_ms, 1, 60000))
         return 1;
     } else if (!strcmp(option, "--body-limit")) {
@@ -840,13 +786,22 @@ int main(int argc, char **argv) {
       return 1;
     }
   }
-  if (!*ob_config.db_path || !*ob_config.web_root ||
-      (ob_config.backup_path && !*ob_config.backup_path))
+  if (!ob_config.auth_enabled && strcmp(ob_config.bind_address, "127.0.0.1")) {
+    fputs("La modalità senza account richiede bind su 127.0.0.1.\n", stderr);
+    return 1;
+  }
+  if (!*ob_config.db_path || (ob_config.backup_path && !*ob_config.backup_path))
     return 1;
   int maintenance_modes =
       ob_config.integrity_check + ob_config.checkpoint + ob_config.diagnostics;
   if (maintenance_modes > 1 || (maintenance_modes && ob_config.backup_path))
     return 1;
+  if (maintenance_modes && cloud_enabled()) {
+    fputs("I controlli SQLite richiedono un backup locale dello storage "
+          "separato.\n",
+          stderr);
+    return 1;
+  }
   if (maintenance_modes)
     return maintenance();
   signal(SIGPIPE, SIG_IGN);
@@ -858,8 +813,14 @@ int main(int argc, char **argv) {
   if (ob_initialize_database())
     return 1;
   if (ob_config.backup_path) {
-    int result = ob_backup(ob_config.backup_path);
+    int result = cloud_request_begin(db);
+    if (!result) {
+      result = ob_backup(ob_config.backup_path);
+      if (cloud_request_finish(db, false))
+        result = 1;
+    }
     ob_worker_close();
+    cloud_shutdown();
     return result;
   }
   ob_worker_close();
@@ -873,7 +834,7 @@ int main(int argc, char **argv) {
   struct sockaddr_in address = {0};
   address.sin_family = AF_INET;
   address.sin_port = htons((uint16_t)ob_config.port);
-  inet_pton(AF_INET, "127.0.0.1", &address.sin_addr);
+  inet_pton(AF_INET, ob_config.bind_address, &address.sin_addr);
   if (bind(listener, (struct sockaddr *)&address, sizeof address) ||
       listen(listener, QUEUE_CAPACITY)) {
     perror("bind/listen");
@@ -894,9 +855,10 @@ int main(int argc, char **argv) {
   if (failed)
     stopping = 1;
   if (!failed) {
-    printf("OpenBoard %s: http://127.0.0.1:%d\nDatabase: %s · worker: %d · "
+    printf("OpenBoard %s: http://%s:%d\nDatabase: %s · worker: %d · "
            "accessi: %s\nPremi Ctrl+C per uscire.\n",
-           OB_VERSION, ob_config.port, ob_config.db_path, ob_config.workers,
+           OB_VERSION, ob_config.bind_address, ob_config.port,
+           ob_config.db_path, ob_config.workers,
            ob_config.auth_enabled ? "account" : "locale");
     fflush(stdout);
   }
@@ -940,6 +902,7 @@ int main(int argc, char **argv) {
   pthread_mutex_unlock(&queue_lock);
   for (int i = 0; i < started; i++)
     pthread_join(threads[i], NULL);
+  cloud_shutdown();
   puts("OpenBoard arrestato.");
   return failed ? 1 : 0;
 }

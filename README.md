@@ -1,10 +1,24 @@
 # OpenBoard
 
-Un'app kanban open source ispirata a Trello, con **server in C e database SQLite**. L'interfaccia web è scritta in HTML, CSS e JavaScript senza framework, dipendenze npm, CDN o servizi esterni.
+Un'app kanban open source ispirata a Trello, con **server in C**. Lo stack Docker separa **frontend statico e backend API autenticato**, **PostgreSQL** per i dati strutturati, **MongoDB** per i documenti JSON e **Nginx Proxy Manager** per HTTP/HTTPS. Per lo sviluppo locale è disponibile anche SQLite. L'interfaccia usa HTML, CSS e JavaScript senza framework, dipendenze npm o CDN.
 
-![Bacheca OpenBoard](docs/preview.jpg)
+![Bacheca OpenBoard](docs/preview.png)
 
 ## Avvio rapido
+
+Con Docker Compose:
+
+```sh
+python3 scripts/init-env.py
+docker compose up -d --build --wait
+python3 scripts/bootstrap-local.py
+```
+
+Apri **http://openboard.localhost**. Il bootstrap locale crea i primi amministratori e il Proxy Host solo su un'istanza nuova, con password casuali in `.env.local-admin` (`0600`, escluso da Git). Il pannello Nginx Proxy Manager è su **http://127.0.0.1:81**. Per scegliere manualmente gli account o usare un dominio reale, segui la [guida di installazione](docs/DEPLOYMENT.md).
+
+La cache SQLite dell'app viene ricostruita dai due database esterni. Le scritture vengono confermate dopo la persistenza dei documenti MongoDB e il commit PostgreSQL. Questa prima integrazione serializza le richieste e pubblica uno snapshot completo a ogni modifica: è adatta a installazioni pilota, con un limite di scalabilità documentato nella guida.
+
+### Sviluppo locale
 
 Servono un compilatore C11, `make`, SQLite con supporto JSON, OpenSSL libcrypto e `pkg-config`.
 
@@ -25,15 +39,17 @@ Dalla cartella del progetto:
 
 ```sh
 make
-make run
+./build/openboard --public-url http://127.0.0.1:8090
+# In un secondo terminale:
+python3 scripts/dev-frontend.py
 ```
 
-Apri **http://127.0.0.1:8080**. Al primo avvio vengono create tre bacheche dimostrative; le modifiche successive vengono salvate in `data/openboard.db`. Ferma il server con `Ctrl+C`.
+Apri **http://127.0.0.1:8090** e configura il primo amministratore. Al primo avvio vengono create tre bacheche dimostrative; le modifiche successive vengono salvate in `data/openboard.db`. Ferma i due processi con `Ctrl+C`. Il backend su `127.0.0.1:8080` espone soltanto API JSON; le richieste ai dati richiedono autenticazione. `--no-auth` abilita esplicitamente lo sviluppo senza account soltanto su loopback.
 
-Puoi scegliere porta, database e cartella degli asset:
+Puoi scegliere porta e database del backend:
 
 ```sh
-./build/openboard --port 8090 --db data/personale.db --web-root web
+./build/openboard --port 8080 --db data/personale.db --public-url http://127.0.0.1:8090
 ```
 
 ## Cosa puoi fare
@@ -43,6 +59,9 @@ Puoi scegliere porta, database e cartella degli asset:
 - Creare e modificare schede con descrizione, etichette multiple, priorità, scadenza, assegnatario, stima, copertina e checklist.
 - Spostare e riordinare schede con il trascinamento oppure scegliendo lista e posizione; impostare limiti WIP.
 - Cercare schede, applicare filtri e usare viste a colonne, elenco, calendario e statistiche.
+- Definire campi personalizzati tipizzati, traguardi e linee guida; consultare una vista tabellare e report del carico.
+- Registrare il tempo con data e nota, leggere report personali/per utente ed esportare il registro in CSV.
+- Rispondere ai commenti, aggiungere reazioni, fissare aggiornamenti e conservare segnalibri personali.
 - Collaborare con account individuali, ruoli, commenti, cronologia e aggiornamenti tra sessioni.
 - Duplicare, archiviare e recuperare dal cestino; importare ed esportare bacheche in JSON.
 
@@ -51,20 +70,24 @@ Le preferenze dell'interfaccia rimangono nel browser; bacheche e schede rimangon
 ## Struttura
 
 ```text
-src/http.c          Trasporto HTTP concorrente, limiti e configurazione
+src/http.c          Trasporto API HTTP concorrente, limiti e configurazione
 src/server.c        API di dominio, migrazioni e persistenza SQLite
 src/auth.c          Account, sessioni e autorizzazioni
 src/collaboration.c Notifiche, sottoscrizioni, allegati e strumenti personali
+src/teamwork.c      Registri del tempo, conversazioni, reazioni e segnalibri
+src/cloud.c         PostgreSQL e MongoDB; cache SQLite ricostruibile
 web/index.html      Struttura dell'interfaccia
 web/styles.css      Stili e layout responsive
 web/app.js          Interazioni e comunicazione con le API
+web/planning.js     Campi, traguardi, report e collaborazione della 0.4
+compose.yaml        Backend C, frontend statico, PostgreSQL, MongoDB e proxy
 tests/              Test di regressione, dominio, autenticazione e HTTP
 Makefile            Compilazione e comandi di sviluppo
 data/               Database locale, escluso dal controllo versione
 build/              Eseguibile, escluso dal controllo versione
 ```
 
-Il server usa socket POSIX e statement SQLite preparati. Serve soltanto gli asset previsti e le API; non necessita di Node.js. I dati iniziali vengono inseriti una volta sola per database.
+Il server usa socket POSIX e statement SQLite preparati. Espone soltanto API; non contiene né serve HTML, CSS o JavaScript. Il frontend statico è distribuito da un container separato. Nessuno dei due richiede Node.js a runtime. I dati iniziali vengono inseriti una volta sola per database.
 
 La documentazione degli endpoint e dei campi si trova in [docs/API.md](docs/API.md).
 
@@ -78,10 +101,10 @@ I test avviano il server su porte locali libere con database temporanei e verifi
 
 ## Accesso condiviso
 
-Per utilizzare account e permessi:
+Gli account sono abilitati per impostazione predefinita. Per iniziare senza dati dimostrativi:
 
 ```sh
-./build/openboard --auth --no-demo
+./build/openboard --no-demo --public-url http://127.0.0.1:8090
 ```
 
 Apri il browser locale, configura il primo amministratore, poi crea gli utenti nel pannello di gestione. I ruoli disponibili sono amministratore, membro e osservatore. Le bacheche si condividono dal pannello Membri; i preferiti sono personali.
@@ -92,7 +115,7 @@ Per un proxy HTTPS sullo stesso host, configura anche l’origine pubblica, senz
 ./build/openboard --auth --public-url https://board.example.com
 ```
 
-Il processo continua ad ascoltare soltanto su loopback. Completa il setup localmente prima di pubblicare il proxy; la modalità senza account è destinata all’uso personale. I dettagli sono in [SECURITY.md](SECURITY.md).
+Il processo locale ascolta su loopback. Il container usa esplicitamente `OPENBOARD_BIND=0.0.0.0` sulla rete privata, senza pubblicare la porta dell'app. Completa il setup prima di aggiungere il Proxy Host; la modalità senza account è destinata all’uso personale locale. I dettagli sono in [SECURITY.md](SECURITY.md).
 
 ## Funzioni della versione 0.2
 
@@ -108,7 +131,13 @@ Seguendo una bacheca o una scheda ricevi notifiche interne per gli aggiornamenti
 
 Sono disponibili anteprima Markdown, esportazioni CSV/iCalendar e scorciatoie documentate nell'app. L'[elenco dei nuovi 100 interventi](docs/MIGLIORIE_200.md) prosegue la numerazione fino a 200. Le nuove API sono documentate in [produttività](docs/API_PRODUTTIVITA.md) e [collaborazione](docs/API_COLLABORAZIONE.md).
 
-Le istruzioni per installazione, Docker/Compose su Linux, systemd, nginx HTTPS, configurazione da ambiente, metriche e manutenzione sono in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Il servizio continua ad ascoltare su loopback.
+Le istruzioni per installazione, Docker Compose, systemd, nginx HTTPS, configurazione da ambiente, metriche e manutenzione sono in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+## Funzioni della versione 0.4
+
+Terzo gruppo di 100 interventi: campi testo/numero/data/booleano/scelta, traguardi con avanzamento, priorità/etichette/traguardi multipli, linee guida e carico di lavoro. Registro del tempo recuperabile con totali e report CSV; commenti Markdown con risposte, reazioni ed evidenza, segnalibri personali, tabella e notifiche filtrate prima della paginazione.
+
+L'[elenco numerato 201–300 con evidenze](docs/MIGLIORIE_300.md) descrive tutte le funzioni implementate. I contratti sono in [pianificazione](docs/API_PIANIFICAZIONE.md) e [tempo e conversazioni](docs/API_TEAMWORK.md). Lo schema locale passa a 5; l'import/export JSON v2 comprende definizioni personalizzate e traguardi. Il backup completo conserva anche account e dati di collaborazione.
 
 ## Dati e backup
 

@@ -1,0 +1,15 @@
+# Official unprivileged NGINX image; frontend contains public static assets only.
+# https://github.com/nginx/docker-nginx-unprivileged
+FROM nginxinc/nginx-unprivileged:1.30.6-alpine-slim
+
+COPY deploy/frontend.conf /etc/nginx/nginx.conf
+COPY web/ /usr/share/nginx/html/
+
+USER 101:101
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD wget -q -O /dev/null http://127.0.0.1:8080/health || exit 1
+STOPSIGNAL SIGQUIT
+# Skip image initialization scripts: the root filesystem is read-only.
+ENTRYPOINT ["nginx"]
+CMD ["-g", "daemon off;"]

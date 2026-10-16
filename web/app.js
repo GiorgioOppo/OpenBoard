@@ -32,12 +32,12 @@ const ICONS = {
 const $ = (id) => document.getElementById(id);
 const icon = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ICONS.card}</svg>`;
 const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const labels = {design:'Design', sviluppo:'Sviluppo', ricerca:'Ricerca', marketing:'Marketing', urgente:'Urgente'};
-const priorities = {low:'Bassa', normal:'Normale', high:'Alta', urgent:'Urgente'};
+const labels = Object.create(null);
+const priorities = Object.create(null);
 const productivity = OpenBoardProductivity;
-const covers = ['', 'sage', 'peach', 'lavender', 'blue'];
+const covers = [];
 const state = {
-  boards:[], board:null, query:'', label:'', assignee:'', priority:'', status:'', sort:'manual',
+  boards:[], board:null, storageLabel:'', versionRequested:false, query:'', label:'', assignee:'', priority:'', status:'', sort:'manual',
   archived:false, archivedBoards:false, view:'board', saving:false, loading:true, loadError:false,
   loadSequence:0, cardSequence:0, cardEditor:null, boardEditor:null, columnEditor:null,
   draggedCard:null, toastTimer:null, auth:null, remoteVersion:null, polling:false, panel:null, selectionMode:false, selectedCards:new Map(), boardWatching:false, cardWatching:false
@@ -46,7 +46,7 @@ function stored(key, fallback = '') { try { return localStorage.getItem(`openboa
 function remember(key, value) { try { localStorage.setItem(`openboard.${key}`, value); } catch { /* Local preferences remain optional. */ } }
 function forget(key) { try { localStorage.removeItem(`openboard.${key}`); } catch { /* Storage can be disabled. */ } }
 const uuid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-state.view = ['board','list','calendar','stats'].includes(stored('view')) ? stored('view') : 'board';
+state.view = ['board','list','calendar','stats','table'].includes(stored('view')) ? stored('view') : 'board';
 document.documentElement.dataset.theme = stored('theme','light');
 document.documentElement.dataset.density = stored('density','comfortable');
 function hydrateIcons(root = document) { root.querySelectorAll('[data-icon]').forEach((element) => { element.innerHTML = icon(element.dataset.icon); }); }
@@ -108,6 +108,7 @@ function updateBusy() {
   });
   document.querySelectorAll('[data-create-board],#create-board-sidebar,#create-board-link').forEach((element) => { element.disabled = state.saving || state.loading || !canCreateBoard(); });
   if ($('board-dialog').open && !state.boardEditor) $('save-board').disabled = state.saving || !canCreateBoard();
+  if ($('bookmark-card')) $('bookmark-card').disabled = state.saving || !!state.cardEditor?.bookmarkLoading;
   if ($('timer-toggle')) $('timer-toggle').disabled = state.saving || !canWrite() || !state.cardEditor?.id;
   if ($('add-dependency')) $('add-dependency').disabled = state.saving || !canWrite() || !$('dependency-card').value;
   if ($('bulk-complete')) { $('bulk-complete').disabled = state.saving || !canWrite() || !state.selectedCards.size; $('bulk-archive').disabled = $('bulk-complete').disabled; }
@@ -117,7 +118,7 @@ function updateBusy() {
   $('edit-board').disabled = state.saving || state.loading || !state.board || !canWrite();
   $('export-board').disabled = state.loading || !state.board;
   $('members-board').disabled = state.loading || !state.board;
-  $('save-status').textContent = state.saving ? 'Salvataggio in corso…' : state.loadError ? 'Connessione da verificare · bozza locale conservata' : 'Salvataggio sul server · SQLite';
+  $('save-status').textContent = state.saving ? 'Salvataggio in corso…' : state.loadError ? 'Connessione da verificare · bozza locale conservata' : `Salvataggio sul server${state.storageLabel ? ' · '+state.storageLabel : ''}`;
   document.body.setAttribute('aria-busy',String(state.saving));
 }
 async function perform(action, successMessage = '', errorId) {
@@ -175,7 +176,7 @@ function renderHeader() {
   $('assignee-options').innerHTML = assignees().map((name) => `<option value="${escapeHTML(name)}">`).join('');
   document.documentElement.dataset.boardColor = covers.includes(board?.color) ? board.color : 'sage';
   $('show-archived-boards').textContent = state.archivedBoards ? 'Nascondi bacheche archiviate' : 'Bacheche archiviate';
-  updateFilters(); updateBusy();
+  renderPlanningFilters(); updateFilters(); updateBusy();
 }
 function todayISO() { const date = new Date(); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 function overdue(card) { return !!card.due_date && card.due_date < todayISO() && !card.completed; }
@@ -185,22 +186,23 @@ function matches(card) {
   return (!query || text.includes(query)) && (!state.label || cardLabels(card).includes(state.label)) &&
     (!state.assignee || (state.assignee === '__none' ? !assignmentNames(card).length : assignmentNames(card).includes(state.assignee))) &&
     (!state.priority || (card.priority || 'normal') === state.priority) &&
+    (!state.milestone || card.milestone_key === state.milestone) && (!state.customKey || productivity.fieldMatches(card.custom_values?.[state.customKey],state.customQuery || '')) &&
     (!state.status || (state.status === 'blocked' ? !!card.blocked_reason : state.status === 'completed' ? card.completed : state.status === 'overdue' ? overdue(card) : !card.completed));
 }
 function sorted(cards) {
   const result = cards.filter(matches);
   if (state.sort === 'due') result.sort((a,b) => (a.due_date || '9999').localeCompare(b.due_date || '9999') || a.position-b.position);
-  if (state.sort === 'priority') { const rank = {urgent:0,high:1,normal:2,low:3}; result.sort((a,b) => (rank[a.priority] ?? 2)-(rank[b.priority] ?? 2) || a.position-b.position); }
+  if (state.sort === 'priority') { const rank = Object.fromEntries(Object.keys(priorities).reverse().map((key,index) => [key,index])); result.sort((a,b) => (rank[a.priority] ?? 2)-(rank[b.priority] ?? 2) || a.position-b.position); }
   return result;
 }
-function hasFilters() { return !!(state.query || state.label || state.assignee || state.priority || state.status || state.sort !== 'manual'); }
+function hasFilters() { return !!(state.query || state.label || state.assignee || state.priority || state.status || state.sort !== 'manual' || state.milestone || state.customKey); }
 function updateFilters() {
   const cards = allCards();
   $('total-cards').textContent = cards.length;
   $('card-summary').textContent = hasFilters() ? `${cards.filter(matches).length} di ${cards.length} schede` : `${cards.length} schede · ${cards.filter((card) => card.completed).length} completate`;
   $('clear-filters').classList.toggle('selected',!hasFilters());
   ['label','assignee','priority','status'].forEach((key) => $(`${key}-filter`).classList.toggle('filter-active',!!state[key]));
-  ['board','list','calendar','stats'].forEach((view) => { const button = $(`view-${view}`); button.classList.toggle('selected',state.view === view); button.setAttribute('aria-pressed',String(state.view === view)); });
+  ['board','list','calendar','stats','table'].forEach((view) => { const button = $(`view-${view}`); button.classList.toggle('selected',state.view === view); button.setAttribute('aria-pressed',String(state.view === view)); });
 }
 function dueDate(card) {
   if (!card.due_date || !/^\d{4}-\d{2}-\d{2}$/.test(card.due_date)) return '';
@@ -214,14 +216,14 @@ function checklistBadge(card) {
   return total ? `<span class="checklist-count ${total === done ? 'complete' : ''}" aria-label="${done} di ${total} attività completate">${icon('check-square')}${done}/${total}</span>` : '';
 }
 function completionButton(card) { return `<button class="completion-button ${card.completed ? 'is-completed' : ''}" data-complete-card="${Number(card.id)}" type="button" data-write aria-label="${card.completed ? 'Riapri' : 'Completa'} scheda: ${escapeHTML(card.title)}">${icon(card.completed ? 'check-circle' : 'circle')}</button>`; }
-function labelBadges(card) { return cardLabels(card).map((label) => `<span class="card-label label-${label}">${labels[label]}</span>`).join(''); }
+function labelBadges(card) { return cardLabels(card).map((label) => `<span class="card-label label-${label}">${escapeHTML(labels[label])}</span>`).join(''); }
 function priorityBadge(card) { const priority = card.priority || 'normal'; return priority !== 'normal' ? `<span class="priority-badge priority-${priority}">${escapeHTML(priorities[priority])}</span>` : ''; }
 function selectionCheckbox(card) { return state.selectionMode ? `<label class="card-selection"><input type="checkbox" data-select-card="${Number(card.id)}" ${state.selectedCards.has(card.id) ? 'checked' : ''} aria-label="Seleziona scheda: ${escapeHTML(card.title)}">Seleziona</label>` : ''; }
 function blockedBadge(card) { return card.blocked_reason ? `<span class="blocked-badge" title="${escapeHTML(card.blocked_reason)}">Bloccata</span>` : ''; }
 function renderCard(card) {
   const cover = covers.includes(card.cover) && card.cover ? `<div class="card-cover cover-${card.cover}" aria-hidden="true"><span class="cover-shape"></span><span class="cover-detail"></span></div>` : '';
   const description = card.description_preview || card.description;
-  return `<article class="task-card ${card.completed ? 'completed' : ''}" tabindex="${state.selectionMode ? -1 : 0}" role="${state.selectionMode ? 'group' : 'button'}" aria-label="${state.selectionMode ? 'Scheda' : 'Apri scheda'}: ${escapeHTML(card.title)}" draggable="${canWrite()}" data-card-id="${Number(card.id)}" data-column-id="${Number(card.column_id)}">${cover}<div class="card-body">${selectionCheckbox(card)}<div class="card-tags">${labelBadges(card)}${priorityBadge(card)}${blockedBadge(card)}${card.archived ? '<span class="priority-badge">Archiviata</span>' : ''}</div><h3>${escapeHTML(card.title)}</h3>${description ? `<p class="card-description">${escapeHTML(description)}</p>` : ''}<div class="card-footer">${completionButton(card)}${dueDate(card)}${checklistBadge(card)}${assignmentNames(card).length ? `<span class="card-assignee">${assignmentNames(card).slice(0,3).map(avatar).join('')}</span>` : ''}</div></div></article>`;
+  return `<article class="task-card ${card.completed ? 'completed' : ''}" tabindex="${state.selectionMode ? -1 : 0}" role="${state.selectionMode ? 'group' : 'button'}" aria-label="${state.selectionMode ? 'Scheda' : 'Apri scheda'}: ${escapeHTML(card.title)}" draggable="${canWrite()}" data-card-id="${Number(card.id)}" data-column-id="${Number(card.column_id)}">${cover}<div class="card-body">${selectionCheckbox(card)}<div class="card-tags">${labelBadges(card)}${priorityBadge(card)}${blockedBadge(card)}${planningBadges(card)}${card.archived ? '<span class="priority-badge">Archiviata</span>' : ''}</div><h3>${escapeHTML(card.title)}</h3>${description ? `<p class="card-description">${escapeHTML(description)}</p>` : ''}<div class="card-footer">${completionButton(card)}${dueDate(card)}${checklistBadge(card)}${assignmentNames(card).length ? `<span class="card-assignee">${assignmentNames(card).slice(0,3).map(avatar).join('')}</span>` : ''}</div></div></article>`;
 }
 function renderColumn(column) {
   const cards = sorted(column.cards);
@@ -252,6 +254,7 @@ function renderBoard() {
   if (!state.board) $('board-canvas').innerHTML = `<div class="canvas-message"><span class="message-icon">${icon('spark')}</span><h2>Le grandi idee iniziano qui.</h2><p>Crea una bacheca per organizzare il lavoro del team.</p><button class="button primary" type="button" data-create-board data-write>${icon('plus')}Crea una bacheca</button></div>`;
   else if (state.view === 'stats') { $('board-canvas').innerHTML = '<div class="initial-loading"><span class="spinner"></span>Calcolo statistiche…</div>'; renderStats(); }
   else if (state.view === 'calendar') $('board-canvas').innerHTML = renderCalendar();
+  else if (state.view === 'table') $('board-canvas').innerHTML = renderTable();
   else if (state.view === 'list') $('board-canvas').innerHTML = renderList();
   else $('board-canvas').innerHTML = `<div class="kanban-board">${state.board.columns.map(renderColumn).join('')}<button class="add-column-button" type="button" data-add-column data-write>${icon('plus')}Aggiungi una lista</button></div>`;
   updateSelection(); updateFilters(); updateBusy();
@@ -289,11 +292,32 @@ function showLoadError(error) {
   $('board-canvas').innerHTML = `<div class="canvas-message"><span class="message-icon">${icon('alert-circle')}</span><h2>La bacheca non è disponibile.</h2><p>${escapeHTML(error.message)}</p><button class="button primary" id="retry-load" type="button">${icon('refresh')}Riprova</button></div>`;
   updateBusy();
 }
+async function loadCatalog() {
+  const catalog = productivity.catalog(await api('/api/catalog'));
+  for (const object of [labels,priorities,fieldTypes]) for (const key of Object.keys(object)) delete object[key];
+  Object.assign(labels,catalog.labels); Object.assign(priorities,catalog.priorities); Object.assign(fieldTypes,catalog.fieldTypes); covers.splice(0,covers.length,...catalog.covers);
+  const options = (values) => Object.entries(values).map(([key,name]) => `<option value="${escapeHTML(key)}">${escapeHTML(name)}</option>`).join('');
+  $('label-filter').innerHTML = '<option value="">Etichette</option>'+options(labels);
+  $('card-label').innerHTML = '<option value="">Nessuna etichetta</option>'+options(labels);
+  $('priority-filter').innerHTML = '<option value="">Tutte</option>'+options(priorities);
+  $('card-priority').innerHTML = options(priorities);
+  $('card-extra-labels').innerHTML = '<legend class="field-label">Etichette aggiuntive</legend>'+Object.entries(labels).map(([key,name]) => `<label><input type="checkbox" name="extra-label" value="${escapeHTML(key)}">${escapeHTML(name)}</label>`).join('');
+  $('cover-options').innerHTML = covers.map((cover) => `<button type="button" data-cover="${escapeHTML(cover)}" class="cover-swatch ${cover ? 'swatch-'+escapeHTML(cover) : 'no-cover'}" aria-label="${cover ? 'Copertina '+escapeHTML(cover) : 'Nessuna copertina'}" aria-pressed="${String(!cover)}">${cover ? '' : icon('close')}</button>`).join('');
+}
+async function loadStorageLabel() {
+  if (state.versionRequested) return;
+  state.versionRequested = true;
+  try { const version = await api('/api/version'); state.storageLabel = productivity.storageLabel(version.storage); }
+  catch { state.storageLabel = ''; }
+  finally { updateBusy(); }
+}
 async function loadInitial() {
+  loadStorageLabel();
   state.loading = true; updateBusy();
   try {
     state.auth = await api('/api/auth/session');
     if (state.auth.enabled && !state.auth.user) { state.loading = false; showAuth(state.auth.setup_required); return; }
+    await loadCatalog();
     await refreshBoards(); refreshNotifications();
     const requested = currentRoute();
     const fallback = state.boards.find((board) => board.id === Number(stored('board'))) || state.boards[0];
@@ -309,10 +333,11 @@ async function refreshBoard() { if (state.board) await selectBoard(state.board.i
 async function refreshBoards() { const result = await api(`/api/boards${state.archivedBoards ? '?include_archived=1' : ''}`); state.boards = result.boards || []; renderSidebar(); }
 function clearFilters(render = true) {
   ['query','label','assignee','priority','status'].forEach((key) => { state[key] = ''; }); state.sort = 'manual';
+  state.milestone = ''; state.customKey = ''; state.customQuery = ''; renderPlanningFilters();
   $('search-input').value = ''; ['label','assignee','priority','status'].forEach((key) => { $(`${key}-filter`).value = ''; }); $('sort-filter').value = 'manual';
   if (render) renderBoard();
 }
-function closeMenus() { document.querySelectorAll('details[open]').forEach((details) => { details.open = false; }); }
+function closeMenus() { document.querySelectorAll('.dropdown[open]').forEach((details) => { details.open = false; }); }
 const dialogFocus = new Map();
 function openDialog(id) {
   closeMenus();
@@ -328,11 +353,12 @@ function cardData() {
     cover:state.cardEditor?.cover || '', completed:$('card-completed').checked,
     start_date:$('card-start-date').value, blocked_reason:$('card-blocked-reason').value.trim(),
     actual_minutes:Number($('card-actual').value)||0, reference_url:$('card-reference').value.trim(), assignee_ids:[...(state.cardEditor?.assigneeIds || [])],
+    custom_values:readCustomValues(),milestone_key:$('card-milestone').value,
     priority:$('card-priority').value, estimate_minutes:Number($('card-estimate').value)||0,
     checklist:(state.cardEditor?.checklist || []).map((item) => ({...item,text:item.text.trim()})).filter((item) => item.text)
   };
 }
-function cardSnapshot() { return JSON.stringify({card:cardData(),checklist_new:$('checklist-new').value,comment_body:$('comment-body').value}); }
+function cardSnapshot() { return JSON.stringify({card:cardData(),checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,worklog:pendingWorklog()}); }
 function editorDirty(id) {
   if (id === 'card-dialog') return !!state.cardEditor && cardSnapshot() !== state.cardEditor.original;
   if (id === 'board-dialog') return !!state.boardOriginal && JSON.stringify(boardData()) !== state.boardOriginal;
@@ -354,11 +380,12 @@ function saveDraft() {
     return;
   }
   if (!editor.writtenDraft && !editor.previousDraft && readDraft()) editor.previousDraft = stored(draftKey());
-  const serialized = JSON.stringify({data:cardData(),version:editor.version,pending:editor.pending,pendingAmbiguous:!!editor.pendingAmbiguous,checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,updated_at:Date.now()});
+  const serialized = JSON.stringify({data:cardData(),version:editor.version,pending:editor.pending,pendingAmbiguous:!!editor.pendingAmbiguous,checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,worklog:pendingWorklog(),updated_at:Date.now()});
   remember(draftKey(),serialized); editor.writtenDraft = serialized;
 }
 function readDraft() { try { const draft = JSON.parse(stored(draftKey(),'null')); return draft?.data && Date.now()-draft.updated_at < 30*86400000 ? draft : null; } catch { return null; } }
 function closeDialog(id, {force = false,navigate = true} = {}) {
+  if (id === 'panel-dialog' && state.panel === 'thread') saveReplyDraft();
   if (state.saving && !force) return false;
   if (!force && editorDirty(id) && !confirm('Hai modifiche non salvate. Chiudere l’editor? La bozza della scheda resta disponibile su questo dispositivo.')) return false;
   if (id === 'card-dialog') { if (!force) saveDraft(); if (navigate && state.board) route(state.board.id); ++state.cardSequence; }
@@ -398,7 +425,7 @@ function fillCard(data) {
   $('card-column').value = String(data.column_id || state.board.columns[0]?.id || '');
   document.querySelectorAll('input[name="extra-label"]').forEach((input) => { input.checked = Array.isArray(data.labels) && data.labels.includes(input.value); });
   state.cardEditor.checklist = (data.checklist || []).map((item) => ({...item}));
-  setCover(data.cover || ''); renderChecklist(); fillProductivityCard(data);
+  setCover(data.cover || ''); renderChecklist(); fillProductivityCard(data); fillPlanningCard(data);
 }
 async function openCard(cardId, columnId, {navigate = true} = {}) {
   if (state.saving || state.loading || !state.board?.columns.length) return;
@@ -411,7 +438,7 @@ async function openCard(cardId, columnId, {navigate = true} = {}) {
     if (cardId) { const result = await api(`/api/cards/${Number(cardId)}`); card = result.card || result; }
     if (sequence !== state.cardSequence || state.board?.id !== boardId || state.loadSequence !== boardLoadSequence || state.loading || state.saving) return;
     if (card && !state.board.columns.some((column) => column.id === card.column_id)) throw new APIError('Questa scheda appartiene a un’altra bacheca. Aprila dalla ricerca globale.');
-    state.cardEditor = {id:card?.id || null,version:card?.version,cover:card?.cover || '',checklist:[],archived:!!card?.archived,pending:null};
+    state.cardEditor = {id:card?.id || null,version:card?.version,cover:card?.cover || '',checklist:[],archived:!!card?.archived,pending:null,persistedMilestone:card?.milestone_key || ''};
     $('card-form').reset();
     $('card-dialog-context').textContent = card ? 'DETTAGLI DELLA SCHEDA' : 'UNA NUOVA IDEA';
     $('card-column').innerHTML = state.board.columns.map((column) => `<option value="${Number(column.id)}">${escapeHTML(column.title)}</option>`).join('');
@@ -465,16 +492,20 @@ function deleteColumn(columnId) {
   perform(() => committed(async () => { await api(`/api/columns/${column.id}`,'DELETE',undefined,{version:column.version}); closeDialog('column-dialog',{force:true}); },refreshBoard,'Lista spostata nel cestino.'),'','column-form-error');
 }
 async function loadComments(cardId) {
+  const editor = state.cardEditor; if (!editor || editor.id !== cardId) return;
+  const generation = editor.commentSequence = (editor.commentSequence || 0)+1;
+  const current = () => state.cardEditor === editor && editor.commentSequence === generation && $('card-dialog').open;
   try {
     const result = await api(`/api/cards/${cardId}/comments`);
-    if (state.cardEditor?.id !== cardId || !$('card-dialog').open) return;
+    if (!current()) return;
     state.cardEditor.comments = result.comments || [];
-    $('comments-list').innerHTML = (result.comments || []).map((comment) => `<article class="comment"><header><strong>${escapeHTML(comment.author || 'Utente')}</strong><time>${escapeHTML(formatDate(comment.edited_at || comment.created_at))}${comment.edited_at ? ' · modificato' : ''}</time>${canWrite() && (state.auth?.user?.id === comment.author_id || !state.auth?.enabled) ? `<button type="button" class="subtle-button" data-edit-comment="${Number(comment.id)}" data-write>Modifica</button>` : ''}${canManage() || state.auth?.user?.id === comment.author_id || !state.auth?.enabled ? `<button type="button" class="icon-button tiny" data-delete-comment="${Number(comment.id)}" aria-label="Elimina commento" data-write>${icon('trash')}</button>` : ''}</header><p>${escapeHTML(comment.body)}</p></article>`).join('') || '<p class="helper-text">Nessun commento. Condividi il primo aggiornamento.</p>';
+    renderComments();
     updateBusy();
-  } catch (error) { if (state.cardEditor?.id === cardId) $('comments-list').textContent = error.message; }
+  } catch (error) { if (current()) $('comments-list').textContent = error.message; }
 }
 function formatDate(value) { if (!value) return ''; const date = new Date(String(value).includes('T') ? value : String(value).replace(' ','T')+'Z'); return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('it-IT'); }
 function panel(title, body, kind = null) {
+  if (state.panel === 'thread') saveReplyDraft();
   state.panelSequence = (state.panelSequence || 0)+1; state.panel = kind; $('panel-heading').textContent = title; $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); openDialog('panel-dialog');
 }
 async function showPanel(title, loader, kind) {
@@ -511,12 +542,7 @@ async function showMembers() {
     return `<p>Gli osservatori possono leggere; i membri modificano le schede; gli amministratori gestiscono i permessi.</p><div class="member-list">${(result.members || []).map((member) => `<div class="member-row"><div><strong>${escapeHTML(member.name)}</strong><span>@${escapeHTML(member.username)} · ID ${Number(member.user_id)}</span></div><span>${escapeHTML(({admin:'Amministratore',member:'Membro',observer:'Osservatore'})[member.role] || member.role)}</span>${canManage() ? `<button class="button danger-subtle" type="button" data-remove-member="${Number(member.user_id)}" data-manage>Rimuovi</button>` : ''}</div>`).join('') || '<p>Nessun membro esplicito.</p>'}</div>${canManage() ? `<form id="member-form"><h3>Aggiungi o aggiorna un membro</h3><label class="field-label" for="member-user">Utente ${users.length ? '' : '(ID numerico)'}</label>${users.length ? `<select id="member-user">${users.filter((user) => user.active).map((user) => `<option value="${Number(user.id)}">${escapeHTML(user.name)} · @${escapeHTML(user.username)}</option>`).join('')}</select>` : '<input id="member-user" type="number" min="1" required>'}<label class="field-label" for="member-role">Ruolo nella bacheca</label><select id="member-role"><option value="member">Membro</option><option value="observer">Osservatore</option><option value="admin">Amministratore</option></select><button class="button primary" type="submit" data-manage>Salva membro</button></form>` : ''}<p id="panel-error" class="form-error" role="alert"></p>`;
   },'members');
 }
-async function showActivity() {
-  await showPanel('Registro attività',async () => {
-    const result = await api(`/api/boards/${state.board.id}/activity`);
-    return `<ol class="activity-feed">${(result.events || []).map((event) => `<li><div><strong>${escapeHTML(event.actor || 'Workspace locale')}</strong><span>${escapeHTML(event.action)} · ${escapeHTML(event.entity_type)}</span><p>${escapeHTML(event.title || '')}</p></div><time>${escapeHTML(formatDate(event.created_at))}</time></li>`).join('') || '<li>Nessuna attività registrata.</li>'}</ol>`;
-  },'activity');
-}
+async function showActivity(before = null,append = false) { return showActivityPage(before,append); }
 async function showTrash() {
   await showPanel('Cestino',async () => {
     const result = await api('/api/trash');
@@ -539,7 +565,7 @@ async function previewImport(file) {
     if (data.format !== 'openboard' || data.version !== 2 || !data.board || !Array.isArray(data.board.columns)) throw new Error('Serve un’esportazione OpenBoard in formato versione 2.');
     const cards = data.board.columns.reduce((sum,column) => sum+(Array.isArray(column.cards) ? column.cards.length : 0),0);
     state.importData = data; state.importKey = uuid();
-    $('import-preview').innerHTML = `<div class="notice"><div><h3>${escapeHTML(data.board.name || 'Bacheca importata')}</h3><p>${data.board.columns.length} liste · ${cards} schede</p><p>${escapeHTML(data.board.description || '')}</p></div></div><button id="confirm-import" class="button primary" type="button" data-write>Importa come nuova bacheca</button>`;
+    $('import-preview').innerHTML = `<div class="notice"><div><h3>${escapeHTML(data.board.name || 'Bacheca importata')}</h3><p>${data.board.columns.length} liste · ${cards} schede · ${(data.board.custom_fields || []).filter((field) => !field.deleted_at).length} campi personalizzati · ${(data.board.milestones || []).filter((item) => !item.deleted_at).length} traguardi</p><p>${escapeHTML(data.board.description || '')}</p></div></div><button id="confirm-import" class="button primary" type="button" data-write>Importa come nuova bacheca</button>`;
     updateBusy();
   } catch (error) { if (sequence === state.importSequence && state.panel === 'import' && $('panel-error')) $('panel-error').textContent = error instanceof SyntaxError ? 'Il file non contiene JSON valido.' : error.message; }
 }
@@ -660,7 +686,7 @@ document.addEventListener('click',async (event) => {
       state.cardEditor.version = state.conflictVersion; $('conflict-notice').hidden = true; saveDraft(); closeDialog('panel-dialog'); toast('Versione corrente acquisita. Completa la tua bozza e salva.'); break;
     case 'recover-draft': {
       const draft = readDraft();
-      if (draft) { fillCard(draft.data); $('checklist-new').value = draft.checklist_new || ''; $('comment-body').value = draft.comment_body || ''; state.cardEditor.version = draft.version; if (draft.pending) state.cardEditor.pending = draft.pending; state.cardEditor.pendingAmbiguous = draft.pendingAmbiguous ?? !!draft.pending; state.cardEditor.writtenDraft = stored(draftKey()); state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; saveDraft(); toast('Bozza recuperata. Verifica e salva quando pronta.'); }
+      if (draft) { fillCard(draft.data); $('checklist-new').value = draft.checklist_new || ''; $('comment-body').value = draft.comment_body || ''; $('worklog-date').value = draft.worklog?.date || todayISO(); $('worklog-minutes').value = draft.worklog?.minutes || ''; $('worklog-note').value = draft.worklog?.note || ''; state.cardEditor.version = draft.version; if (draft.pending) state.cardEditor.pending = draft.pending; state.cardEditor.pendingAmbiguous = draft.pendingAmbiguous ?? !!draft.pending; state.cardEditor.writtenDraft = stored(draftKey()); state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; saveDraft(); toast('Bozza recuperata. Verifica e salva quando pronta.'); }
       break;
     }
     case 'discard-draft': forget(draftKey()); state.cardEditor.writtenDraft = null; state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; break;
@@ -709,7 +735,7 @@ $('search-input').addEventListener('input',() => { state.query = $('search-input
 ['label','assignee','priority','status','sort'].forEach((key) => $(`${key}-filter`).addEventListener('change',() => { state[key] = $(`${key}-filter`).value; renderBoard(); }));
 $('show-archived').addEventListener('change',() => { state.archived = $('show-archived').checked; perform(refreshBoard); });
 $('clear-filters').addEventListener('click',() => clearFilters());
-['board','list','calendar','stats'].forEach((view) => $(`view-${view}`).addEventListener('click',() => { state.view = view; remember('view',view); renderBoard(); }));
+['board','list','calendar','stats','table'].forEach((view) => $(`view-${view}`).addEventListener('click',() => { state.view = view; remember('view',view); renderBoard(); }));
 ['create-board-sidebar','create-board-link'].forEach((id) => $(id).addEventListener('click',() => openBoardEditor()));
 ['boards-nav','mobile-boards'].forEach((id) => $(id).addEventListener('click',() => { renderSidebar(); openDialog('boards-dialog'); }));
 $('add-card-main').addEventListener('click',() => openCard());
@@ -768,13 +794,14 @@ $('card-form').addEventListener('submit',(event) => {
     $('comment-body').focus();
     return;
   }
+  if ($('worklog-minutes').value || $('worklog-note').value.trim()) { saveDraft(); $('card-form-error').textContent = 'Registra o cancella il tempo inserito prima di salvare la scheda. La bozza è conservata.'; $('worklog-minutes').focus(); return; }
   if ($('checklist-new').value.trim()) {
     saveDraft();
     $('card-form-error').textContent = 'Aggiungi l’attività alla checklist oppure cancella il testo prima di salvare la scheda. La bozza è conservata.';
     $('checklist-new').focus();
     return;
   }
-  const data = cardData(); const editor = state.cardEditor;
+  const editor = state.cardEditor; const data = productivity.planningPayload(cardData(),state.board.custom_fields,state.board.milestones,editor.persistedMilestone);
   if (!data.title) { $('card-form-error').textContent = 'Dai un titolo alla tua scheda.'; $('card-title').focus(); return; }
   const key = stableRequest(editor,data); saveDraft();
   perform(() => committed(async () => {
@@ -967,6 +994,7 @@ async function loadProductivityCard(cardId,boardId,sequence) {
     try { const members = await api(`/api/boards/${boardId}/members`); if (isCurrent()) renderMemberAssignments(members.members || []); }
     catch (error) { if (isCurrent()) $('card-assignees').textContent = error.message; }
   } else if (isCurrent()) renderMemberAssignments([]);
+  if (isCurrent()) loadPlanningCard(Number(cardId)||null,boardId,sequence);
   if (!cardId || !isCurrent()) return;
   $('dependency-card').innerHTML = allCards().filter((card) => card.id !== Number(cardId) && !card.archived).map((card) => `<option value="${Number(card.id)}">${escapeHTML(card.title)}</option>`).join('');
   await Promise.allSettled([loadDependencies(Number(cardId)),loadAttachments(Number(cardId)),refreshWatchState(Number(cardId))]);
@@ -1041,14 +1069,7 @@ async function refreshNotifications() {
   if (!state.auth?.enabled || !state.auth?.user || document.hidden) return;
   try { const result = await api('/api/notifications/unread-count'); const count = Number(result.unread_count)||0; $('unread-count').textContent = count > 99 ? '99+' : String(count); $('unread-count').hidden = !count; $('notifications').setAttribute('aria-label',`Notifiche: ${count} non lette`); } catch { /* Keep the last verified badge when offline. */ }
 }
-async function showNotifications(before = null,append = false) {
-  const build = async () => {
-    const result = await api(`/api/notifications?limit=30${before ? '&before='+Number(before) : ''}`);
-    state.notificationsItems = append ? [...(state.notificationsItems || []),...(result.items || [])] : (result.items || []);
-    return `<p>${Number(result.unread_count)||0} notifiche non lette</p><button id="notifications-read-all" type="button" class="button secondary">Segna tutte come lette</button><div class="notifications-list">${state.notificationsItems.map((item) => `<article class="notification-item ${item.read ? 'read':'unread'}"><div><strong>${escapeHTML(item.title || 'Aggiornamento')}</strong><p>${escapeHTML(item.actor || 'Un membro')} · ${escapeHTML(activityLabel(item.action))}</p><time>${escapeHTML(formatDate(item.created_at))}</time></div><button type="button" class="button secondary" data-notification-open="${Number(item.id)}" data-notification-board="${Number(item.board_id)}" ${item.entity_type === 'cards' ? `data-notification-card="${Number(item.entity_id)}"` : ''}>Apri</button>${!item.read ? `<button type="button" class="subtle-button" data-notification-read="${Number(item.id)}">Segna letta</button>` : '<span class="helper-text">Letta</span>'}</article>`).join('') || '<p>Nessuna notifica. Segui una bacheca o una scheda per ricevere gli aggiornamenti degli altri membri.</p>'}</div>${result.next_cursor ? `<button id="notifications-more" type="button" class="button secondary" data-before="${Number(result.next_cursor)}">Carica precedenti</button>` : ''}<p id="panel-error" class="form-error" role="alert"></p>`;
-  };
-  await showPanel('Le tue notifiche',build,'notifications'); refreshNotifications();
-}
+async function showNotifications(before = null,append = false) { return showFilteredNotifications(before,append); }
 function activityLabel(action) { return ({created:'ha creato',updated:'ha modificato',deleted:'ha eliminato',restored:'ha ripristinato',commented:'ha commentato',moved:'ha spostato',archived:'ha archiviato',attached:'ha allegato un file'})[action] || action; }
 async function showMyTasks() {
   if (!state.auth?.user) { panel('Mie attività','<p>Accedi con un account per vedere le schede assegnate a te attraverso i membri della bacheca.</p>','mytasks'); return; }
@@ -1206,4 +1227,4 @@ setInterval(refreshNotifications,15000);
 
 setInterval(pollRevision,5000);
 document.addEventListener('visibilitychange',() => { if (!document.hidden) pollRevision(); });
-loadInitial();
+document.addEventListener('DOMContentLoaded',loadInitial,{once:true});

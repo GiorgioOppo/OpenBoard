@@ -17,6 +17,14 @@ PASSWORD = "correct-password-123"
 
 
 class OpenBoardAuth(unittest.TestCase):
+    def test_catalog_requires_session_and_matches_domain_values(self):
+        self.api("GET", "/api/catalog", actor=None, expected=401)
+        catalog, _ = self.api("GET", "/api/catalog")
+        self.assertEqual(set(catalog["labels"]), {"design", "sviluppo", "ricerca", "marketing", "urgente"})
+        self.assertEqual(set(catalog["priorities"]), {"low", "normal", "high", "urgent"})
+        self.assertEqual({item["value"] for item in catalog["custom_field_types"]}, {"text", "number", "date", "boolean", "select"})
+        self.assertEqual(catalog["covers"][0], "")
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="openboard-auth-")
         self.addCleanup(self.temp.cleanup)
@@ -27,7 +35,7 @@ class OpenBoardAuth(unittest.TestCase):
             reserve.bind(("127.0.0.1", 0))
             self.port = reserve.getsockname()[1]
         self.process = subprocess.Popen(
-            [str(BINARY), "--port", str(self.port), "--db", str(self.db), "--web-root", str(ROOT / "web"), "--auth", "--quiet"],
+            [str(BINARY), "--port", str(self.port), "--db", str(self.db), "--auth", "--quiet"],
             cwd=ROOT, stdout=self.log, stderr=subprocess.STDOUT,
         )
         self.addCleanup(self.stop)
@@ -280,7 +288,7 @@ class OpenBoardAuth(unittest.TestCase):
     def test_https_public_url_sets_secure_session_cookie(self):
         self.stop()
         self.process = subprocess.Popen(
-            [str(BINARY), "--port", str(self.port), "--db", str(self.db), "--web-root", str(ROOT / "web"),
+            [str(BINARY), "--port", str(self.port), "--db", str(self.db),
              "--auth", "--quiet", "--public-url", "https://openboard.example"],
             cwd=ROOT, stdout=self.log, stderr=subprocess.STDOUT,
         )

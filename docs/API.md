@@ -1,8 +1,8 @@
-# API di OpenBoard 0.3.0
+# API di OpenBoard 0.4.0
 
-Il contratto di base della versione 0.2 resta disponibile qui. Le nuove API sono descritte in [produttività e pianificazione](API_PRODUTTIVITA.md) e [collaborazione e account](API_COLLABORAZIONE.md); configurazione e metriche sono in [installazione e gestione](DEPLOYMENT.md).
+Il contratto di base della versione 0.2 resta disponibile qui. Le API della 0.3 sono descritte in [produttività](API_PRODUTTIVITA.md) e [collaborazione e account](API_COLLABORAZIONE.md); la 0.4 aggiunge [campi e traguardi](API_PIANIFICAZIONE.md) e [tempo e conversazioni](API_TEAMWORK.md). Configurazione, database separati e metriche sono in [installazione e gestione](DEPLOYMENT.md).
 
-Le API sono disponibili sulla stessa origine dell'interfaccia, per impostazione predefinita `http://127.0.0.1:8080`. Il server ascolta su loopback; `--public-url https://board.example.com` configura host e origine pubblici per un reverse proxy. TLS è gestito dal proxy.
+Le API sono disponibili sulla stessa origine dell'interfaccia, per impostazione predefinita `http://127.0.0.1:8080`. Il backend risponde soltanto con API JSON e restituisce `404` per HTML/CSS/JavaScript e tutti i percorsi non API. Il server locale ascolta su loopback; il container imposta `--bind 0.0.0.0` su una rete privata. `--public-url https://board.example.com` configura host e origine pubblici per il reverse proxy. TLS è gestito da Nginx Proxy Manager.
 
 ## Convenzioni HTTP
 
@@ -32,13 +32,17 @@ Questi endpoint sono disponibili anche senza sessione quando gli account sono ab
 | --- | --- | --- |
 | GET | `/api/health` | `{"status":"ok"}`: il processo risponde |
 | GET | `/api/ready` | `200 {"status":"ready"}` se il database è aperto in scrittura e la lettura di controllo riesce; altrimenti `503 {"status":"unavailable"}` |
-| GET | `/api/version` | `{"version":"0.3.0","sqlite":"…","auth_enabled":false,"workers":8}` |
+| GET | `/api/version` | `{"version":"0.4.0","sqlite":"…","auth_enabled":false,"workers":8,"storage":"sqlite"}`; lo storage esterno riporta `postgresql+mongodb` |
 
-La readiness verifica apertura e lettura del database; non esegue una scrittura di prova.
+La readiness verifica apertura e lettura del database e, in modalità esterna, raggiungibilità di PostgreSQL e MongoDB; non esegue una scrittura di prova. Una scrittura non persistita sui servizi esterni restituisce `503`; riusare la stessa `Idempotency-Key` quando si ritenta un `POST` supportato.
+
+## Cataloghi per il frontend
+
+`GET /api/catalog` richiede una sessione e restituisce `labels`, `priorities`, `covers` e `custom_field_types`. Il frontend costruisce i selettori da questi metadati; le definizioni personalizzate e i dati delle bacheche arrivano dai rispettivi endpoint. Il backend resta responsabile di convalida e permessi.
 
 ## Account e sessioni
 
-Senza `--auth` l'istanza opera in modalità locale: tutte le bacheche sono accessibili e non occorre un token CSRF. Con `--auth`, gli endpoint di dominio richiedono una sessione. Le eccezioni pubbliche sono stato del servizio, lettura della sessione, configurazione iniziale e accesso.
+Con l'opzione esplicita `--no-auth`, ammessa solo su loopback, l'istanza opera in modalità di sviluppo locale: tutte le bacheche sono accessibili e non occorre un token CSRF. Per impostazione predefinita gli endpoint di dominio richiedono una sessione. Le eccezioni pubbliche sono stato del servizio, lettura della sessione, configurazione iniziale e accesso.
 
 | Metodo | Percorso | Corpo / comportamento |
 | --- | --- | --- |
@@ -63,7 +67,7 @@ Per un visitatore anonimo `user` è `null` e `csrf` è vuoto. Senza `--auth`, `e
 
 La sessione usa il cookie `ob_session`, `HttpOnly`, `SameSite=Strict`, `Path=/`. Con un URL pubblico HTTPS il cookie ha anche `Secure`. La durata massima è 8 ore, con scadenza dopo 30 minuti di inattività; un account può avere fino a 10 sessioni. Il token CSRF restituito dalla sessione deve essere inviato nell'header `X-CSRF-Token` per tutte le scritture autenticate, incluso il logout. Setup e login non richiedono una sessione precedente. Dopo un `401`, rileggere la sessione o effettuare nuovamente l'accesso.
 
-Setup, login e cambio password hanno un limite di tentativi: 10 per chiave account, 60 per peer e 80 globali ogni 5 minuti. La risposta `429` include `Retry-After: 300`. Dietro il proxy i peer sono visti dal server come loopback.
+Setup, login e cambio password hanno un limite di tentativi: 10 per chiave account, 60 per peer e 80 globali ogni 5 minuti. La risposta `429` include `Retry-After: 300`. Dietro il proxy i peer sono visti dal server come indirizzi della rete Docker; gli header inoltrati non sono usati per aggirare il limite.
 
 ### Utenti e permessi
 

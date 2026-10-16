@@ -41,7 +41,7 @@ class OpenBoardAPI(unittest.TestCase):
             reserve.bind(("127.0.0.1", 0))
             self.port = reserve.getsockname()[1]
         self.process = subprocess.Popen(
-            [str(BINARY), "--port", str(self.port), "--db", str(self.db), "--web-root", str(self.web)],
+            [str(BINARY), "--port", str(self.port), "--db", str(self.db), "--no-auth"],
             stdout=self.log,
             stderr=subprocess.STDOUT,
             cwd=ROOT,
@@ -118,18 +118,14 @@ class OpenBoardAPI(unittest.TestCase):
         self.assertEqual([card["position"] for card in column["cards"]], list(range(len(expected_ids))))
         return column["cards"]
 
-    def test_health_and_static_files(self):
+    def test_health_and_api_only_backend(self):
         self.assertEqual(self.api("GET", "/api/health")["status"], "ok")
-        for path, expected_type, expected_body in [
-            ("/", "text/html", b"OpenBoard test"),
-            ("/styles.css", "text/css", b"color: teal"),
-            ("/app.js", "javascript", b"console.log"),
-        ]:
+        for path in ("/", "/index.html", "/styles.css", "/app.js", "/planning.js"):
             with self.subTest(path=path):
                 status, headers, body = self.request("GET", path)
-                self.assertEqual(status, 200)
-                self.assertIn(expected_type, headers.get("content-type", ""))
-                self.assertIn(expected_body, body)
+                self.assertEqual(status, 404)
+                self.assertIn("application/json", headers.get("content-type", ""))
+                self.assertNotIn(b"<!doctype", body)
 
     def test_static_directory_traversal_is_blocked(self):
         for path in ("/../secret.txt", "/%2e%2e/secret.txt", "/..%2fsecret.txt"):

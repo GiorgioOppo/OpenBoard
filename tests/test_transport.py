@@ -22,10 +22,10 @@ class TransportTests(unittest.TestCase):
         self.addCleanup(self.stop)
         self.start()
 
-    def start(self, *options):
+    def start(self, *options, local=True):
         with socket.socket() as s:
             s.bind(('127.0.0.1', 0)); self.port = s.getsockname()[1]
-        self.process = subprocess.Popen([str(BINARY), '--port', str(self.port), '--db', str(Path(self.temp.name)/'test.db'), '--web-root', str(ROOT/'web'), '--quiet', *options], stdout=self.log, stderr=self.log)
+        self.process = subprocess.Popen([str(BINARY), '--port', str(self.port), '--db', str(Path(self.temp.name)/'test.db'), '--quiet', *(['--no-auth'] if local else []), *options], stdout=self.log, stderr=self.log)
         deadline = time.monotonic()+5
         while time.monotonic()<deadline:
             if self.process.poll() is not None:
@@ -56,19 +56,22 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(status,200);self.assertEqual(json.loads(b)['status'],'ready')
         status,v,b=self.request('GET','/api/version')
         version=json.loads(b)
-        self.assertEqual(version['version'],'0.3.0');self.assertGreaterEqual(version['workers'],2)
+        self.assertEqual(version['version'],'0.4.0');self.assertGreaterEqual(version['workers'],2)
         self.assertNotEqual(h['X-Request-ID'],v['X-Request-ID'])
         status,h,b=self.request('HEAD','/api/health')
         self.assertEqual(status,200);self.assertEqual(b,b'');self.assertGreater(int(h['Content-Length']),0)
         self.assertEqual(h['Cache-Control'],'no-store')
 
-    def test_asset_etag_and_head(self):
-        status,h,b=self.request('GET','/app.js')
-        self.assertEqual(status,200);self.assertTrue(b);self.assertIn('ETag',h)
-        status,h2,b2=self.request('GET','/app.js',headers={'If-None-Match':h['ETag']})
-        self.assertEqual(status,304);self.assertEqual(b2,b'');self.assertEqual(h2['ETag'],h['ETag'])
-        status,h3,b3=self.request('HEAD','/styles.css')
-        self.assertEqual(status,200);self.assertEqual(b3,b'');self.assertGreater(int(h3['Content-Length']),0)
+    def test_backend_has_no_static_routes_and_auth_is_default(self):
+        self.stop(); self.start(local=False)
+        self.assertEqual(self.request('GET','/api/boards')[0],401)
+        self.assertEqual(self.request('POST','/api/boards', '{}', {'Content-Type':'application/json'})[0],401)
+        self.assertTrue(json.loads(self.request('GET','/api/version')[2])['auth_enabled'])
+        for path in ('/','/app.js','/styles.css','/index.html'):
+            status, headers, body = self.request('GET',path)
+            self.assertEqual(status,404); self.assertIn('application/json',headers['Content-Type'])
+            status, headers, body = self.request('HEAD',path)
+            self.assertEqual(status,404); self.assertEqual(body,b'')
 
     def test_partial_client_does_not_block_and_has_total_deadline(self):
         with socket.create_connection(('127.0.0.1',self.port),timeout=3) as slow:
@@ -127,7 +130,7 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(self.request('GET','/api/ready')[0],200)
 
     def test_invalid_cli_bounds(self):
-        for args in [('--workers','0'),('--workers','33'),('--port','65536'),('--public-url','https://host/path')]:
+        for args in [('--workers','0'),('--workers','33'),('--port','65536'),('--public-url','https://host/path'),('--bind','192.0.2.1'),('--bind','localhost'),('--bind','0.0.0.0','--no-auth'),('--web-root','web')]:
             with self.subTest(args=args):
                 r=subprocess.run([str(BINARY),*args],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=3)
                 self.assertNotEqual(r.returncode,0)

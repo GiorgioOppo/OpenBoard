@@ -31,23 +31,44 @@ jobs:
         run: make test-sanitize
   container:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COMPOSE_PROJECT_NAME: openboard-ci-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
+      - name: Generate private Compose configuration
+        run: python3 scripts/init-env.py --http-port 8088 --https-port 8443 --admin-port 8181
       - name: Validate Compose
         run: docker compose config --quiet
-      - name: Build image
-        run: docker build -t openboard:test .
-      - name: Container smoke test
+      - name: Build backend and frontend images
+        run: docker compose build app frontend
+      - name: Start all five services
+        run: docker compose up --detach --wait --wait-timeout 180
+      - name: Bootstrap private administrators and local proxy
+        run: python3 scripts/bootstrap-local.py
+      - name: Verify public frontend and authenticated API routing
         shell: bash
         run: |
           set -euo pipefail
-          docker run --detach --name openboard-smoke openboard:test
-          trap 'docker logs openboard-smoke; docker rm -f openboard-smoke' EXIT
-          for attempt in $(seq 1 30); do
-            if docker exec openboard-smoke curl --fail --silent http://127.0.0.1:8080/api/ready; then
-              docker exec openboard-smoke /usr/local/bin/openboard --integrity-check
-              exit 0
-            fi
-            sleep 1
-          done
-          exit 1
+          authority='openboard.localhost:8088'
+          url='http://127.0.0.1:8088'
+          curl --fail --silent --show-error --max-time 20 --header "Host: $authority" --output /dev/null "$url/"
+          curl --fail --silent --show-error --max-time 20 --header "Host: $authority" --output /dev/null "$url/api/ready"
+          test "$(curl --silent --show-error --max-time 20 --header "Host: $authority" --output /dev/null --write-out '%{http_code}' "$url/api/boards")" = 401
+          curl --fail --silent --show-error --max-time 20 --header "Host: $authority" "$url/api/version" |
+            python3 -c 'import json,sys; version=json.load(sys.stdin); assert version["auth_enabled"] is True; assert version["storage"] == "postgresql+mongodb"'
+      - name: Verify isolated static frontend container
+        env:
+          OPENBOARD_FRONTEND_IMAGE: openboard-frontend:0.4.0
+        run: python3 -m unittest discover -s tests -p 'test_frontend_static.py' -v
+      - name: Backend diagnostics on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 100 app
+      - name: Remove disposable CI stack and credentials
+        if: always()
+        shell: bash
+        run: |
+          trap 'rm -f .env .env.local-admin' EXIT
+          if [ -f .env ]; then
+            docker compose down --volumes --remove-orphans
+          fi

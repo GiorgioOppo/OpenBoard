@@ -9,3 +9,7 @@
 *.sqlite3-shm
 .DS_Store
 __pycache__/
+.env
+.env.*
+!.env.example
+/backups/

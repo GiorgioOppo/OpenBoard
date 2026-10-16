@@ -2,7 +2,9 @@
 #define _POSIX_C_SOURCE 200809L
 #include "auth.h"
 #include "collaboration.h"
+#include "cloud.h"
 #include "openboard.h"
+#include "teamwork.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -15,11 +17,15 @@
 #include <time.h>
 #include <unistd.h>
 #define COUNT_OF(a) (sizeof(a) / sizeof((a)[0]))
-#define SCHEMA_VERSION 4
+#define SCHEMA_VERSION 5
 _Thread_local sqlite3 *db;
 static _Thread_local jmp_buf request_recovery;
 static _Thread_local jmp_buf *failure_target;
-static _Thread_local bool recovering, outer_transaction;
+static _Thread_local bool recovering, outer_transaction, importing_plan;
+/* Cloud lock state must survive the SQL recovery longjmp. The external store
+ * remains authoritative until cloud_request_finish acknowledges its commit. */
+static _Thread_local bool cloud_request_active;
+static _Thread_local sqlite3_int64 cloud_changes_before;
 static _Thread_local Request *current_request;
 static void die(const char *s) {
     fprintf(stderr, "%s: %s\n", s, strerror(errno));
@@ -155,11 +161,12 @@ Response query_json(const char *sql, int64_t id) {
     if (sqlite3_bind_parameter_count(s))
         sqlite3_bind_int64(s, 1, id);
     int rc = sqlite3_step(s);
-    Response r = rc == SQLITE_ROW
-                     ? json_response(200, (const char *)sqlite3_column_text(s, 0))
-                     : error_response(rc == SQLITE_DONE ? 404 : 503,
-                                      rc == SQLITE_DONE ? "Risorsa non trovata."
-                                                        : "Database temporaneamente non disponibile.");
+    Response r =
+        rc == SQLITE_ROW
+            ? json_response(200, (const char *)sqlite3_column_text(s, 0))
+            : error_response(rc == SQLITE_DONE ? 404 : 503,
+                             rc == SQLITE_DONE ? "Risorsa non trovata."
+                                               : "Database temporaneamente non disponibile.");
     sqlite3_finalize(s);
     return r;
 }
@@ -183,7 +190,8 @@ bool valid_utf8(const char *text, size_t length) {
             i += 2;
         } else if (c >= 0xf0 && c <= 0xf4) {
             if (length - i < 3 || (s[i] & 0xc0) != 0x80 || (s[i + 1] & 0xc0) != 0x80 ||
-                (s[i + 2] & 0xc0) != 0x80 || (c == 0xf0 && s[i] < 0x90) || (c == 0xf4 && s[i] >= 0x90))
+                (s[i + 2] & 0xc0) != 0x80 || (c == 0xf0 && s[i] < 0x90) ||
+                (c == 0xf4 && s[i] >= 0x90))
                 return false;
             i += 3;
         } else
@@ -222,8 +230,9 @@ int json_string(const char *json, const char *field, char **out, size_t limit) {
         else if (!strcmp(type, "text")) {
             const char *v = (const char *)sqlite3_column_text(s, 1);
             int n = sqlite3_column_bytes(s, 1);
-            if (v && n >= 0 && (size_t)n <= limit * 4 && (size_t)sqlite3_column_int64(s, 2) <= limit &&
-                strlen(v) == (size_t)n && valid_utf8(v, (size_t)n)) {
+            if (v && n >= 0 && (size_t)n <= limit * 4 &&
+                (size_t)sqlite3_column_int64(s, 2) <= limit && strlen(v) == (size_t)n &&
+                valid_utf8(v, (size_t)n)) {
                 *out = copy_string(v);
                 result = 1;
             }
@@ -232,7 +241,8 @@ int json_string(const char *json, const char *field, char **out, size_t limit) {
     sqlite3_finalize(s);
     return result;
 }
-int json_integer(const char *json, const char *field, int64_t *out, int64_t min, int64_t max, bool boolean) {
+int json_integer(const char *json, const char *field, int64_t *out, int64_t min, int64_t max,
+                 bool boolean) {
     char path[80];
     snprintf(path, sizeof path, "$.%s", field);
     sqlite3_stmt *s = prepare("SELECT json_type(?1,?2),json_extract(?1,?2)");
@@ -333,8 +343,10 @@ static const char *const colors[] = {"sage", "peach", "lavender", "blue"};
 static const char *const labels[] = {"", "design", "sviluppo", "ricerca", "marketing", "urgente"};
 static const char *const covers[] = {"", "sage", "peach", "lavender", "blue"};
 
-static int64_t seed_board(const char *name, const char *description, const char *color, int starred) {
-    sqlite3_stmt *s = prepare("INSERT INTO boards(name,description,color,starred) VALUES(?1,?2,?3,?4)");
+static int64_t seed_board(const char *name, const char *description, const char *color,
+                          int starred) {
+    sqlite3_stmt *s =
+        prepare("INSERT INTO boards(name,description,color,starred) VALUES(?1,?2,?3,?4)");
     bind_text(s, 1, name);
     bind_text(s, 2, description);
     bind_text(s, 3, color);
@@ -355,8 +367,8 @@ static int64_t seed_column(int64_t board, const char *title, int position) {
     return sqlite3_last_insert_rowid(db);
 }
 static void seed_card(int64_t column, const char *title, const char *description, const char *label,
-                      const char *date, const char *assignee, const char *cover, int position, int completed,
-                      const char *checklist) {
+                      const char *date, const char *assignee, const char *cover, int position,
+                      int completed, const char *checklist) {
     sqlite3_stmt *s = prepare("INSERT INTO "
                               "cards(column_id,title,description,label,due_date,assignee,cover,"
                               "position,completed,checklist,labels) "
@@ -379,14 +391,14 @@ static void seed_card(int64_t column, const char *title, const char *description
 static _Thread_local bool include_archived, summary_mode;
 /* Callback recovery returns through SQLite normally; never jump out of
  * sqlite3_step. */
-#define SQL_CALLBACK_GUARD(context)                                                                          \
-    jmp_buf callback_recovery;                                                                               \
-    jmp_buf *previous_recovery = failure_target;                                                             \
-    failure_target = &callback_recovery;                                                                     \
-    if (setjmp(callback_recovery)) {                                                                         \
-        failure_target = previous_recovery;                                                                  \
-        sqlite3_result_error(context, "Database temporaneamente non disponibile", -1);                       \
-        return;                                                                                              \
+#define SQL_CALLBACK_GUARD(context)                                                                \
+    jmp_buf callback_recovery;                                                                     \
+    jmp_buf *previous_recovery = failure_target;                                                   \
+    failure_target = &callback_recovery;                                                           \
+    if (setjmp(callback_recovery)) {                                                               \
+        failure_target = previous_recovery;                                                        \
+        sqlite3_result_error(context, "Database temporaneamente non disponibile", -1);             \
+        return;                                                                                    \
     }
 #define SQL_CALLBACK_END() failure_target = previous_recovery
 
@@ -394,15 +406,16 @@ static void allowed_sql(sqlite3_context *c, int n, sqlite3_value **v) {
     SQL_CALLBACK_GUARD(c);
     (void)n;
     sqlite3_result_int(
-        c, current_request ? auth_board_allowed(current_request, sqlite3_value_int64(v[0]), false) : 1);
+        c, current_request ? auth_board_allowed(current_request, sqlite3_value_int64(v[0]), false)
+                           : 1);
     SQL_CALLBACK_END();
 }
 static void starred_sql(sqlite3_context *c, int n, sqlite3_value **v) {
     SQL_CALLBACK_GUARD(c);
     (void)n;
-    sqlite3_result_int(
-        c, current_request ? auth_starred(current_request, sqlite3_value_int64(v[0]), sqlite3_value_int(v[1]))
-                           : sqlite3_value_int(v[1]));
+    sqlite3_result_int(c, current_request ? auth_starred(current_request, sqlite3_value_int64(v[0]),
+                                                         sqlite3_value_int(v[1]))
+                                          : sqlite3_value_int(v[1]));
     SQL_CALLBACK_END();
 }
 static void archived_sql(sqlite3_context *c, int n, sqlite3_value **v) {
@@ -439,7 +452,8 @@ static void readonly_sql(sqlite3_context *c, int n, sqlite3_value **v) {
     SQL_CALLBACK_GUARD(c);
     (void)n;
     sqlite3_result_int(
-        c, current_request ? !auth_board_allowed(current_request, sqlite3_value_int64(v[0]), true) : 0);
+        c, current_request ? !auth_board_allowed(current_request, sqlite3_value_int64(v[0]), true)
+                           : 0);
     SQL_CALLBACK_END();
 }
 static void register_functions(void) {
@@ -468,7 +482,8 @@ int ob_backup(const char *path) {
         return -1;
     struct stat source_stat, destination_stat;
     if (stat(ob_config.db_path, &source_stat) == 0 && stat(path, &destination_stat) == 0 &&
-        source_stat.st_dev == destination_stat.st_dev && source_stat.st_ino == destination_stat.st_ino)
+        source_stat.st_dev == destination_stat.st_dev &&
+        source_stat.st_ino == destination_stat.st_ino)
         return -1;
     make_parent_dirs(path);
     sqlite3 *dest = NULL;
@@ -498,28 +513,29 @@ int ob_backup(const char *path) {
     int close_rc = sqlite3_close(dest);
     return rc == SQLITE_DONE && finish_rc == SQLITE_OK && close_rc == SQLITE_OK ? 0 : -1;
 }
-static const char *schema_one = "CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY,value TEXT NOT "
-                                "NULL);"
-                                "CREATE TABLE IF NOT EXISTS boards(id INTEGER PRIMARY KEY "
-                                "AUTOINCREMENT,name TEXT NOT NULL,description TEXT NOT "
-                                "NULL DEFAULT '',color TEXT NOT NULL DEFAULT 'sage',starred INTEGER NOT "
-                                "NULL DEFAULT 0 CHECK(starred IN(0,1)));"
-                                "CREATE TABLE IF NOT EXISTS columns(id INTEGER PRIMARY KEY "
-                                "AUTOINCREMENT,board_id INTEGER NOT NULL REFERENCES "
-                                "boards(id) ON DELETE CASCADE,title TEXT NOT NULL,position INTEGER NOT "
-                                "NULL);CREATE INDEX IF NOT EXISTS "
-                                "columns_board ON columns(board_id,position);"
-                                "CREATE TABLE IF NOT EXISTS cards(id INTEGER PRIMARY KEY "
-                                "AUTOINCREMENT,column_id INTEGER NOT NULL REFERENCES "
-                                "columns(id) ON DELETE CASCADE,title TEXT NOT NULL,description TEXT NOT "
-                                "NULL DEFAULT '',label TEXT NOT NULL "
-                                "DEFAULT '',due_date TEXT NOT NULL DEFAULT '',assignee TEXT NOT NULL "
-                                "DEFAULT '',cover TEXT NOT NULL DEFAULT "
-                                "'',position INTEGER NOT NULL,completed INTEGER NOT NULL DEFAULT 0 "
-                                "CHECK(completed IN(0,1)),checklist TEXT NOT "
-                                "NULL DEFAULT '[]' CHECK(json_valid(checklist)));CREATE INDEX IF NOT "
-                                "EXISTS cards_column ON "
-                                "cards(column_id,position);";
+static const char *schema_one =
+    "CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY,value TEXT NOT "
+    "NULL);"
+    "CREATE TABLE IF NOT EXISTS boards(id INTEGER PRIMARY KEY "
+    "AUTOINCREMENT,name TEXT NOT NULL,description TEXT NOT "
+    "NULL DEFAULT '',color TEXT NOT NULL DEFAULT 'sage',starred INTEGER NOT "
+    "NULL DEFAULT 0 CHECK(starred IN(0,1)));"
+    "CREATE TABLE IF NOT EXISTS columns(id INTEGER PRIMARY KEY "
+    "AUTOINCREMENT,board_id INTEGER NOT NULL REFERENCES "
+    "boards(id) ON DELETE CASCADE,title TEXT NOT NULL,position INTEGER NOT "
+    "NULL);CREATE INDEX IF NOT EXISTS "
+    "columns_board ON columns(board_id,position);"
+    "CREATE TABLE IF NOT EXISTS cards(id INTEGER PRIMARY KEY "
+    "AUTOINCREMENT,column_id INTEGER NOT NULL REFERENCES "
+    "columns(id) ON DELETE CASCADE,title TEXT NOT NULL,description TEXT NOT "
+    "NULL DEFAULT '',label TEXT NOT NULL "
+    "DEFAULT '',due_date TEXT NOT NULL DEFAULT '',assignee TEXT NOT NULL "
+    "DEFAULT '',cover TEXT NOT NULL DEFAULT "
+    "'',position INTEGER NOT NULL,completed INTEGER NOT NULL DEFAULT 0 "
+    "CHECK(completed IN(0,1)),checklist TEXT NOT "
+    "NULL DEFAULT '[]' CHECK(json_valid(checklist)));CREATE INDEX IF NOT "
+    "EXISTS cards_column ON "
+    "cards(column_id,position);";
 static void migration_two(void) {
     const char *tables[] = {"boards", "columns", "cards"};
     char sql[2048];
@@ -567,31 +583,32 @@ static void migration_two(void) {
              "cards SET labels=CASE WHEN label='' THEN '[]' ELSE "
              "json_array(label) END;");
 }
-static const char *schema_three = "CREATE TABLE comments(id INTEGER PRIMARY KEY AUTOINCREMENT,card_id "
-                                  "INTEGER NOT NULL REFERENCES cards(id) ON "
-                                  "DELETE CASCADE,author_id INTEGER NOT NULL DEFAULT 0,author TEXT NOT "
-                                  "NULL,body TEXT NOT NULL,created_at TEXT NOT "
-                                  "NULL DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')));CREATE INDEX "
-                                  "comments_card ON comments(card_id,id);"
-                                  "CREATE TABLE activity(id INTEGER PRIMARY KEY AUTOINCREMENT,board_id "
-                                  "INTEGER NOT NULL REFERENCES boards(id) ON "
-                                  "DELETE CASCADE,actor_id INTEGER NOT NULL DEFAULT 0,actor TEXT NOT "
-                                  "NULL,action TEXT NOT NULL,entity_type TEXT NOT "
-                                  "NULL,entity_id INTEGER NOT NULL,title TEXT NOT NULL,created_at TEXT NOT "
-                                  "NULL "
-                                  "DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')));CREATE INDEX "
-                                  "activity_board ON activity(board_id,id DESC);"
-                                  "CREATE TABLE idempotency(user_id INTEGER NOT NULL,path TEXT NOT NULL,key "
-                                  "TEXT NOT NULL,request_body TEXT NOT "
-                                  "NULL,status INTEGER NOT NULL,response_body TEXT NOT NULL,created_at TEXT "
-                                  "NOT NULL "
-                                  "DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')),PRIMARY "
-                                  "KEY(user_id,path,key));"
-                                  "CREATE INDEX cards_due ON cards(due_date) WHERE deleted_at IS NULL;CREATE "
-                                  "INDEX cards_active ON "
-                                  "cards(column_id,archived,position) WHERE deleted_at IS NULL;CREATE INDEX "
-                                  "boards_active ON boards(archived,id) "
-                                  "WHERE deleted_at IS NULL;";
+static const char *schema_three =
+    "CREATE TABLE comments(id INTEGER PRIMARY KEY AUTOINCREMENT,card_id "
+    "INTEGER NOT NULL REFERENCES cards(id) ON "
+    "DELETE CASCADE,author_id INTEGER NOT NULL DEFAULT 0,author TEXT NOT "
+    "NULL,body TEXT NOT NULL,created_at TEXT NOT "
+    "NULL DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')));CREATE INDEX "
+    "comments_card ON comments(card_id,id);"
+    "CREATE TABLE activity(id INTEGER PRIMARY KEY AUTOINCREMENT,board_id "
+    "INTEGER NOT NULL REFERENCES boards(id) ON "
+    "DELETE CASCADE,actor_id INTEGER NOT NULL DEFAULT 0,actor TEXT NOT "
+    "NULL,action TEXT NOT NULL,entity_type TEXT NOT "
+    "NULL,entity_id INTEGER NOT NULL,title TEXT NOT NULL,created_at TEXT NOT "
+    "NULL "
+    "DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')));CREATE INDEX "
+    "activity_board ON activity(board_id,id DESC);"
+    "CREATE TABLE idempotency(user_id INTEGER NOT NULL,path TEXT NOT NULL,key "
+    "TEXT NOT NULL,request_body TEXT NOT "
+    "NULL,status INTEGER NOT NULL,response_body TEXT NOT NULL,created_at TEXT "
+    "NOT NULL "
+    "DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')),PRIMARY "
+    "KEY(user_id,path,key));"
+    "CREATE INDEX cards_due ON cards(due_date) WHERE deleted_at IS NULL;CREATE "
+    "INDEX cards_active ON "
+    "cards(column_id,archived,position) WHERE deleted_at IS NULL;CREATE INDEX "
+    "boards_active ON boards(archived,id) "
+    "WHERE deleted_at IS NULL;";
 static void migration_four(void) {
     sql_exec("ALTER TABLE cards ADD COLUMN start_date TEXT NOT NULL DEFAULT '';"
              "ALTER TABLE cards ADD COLUMN blocked_reason TEXT NOT NULL DEFAULT '';"
@@ -622,68 +639,108 @@ static void migration_four(void) {
              "DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')));"
              "CREATE INDEX saved_views_owner ON saved_views(user_id,board_id,id);");
 }
-static const char *json_views = "CREATE VIEW IF NOT EXISTS ob_card_objects AS SELECT "
-                                "k.*,json_object('id',k.id,'column_id',k.column_id,'title',k.title,'"
-                                "description',k.description,'label',k.label,'"
-                                "labels',json(k.labels),'due_date',k.due_date,'assignee',k.assignee,'cover'"
-                                ",k.cover,'position',k.position,'"
-                                "completed',json(CASE k.completed WHEN 1 THEN 'true' ELSE 'false' "
-                                "END),'checklist',json(k.checklist),'priority',k.priority,'estimate_"
-                                "minutes',k.estimate_minutes,'archived',json("
-                                "CASE k.archived WHEN 1 THEN 'true' ELSE 'false' "
-                                "END),'version',k.version,'created_at',k.created_at,'updated_at',k.updated_"
-                                "at,'start_date',k.start_date,'blocked_reason',k.blocked_reason,'actual_"
-                                "minutes',k.actual_minutes,'reference_url',k.reference_url,'assignee_ids',"
-                                "json((SELECT json_group_array(user_id) FROM card_assignees WHERE "
-                                "card_id=k.id)),'assignees',json((SELECT "
-                                "json_group_array(json_object('id',u.id,'name',u.name,'username',u."
-                                "username)) FROM card_assignees a JOIN users u ON u.id=a.user_id WHERE "
-                                "a.card_id=k.id))) data,"
-                                "json_object('id',k.id,'column_id',k.column_id,'title',k.title,'"
-                                "description_preview',substr(k.description,1,160),'"
-                                "checklist_total',json_array_length(k.checklist),'checklist_done',(SELECT "
-                                "count(*) FROM json_each(k.checklist) "
-                                "WHERE "
-                                "json_extract(value,'$.done')=1),'label',k.label,'labels',json(k.labels),'"
-                                "due_date',k.due_date,'assignee',k."
-                                "assignee,'cover',k.cover,'position',k.position,'completed',json(CASE "
-                                "k.completed WHEN 1 THEN 'true' ELSE 'false' "
-                                "END),'priority',k.priority,'estimate_minutes',k.estimate_minutes,'"
-                                "archived',json(CASE k.archived WHEN 1 THEN "
-                                "'true' ELSE 'false' "
-                                "END),'version',k.version,'created_at',k.created_at,'updated_at',k.updated_"
-                                "at,'start_date',k.start_date,'blocked_reason',k.blocked_reason,'actual_"
-                                "minutes',k.actual_minutes,'reference_url',k.reference_url,'assignee_ids',"
-                                "json((SELECT json_group_array(user_id) FROM card_assignees WHERE "
-                                "card_id=k.id)),'assignees',json((SELECT "
-                                "json_group_array(json_object('id',u.id,'name',u.name,'username',u."
-                                "username)) FROM card_assignees a JOIN users u ON u.id=a.user_id WHERE "
-                                "a.card_id=k.id))) summary FROM "
-                                "cards k;"
-                                "CREATE VIEW IF NOT EXISTS ob_board_objects AS SELECT "
-                                "b.*,json_object('id',b.id,'name',b.name,'description',b.description,'"
-                                "color',b.color,'starred',json(CASE "
-                                "ob_starred(b.id,b.starred) WHEN 1 THEN 'true' ELSE 'false' "
-                                "END),'archived',json(CASE b.archived WHEN 1 THEN "
-                                "'true' ELSE 'false' "
-                                "END),'version',b.version,'created_at',b.created_at,'updated_at',b.updated_"
-                                "at,'role',ob_role(b.id),'membership_"
-                                "role',ob_role(b.id),'readonly',json(CASE ob_readonly(b.id) WHEN 1 THEN "
-                                "'true' ELSE 'false' "
-                                "END),'columns',json((SELECT json_group_array(json(col)) FROM(SELECT "
-                                "json_object('id',c.id,'title',c.title,'position',c.position,'wip_limit',c."
-                                "wip_limit,'version',c.version,'created_"
-                                "at',c.created_at,'updated_at',c.updated_at,'cards',json((SELECT "
-                                "json_group_array(json(item)) FROM(SELECT CASE "
-                                "ob_summary() WHEN 1 THEN k.summary ELSE k.data END item FROM "
-                                "ob_card_objects k WHERE k.column_id=c.id AND "
-                                "k.deleted_at IS NULL AND (ob_archived() OR k.archived=0) ORDER BY "
-                                "k.position,k.id)))) col FROM columns c WHERE "
-                                "c.board_id=b.id AND c.deleted_at IS NULL ORDER BY c.position,c.id)))) "
-                                "data FROM boards b;";
+static void migration_five(void) {
+    sql_exec("ALTER TABLE boards ADD COLUMN guidelines TEXT NOT NULL DEFAULT '';"
+             "ALTER TABLE cards ADD COLUMN custom_values TEXT NOT NULL DEFAULT '{}' "
+             "CHECK(json_valid(custom_values));"
+             "ALTER TABLE cards ADD COLUMN milestone_key TEXT NOT NULL DEFAULT '';"
+             "CREATE TABLE custom_fields(id INTEGER PRIMARY KEY "
+             "AUTOINCREMENT,board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE "
+             "CASCADE,"
+             "key TEXT NOT NULL,name TEXT NOT NULL,type TEXT NOT NULL CHECK(type "
+             "IN('text','number','date','boolean','select')),"
+             "options TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(options)),position "
+             "INTEGER NOT NULL DEFAULT 0,deleted_at TEXT,UNIQUE(board_id,key));"
+             "CREATE INDEX custom_fields_board ON custom_fields(board_id,position,id);"
+             "CREATE TABLE milestones(id INTEGER PRIMARY KEY AUTOINCREMENT,board_id "
+             "INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,"
+             "key TEXT NOT NULL,title TEXT NOT NULL,due_date TEXT NOT NULL DEFAULT "
+             "'',completed INTEGER NOT NULL DEFAULT 0 CHECK(completed IN(0,1)),"
+             "deleted_at TEXT,UNIQUE(board_id,key));CREATE INDEX milestones_board ON "
+             "milestones(board_id,due_date,id);");
+    teamwork_schema(db);
+}
+static const char *json_views =
+    "CREATE VIEW IF NOT EXISTS ob_card_objects AS SELECT "
+    "k.*,json_object('id',k.id,'column_id',k.column_id,'title',k.title,'"
+    "description',k.description,'label',k.label,'"
+    "labels',json(k.labels),'due_date',k.due_date,'assignee',k.assignee,'cover'"
+    ",k.cover,'position',k.position,'"
+    "completed',json(CASE k.completed WHEN 1 THEN 'true' ELSE 'false' "
+    "END),'checklist',json(k.checklist),'priority',k.priority,'estimate_"
+    "minutes',k.estimate_minutes,'archived',json("
+    "CASE k.archived WHEN 1 THEN 'true' ELSE 'false' "
+    "END),'version',k.version,'created_at',k.created_at,'updated_at',k.updated_"
+    "at,'start_date',k.start_date,'blocked_reason',k.blocked_reason,'actual_"
+    "minutes',k.actual_minutes,'reference_url',k.reference_url,'assignee_ids',"
+    "json((SELECT json_group_array(user_id) FROM card_assignees WHERE "
+    "card_id=k.id)),'assignees',json((SELECT "
+    "json_group_array(json_object('id',u.id,'name',u.name,'username',u."
+    "username)) FROM card_assignees a JOIN users u ON u.id=a.user_id WHERE "
+    "a.card_id=k.id)),'custom_values',json(k.custom_values),'milestone_key',k."
+    "milestone_key,'logged_minutes',coalesce((SELECT sum(minutes) FROM "
+    "worklogs WHERE card_id=k.id AND deleted_at IS "
+    "NULL),0),'total_minutes',k.actual_minutes+coalesce((SELECT sum(minutes) "
+    "FROM worklogs WHERE card_id=k.id AND deleted_at IS NULL),0)) data,"
+    "json_object('id',k.id,'column_id',k.column_id,'title',k.title,'"
+    "description_preview',substr(k.description,1,160),'"
+    "checklist_total',json_array_length(k.checklist),'checklist_done',(SELECT "
+    "count(*) FROM json_each(k.checklist) "
+    "WHERE "
+    "json_extract(value,'$.done')=1),'label',k.label,'labels',json(k.labels),'"
+    "due_date',k.due_date,'assignee',k."
+    "assignee,'cover',k.cover,'position',k.position,'completed',json(CASE "
+    "k.completed WHEN 1 THEN 'true' ELSE 'false' "
+    "END),'priority',k.priority,'estimate_minutes',k.estimate_minutes,'"
+    "archived',json(CASE k.archived WHEN 1 THEN "
+    "'true' ELSE 'false' "
+    "END),'version',k.version,'created_at',k.created_at,'updated_at',k.updated_"
+    "at,'start_date',k.start_date,'blocked_reason',k.blocked_reason,'actual_"
+    "minutes',k.actual_minutes,'reference_url',k.reference_url,'assignee_ids',"
+    "json((SELECT json_group_array(user_id) FROM card_assignees WHERE "
+    "card_id=k.id)),'assignees',json((SELECT "
+    "json_group_array(json_object('id',u.id,'name',u.name,'username',u."
+    "username)) FROM card_assignees a JOIN users u ON u.id=a.user_id WHERE "
+    "a.card_id=k.id)),'custom_values',json(k.custom_values),'milestone_key',k."
+    "milestone_key,'logged_minutes',coalesce((SELECT sum(minutes) FROM "
+    "worklogs WHERE card_id=k.id AND deleted_at IS "
+    "NULL),0),'total_minutes',k.actual_minutes+coalesce((SELECT sum(minutes) "
+    "FROM worklogs WHERE card_id=k.id AND deleted_at IS NULL),0)) summary FROM "
+    "cards k;";
+static const char *json_board_view =
+    "CREATE VIEW IF NOT EXISTS ob_board_objects AS SELECT "
+    "b.*,json_object('id',b.id,'name',b.name,'description',b.description,'"
+    "guidelines',b.guidelines,'custom_fields',json((SELECT "
+    "json_group_array(json_object('id',id,'key',key,'name',name,'type',type,'"
+    "options',json(options),'position',position,'deleted_at',deleted_at)) FROM "
+    "(SELECT * FROM custom_fields WHERE board_id=b.id ORDER BY "
+    "position,id))),'milestones',json((SELECT "
+    "json_group_array(json_object('id',id,'key',key,'title',title,'due_date',"
+    "due_date,'completed',json(CASE completed WHEN 1 THEN 'true' ELSE 'false' "
+    "END),'deleted_at',deleted_at)) FROM milestones WHERE board_id=b.id)),'"
+    "color',b.color,'starred',json(CASE "
+    "ob_starred(b.id,b.starred) WHEN 1 THEN 'true' ELSE 'false' "
+    "END),'archived',json(CASE b.archived WHEN 1 THEN "
+    "'true' ELSE 'false' "
+    "END),'version',b.version,'created_at',b.created_at,'updated_at',b.updated_"
+    "at,'role',ob_role(b.id),'membership_"
+    "role',ob_role(b.id),'readonly',json(CASE ob_readonly(b.id) WHEN 1 THEN "
+    "'true' ELSE 'false' "
+    "END),'columns',json((SELECT json_group_array(json(col)) FROM(SELECT "
+    "json_object('id',c.id,'title',c.title,'position',c.position,'wip_limit',c."
+    "wip_limit,'version',c.version,'created_"
+    "at',c.created_at,'updated_at',c.updated_at,'cards',json((SELECT "
+    "json_group_array(json(item)) FROM(SELECT CASE "
+    "ob_summary() WHEN 1 THEN k.summary ELSE k.data END item FROM "
+    "ob_card_objects k WHERE k.column_id=c.id AND "
+    "k.deleted_at IS NULL AND (ob_archived() OR k.archived=0) ORDER BY "
+    "k.position,k.id)))) col FROM columns c WHERE "
+    "c.board_id=b.id AND c.deleted_at IS NULL ORDER BY c.position,c.id)))) "
+    "data FROM boards b;";
 int ob_worker_init(void) {
     if (sqlite3_open_v2(ob_config.db_path, &db,
-                        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX, NULL) != SQLITE_OK)
+                        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX,
+                        NULL) != SQLITE_OK)
         return -1;
     if (chmod(ob_config.db_path, 0600) < 0)
         return -1;
@@ -730,11 +787,12 @@ int ob_initialize_database(void) {
             migration_two();
         else if (next == 3)
             sql_exec(schema_three);
-        else {
+        else if (next == 4) {
             auth_schema(db);
             migration_four();
             collaboration_schema(db);
-        }
+        } else
+            migration_five();
         char p[64];
         snprintf(p, sizeof p, "PRAGMA user_version=%d;COMMIT", next);
         sql_exec(p);
@@ -753,6 +811,7 @@ int ob_initialize_database(void) {
     sql_exec("DROP VIEW IF EXISTS ob_board_objects;DROP VIEW IF EXISTS "
              "ob_card_objects;");
     sql_exec(json_views);
+    sql_exec(json_board_view);
     bool initialized = scalar_id("SELECT count(*) FROM metadata WHERE key='initialized'", 0) > 0;
     if (!initialized) {
         sql_exec("BEGIN IMMEDIATE");
@@ -762,7 +821,8 @@ int ob_initialize_database(void) {
                                        "idee. Costruiamo qualcosa di bello, insieme.",
                                        "sage", 1);
             int64_t ideas = seed_column(board, "Idee", 0), todo = seed_column(board, "Da fare", 1),
-                    doing = seed_column(board, "In corso", 2), done = seed_column(board, "Completato", 3);
+                    doing = seed_column(board, "In corso", 2),
+                    done = seed_column(board, "Completato", 3);
             seed_card(ideas, "Una casa per tutte le nostre idee",
                       "Raccogliere spunti, ispirazioni e piccoli esperimenti per il "
                       "futuro di OpenBoard.",
@@ -819,21 +879,22 @@ int ob_initialize_database(void) {
                       "[{\"id\":\"base-1\",\"text\":\"Server "
                       "HTTP\",\"done\":true},{\"id\":\"base-2\",\"text\":"
                       "\"Persistenza SQLite\",\"done\":true}]");
-            int64_t inspiration =
-                seed_board("Idee & ispirazioni",
-                           "Uno spazio per i prossimi esperimenti e le cose che ci ispirano.", "lavender", 0);
+            int64_t inspiration = seed_board(
+                "Idee & ispirazioni",
+                "Uno spazio per i prossimi esperimenti e le cose che ci ispirano.", "lavender", 0);
             seed_column(inspiration, "Raccolta", 0);
             seed_column(inspiration, "Da esplorare", 1);
             seed_column(inspiration, "Preferiti", 2);
             int64_t website = seed_board(
-                "Sito web", "Dal primo wireframe alla pubblicazione del nostro nuovo sito.", "blue", 0);
+                "Sito web", "Dal primo wireframe alla pubblicazione del nostro nuovo sito.", "blue",
+                0);
             seed_column(website, "Da fare", 0);
             seed_column(website, "In corso", 1);
             seed_column(website, "Pubblicato", 2);
         }
         sql_exec("INSERT INTO metadata(key,value) VALUES('initialized','1');COMMIT;");
     }
-    return 0;
+    return cloud_bootstrap(db);
 }
 int64_t parse_id(const char *s) {
     if (!s || !*s || *s == '0')
@@ -878,17 +939,18 @@ static char *actor_name(Request *r) {
         return copy_string("Locale");
     sqlite3_stmt *s = prepare("SELECT name FROM users WHERE id=?1");
     sqlite3_bind_int64(s, 1, r->user_id);
-    char *name =
-        copy_string(sqlite3_step(s) == SQLITE_ROW ? (const char *)sqlite3_column_text(s, 0) : "Utente");
+    char *name = copy_string(sqlite3_step(s) == SQLITE_ROW ? (const char *)sqlite3_column_text(s, 0)
+                                                           : "Utente");
     sqlite3_finalize(s);
     return name;
 }
-static void record_event(Request *r, int64_t board, const char *action, const char *kind, int64_t id,
-                         const char *title) {
+static void record_event(Request *r, int64_t board, const char *action, const char *kind,
+                         int64_t id, const char *title) {
     char *actor = actor_name(r);
-    sqlite3_stmt *s = prepare("INSERT INTO "
-                              "activity(board_id,actor_id,actor,action,entity_type,entity_id,title) "
-                              "VALUES(?1,?2,?3,?4,?5,?6,?7)");
+    sqlite3_stmt *s =
+        prepare("INSERT INTO "
+                "activity(board_id,actor_id,actor,action,entity_type,entity_id,title) "
+                "VALUES(?1,?2,?3,?4,?5,?6,?7)");
     sqlite3_bind_int64(s, 1, board);
     sqlite3_bind_int64(s, 2, r->user_id);
     bind_text(s, 3, actor);
@@ -911,11 +973,12 @@ static void record_event(Request *r, int64_t board, const char *action, const ch
 }
 static char *resource_title(const char *kind, int64_t id) {
     char sql[100];
-    snprintf(sql, sizeof sql, "SELECT %s FROM %s WHERE id=?1", !strcmp(kind, "boards") ? "name" : "title",
-             kind);
+    snprintf(sql, sizeof sql, "SELECT %s FROM %s WHERE id=?1",
+             !strcmp(kind, "boards") ? "name" : "title", kind);
     sqlite3_stmt *s = prepare(sql);
     sqlite3_bind_int64(s, 1, id);
-    char *t = copy_string(sqlite3_step(s) == SQLITE_ROW ? (const char *)sqlite3_column_text(s, 0) : "");
+    char *t =
+        copy_string(sqlite3_step(s) == SQLITE_ROW ? (const char *)sqlite3_column_text(s, 0) : "");
     sqlite3_finalize(s);
     return t;
 }
@@ -983,16 +1046,17 @@ static Response mutation_success(int status, const char *kind, int64_t id) {
     return json_response(status, body);
 }
 static Response save_board(Request *r, int64_t id, bool create) {
-    char *name = NULL, *description = NULL, *color = NULL;
+    char *name = NULL, *description = NULL, *color = NULL, *guidelines = NULL;
     int64_t starred = 0, archived = 0;
-    int n = json_string(r->body, "name", &name, 200),
+    int g = json_string(r->body, "guidelines", &guidelines, 10000),
+        n = json_string(r->body, "name", &name, 200),
         d = json_string(r->body, "description", &description, 2000),
         c = json_string(r->body, "color", &color, 20),
         t = json_integer(r->body, "starred", &starred, 0, 1, true),
         a = json_integer(r->body, "archived", &archived, 0, 1, true);
     Response result;
-    if (n < 0 || d < 0 || c < 0 || t < 0 || a < 0 || (create && n != 1) || (name && !nonblank(name)) ||
-        (color && !one_of(color, colors, COUNT_OF(colors)))) {
+    if (g < 0 || n < 0 || d < 0 || c < 0 || t < 0 || a < 0 || (create && n != 1) ||
+        (name && !nonblank(name)) || (color && !one_of(color, colors, COUNT_OF(colors)))) {
         result = error_response(400, "Dati della bacheca non validi.");
         goto done;
     }
@@ -1007,18 +1071,21 @@ static Response save_board(Request *r, int64_t id, bool create) {
     sqlite3_stmt *s;
     if (create) {
         s = prepare("INSERT INTO "
-                    "boards(name,description,color,starred,archived)VALUES(?1,?2,?"
-                    "3,?4,?5)");
+                    "boards(name,description,color,starred,archived,guidelines)"
+                    "VALUES(?1,?2,?"
+                    "3,?4,?5,?6)");
         bind_text(s, 1, name);
         bind_text(s, 2, description);
         bind_text(s, 3, color ? color : "sage");
         sqlite3_bind_int64(s, 4, starred);
         sqlite3_bind_int64(s, 5, archived);
+        bind_text(s, 6, guidelines);
     } else {
         s = prepare("UPDATE boards SET "
                     "name=coalesce(?2,name),description=coalesce(?3,description),color="
                     "coalesce(?4,color),starred="
-                    "coalesce(?5,starred),archived=coalesce(?6,archived)WHERE id=?1");
+                    "coalesce(?5,starred),archived=coalesce(?6,archived),guidelines="
+                    "coalesce(?7,guidelines)WHERE id=?1");
         sqlite3_bind_int64(s, 1, id);
         if (name)
             bind_text(s, 2, name);
@@ -1030,6 +1097,8 @@ static Response save_board(Request *r, int64_t id, bool create) {
             sqlite3_bind_int64(s, 5, starred);
         if (a)
             sqlite3_bind_int64(s, 6, archived);
+        if (g)
+            bind_text(s, 7, guidelines);
     }
     bool ok = sqlite3_step(s) == SQLITE_DONE;
     sqlite3_finalize(s);
@@ -1068,6 +1137,7 @@ done:
     ob_free(name);
     ob_free(description);
     ob_free(color);
+    ob_free(guidelines);
     return result;
 }
 static Response save_column(Request *r, int64_t id, bool create) {
@@ -1089,7 +1159,8 @@ static Response save_column(Request *r, int64_t id, bool create) {
         ob_free(title);
         return error_response(412, "Lista modificata da un altro utente.");
     }
-    int64_t count = scalar_id("SELECT count(*) FROM columns WHERE board_id=?1 AND deleted_at IS NULL", board);
+    int64_t count =
+        scalar_id("SELECT count(*) FROM columns WHERE board_id=?1 AND deleted_at IS NULL", board);
     if (!create)
         count--;
     if (p && position > count) {
@@ -1227,11 +1298,12 @@ static void write_assignees(int64_t card, const char *ids) {
 /* A deleted prerequisite remains unsatisfied until it is restored and
  * completed. */
 static bool dependencies_complete(int64_t card, const char *completed_ids) {
-    sqlite3_stmt *s = prepare("SELECT NOT EXISTS(SELECT 1 FROM card_dependencies d JOIN cards k ON "
-                              "k.id=d.required_card_id JOIN columns c ON c.id=k.column_id WHERE "
-                              "d.card_id=?1 AND (k.deleted_at IS NOT NULL OR c.deleted_at IS NOT NULL "
-                              "OR (k.completed=0 AND NOT EXISTS(SELECT 1 FROM "
-                              "json_each(coalesce(?2,'[]')) j WHERE j.value=k.id))))");
+    sqlite3_stmt *s =
+        prepare("SELECT NOT EXISTS(SELECT 1 FROM card_dependencies d JOIN cards k ON "
+                "k.id=d.required_card_id JOIN columns c ON c.id=k.column_id WHERE "
+                "d.card_id=?1 AND (k.deleted_at IS NOT NULL OR c.deleted_at IS NOT NULL "
+                "OR (k.completed=0 AND NOT EXISTS(SELECT 1 FROM "
+                "json_each(coalesce(?2,'[]')) j WHERE j.value=k.id))))");
     sqlite3_bind_int64(s, 1, card);
     if (completed_ids)
         bind_text(s, 2, completed_ids);
@@ -1239,12 +1311,120 @@ static bool dependencies_complete(int64_t card, const char *completed_ids) {
     sqlite3_finalize(s);
     return ok;
 }
+/* Stable board-scoped keys are portable between databases; SQL paths are bound.
+ */
+static bool valid_plan_key(const char *key) {
+    if (!key || key[0] < 'a' || key[0] > 'z' || strlen(key) > 40)
+        return false;
+    for (const char *p = key + 1; *p; p++)
+        if (!(*p >= 'a' && *p <= 'z') && !(*p >= '0' && *p <= '9') && *p != '_')
+            return false;
+    return true;
+}
+static int json_object_field(const char *body, const char *field, char **out) {
+    char path[80];
+    snprintf(path, sizeof path, "$.%s", field);
+    sqlite3_stmt *s = prepare("SELECT json_type(?1,?2),json_extract(?1,?2)");
+    bind_text(s, 1, body);
+    bind_text(s, 2, path);
+    int p = -1;
+    if (sqlite3_step(s) == SQLITE_ROW) {
+        const char *type = (const char *)sqlite3_column_text(s, 0);
+        if (!type)
+            p = 0;
+        else if (!strcmp(type, "object")) {
+            *out = copy_string((const char *)sqlite3_column_text(s, 1));
+            p = 1;
+        }
+    }
+    sqlite3_finalize(s);
+    return p == 1 && !valid_object(*out) ? -1 : p;
+}
+static bool custom_text_valid(const char *value, int bytes) {
+    if (!value || bytes < 0 || strlen(value) != (size_t)bytes || bytes > 8000 ||
+        !valid_utf8(value, (size_t)bytes))
+        return false;
+    size_t characters = 0;
+    for (const unsigned char *p = (const unsigned char *)value; *p; p++)
+        if ((*p & 0xc0) != 0x80)
+            characters++;
+    return characters <= 2000;
+}
+static bool valid_custom_values(int64_t board, const char *values) {
+    sqlite3_stmt *s = prepare("SELECT j.key,j.type,j.value,f.type,f.options,f.deleted_at "
+                              "FROM json_each(?1) j LEFT JOIN custom_fields f ON f.board_id=?2 "
+                              "AND f.key=j.key");
+    bind_text(s, 1, values);
+    sqlite3_bind_int64(s, 2, board);
+    bool valid = true;
+    int count = 0;
+    while (sqlite3_step(s) == SQLITE_ROW) {
+        const char *key = (const char *)sqlite3_column_text(s, 0),
+                   *type = (const char *)sqlite3_column_text(s, 1),
+                   *value = (const char *)sqlite3_column_text(s, 2),
+                   *expected = (const char *)sqlite3_column_text(s, 3);
+        if (++count > 100 || !valid_plan_key(key) || !expected ||
+            (!importing_plan && sqlite3_column_type(s, 5) != SQLITE_NULL)) {
+            valid = false;
+            break;
+        }
+        if (!strcmp(type, "null"))
+            continue;
+        if (!strcmp(type, "text") &&
+            (!value || strlen(value) != (size_t)sqlite3_column_bytes(s, 2) ||
+             !valid_utf8(value, strlen(value)))) {
+            valid = false;
+            break;
+        }
+        if (!strcmp(expected, "text"))
+            valid = !strcmp(type, "text") && custom_text_valid(value, sqlite3_column_bytes(s, 2));
+        else if (!strcmp(expected, "number"))
+            valid = (!strcmp(type, "integer") || !strcmp(type, "real")) &&
+                    sqlite3_column_double(s, 2) >= -1e12 && sqlite3_column_double(s, 2) <= 1e12;
+        else if (!strcmp(expected, "date"))
+            valid = !strcmp(type, "text") && value && strlen(value) == 10 && valid_date(value);
+        else if (!strcmp(expected, "boolean"))
+            valid = !strcmp(type, "true") || !strcmp(type, "false");
+        else {
+            valid = !strcmp(type, "text") && value &&
+                    strlen(value) == (size_t)sqlite3_column_bytes(s, 2);
+            if (valid) {
+                sqlite3_stmt *option =
+                    prepare("SELECT EXISTS(SELECT 1 FROM json_each(?1) WHERE value=?2)");
+                bind_text(option, 1, (const char *)sqlite3_column_text(s, 4));
+                bind_text(option, 2, value);
+                valid = sqlite3_step(option) == SQLITE_ROW && sqlite3_column_int(option, 0);
+                sqlite3_finalize(option);
+            }
+        }
+        if (!valid)
+            break;
+    }
+    sqlite3_finalize(s);
+    return valid;
+}
+static bool valid_milestone(int64_t board, const char *key) {
+    if (!key || !*key)
+        return true;
+    if (!valid_plan_key(key))
+        return false;
+    sqlite3_stmt *s = prepare("SELECT EXISTS(SELECT 1 FROM milestones WHERE board_id=?1 AND "
+                              "key=?2 AND (?3 OR deleted_at IS NULL))");
+    sqlite3_bind_int64(s, 1, board);
+    bind_text(s, 2, key);
+    sqlite3_bind_int(s, 3, importing_plan);
+    bool ok = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
+    sqlite3_finalize(s);
+    return ok;
+}
 static Response save_card(Request *r, int64_t id, bool create) {
-    const char *fields[] = {"title", "description", "label",      "due_date",       "assignee",
-                            "cover", "priority",    "start_date", "blocked_reason", "reference_url"};
+    const char *fields[] = {"title",          "description",  "label",    "due_date",
+                            "assignee",       "cover",        "priority", "start_date",
+                            "blocked_reason", "reference_url"};
     size_t limits[] = {300, 10000, 30, 10, 100, 20, 10, 10, 1000, 2000};
     const char *priorities[] = {"low", "normal", "high", "urgent"};
-    char *values[10] = {0}, *checklist = NULL, *multi_labels = NULL, *assignee_ids = NULL;
+    char *values[10] = {0}, *checklist = NULL, *multi_labels = NULL, *assignee_ids = NULL,
+         *custom_values = NULL, *milestone = NULL;
     int64_t completed = 0, target_column = 0, position = 0, archived = 0, estimate = 0, actual = 0;
     int cp = json_integer(r->body, "completed", &completed, 0, 1, true),
         colp = json_integer(r->body, "column_id", &target_column, 1, INT64_MAX, false),
@@ -1253,9 +1433,11 @@ static Response save_card(Request *r, int64_t id, bool create) {
         ep = json_integer(r->body, "estimate_minutes", &estimate, 0, 100000, false),
         kp = json_checklist(r->body, &checklist), lp = json_labels(r->body, &multi_labels),
         acp = json_integer(r->body, "actual_minutes", &actual, 0, 1000000, false),
-        aip = json_assignee_ids(r->body, "assignee_ids", &assignee_ids);
-    bool valid =
-        cp >= 0 && colp >= 0 && pp >= 0 && ap >= 0 && ep >= 0 && kp >= 0 && lp >= 0 && acp >= 0 && aip >= 0;
+        aip = json_assignee_ids(r->body, "assignee_ids", &assignee_ids),
+        cvp = json_object_field(r->body, "custom_values", &custom_values),
+        mp = json_string(r->body, "milestone_key", &milestone, 40);
+    bool valid = cp >= 0 && colp >= 0 && pp >= 0 && ap >= 0 && ep >= 0 && kp >= 0 && lp >= 0 &&
+                 acp >= 0 && aip >= 0 && cvp >= 0 && mp >= 0;
     int titlep = 0;
     for (size_t i = 0; i < 10; i++) {
         int p = json_string(r->body, fields[i], &values[i], limits[i]);
@@ -1267,8 +1449,8 @@ static Response save_card(Request *r, int64_t id, bool create) {
             (!values[2] || one_of(values[2], labels, COUNT_OF(labels))) &&
             (!values[3] || valid_date(values[3])) &&
             (!values[5] || one_of(values[5], covers, COUNT_OF(covers))) &&
-            (!values[6] || one_of(values[6], priorities, 4)) && (!values[7] || valid_date(values[7])) &&
-            (!values[9] || valid_reference_url(values[9]));
+            (!values[6] || one_of(values[6], priorities, 4)) &&
+            (!values[7] || valid_date(values[7])) && (!values[9] || valid_reference_url(values[9]));
     Response result;
     if (!valid) {
         result = error_response(400, "Dati della scheda non validi.");
@@ -1292,7 +1474,8 @@ static Response save_card(Request *r, int64_t id, bool create) {
         goto done;
     }
     if (!create && !precondition(r, "cards", id)) {
-        result = error_response(412, "Scheda modificata da un altro utente. Ricarica prima di salvare.");
+        result =
+            error_response(412, "Scheda modificata da un altro utente. Ricarica prima di salvare.");
         goto done;
     }
     if (!colp || create)
@@ -1309,6 +1492,11 @@ static Response save_card(Request *r, int64_t id, bool create) {
     }
     if (assignee_ids && !valid_assignees(source_board, assignee_ids)) {
         result = error_response(400, "Gli assegnatari devono essere utenti attivi della bacheca.");
+        goto done;
+    }
+    if ((custom_values && !valid_custom_values(source_board, custom_values)) ||
+        (milestone && !valid_milestone(source_board, milestone))) {
+        result = error_response(400, "Campi personalizzati o traguardo non validi per la bacheca.");
         goto done;
     }
     char *stored_start = NULL, *stored_due = NULL;
@@ -1334,8 +1522,8 @@ static Response save_card(Request *r, int64_t id, bool create) {
         result = error_response(409, "Completa prima tutte le dipendenze della scheda.");
         goto done;
     }
-    int64_t count =
-        scalar_id("SELECT count(*) FROM cards WHERE column_id=?1 AND deleted_at IS NULL", target_column);
+    int64_t count = scalar_id(
+        "SELECT count(*) FROM cards WHERE column_id=?1 AND deleted_at IS NULL", target_column);
     if (!create && source_column == target_column)
         count--;
     if (pp && position > count) {
@@ -1345,7 +1533,8 @@ static Response save_card(Request *r, int64_t id, bool create) {
     int64_t old_completed = create ? 0 : scalar_id("SELECT completed FROM cards WHERE id=?1", id),
             old_archived = create ? 0 : scalar_id("SELECT archived FROM cards WHERE id=?1", id);
     bool active = !(cp ? completed : old_completed) && !(ap ? archived : old_archived);
-    bool adds = active && (create || target_column != source_column || old_completed || old_archived);
+    bool adds =
+        active && (create || target_column != source_column || old_completed || old_archived);
     int64_t wip = scalar_id("SELECT wip_limit FROM columns WHERE id=?1", target_column);
     if (adds && wip &&
         scalar_id("SELECT count(*) FROM cards WHERE column_id=?1 AND deleted_at "
@@ -1432,6 +1621,19 @@ static Response save_card(Request *r, int64_t id, bool create) {
     }
     if (create)
         id = sqlite3_last_insert_rowid(db);
+    if (custom_values || milestone) {
+        s = prepare("UPDATE cards SET "
+                    "custom_values=json_patch(custom_values,coalesce(?2,'{}')),"
+                    "milestone_key=coalesce(?3,milestone_key) WHERE id=?1");
+        sqlite3_bind_int64(s, 1, id);
+        if (custom_values)
+            bind_text(s, 2, custom_values);
+        if (milestone)
+            bind_text(s, 3, milestone);
+        if (sqlite3_step(s) != SQLITE_DONE)
+            db_die("Pianificazione scheda non salvata");
+        sqlite3_finalize(s);
+    }
     if (assignee_ids)
         write_assignees(id, assignee_ids);
     if ((!create && target_column != source_column) || pp) {
@@ -1482,6 +1684,8 @@ done:
     ob_free(assignee_ids);
     ob_free(checklist);
     ob_free(multi_labels);
+    ob_free(custom_values);
+    ob_free(milestone);
     return result;
 }
 static Response delete_resource(Request *r, const char *kind, int64_t id) {
@@ -1491,8 +1695,9 @@ static Response delete_resource(Request *r, const char *kind, int64_t id) {
         return error_response(412, "Risorsa modificata da un altro utente.");
     int64_t board = resource_board(kind, id, false),
             parent = !strcmp(kind, "columns") ? board
-                     : !strcmp(kind, "cards") ? scalar_id("SELECT column_id FROM cards WHERE id=?1", id)
-                                              : 0;
+                     : !strcmp(kind, "cards")
+                         ? scalar_id("SELECT column_id FROM cards WHERE id=?1", id)
+                         : 0;
     char sql[200];
     snprintf(sql, sizeof sql,
              "UPDATE %s SET "
@@ -1517,7 +1722,8 @@ static Response restore_resource(Request *r, const char *kind, int64_t id) {
         return error_response(404, "Risorsa non trovata.");
     int64_t board = resource_board(kind, id, true);
     char sql[256];
-    snprintf(sql, sizeof sql, "SELECT count(*) FROM %s WHERE id=?1 AND deleted_at IS NOT NULL", kind);
+    snprintf(sql, sizeof sql, "SELECT count(*) FROM %s WHERE id=?1 AND deleted_at IS NOT NULL",
+             kind);
     if (!scalar_id(sql, id))
         return error_response(409, "Risorsa già ripristinata.");
     if (strcmp(kind, "boards") &&
@@ -1560,18 +1766,38 @@ static Response duplicate_card(Request *r, int64_t id) {
         return error_response(400, "Lista non valida.");
     if (resource_board("columns", target, false) != resource_board("cards", id, false))
         return error_response(400, "La lista deve appartenere alla stessa bacheca.");
-    /* Historical assignments remain on the source. A copy keeps only users who can still read its board. */
-    sqlite3_stmt *s = prepare(
-        "SELECT json_set(json_remove(data,'$.position'),'$.assignee_ids',json((SELECT json_group_array(a.user_id) "
-        "FROM card_assignees a JOIN users u ON u.id=a.user_id WHERE a.card_id=?1 AND ?2 AND u.active=1 AND "
-        "(u.role='admin' OR EXISTS(SELECT 1 FROM board_members m WHERE m.user_id=u.id AND m.board_id=?3))))) "
-        "FROM ob_card_objects WHERE id=?1");
+    /* Historical assignments remain on the source. A copy keeps only users who
+     * can still read its board. */
+    sqlite3_stmt *s = prepare("SELECT "
+                              "json_set(json_remove(data,'$.position'),'$.assignee_ids',json(("
+                              "SELECT json_group_array(a.user_id) "
+                              "FROM card_assignees a JOIN users u ON u.id=a.user_id WHERE "
+                              "a.card_id=?1 AND ?2 AND u.active=1 AND "
+                              "(u.role='admin' OR EXISTS(SELECT 1 FROM board_members m WHERE "
+                              "m.user_id=u.id AND m.board_id=?3))))) "
+                              "FROM ob_card_objects WHERE id=?1");
     sqlite3_bind_int64(s, 1, id);
     sqlite3_bind_int(s, 2, ob_config.auth_enabled);
     sqlite3_bind_int64(s, 3, resource_board("cards", id, false));
     sqlite3_step(s);
     char *body = copy_string((const char *)sqlite3_column_text(s, 0));
     sqlite3_finalize(s);
+    s = prepare("SELECT json_set(?1,'$.custom_values',json(coalesce((SELECT "
+                "'{'||group_concat(json_quote(j.key)||':'||CASE j.type WHEN 'true' THEN "
+                "'true' WHEN 'false' THEN 'false' ELSE json_quote(j.value) END)||'}' "
+                "FROM json_each(?1,'$.custom_values') j JOIN custom_fields f ON "
+                "f.key=j.key AND f.board_id=?2 AND f.deleted_at IS "
+                "NULL),'{}')),'$.milestone_key',CASE WHEN EXISTS(SELECT 1 FROM "
+                "milestones WHERE board_id=?2 AND key=json_extract(?1,'$.milestone_key') "
+                "AND deleted_at IS NULL) THEN json_extract(?1,'$.milestone_key') ELSE '' "
+                "END)");
+    bind_text(s, 1, body);
+    sqlite3_bind_int64(s, 2, resource_board("cards", id, false));
+    sqlite3_step(s);
+    char *filtered = copy_string((const char *)sqlite3_column_text(s, 0));
+    sqlite3_finalize(s);
+    ob_free(body);
+    body = filtered;
     Request duplicate = *r;
     duplicate.body = body;
     duplicate.if_match[0] = 0;
@@ -1588,9 +1814,9 @@ static Response duplicate_board(Request *r, int64_t id) {
         ob_free(name);
         return error_response(400, "Nome non valido.");
     }
-    sqlite3_stmt *s = prepare("INSERT INTO boards(name,description,color)SELECT "
+    sqlite3_stmt *s = prepare("INSERT INTO boards(name,description,color,guidelines)SELECT "
                               "coalesce(?2,substr(name,1,192)||' "
-                              "(copia)'),description,color FROM boards WHERE id=?1");
+                              "(copia)'),description,color,guidelines FROM boards WHERE id=?1");
     sqlite3_bind_int64(s, 1, id);
     if (name)
         bind_text(s, 2, name);
@@ -1602,6 +1828,24 @@ static Response duplicate_board(Request *r, int64_t id) {
     int64_t newboard = sqlite3_last_insert_rowid(db);
     if (!auth_add_board_owner(r, newboard))
         db_die("Assegnazione proprietario fallita");
+    s = prepare("INSERT INTO "
+                "custom_fields(board_id,key,name,type,options,position,deleted_"
+                "at) SELECT ?2,key,name,type,options,position,deleted_at FROM "
+                "custom_fields WHERE board_id=?1");
+    sqlite3_bind_int64(s, 1, id);
+    sqlite3_bind_int64(s, 2, newboard);
+    if (sqlite3_step(s) != SQLITE_DONE)
+        db_die("Duplicazione campi fallita");
+    sqlite3_finalize(s);
+    s = prepare("INSERT INTO "
+                "milestones(board_id,key,title,due_date,completed,deleted_at) "
+                "SELECT ?2,key,title,due_date,completed,deleted_at FROM "
+                "milestones WHERE board_id=?1");
+    sqlite3_bind_int64(s, 1, id);
+    sqlite3_bind_int64(s, 2, newboard);
+    if (sqlite3_step(s) != SQLITE_DONE)
+        db_die("Duplicazione traguardi fallita");
+    sqlite3_finalize(s);
     s = prepare("SELECT id,title,position,wip_limit FROM columns WHERE "
                 "board_id=?1 AND deleted_at IS NULL ORDER BY "
                 "position,id");
@@ -1621,11 +1865,12 @@ static Response duplicate_board(Request *r, int64_t id) {
                     "cards(column_id,title,description,label,due_date,assignee,cover,"
                     "position,completed,checklist,"
                     "priority,labels,estimate_minutes,archived,start_date,blocked_reason,"
-                    "actual_minutes,reference_url)SELECT "
+                    "actual_minutes,reference_url,custom_values,milestone_key)SELECT "
                     "?2,title,description,label,due_date,assignee,cover,position,completed,"
                     "checklist,priority,labels,"
                     "estimate_minutes,archived,start_date,blocked_reason,actual_minutes,"
-                    "reference_url FROM cards WHERE column_id=?1 AND deleted_at IS NULL");
+                    "reference_url,custom_values,milestone_key FROM cards WHERE "
+                    "column_id=?1 AND deleted_at IS NULL");
         sqlite3_bind_int64(c, 1, sqlite3_column_int64(s, 0));
         sqlite3_bind_int64(c, 2, nc);
         if (sqlite3_step(c) != SQLITE_DONE)
@@ -1655,7 +1900,8 @@ static Response comments_api(Request *r, int64_t id, bool post) {
         return error_response(400, "Il commento deve contenere da 1 a 5000 caratteri.");
     }
     char *actor = actor_name(r);
-    sqlite3_stmt *s = prepare("INSERT INTO comments(card_id,author_id,author,body)VALUES(?1,?2,?3,?4)");
+    sqlite3_stmt *s =
+        prepare("INSERT INTO comments(card_id,author_id,author,body)VALUES(?1,?2,?3,?4)");
     sqlite3_bind_int64(s, 1, id);
     sqlite3_bind_int64(s, 2, r->user_id);
     bind_text(s, 3, actor);
@@ -1774,6 +2020,406 @@ static Response search_api(Request *r) {
     sqlite3_finalize(s);
     return result;
 }
+static Response fields_list(Request *r, int64_t board) {
+    if (!accessible(r, "boards", board, false, false))
+        return error_response(404, "Bacheca non trovata.");
+    char option[32];
+    bool deleted = query_value(r, "include_deleted", option, sizeof option) && !strcmp(option, "1");
+    sqlite3_stmt *s = prepare("SELECT json_object('fields',json((SELECT "
+                              "json_group_array(json(item)) FROM ("
+                              "SELECT "
+                              "json_object('id',id,'key',key,'name',name,'type',type,'options',"
+                              "json(options),'position',position,'deleted_at',deleted_at) item "
+                              "FROM custom_fields WHERE board_id=?1 AND (?2 OR deleted_at IS "
+                              "NULL) ORDER BY position,id))))");
+    sqlite3_bind_int64(s, 1, board);
+    sqlite3_bind_int(s, 2, deleted);
+    Response out = sqlite3_step(s) == SQLITE_ROW
+                       ? json_response(200, (const char *)sqlite3_column_text(s, 0))
+                       : error_response(503, "Campi non disponibili.");
+    sqlite3_finalize(s);
+    return out;
+}
+static Response field_save(Request *r, int64_t id, bool create) {
+    int64_t board = create ? id
+                           : scalar_id("SELECT board_id FROM custom_fields WHERE "
+                                       "id=?1 AND deleted_at IS NULL",
+                                       id);
+    if (!board || !accessible(r, "boards", board, true, false))
+        return error_response(404, "Campo o bacheca non trovati.");
+    char *key = NULL, *name = NULL, *type = NULL, *options = NULL;
+    int64_t position = 0;
+    int kp = json_string(r->body, "key", &key, 40), np = json_string(r->body, "name", &name, 100),
+        tp = json_string(r->body, "type", &type, 10),
+        pp = json_integer(r->body, "position", &position, 0, INT_MAX, false);
+    Response out;
+    if (kp < 0 || np < 0 || tp < 0 || pp < 0 || (name && !nonblank(name)) ||
+        (create && (kp != 1 || np != 1 || tp != 1 || !valid_plan_key(key))) ||
+        (!create && (kp || tp))) {
+        out = error_response(400, "Definizione campo non valida; chiave e tipo sono immutabili.");
+        goto done;
+    }
+    if (create) {
+        const char *types[] = {"text", "number", "date", "boolean", "select"};
+        if (!one_of(type, types, COUNT_OF(types))) {
+            out = error_response(400, "Tipo campo non valido.");
+            goto done;
+        }
+        sqlite3_stmt *s = prepare("SELECT json_type(?1,'$.options'),json_extract(?1,'$.options')");
+        bind_text(s, 1, r->body);
+        bool valid = sqlite3_step(s) == SQLITE_ROW;
+        const char *ot = valid ? (const char *)sqlite3_column_text(s, 0) : NULL;
+        if (ot && strcmp(ot, "array"))
+            valid = false;
+        options = copy_string(ot && valid ? (const char *)sqlite3_column_text(s, 1) : "[]");
+        sqlite3_finalize(s);
+        s = prepare("SELECT json_array_length(?1)<=30 AND NOT EXISTS(SELECT 1 FROM "
+                    "json_each(?1) WHERE type<>'text' OR length(value) NOT BETWEEN "
+                    "1 AND 100 OR instr(value,char(0))>0) AND NOT EXISTS(SELECT 1 "
+                    "FROM json_each(?1) GROUP BY value HAVING count(*)>1)");
+        bind_text(s, 1, options);
+        valid = valid && sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
+        sqlite3_finalize(s);
+        if (valid) {
+            s = prepare("SELECT value FROM json_each(?1)");
+            bind_text(s, 1, options);
+            while (sqlite3_step(s) == SQLITE_ROW) {
+                const char *value = (const char *)sqlite3_column_text(s, 0);
+                if (!value || strlen(value) != (size_t)sqlite3_column_bytes(s, 0) ||
+                    !valid_utf8(value, strlen(value))) {
+                    valid = false;
+                    break;
+                }
+            }
+            sqlite3_finalize(s);
+        }
+        if (!valid || (!strcmp(type, "select") ? !strcmp(options, "[]") : strcmp(options, "[]"))) {
+            out = error_response(400, "Opzioni campo non valide.");
+            goto done;
+        }
+        if (scalar_id("SELECT count(*) FROM custom_fields WHERE board_id=?1", board) >= 100 ||
+            (!importing_plan &&
+             scalar_id("SELECT count(*) FROM custom_fields WHERE board_id=?1 AND "
+                       "deleted_at IS NULL",
+                       board) >= 20)) {
+            out = error_response(409, "Limite campi della bacheca raggiunto.");
+            goto done;
+        }
+        int64_t count = scalar_id("SELECT count(*) FROM custom_fields WHERE "
+                                  "board_id=?1 AND deleted_at IS NULL",
+                                  board);
+        if (pp && position > count) {
+            out = error_response(400, "Posizione campo non valida.");
+            goto done;
+        }
+        s = prepare("INSERT INTO custom_fields(board_id,key,name,type,options,position) "
+                    "VALUES(?1,?2,?3,?4,?5,?6)");
+        sqlite3_bind_int64(s, 1, board);
+        bind_text(s, 2, key);
+        bind_text(s, 3, name);
+        bind_text(s, 4, type);
+        bind_text(s, 5, options);
+        sqlite3_bind_int64(s, 6, count);
+        int rc = sqlite3_step(s);
+        sqlite3_finalize(s);
+        if (rc != SQLITE_DONE) {
+            out = error_response(rc == SQLITE_CONSTRAINT ? 409 : 503,
+                                 "Chiave campo già presente o salvataggio non disponibile.");
+            goto done;
+        }
+        id = sqlite3_last_insert_rowid(db);
+    } else {
+        sqlite3_stmt *s = prepare("UPDATE custom_fields SET name=coalesce(?2,name) WHERE id=?1");
+        sqlite3_bind_int64(s, 1, id);
+        if (name)
+            bind_text(s, 2, name);
+        if (sqlite3_step(s) != SQLITE_DONE)
+            db_die("Campo non salvato");
+        sqlite3_finalize(s);
+    }
+    if (pp) {
+        int64_t count = scalar_id("SELECT count(*) FROM custom_fields WHERE "
+                                  "board_id=?1 AND deleted_at IS NULL",
+                                  board);
+        if (position >= count) {
+            out = error_response(400, "Posizione campo non valida.");
+            goto done;
+        }
+        sqlite3_stmt *s =
+            prepare("WITH ranked AS(SELECT id,row_number()OVER(ORDER BY position,id)-1 n "
+                    "FROM custom_fields WHERE board_id=?1 AND id<>?2 AND deleted_at IS "
+                    "NULL) UPDATE custom_fields SET position=(SELECT n FROM ranked WHERE "
+                    "ranked.id=custom_fields.id)+CASE WHEN(SELECT n FROM ranked WHERE "
+                    "ranked.id=custom_fields.id)>=?3 THEN 1 ELSE 0 END WHERE board_id=?1 "
+                    "AND id<>?2 AND deleted_at IS NULL");
+        sqlite3_bind_int64(s, 1, board);
+        sqlite3_bind_int64(s, 2, id);
+        sqlite3_bind_int64(s, 3, position);
+        if (sqlite3_step(s) != SQLITE_DONE)
+            db_die("Riordino campi fallito");
+        sqlite3_finalize(s);
+        s = prepare("UPDATE custom_fields SET position=?2 WHERE id=?1");
+        sqlite3_bind_int64(s, 1, id);
+        sqlite3_bind_int64(s, 2, position);
+        if (sqlite3_step(s) != SQLITE_DONE)
+            db_die("Riordino campo fallito");
+        sqlite3_finalize(s);
+    }
+    record_event(r, board, create ? "field_created" : "field_updated", "custom_fields", id,
+                 name ? name : "");
+    out = success(create ? 201 : 200, id);
+done:
+    ob_free(key);
+    ob_free(name);
+    ob_free(type);
+    ob_free(options);
+    return out;
+}
+static Response plan_delete_restore(Request *r, const char *table, int64_t id, bool restore) {
+    char sql[400];
+    snprintf(sql, sizeof sql, "SELECT board_id FROM %s WHERE id=?1 AND deleted_at IS %s NULL",
+             table, restore ? "NOT" : "");
+    int64_t board = scalar_id(sql, id);
+    if (!board || !accessible(r, "boards", board, true, false))
+        return error_response(404, "Elemento o bacheca non trovati.");
+    if (restore) {
+        snprintf(sql, sizeof sql,
+                 "SELECT count(*) FROM %s WHERE board_id=?1 AND deleted_at IS NULL", table);
+        if (scalar_id(sql, board) >= (!strcmp(table, "custom_fields") ? 20 : 100))
+            return error_response(409, "Limite elementi attivi raggiunto.");
+    }
+    snprintf(sql, sizeof sql, "UPDATE %s SET deleted_at=%s WHERE id=?1", table,
+             restore ? "NULL" : "strftime('%Y-%m-%dT%H:%M:%fZ','now')");
+    if (!run_id(sql, id))
+        db_die("Elemento non salvato");
+    if (!strcmp(table, "custom_fields")) {
+        sqlite3_stmt *s;
+        if (restore) {
+            s = prepare("UPDATE custom_fields SET position=(SELECT count(*)-1 FROM "
+                        "custom_fields WHERE board_id=?2 AND deleted_at IS NULL) "
+                        "WHERE id=?1");
+            sqlite3_bind_int64(s, 1, id);
+            sqlite3_bind_int64(s, 2, board);
+            if (sqlite3_step(s) != SQLITE_DONE)
+                db_die("Riordino campo ripristinato fallito");
+            sqlite3_finalize(s);
+        }
+        s = prepare("WITH ranked AS(SELECT id,row_number()OVER(ORDER BY position,id)-1 n "
+                    "FROM custom_fields WHERE board_id=?1 AND deleted_at IS NULL) UPDATE "
+                    "custom_fields SET position=(SELECT n FROM ranked WHERE "
+                    "ranked.id=custom_fields.id) WHERE board_id=?1 AND deleted_at IS NULL");
+        sqlite3_bind_int64(s, 1, board);
+        if (sqlite3_step(s) != SQLITE_DONE)
+            db_die("Riordino campi fallito");
+        sqlite3_finalize(s);
+    }
+    record_event(r, board, restore ? "restored" : "deleted", table, id, "");
+    return success(200, id);
+}
+static Response milestones_list(Request *r, int64_t board) {
+    if (!accessible(r, "boards", board, false, false))
+        return error_response(404, "Bacheca non trovata.");
+    char option[32];
+    bool deleted = query_value(r, "include_deleted", option, sizeof option) && !strcmp(option, "1"),
+         overdue = query_value(r, "overdue", option, sizeof option) && !strcmp(option, "1");
+    sqlite3_stmt *s =
+        prepare("SELECT json_object('milestones',json((SELECT "
+                "json_group_array(json(item)) FROM(SELECT "
+                "json_object('id',m.id,'key',m.key,'title',m.title,'due_date',m.due_date,"
+                "'completed',json(CASE m.completed WHEN 1 THEN 'true' ELSE 'false' "
+                "END),'deleted_at',m.deleted_at,'total',(SELECT count(*) FROM cards k "
+                "JOIN columns c ON c.id=k.column_id WHERE c.board_id=m.board_id AND "
+                "k.milestone_key=m.key AND c.deleted_at IS NULL AND k.deleted_at IS NULL "
+                "AND k.archived=0),'done',(SELECT count(*) FROM cards k JOIN columns c "
+                "ON c.id=k.column_id WHERE c.board_id=m.board_id AND "
+                "k.milestone_key=m.key AND c.deleted_at IS NULL AND k.deleted_at IS NULL "
+                "AND k.archived=0 AND k.completed=1),'overdue',json(CASE WHEN "
+                "m.completed=0 AND m.deleted_at IS NULL AND m.due_date<>'' AND "
+                "m.due_date<date('now') THEN 'true' ELSE 'false' END))item FROM "
+                "milestones m WHERE board_id=?1 AND (?2 OR deleted_at IS NULL) AND (NOT "
+                "?3 OR(m.completed=0 AND m.deleted_at IS NULL AND m.due_date<>'' AND "
+                "m.due_date<date('now'))) ORDER BY m.due_date='',m.due_date,m.id))))");
+    sqlite3_bind_int64(s, 1, board);
+    sqlite3_bind_int(s, 2, deleted);
+    sqlite3_bind_int(s, 3, overdue);
+    Response out = sqlite3_step(s) == SQLITE_ROW
+                       ? json_response(200, (const char *)sqlite3_column_text(s, 0))
+                       : error_response(503, "Traguardi non disponibili.");
+    sqlite3_finalize(s);
+    return out;
+}
+static Response milestone_save(Request *r, int64_t id, bool create) {
+    int64_t board = create ? id
+                           : scalar_id("SELECT board_id FROM milestones WHERE "
+                                       "id=?1 AND deleted_at IS NULL",
+                                       id);
+    if (!board || !accessible(r, "boards", board, true, false))
+        return error_response(404, "Traguardo o bacheca non trovati.");
+    char *key = NULL, *title = NULL, *due = NULL;
+    int64_t completed = 0;
+    int kp = json_string(r->body, "key", &key, 40), tp = json_string(r->body, "title", &title, 200),
+        dp = json_string(r->body, "due_date", &due, 10),
+        cp = json_integer(r->body, "completed", &completed, 0, 1, true);
+    Response out;
+    if (kp < 0 || tp < 0 || dp < 0 || cp < 0 || (create && tp != 1) ||
+        (title && !nonblank(title)) || (due && !valid_date(due)) || (key && !valid_plan_key(key)) ||
+        (!create && kp)) {
+        out = error_response(400, "Traguardo non valido; la chiave è immutabile.");
+        goto done;
+    }
+    sqlite3_stmt *s;
+    if (create) {
+        if (scalar_id("SELECT count(*) FROM milestones WHERE board_id=?1", board) >= 200 ||
+            (!importing_plan && scalar_id("SELECT count(*) FROM milestones WHERE "
+                                          "board_id=?1 AND deleted_at IS NULL",
+                                          board) >= 100)) {
+            out = error_response(409, "Limite traguardi raggiunto.");
+            goto done;
+        }
+        if (!key) {
+            s = prepare("SELECT 'm_'||lower(hex(randomblob(8)))");
+            sqlite3_step(s);
+            key = copy_string((const char *)sqlite3_column_text(s, 0));
+            sqlite3_finalize(s);
+        }
+        s = prepare("INSERT INTO milestones(board_id,key,title,due_date,completed) "
+                    "VALUES(?1,?2,?3,?4,?5)");
+        sqlite3_bind_int64(s, 1, board);
+        bind_text(s, 2, key);
+        bind_text(s, 3, title);
+        bind_text(s, 4, due);
+        sqlite3_bind_int64(s, 5, completed);
+    } else {
+        s = prepare("UPDATE milestones SET "
+                    "title=coalesce(?2,title),due_date=coalesce(?3,due_date),"
+                    "completed=coalesce(?4,completed) WHERE id=?1");
+        sqlite3_bind_int64(s, 1, id);
+        if (title)
+            bind_text(s, 2, title);
+        if (due)
+            bind_text(s, 3, due);
+        if (cp)
+            sqlite3_bind_int64(s, 4, completed);
+    }
+    int rc = sqlite3_step(s);
+    sqlite3_finalize(s);
+    if (rc != SQLITE_DONE) {
+        out = error_response(rc == SQLITE_CONSTRAINT ? 409 : 503,
+                             "Chiave traguardo già presente o salvataggio non disponibile.");
+        goto done;
+    }
+    if (create)
+        id = sqlite3_last_insert_rowid(db);
+    record_event(r, board, create ? "milestone_created" : "milestone_updated", "milestones", id,
+                 title ? title : "");
+    out = success(create ? 201 : 200, id);
+done:
+    ob_free(key);
+    ob_free(title);
+    ob_free(due);
+    return out;
+}
+static Response custom_values_api(Request *r, int64_t id, bool get) {
+    if (!accessible(r, "cards", id, !get, false))
+        return error_response(404, "Scheda non trovata.");
+    if (get)
+        return query_json("SELECT json_object('values',json(custom_values),'version',version) "
+                          "FROM cards WHERE id=?1",
+                          id);
+    char *values = NULL;
+    if (json_object_field(r->body, "values", &values) != 1 ||
+        !valid_custom_values(resource_board("cards", id, false), values)) {
+        ob_free(values);
+        return error_response(400, "Valori campo non validi.");
+    }
+    if (!precondition(r, "cards", id)) {
+        ob_free(values);
+        return error_response(412, "Scheda modificata da un altro utente.");
+    }
+    sqlite3_stmt *s = prepare("UPDATE cards SET custom_values=json_patch(custom_values,?2) "
+                              "WHERE id=?1");
+    sqlite3_bind_int64(s, 1, id);
+    bind_text(s, 2, values);
+    ob_free(values);
+    if (sqlite3_step(s) != SQLITE_DONE)
+        db_die("Valori campo non salvati");
+    sqlite3_finalize(s);
+    record_event(r, resource_board("cards", id, false), "fields_updated", "cards", id, "");
+    return mutation_success(200, "cards", id);
+}
+static Response field_search(Request *r, int64_t board) {
+    if (!accessible(r, "boards", board, false, false))
+        return error_response(404, "Bacheca non trovata.");
+    char key[164], value[8192];
+    if (!query_value(r, "key", key, sizeof key) || !valid_plan_key(key) ||
+        !query_value(r, "value", value, sizeof value))
+        return error_response(400, "Chiave e valore JSON richiesti.");
+    sqlite3_stmt *s = prepare("SELECT json_valid(?1)");
+    bind_text(s, 1, value);
+    bool valid = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
+    sqlite3_finalize(s);
+    if (!valid)
+        return error_response(400, "Valore JSON non valido.");
+    s = prepare("SELECT json_object(?1,json(?2))");
+    bind_text(s, 1, key);
+    bind_text(s, 2, value);
+    sqlite3_step(s);
+    char *check = copy_string((const char *)sqlite3_column_text(s, 0));
+    sqlite3_finalize(s);
+    valid = valid_custom_values(board, check);
+    ob_free(check);
+    if (!valid)
+        return error_response(400, "Campo o valore non valido.");
+    s = prepare("SELECT json_object('cards',json((SELECT "
+                "json_group_array(json(k.summary)) FROM ob_card_objects k JOIN columns c "
+                "ON c.id=k.column_id WHERE c.board_id=?1 AND c.deleted_at IS NULL AND "
+                "k.deleted_at IS NULL AND k.archived=0 AND EXISTS(SELECT 1 FROM "
+                "json_each(k.custom_values) j WHERE j.key=?2 AND (j.type=json_type(?3) "
+                "OR(j.type IN('integer','real') AND json_type(?3) IN('integer','real'))) "
+                "AND j.value IS json_extract(?3,'$')))))");
+    sqlite3_bind_int64(s, 1, board);
+    bind_text(s, 2, key);
+    bind_text(s, 3, value);
+    Response out = sqlite3_step(s) == SQLITE_ROW
+                       ? json_response(200, (const char *)sqlite3_column_text(s, 0))
+                       : error_response(503, "Ricerca campi non disponibile.");
+    sqlite3_finalize(s);
+    return out;
+}
+static Response workload_api(Request *r, int64_t board) {
+    if (!accessible(r, "boards", board, false, false))
+        return error_response(404, "Bacheca non trovata.");
+    return query_json("WITH active AS(SELECT k.*,coalesce((SELECT sum(minutes) FROM worklogs "
+                      "WHERE card_id=k.id AND deleted_at IS NULL),0) logged FROM cards k JOIN "
+                      "columns c ON c.id=k.column_id WHERE c.board_id=?1 AND c.deleted_at IS "
+                      "NULL AND k.deleted_at IS NULL AND k.archived=0) SELECT "
+                      "json_object('total',count(*),'completed',coalesce(sum(completed),0),'"
+                      "blocked',coalesce(sum(blocked_reason<>'' OR EXISTS(SELECT 1 FROM "
+                      "card_dependencies d JOIN cards p ON p.id=d.required_card_id JOIN "
+                      "columns pc ON pc.id=p.column_id WHERE d.card_id=active.id AND "
+                      "(p.completed=0 OR p.deleted_at IS NOT NULL OR pc.deleted_at IS NOT "
+                      "NULL))),0),'estimate_minutes',coalesce(sum(estimate_minutes),0),'actual_"
+                      "minutes',coalesce(sum(actual_minutes),0),'logged_minutes',coalesce(sum("
+                      "logged),0),'total_minutes',coalesce(sum(actual_minutes+logged),0),'by_"
+                      "priority',json((SELECT json_group_object(priority,n) FROM(SELECT "
+                      "priority,count(*) n FROM active GROUP BY "
+                      "priority))),'by_milestone',json((SELECT "
+                      "json_group_array(json_object('key',milestone_key,'title',coalesce(("
+                      "SELECT title FROM milestones m WHERE m.board_id=?1 AND "
+                      "m.key=milestone_key),'Senza "
+                      "traguardo'),'total',n,'completed',done,'estimate_minutes',estimate,'"
+                      "total_minutes',actual)) FROM(SELECT milestone_key,count(*) "
+                      "n,sum(completed) done,sum(estimate_minutes) "
+                      "estimate,sum(actual_minutes+logged) actual FROM active GROUP BY "
+                      "milestone_key))),'cards',json((SELECT "
+                      "json_group_array(json_object('id',id,'title',title,'priority',priority,'"
+                      "milestone_key',milestone_key,'estimate_minutes',estimate_minutes,'"
+                      "actual_minutes',actual_minutes,'logged_minutes',logged,'total_minutes',"
+                      "actual_minutes+logged,'completed',json(CASE completed WHEN 1 THEN "
+                      "'true' ELSE 'false' END),'blocked_reason',blocked_reason)) FROM "
+                      "active))) FROM active",
+                      board);
+}
 static Response export_board(Request *r, int64_t id) {
     if (!accessible(r, "boards", id, false, false))
         return error_response(404, "Bacheca non trovata.");
@@ -1787,7 +2433,91 @@ static Response export_board(Request *r, int64_t id) {
     summary_mode = old_summary;
     include_archived = old_archive;
     snprintf(out.headers, sizeof out.headers,
-             "Content-Disposition: attachment; filename=\"openboard-%lld.json\"\r\n", (long long)id);
+             "Content-Disposition: attachment; filename=\"openboard-%lld.json\"\r\n",
+             (long long)id);
+    return out;
+}
+/* Exports retain deleted definitions so hidden values can be restored after
+ * transfer. */
+static Response import_plan(Request *r, const char *board, int64_t bid) {
+    const char *fields[] = {"custom_fields", "milestones"};
+    bool old = importing_plan;
+    importing_plan = true;
+    Response out = {0};
+    for (size_t i = 0; i < 2; i++) {
+        char path[40];
+        snprintf(path, sizeof path, "$.%s", fields[i]);
+        sqlite3_stmt *check = prepare("SELECT json_type(?1,?2),json_array_length(?1,?2)");
+        bind_text(check, 1, board);
+        bind_text(check, 2, path);
+        int rc = sqlite3_step(check);
+        const char *type = rc == SQLITE_ROW ? (const char *)sqlite3_column_text(check, 0) : NULL;
+        bool exists = type != NULL,
+             valid = !exists ||
+                     (!strcmp(type, "array") && sqlite3_column_int(check, 1) <= (i ? 200 : 100));
+        sqlite3_finalize(check);
+        if (!valid) {
+            out = error_response(400, "Definizioni di pianificazione importate non valide.");
+            break;
+        }
+        if (!exists)
+            continue;
+        sqlite3_stmt *s = prepare("SELECT value,type FROM json_each(?1,?2)");
+        bind_text(s, 1, board);
+        bind_text(s, 2, path);
+        while (sqlite3_step(s) == SQLITE_ROW) {
+            const char *item = (const char *)sqlite3_column_text(s, 0);
+            if (strcmp((const char *)sqlite3_column_text(s, 1), "object") || !valid_object(item)) {
+                out = error_response(400, "Definizione importata non valida.");
+                break;
+            }
+            check = prepare("SELECT json_type(?1,'$.deleted_at'),json_remove(?1,'$.position')");
+            bind_text(check, 1, item);
+            sqlite3_step(check);
+            const char *deleted_type = (const char *)sqlite3_column_text(check, 0);
+            bool deleted = deleted_type && !strcmp(deleted_type, "text"),
+                 dtvalid = !deleted_type || deleted || !strcmp(deleted_type, "null");
+            char *body = copy_string((const char *)sqlite3_column_text(check, 1));
+            sqlite3_finalize(check);
+            if (!dtvalid) {
+                ob_free(body);
+                out = error_response(400, "Stato eliminazione importato non valido.");
+                break;
+            }
+            Request part = *r;
+            part.body = body;
+            Response created = i ? milestone_save(&part, bid, true) : field_save(&part, bid, true);
+            ob_free(body);
+            if (created.status != 201) {
+                out = created;
+                break;
+            }
+            int64_t id = 0;
+            json_integer(created.body, "id", &id, 1, INT64_MAX, false);
+            ob_free(created.body);
+            if (deleted) {
+                char sql[200];
+                snprintf(sql, sizeof sql,
+                         "UPDATE %s SET "
+                         "deleted_at=strftime('%%Y-%%m-%%dT%%H:%%M:%%fZ','now') WHERE id=?1",
+                         i ? "milestones" : "custom_fields");
+                if (!run_id(sql, id))
+                    db_die("Importazione definizione eliminata fallita");
+            }
+        }
+        sqlite3_finalize(s);
+        if (out.status)
+            break;
+        char sql[160];
+        snprintf(sql, sizeof sql,
+                 "SELECT count(*) FROM %s WHERE board_id=?1 AND deleted_at IS NULL",
+                 i ? "milestones" : "custom_fields");
+        if (scalar_id(sql, bid) > (i ? 100 : 20)) {
+            out = error_response(400, "Troppi elementi attivi nella pianificazione importata.");
+            break;
+        }
+    }
+    importing_plan = old;
     return out;
 }
 static Response import_board(Request *r) {
@@ -1832,6 +2562,13 @@ static Response import_board(Request *r) {
     int64_t bid = 0;
     json_integer(result.body, "id", &bid, 1, INT64_MAX, false);
     ob_free(result.body);
+    result = import_plan(r, board, bid);
+    if (result.status) {
+        ob_free(board);
+        return result;
+    }
+    bool old_importing = importing_plan;
+    importing_plan = true;
     if (!run_id("DELETE FROM columns WHERE board_id=?1", bid))
         db_die("Preparazione importazione fallita");
     s = prepare("SELECT value,type FROM json_each(?1,'$.columns')");
@@ -1879,12 +2616,13 @@ static Response import_board(Request *r) {
         while (sqlite3_step(j) == SQLITE_ROW) {
             if (++total > 10000 || strcmp((const char *)sqlite3_column_text(j, 1), "object")) {
                 ob_free(result.body);
-                result =
-                    error_response(400, "Scheda importata non valida o limite di 10000 schede superato.");
+                result = error_response(
+                    400, "Scheda importata non valida o limite di 10000 schede superato.");
                 bad = true;
                 break;
             }
-            sqlite3_stmt *k = prepare("SELECT json_remove(?1,'$.position','$.column_id','$.assignee_ids')");
+            sqlite3_stmt *k =
+                prepare("SELECT json_remove(?1,'$.position','$.column_id','$.assignee_ids')");
             bind_text(k, 1, (const char *)sqlite3_column_text(j, 0));
             sqlite3_step(k);
             char *body = copy_string((const char *)sqlite3_column_text(k, 0));
@@ -1920,6 +2658,7 @@ static Response import_board(Request *r) {
     }
     sqlite3_finalize(s);
     ob_free(board);
+    importing_plan = old_importing;
     if (result.status == 201) {
         ob_free(result.body);
         char *title = resource_title("boards", bid);
@@ -1954,18 +2693,20 @@ static Response assignees_api(Request *r, int64_t id, bool get) {
     return mutation_success(200, "cards", id);
 }
 static Response my_tasks(Request *r) {
-    sqlite3_stmt *s = prepare("SELECT json_object('cards',json((SELECT json_group_array(json(item)) "
-                              "FROM(SELECT "
-                              "json_patch(k.data,json_object('board_id',b.id,'board_name',b.name,'"
-                              "column_title',c.title)) item FROM ob_card_objects k JOIN card_assignees "
-                              "a ON a.card_id=k.id JOIN columns c ON c.id=k.column_id JOIN boards b ON "
-                              "b.id=c.board_id WHERE a.user_id=?1 AND ob_allowed(b.id) AND "
-                              "b.deleted_at IS NULL AND c.deleted_at IS NULL AND k.deleted_at IS NULL "
-                              "AND b.archived=0 AND k.archived=0 AND k.completed=0 ORDER BY "
-                              "k.due_date='',k.due_date,k.id))))");
+    sqlite3_stmt *s =
+        prepare("SELECT json_object('cards',json((SELECT json_group_array(json(item)) "
+                "FROM(SELECT "
+                "json_patch(k.data,json_object('board_id',b.id,'board_name',b.name,'"
+                "column_title',c.title)) item FROM ob_card_objects k JOIN card_assignees "
+                "a ON a.card_id=k.id JOIN columns c ON c.id=k.column_id JOIN boards b ON "
+                "b.id=c.board_id WHERE a.user_id=?1 AND ob_allowed(b.id) AND "
+                "b.deleted_at IS NULL AND c.deleted_at IS NULL AND k.deleted_at IS NULL "
+                "AND b.archived=0 AND k.archived=0 AND k.completed=0 ORDER BY "
+                "k.due_date='',k.due_date,k.id))))");
     sqlite3_bind_int64(s, 1, r->user_id);
-    Response out = sqlite3_step(s) == SQLITE_ROW ? json_response(200, (const char *)sqlite3_column_text(s, 0))
-                                                 : error_response(503, "Attività non disponibili.");
+    Response out = sqlite3_step(s) == SQLITE_ROW
+                       ? json_response(200, (const char *)sqlite3_column_text(s, 0))
+                       : error_response(503, "Attività non disponibili.");
     sqlite3_finalize(s);
     return out;
 }
@@ -1991,14 +2732,16 @@ static Response dependencies_api(Request *r, int64_t id, int64_t required, bool 
             db_die("Dipendenza non rimossa");
         sqlite3_finalize(s);
     } else {
-        if (json_integer(r->body, "required_card_id", &required, 1, INT64_MAX, false) != 1 || required == id)
+        if (json_integer(r->body, "required_card_id", &required, 1, INT64_MAX, false) != 1 ||
+            required == id)
             return error_response(400, "La dipendenza deve indicare un'altra scheda.");
         int64_t board = resource_board("cards", id, false);
         if (resource_board("cards", required, false) != board)
             return error_response(400, "Le dipendenze devono appartenere alla stessa bacheca.");
-        sqlite3_stmt *s = prepare("WITH RECURSIVE chain(id) AS(SELECT ?2 UNION SELECT d.required_card_id "
-                                  "FROM card_dependencies d JOIN chain c ON d.card_id=c.id)SELECT "
-                                  "EXISTS(SELECT 1 FROM chain WHERE id=?1)");
+        sqlite3_stmt *s =
+            prepare("WITH RECURSIVE chain(id) AS(SELECT ?2 UNION SELECT d.required_card_id "
+                    "FROM card_dependencies d JOIN chain c ON d.card_id=c.id)SELECT "
+                    "EXISTS(SELECT 1 FROM chain WHERE id=?1)");
         sqlite3_bind_int64(s, 1, id);
         sqlite3_bind_int64(s, 2, required);
         bool cycle = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
@@ -2007,7 +2750,8 @@ static Response dependencies_api(Request *r, int64_t id, int64_t required, bool 
             return error_response(409, "La dipendenza creerebbe un ciclo.");
         if (scalar_id("SELECT completed FROM cards WHERE id=?1", id) &&
             !scalar_id("SELECT completed FROM cards WHERE id=?1", required))
-            return error_response(409, "Riapri la scheda prima di aggiungere una dipendenza incompleta.");
+            return error_response(
+                409, "Riapri la scheda prima di aggiungere una dipendenza incompleta.");
         s = prepare("INSERT OR IGNORE INTO "
                     "card_dependencies(card_id,required_card_id)VALUES(?1,?2)");
         sqlite3_bind_int64(s, 1, id);
@@ -2022,19 +2766,20 @@ static Response dependencies_api(Request *r, int64_t id, int64_t required, bool 
                 id))
         db_die("Versione non salvata");
     char *title = resource_title("cards", id);
-    record_event(r, resource_board("cards", id, false), del ? "dependency_removed" : "dependency_added",
-                 "cards", id, title);
+    record_event(r, resource_board("cards", id, false),
+                 del ? "dependency_removed" : "dependency_added", "cards", id, title);
     ob_free(title);
     return mutation_success(del ? 200 : 201, "cards", id);
 }
-static Response template_api(Request *r, const char *kind, int64_t id, bool instantiate, bool get, bool post,
-                             bool del) {
+static Response template_api(Request *r, const char *kind, int64_t id, bool instantiate, bool get,
+                             bool post, bool del) {
     if (!id) {
         if (get) {
-            sqlite3_stmt *s = prepare("SELECT json_object('templates',json((SELECT "
-                                      "json_group_array(json(item)) FROM(SELECT "
-                                      "json_object('id',id,'name',name,'created_at',created_at) item FROM "
-                                      "templates WHERE owner_id=?1 AND kind=?2 ORDER BY id DESC))))");
+            sqlite3_stmt *s =
+                prepare("SELECT json_object('templates',json((SELECT "
+                        "json_group_array(json(item)) FROM(SELECT "
+                        "json_object('id',id,'name',name,'created_at',created_at) item FROM "
+                        "templates WHERE owner_id=?1 AND kind=?2 ORDER BY id DESC))))");
             sqlite3_bind_int64(s, 1, r->user_id);
             bind_text(s, 2, kind);
             Response out = sqlite3_step(s) == SQLITE_ROW
@@ -2064,7 +2809,8 @@ static Response template_api(Request *r, const char *kind, int64_t id, bool inst
                                 ? "SELECT "
                                   "json_remove(data,'$.id','$.column_id','$.position','$.version','"
                                   "$.created_at','$.updated_at','$.assignee_ids','$.assignees','$."
-                                  "archived') FROM ob_card_objects WHERE id=?1"
+                                  "archived','$.custom_values','$.milestone_key') FROM "
+                                  "ob_card_objects WHERE id=?1"
                                 : "SELECT "
                                   "json_object('format','openboard','version',2,'board',json(data))"
                                   " FROM ob_board_objects WHERE id=?1";
@@ -2184,14 +2930,16 @@ static int json_filters(const char *body, char **out) {
     sqlite3_finalize(s);
     return ok ? 1 : -1;
 }
-static Response views_api(Request *r, int64_t board, int64_t id, bool get, bool post, bool patch, bool del) {
+static Response views_api(Request *r, int64_t board, int64_t id, bool get, bool post, bool patch,
+                          bool del) {
     if (!id) {
         if (!accessible(r, "boards", board, false, false))
             return error_response(404, "Bacheca non trovata.");
         if (get) {
-            sqlite3_stmt *s = prepare("SELECT json_object('views',json((SELECT "
-                                      "json_group_array(json_object('id',id,'name',name,'filters',json("
-                                      "filters))) FROM saved_views WHERE board_id=?1 AND user_id=?2)))");
+            sqlite3_stmt *s =
+                prepare("SELECT json_object('views',json((SELECT "
+                        "json_group_array(json_object('id',id,'name',name,'filters',json("
+                        "filters))) FROM saved_views WHERE board_id=?1 AND user_id=?2)))");
             sqlite3_bind_int64(s, 1, board);
             sqlite3_bind_int64(s, 2, r->user_id);
             Response out = sqlite3_step(s) == SQLITE_ROW
@@ -2225,11 +2973,12 @@ static Response views_api(Request *r, int64_t board, int64_t id, bool get, bool 
         ob_free(filters);
         return error_response(400, "Nome o filtri della vista non validi.");
     }
-    sqlite3_stmt *s = prepare(!id ? "INSERT INTO "
-                                    "saved_views(board_id,user_id,name,filters)VALUES(?1,?2,?3,?4)"
-                                  : "UPDATE saved_views SET "
-                                    "name=coalesce(?3,name),filters=coalesce(?4,filters) WHERE id=?1 "
-                                    "AND user_id=?2");
+    sqlite3_stmt *s =
+        prepare(!id ? "INSERT INTO "
+                      "saved_views(board_id,user_id,name,filters)VALUES(?1,?2,?3,?4)"
+                    : "UPDATE saved_views SET "
+                      "name=coalesce(?3,name),filters=coalesce(?4,filters) WHERE id=?1 "
+                      "AND user_id=?2");
     sqlite3_bind_int64(s, 1, id ? id : board);
     sqlite3_bind_int64(s, 2, r->user_id);
     if (name)
@@ -2246,12 +2995,34 @@ static Response views_api(Request *r, int64_t board, int64_t id, bool get, bool 
 static Response bulk_api(Request *r, int64_t board) {
     if (!accessible(r, "boards", board, true, false))
         return error_response(404, "Bacheca non trovata.");
-    char *action = NULL;
+    char *action = NULL, *string_value = NULL, *batch_labels = NULL;
     int64_t value = 0;
-    if (json_string(r->body, "action", &action, 20) != 1 ||
-        json_integer(r->body, "value", &value, 0, 1, true) != 1 ||
-        (!strcmp(action, "complete") ? false : strcmp(action, "archive") != 0)) {
+    bool action_valid = json_string(r->body, "action", &action, 20) == 1;
+    bool flag_action = action_valid && (!strcmp(action, "complete") || !strcmp(action, "archive"));
+    if (flag_action)
+        action_valid = json_integer(r->body, "value", &value, 0, 1, true) == 1;
+    else if (action_valid && (!strcmp(action, "priority") || !strcmp(action, "milestone"))) {
+        action_valid = json_string(r->body, "value", &string_value, 40) == 1;
+        if (action_valid && !strcmp(action, "priority")) {
+            const char *p[] = {"low", "normal", "high", "urgent"};
+            action_valid = one_of(string_value, p, 4);
+        }
+        if (action_valid && !strcmp(action, "milestone"))
+            action_valid = valid_milestone(board, string_value);
+    } else if (action_valid && !strcmp(action, "labels")) {
+        sqlite3_stmt *j = prepare("SELECT json_object('labels',json_extract(?1,'$.value'))");
+        bind_text(j, 1, r->body);
+        sqlite3_step(j);
+        char *labelbody = copy_string((const char *)sqlite3_column_text(j, 0));
+        sqlite3_finalize(j);
+        action_valid = json_labels(labelbody, &batch_labels) == 1;
+        ob_free(labelbody);
+    } else
+        action_valid = false;
+    if (!action_valid) {
         ob_free(action);
+        ob_free(string_value);
+        ob_free(batch_labels);
         return error_response(400, "Azione collettiva non valida.");
     }
     sqlite3_stmt *s = prepare("SELECT json_type(?1,'$.cards')='array' AND "
@@ -2290,6 +3061,8 @@ static Response bulk_api(Request *r, int64_t board) {
     if (!valid) {
         ob_free(action);
         ob_free(cards);
+        ob_free(string_value);
+        ob_free(batch_labels);
         return error_response(400, "Indica da 1 a 500 schede con ID e versione univoci.");
     }
     s = prepare("SELECT json_extract(value,'$.id'),json_extract(value,'$.version') FROM "
@@ -2308,7 +3081,8 @@ static Response bulk_api(Request *r, int64_t board) {
             break;
         }
         if (!strcmp(action, "complete") && value && !dependencies_complete(id, ids)) {
-            out = error_response(409, "Una dipendenza non è completata: nessuna modifica applicata.");
+            out =
+                error_response(409, "Una dipendenza non è completata: nessuna modifica applicata.");
             break;
         }
         count++;
@@ -2318,17 +3092,21 @@ static Response bulk_api(Request *r, int64_t board) {
         goto done;
     /* Validate the final state collectively, so reopening several cards cannot
      * bypass WIP. */
-    if (!value) {
+    if (flag_action && !value) {
         s = prepare(!strcmp(action, "complete")
                         ? "SELECT count(*) FROM columns c WHERE c.board_id=?1 AND "
-                          "c.deleted_at IS NULL AND c.wip_limit>0 AND c.id IN(SELECT column_id FROM cards "
-                          "WHERE id IN(SELECT value FROM json_each(?2))) AND (SELECT count(*) "
+                          "c.deleted_at IS NULL AND c.wip_limit>0 AND c.id IN(SELECT "
+                          "column_id FROM cards "
+                          "WHERE id IN(SELECT value FROM json_each(?2))) AND (SELECT "
+                          "count(*) "
                           "FROM cards k WHERE k.column_id=c.id AND k.deleted_at IS NULL "
                           "AND k.archived=0 AND (k.completed=0 OR k.id IN(SELECT value "
                           "FROM json_each(?2))))>c.wip_limit"
                         : "SELECT count(*) FROM columns c WHERE c.board_id=?1 AND "
-                          "c.deleted_at IS NULL AND c.wip_limit>0 AND c.id IN(SELECT column_id FROM cards "
-                          "WHERE id IN(SELECT value FROM json_each(?2))) AND (SELECT count(*) "
+                          "c.deleted_at IS NULL AND c.wip_limit>0 AND c.id IN(SELECT "
+                          "column_id FROM cards "
+                          "WHERE id IN(SELECT value FROM json_each(?2))) AND (SELECT "
+                          "count(*) "
                           "FROM cards k WHERE k.column_id=c.id AND k.deleted_at IS NULL "
                           "AND k.completed=0 AND (k.archived=0 OR k.id IN(SELECT value "
                           "FROM json_each(?2))))>c.wip_limit");
@@ -2341,11 +3119,23 @@ static Response bulk_api(Request *r, int64_t board) {
             goto done;
         }
     }
-    s = prepare(!strcmp(action, "complete") ? "UPDATE cards SET completed=?1 WHERE id IN(SELECT value "
-                                              "FROM json_each(?2))"
-                                            : "UPDATE cards SET archived=?1 WHERE id IN(SELECT value "
-                                              "FROM json_each(?2))");
-    sqlite3_bind_int64(s, 1, value);
+    const char *update = !strcmp(action, "complete")   ? "UPDATE cards SET completed=?1 WHERE id "
+                                                         "IN(SELECT value FROM json_each(?2))"
+                         : !strcmp(action, "archive")  ? "UPDATE cards SET archived=?1 WHERE id "
+                                                         "IN(SELECT value FROM json_each(?2))"
+                         : !strcmp(action, "priority") ? "UPDATE cards SET priority=?1 WHERE id "
+                                                         "IN(SELECT value FROM json_each(?2))"
+                         : !strcmp(action, "milestone")
+                             ? "UPDATE cards SET milestone_key=?1 WHERE id IN(SELECT value FROM "
+                               "json_each(?2))"
+                             : "UPDATE cards SET "
+                               "labels=?1,label=coalesce(json_extract(?1,'$[0]'),'') WHERE id "
+                               "IN(SELECT value FROM json_each(?2))";
+    s = prepare(update);
+    if (flag_action)
+        sqlite3_bind_int64(s, 1, value);
+    else
+        bind_text(s, 1, batch_labels ? batch_labels : string_value);
     bind_text(s, 2, ids);
     if (sqlite3_step(s) != SQLITE_DONE)
         db_die("Modifica collettiva fallita");
@@ -2355,8 +3145,9 @@ static Response bulk_api(Request *r, int64_t board) {
     bind_text(s, 1, ids);
     while (sqlite3_step(s) == SQLITE_ROW)
         record_event(r, board,
-                     !strcmp(action, "complete") ? (value ? "completed" : "reopened")
-                                                 : (value ? "archived" : "unarchived"),
+                     !strcmp(action, "complete")  ? (value ? "completed" : "reopened")
+                     : !strcmp(action, "archive") ? (value ? "archived" : "unarchived")
+                                                  : "planning_updated",
                      "cards", sqlite3_column_int64(s, 0), (const char *)sqlite3_column_text(s, 1));
     sqlite3_finalize(s);
     if (!strcmp(action, "archive")) {
@@ -2374,6 +3165,8 @@ done:
     ob_free(action);
     ob_free(cards);
     ob_free(ids);
+    ob_free(string_value);
+    ob_free(batch_labels);
     return out;
 }
 static Response route_domain(Request *r) {
@@ -2411,13 +3204,17 @@ static Response route_domain(Request *r) {
     snprintf(path, sizeof path, "%s", r->path);
     char *parts[7] = {0}, *state = NULL;
     size_t count = 0;
-    for (char *p = strtok_r(path, "/", &state); p && count < COUNT_OF(parts); p = strtok_r(NULL, "/", &state))
+    for (char *p = strtok_r(path, "/", &state); p && count < COUNT_OF(parts);
+         p = strtok_r(NULL, "/", &state))
         parts[count++] = p;
-    if (count < 3 || strcmp(parts[0], "api") || strstr(r->path, "//") || r->path[strlen(r->path) - 1] == '/')
+    if (count < 3 || strcmp(parts[0], "api") || strstr(r->path, "//") ||
+        r->path[strlen(r->path) - 1] == '/')
         return error_response(404, "Percorso non trovato.");
-    if (!strcmp(parts[1], "templates") && (!strcmp(parts[2], "cards") || !strcmp(parts[2], "boards"))) {
+    if (!strcmp(parts[1], "templates") &&
+        (!strcmp(parts[2], "cards") || !strcmp(parts[2], "boards"))) {
         int64_t tid = count >= 4 ? parse_id(parts[3]) : 0;
-        if (count == 3 || (tid && count == 4) || (tid && count == 5 && !strcmp(parts[4], "instantiate")))
+        if (count == 3 || (tid && count == 4) ||
+            (tid && count == 5 && !strcmp(parts[4], "instantiate")))
             return template_api(r, parts[2], tid, count == 5, get, post, del);
         return error_response(404, "Modello non trovato.");
     }
@@ -2428,6 +3225,16 @@ static Response route_domain(Request *r) {
     int64_t id = parse_id(parts[2]);
     if (!id)
         return error_response(404, "Risorsa non trovata.");
+    if (!strcmp(parts[1], "fields") || !strcmp(parts[1], "milestones")) {
+        bool field = !strcmp(parts[1], "fields");
+        if (count == 3 && patch)
+            return field ? field_save(r, id, false) : milestone_save(r, id, false);
+        if (count == 3 && del)
+            return plan_delete_restore(r, field ? "custom_fields" : "milestones", id, false);
+        if (count == 4 && post && !strcmp(parts[3], "restore"))
+            return plan_delete_restore(r, field ? "custom_fields" : "milestones", id, true);
+        return error_response(405, "Metodo non consentito.");
+    }
     if (!strcmp(parts[1], "views") && count == 3)
         return views_api(r, 0, id, get, post, patch, del);
     if (!strcmp(parts[1], "comments") && count == 3)
@@ -2448,6 +3255,22 @@ static Response route_domain(Request *r) {
             return dependencies_api(r, id, 0, get, false);
         if (board && !strcmp(parts[3], "views"))
             return views_api(r, id, 0, get, post, patch, del);
+        if (board && !strcmp(parts[3], "fields"))
+            return get    ? fields_list(r, id)
+                   : post ? field_save(r, id, true)
+                          : error_response(405, "Metodo non consentito.");
+        if (board && !strcmp(parts[3], "milestones"))
+            return get    ? milestones_list(r, id)
+                   : post ? milestone_save(r, id, true)
+                          : error_response(405, "Metodo non consentito.");
+        if (board && !strcmp(parts[3], "field-search"))
+            return get ? field_search(r, id) : error_response(405, "Metodo non consentito.");
+        if (board && !strcmp(parts[3], "workload"))
+            return get ? workload_api(r, id) : error_response(405, "Metodo non consentito.");
+        if (card && !strcmp(parts[3], "fields"))
+            return get     ? custom_values_api(r, id, true)
+                   : patch ? custom_values_api(r, id, false)
+                           : error_response(405, "Metodo non consentito.");
         if (board && !strcmp(parts[3], "bulk") && post)
             return bulk_api(r, id);
         if (post && !strcmp(parts[3], "restore"))
@@ -2464,7 +3287,8 @@ static Response route_domain(Request *r) {
             if (get && !strcmp(parts[3], "revision")) {
                 if (!accessible(r, "boards", id, false, false))
                     return error_response(404, "Bacheca non trovata.");
-                return query_json("SELECT json_object('version',version)FROM boards WHERE id=?1", id);
+                return query_json("SELECT json_object('version',version)FROM boards WHERE id=?1",
+                                  id);
             }
             if (get && !strcmp(parts[3], "activity"))
                 return board_activity(r, id);
@@ -2489,7 +3313,8 @@ static Response route_domain(Request *r) {
                               "deleted_at IS NULL",
                               id);
         if (card)
-            return query_json("SELECT data FROM ob_card_objects WHERE id=?1 AND deleted_at IS NULL", id);
+            return query_json("SELECT data FROM ob_card_objects WHERE id=?1 AND deleted_at IS NULL",
+                              id);
         return error_response(405, "Metodo non consentito.");
     }
     if (patch) {
@@ -2537,7 +3362,8 @@ static void store_idempotency(Request *r, Response *out) {
     }
     sqlite3_finalize(s);
 }
-/* Personal filters require board read access; they never mutate shared board content. */
+/* Personal filters require board read access; they never mutate shared board
+ * content. */
 static bool personal_view_route(Request *r) {
     const char *prefix = "/api/views/";
     if (!strncmp(r->path, prefix, strlen(prefix)))
@@ -2556,7 +3382,9 @@ static bool personal_view_route(Request *r) {
 }
 Response ob_route(Request *r) {
     current_request = r;
+    cloud_request_active = false;
     outer_transaction = false;
+    importing_plan = false;
     include_archived = false;
     summary_mode = false;
     recovering = true;
@@ -2568,6 +3396,10 @@ Response ob_route(Request *r) {
         while ((s = sqlite3_next_stmt(db, NULL)))
             sqlite3_finalize(s);
         sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
+        if (cloud_request_active) {
+            cloud_request_active = false;
+            cloud_request_abort(db);
+        }
         current_request = NULL;
         failure_target = NULL;
         release_request_allocations();
@@ -2576,6 +3408,14 @@ Response ob_route(Request *r) {
     bool get = !strcmp(r->method, "GET"), post = !strcmp(r->method, "POST"),
          patch = !strcmp(r->method, "PATCH"), del = !strcmp(r->method, "DELETE");
     Response result;
+    /* Refresh before every SQLite-backed callback, including authentication and
+     * session reads: those callbacks can also commit session changes. */
+    if (cloud_request_begin(db)) {
+        result = error_response(503, "Archivio esterno temporaneamente non disponibile. Riprova.");
+        goto done;
+    }
+    cloud_request_active = true;
+    cloud_changes_before = sqlite3_total_changes64(db);
     if (!get && !post && !patch && !del) {
         result = error_response(405, "Metodo non consentito.");
         goto done;
@@ -2592,11 +3432,15 @@ Response ob_route(Request *r) {
                 result = error_response(400, "Il corpo deve essere un oggetto JSON valido.");
                 goto done;
             }
+            if (cloud_validate_json(db, r->body)) {
+                result = error_response(400, "JSON non supportato: massimo 90 livelli e nessun NUL nelle chiavi.");
+                goto done;
+            }
         }
     }
     if (!strcmp(r->path, "/api/health")) {
-        result =
-            get ? json_response(200, "{\"status\":\"ok\"}") : error_response(405, "Metodo non consentito.");
+        result = get ? json_response(200, "{\"status\":\"ok\"}")
+                     : error_response(405, "Metodo non consentito.");
         goto done;
     }
     if (auth_handle(r, &result))
@@ -2604,7 +3448,8 @@ Response ob_route(Request *r) {
     if (!auth_authorize(r, &result))
         goto done;
     char option[32];
-    include_archived = query_value(r, "include_archived", option, sizeof option) && !strcmp(option, "1");
+    include_archived =
+        query_value(r, "include_archived", option, sizeof option) && !strcmp(option, "1");
     summary_mode = query_value(r, "summary", option, sizeof option) && !strcmp(option, "1");
     if (!get) {
         if (!begin_transaction()) {
@@ -2618,9 +3463,19 @@ Response ob_route(Request *r) {
             goto done;
         }
     }
-    if (!strcmp(r->path, "/api/metrics")) {
+    if (!strcmp(r->path, "/api/catalog")) {
+        result = get ? json_response(200,
+            "{\"labels\":{\"design\":\"Design\",\"sviluppo\":\"Sviluppo\","
+            "\"ricerca\":\"Ricerca\",\"marketing\":\"Marketing\",\"urgente\":\"Urgente\"},"
+            "\"priorities\":{\"low\":\"Bassa\",\"normal\":\"Normale\",\"high\":\"Alta\",\"urgent\":\"Urgente\"},"
+            "\"covers\":[\"\",\"sage\",\"peach\",\"lavender\",\"blue\"],"
+            "\"custom_field_types\":[{\"value\":\"text\",\"label\":\"Testo\"},"
+            "{\"value\":\"number\",\"label\":\"Numero\"},{\"value\":\"date\",\"label\":\"Data\"},"
+            "{\"value\":\"boolean\",\"label\":\"Sì/No\"},{\"value\":\"select\",\"label\":\"Scelta\"}]}"
+        ) : error_response(405, "Metodo non consentito.");
+    } else if (!strcmp(r->path, "/api/metrics")) {
         result = get ? ob_metrics(r) : error_response(405, "Metodo non consentito.");
-    } else if (!collaboration_handle(r, &result)) {
+    } else if (!teamwork_handle(r, &result) && !collaboration_handle(r, &result)) {
         if (!get && !strcmp(r->role, "observer") && !personal_view_route(r))
             result = error_response(403, "Il ruolo osservatore consente solo la lettura.");
         else
@@ -2646,6 +3501,14 @@ done:
         sqlite3_stmt *statement;
         while ((statement = sqlite3_next_stmt(db, NULL)))
             sqlite3_finalize(statement);
+    }
+    if (cloud_request_active) {
+        bool changed = sqlite3_total_changes64(db) != cloud_changes_before;
+        cloud_request_active = false;
+        if (cloud_request_finish(db, changed)) {
+            ob_free(result.body);
+            result = error_response(503, "Salvataggio esterno temporaneamente non disponibile. Riprova.");
+        }
     }
     /* The HTTP layer owns the response body after this return. */
     forget_allocation(result.body);

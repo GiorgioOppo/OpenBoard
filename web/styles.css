@@ -2886,3 +2886,21 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,t
   .topbar .search-box { flex:1 1 0; width:0; }
   #notifications { flex-shrink:0; }
 }
+
+/* Planning, tabular board and collaboration tools */
+.planning-filters { display:flex; flex-wrap:wrap; gap:12px; margin:10px 0 4px; font-size:12px; color:var(--muted); }
+.planning-filters label,.comment-filters label { display:flex; gap:8px; align-items:center; }
+.planning-filters select,.planning-filters input,.comment-filters select,.comment-filters input { width:auto; max-width:220px; min-height:34px; padding:6px 9px; }
+.planning-badge { display:inline-flex; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:3px 6px; border:1px solid var(--border); border-radius:6px; font-size:10px; color:var(--sage-dark); background:var(--paper); }
+.panel-tabs { display:flex; gap:7px; flex-wrap:wrap; padding-bottom:18px; margin-bottom:16px; border-bottom:1px solid var(--border); }
+.planning-row { display:flex; gap:10px; flex-wrap:wrap; align-items:end; border-bottom:1px solid var(--border); padding:15px 0; }
+.planning-row>div { min-width:110px; align-self:center; }.planning-row>div span { display:block; font-size:12px; color:var(--muted); }
+.planning-row label { flex:1; min-width:90px; }.planning-row input { margin-top:5px; }.planning-row label:has([name="position"]) { flex:0 1 80px; }
+.panel-dialog form>label { display:block; margin:12px 0; }.panel-dialog form>.button { margin:12px 7px 0 0; }
+.milestone-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(235px,1fr)); gap:15px; }.milestone-card { padding:16px; border:1px solid var(--border); border-radius:12px; background:var(--paper); }.milestone-card h4 { margin:0 0 10px; }.milestone-card progress { width:100%; height:10px; accent-color:var(--sage-dark); }.milestone-card label { font-size:12px; }.milestone-card input { margin-top:5px; }.overdue-panel { display:block; }.overdue-panel h4 { margin:0; }
+.table-scroll { overflow:auto; max-width:100%; margin:0 28px; border:1px solid var(--border); border-radius:12px; background:var(--paper); }.board-table { border-collapse:collapse; width:100%; min-width:850px; font-size:12px; }.board-table caption { padding:15px; text-align:left; font-weight:600; }.board-table th,.board-table td { padding:12px 15px; border-top:1px solid var(--border); text-align:left; max-width:280px; overflow-wrap:anywhere; }.board-table thead { background:var(--board-bg); }.board-table th:first-child { min-width:220px; }.table-card-link { border:0; background:none; color:inherit; text-align:left; font:inherit; font-weight:600; cursor:pointer; padding:3px; }.table-card-link:hover { text-decoration:underline; }.table-card-link:focus-visible { outline:2px solid var(--sage-dark); outline-offset:3px; }
+.worklog-row { display:flex; gap:12px; justify-content:space-between; align-items:start; padding:13px 0; border-bottom:1px solid var(--border); font-size:12px; }.worklog-row p { margin:5px 0; overflow-wrap:anywhere; }.worklog-row>div { min-width:0; }.worklog-row.deleted { opacity:.7; }.worklog-row>div:last-child { flex-shrink:0; }.time-report-rows { margin-top:20px; }
+.comment-filters { display:flex; flex-wrap:wrap; gap:10px; font-size:12px; margin:12px 0; }.comment-markdown p { white-space:normal; margin:8px 0; }.comment-actions { display:flex; gap:5px; flex-wrap:wrap; margin-top:10px; }.reaction-button { font-size:11px; border:1px solid var(--border); color:var(--sage-dark); background:var(--paper); padding:5px 7px; border-radius:14px; cursor:pointer; }.reaction-button.mine { border-color:var(--sage-dark); color:var(--sage-dark); background:var(--board-bg); }.pinned-comment { border-left:3px solid var(--sage-dark); padding-left:12px; }
+@media(max-width:600px) { .planning-filters { gap:7px; }.planning-filters label { flex:1 1 100%; }.planning-filters select,.planning-filters input { max-width:none; flex:1; min-width:0; }.table-scroll { margin:0 12px; }.worklog-row { flex-wrap:wrap; }.planning-row { display:block; }.planning-row label { display:block; margin:10px 0; }.planning-row button { margin:8px 5px 0 0; }.comment-filters label { width:100%; }.comment-filters input { min-width:0; flex:1; }.milestone-grid { grid-template-columns:1fr; } }
+
+.dropdown-menu { max-height:min(65vh,600px); overflow-y:auto; }

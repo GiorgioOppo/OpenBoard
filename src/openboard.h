@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define OB_VERSION "0.3.0"
+#define OB_VERSION "0.4.0"
 #define OB_HEADER_LIMIT 16384
 #define OB_BODY_LIMIT 2097152
 
@@ -29,7 +29,7 @@ typedef struct {
 
 typedef struct {
   int port, workers;
-  const char *web_root, *db_path, *public_url, *backup_path;
+  const char *db_path, *public_url, *backup_path, *bind_address;
   bool auth_enabled, no_demo, quiet;
   int busy_timeout_ms, body_limit;
   bool integrity_check, checkpoint, diagnostics;

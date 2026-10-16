@@ -1,6 +1,7 @@
 [Unit]
-Description=OpenBoard kanban
-After=network.target
+Description=OpenBoard authenticated C API backend
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -9,7 +10,7 @@ StateDirectory=openboard
 WorkingDirectory=/var/lib/openboard
 ExecStart=/usr/local/bin/openboard
 Environment=OPENBOARD_DB=/var/lib/openboard/openboard.db
-Environment=OPENBOARD_WEB_ROOT=/usr/local/share/openboard
+Environment=OPENBOARD_BIND=127.0.0.1
 Environment=OPENBOARD_AUTH=true
 Environment=OPENBOARD_NO_DEMO=true
 EnvironmentFile=-/etc/openboard.env
@@ -23,7 +24,7 @@ ProtectHome=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
-RestrictAddressFamilies=AF_INET AF_UNIX
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 CapabilityBoundingSet=
 
 [Install]

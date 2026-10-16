@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+Terzo gruppo di 100 interventi: campi personalizzati tipizzati, traguardi, azioni multiple per priorità/etichette/traguardi, linee guida e carico di lavoro. Registrazioni del tempo con cestino, riepiloghi per scheda, bacheca e settimana personale, CSV dal server. Risposte ai commenti, reazioni, commenti in evidenza, segnalibri personali e notifiche filtrate prima della paginazione.
+
+Interfaccia con gestione dei campi, traguardi, report e vista tabellare. Le bozze delle risposte sopravvivono ai refresh; risposte HTTP tardive non sovrascrivono filtri e segnalibri. Schema locale 5 con backup prima della migrazione. JSON v2 comprende definizioni, valori e traguardi; il backup completo conserva le relazioni personali e collaborative. [Elenco 201–300 e verifiche](docs/MIGLIORIE_300.md).
+
+Docker Compose separa backend C con sole API autenticate, frontend statico, PostgreSQL, MongoDB e Nginx Proxy Manager. Il binario e la sua immagine non contengono asset grafici; autenticazione predefinita e modalità senza account solo esplicita su loopback. Il frontend carica dati e cataloghi dalle API sulla stessa origine. PostgreSQL conserva colonne scalari tipizzate e riferimenti ai documenti JSON immutabili in MongoDB; SQLite diventa una cache ricostruibile. Commit SQL e lock tra processi coordinano la pubblicazione degli snapshot. Modalità locale SQLite conservata. Volumi persistenti separati, credenziali generate e reti private; [gestione e limiti](docs/DEPLOYMENT.md).
+
 ## 0.3.0
 
 Secondo gruppo di 100 interventi: pianificazione e blocchi, tempo effettivo, assegnazioni multiple a utenti, attività personali, dipendenze senza cicli, template personali, filtri salvati e azioni multiple atomiche. Notifiche interne con sottoscrizioni, allegati recuperabili nel database, modifica dei commenti, profilo e revoca delle sessioni.

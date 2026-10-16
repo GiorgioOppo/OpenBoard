@@ -1,21 +1,147 @@
-# Linux: il processo resta su loopback, condiviso con un proxy sullo stesso host.
+name: openboard
 services:
-  openboard:
+  app:
     build: .
-    image: openboard:0.3.0
-    network_mode: host
+    image: openboard:0.4.0
     restart: unless-stopped
-    stop_grace_period: 25s
+    init: true
+    stop_grace_period: 30s
     read_only: true
+    user: "10001:10001"
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
-    tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
-    volumes:
-      - openboard-data:/var/lib/openboard
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m,uid=10001,gid=10001,mode=0700
+    expose: ["8080"]
     environment:
+      OPENBOARD_BIND: "0.0.0.0"
+      OPENBOARD_PORT: "8080"
+      OPENBOARD_DB: /tmp/openboard/cache.db
       OPENBOARD_AUTH: "true"
       OPENBOARD_NO_DEMO: "true"
       OPENBOARD_WORKERS: "8"
-      # Configurare OPENBOARD_PUBLIC_URL solo dopo il setup amministrativo locale.
+      OPENBOARD_PUBLIC_URL: ${OPENBOARD_PUBLIC_URL:-http://openboard.localhost}
+      OPENBOARD_POSTGRES_URL: postgresql://openboard:${POSTGRES_APP_PASSWORD:?Run python3 scripts/init-env.py}@postgres:5432/openboard?connect_timeout=10
+      OPENBOARD_MONGODB_URI: mongodb://openboard:${MONGO_APP_PASSWORD:?Run python3 scripts/init-env.py}@mongo:27017/openboard?authSource=openboard&serverSelectionTimeoutMS=5000&connectTimeoutMS=5000
+      TZ: ${TZ:-Europe/Rome}
+    networks: [frontend, backend]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: openboard-frontend:0.4.0
+    restart: unless-stopped
+    read_only: true
+    user: "101:101"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    expose: ["8080"]
+    networks: [frontend]
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  postgres:
+    image: postgres:17-trixie
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: openboard
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init-env.py}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD:?Run python3 scripts/init-env.py}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/postgres-init.sh:/docker-entrypoint-initdb.d/10-openboard.sh:ro
+    networks: [backend]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d openboard && PGPASSWORD=\"$$POSTGRES_APP_PASSWORD\" psql -h 127.0.0.1 -U openboard -d openboard -Atqc 'SELECT 1' >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 10
+    shm_size: 128m
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  mongo:
+    image: mongo:8.0-noble
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Run python3 scripts/init-env.py}
+      MONGO_INITDB_DATABASE: openboard
+      OPENBOARD_MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD:?Run python3 scripts/init-env.py}
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/10-openboard.js:ro
+    networks: [backend]
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - "const app = db.getSiblingDB('openboard'); if (!app.auth('openboard', process.env.OPENBOARD_MONGO_APP_PASSWORD)) quit(1); quit(app.runCommand({ping: 1}).ok ? 0 : 1);"
+      interval: 10s
+      timeout: 10s
+      start_period: 30s
+      retries: 10
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  npm:
+    image: jc21/nginx-proxy-manager:2.16.0
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --max-time, "5", "http://127.0.0.1:81/api/"]
+      interval: 10s
+      timeout: 6s
+      start_period: 30s
+      retries: 12
+    ports:
+      - "${OPENBOARD_HTTP_PORT:-80}:80"
+      - "${OPENBOARD_HTTPS_PORT:-443}:443"
+      - "127.0.0.1:${OPENBOARD_NPM_ADMIN_PORT:-81}:81"
+    environment:
+      TZ: ${TZ:-Europe/Rome}
+      DB_SQLITE_FILE: /data/database.sqlite
+    volumes:
+      - npm-data:/data
+      - npm-letsencrypt:/etc/letsencrypt
+    networks: [frontend]
+    depends_on:
+      app:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+networks:
+  frontend:
+  backend:
+    internal: true
 volumes:
-  openboard-data:
+  postgres-data:
+  mongo-data:
+  mongo-config:
+  npm-data:
+  npm-letsencrypt:
