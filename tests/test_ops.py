@@ -45,15 +45,26 @@ class OperationsTests(unittest.TestCase):
         self.assertEqual(self.request('GET','/api/ready')[0],200)
 
     def test_metrics_counters_and_private_cache(self):
-        self.request('GET','/api/missing')
+        self.assertEqual(self.request('GET','/api/missing')[0],404)
         status, headers, body = self.request('GET','/api/metrics')
         self.assertEqual(status,200)
         self.assertIn('text/plain',headers['Content-Type'])
         self.assertEqual(headers['Cache-Control'],'no-store')
         values = dict(line.split() for line in body.decode().splitlines() if line and not line.startswith('#'))
         self.assertGreaterEqual(int(values['openboard_http_requests_total']),3)
-        self.assertGreaterEqual(int(values['openboard_http_errors_total']),1)
+        self.assertEqual(int(values['openboard_http_errors_total']),1)
         self.assertGreaterEqual(int(values['openboard_http_active']),1)
+        # Each completed 404 must already be visible to the next HTTP client,
+        # even when another worker handles metrics before error-request cleanup.
+        # Exact totals also catch accidentally counting the same response twice.
+        for expected in range(2,21):
+            with self.subTest(completed_errors=expected):
+                self.assertEqual(self.request('GET','/api/missing')[0],404)
+                status, _, body = self.request('GET','/api/metrics')
+                self.assertEqual(status,200)
+                values = dict(line.split() for line in body.decode().splitlines()
+                              if line and not line.startswith('#'))
+                self.assertEqual(int(values['openboard_http_errors_total']),expected)
 
     def test_metrics_require_global_admin_with_accounts(self):
         self.stop(); self.start('--auth')

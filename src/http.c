@@ -478,6 +478,11 @@ static void handle(int fd) {
                         : status == 403 ? "Origine o host non consentiti."
                                         : "Richiesta HTTP non valida.")
           : route(&request);
+  /* Publish the selected status before the client can receive it and request
+   * metrics through another worker. Cleanup and transmission may finish later.
+   */
+  if (response.status >= 400)
+    atomic_fetch_add(&metric_errors, 1);
   send_response(fd, &request, &response, head);
   if (!ob_config.quiet) {
     char path[2048];
@@ -492,8 +497,6 @@ static void handle(int fd) {
   }
   free(response.body);
   free(request.body);
-  if (response.status >= 400)
-    atomic_fetch_add(&metric_errors, 1);
   atomic_fetch_add(&metric_duration_ms,
                    (unsigned long long)(milliseconds() - start));
   atomic_fetch_sub(&metric_active, 1);
