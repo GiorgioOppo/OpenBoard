@@ -34,12 +34,13 @@ const icon = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name
 const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const labels = {design:'Design', sviluppo:'Sviluppo', ricerca:'Ricerca', marketing:'Marketing', urgente:'Urgente'};
 const priorities = {low:'Bassa', normal:'Normale', high:'Alta', urgent:'Urgente'};
+const productivity = OpenBoardProductivity;
 const covers = ['', 'sage', 'peach', 'lavender', 'blue'];
 const state = {
   boards:[], board:null, query:'', label:'', assignee:'', priority:'', status:'', sort:'manual',
   archived:false, archivedBoards:false, view:'board', saving:false, loading:true, loadError:false,
   loadSequence:0, cardSequence:0, cardEditor:null, boardEditor:null, columnEditor:null,
-  draggedCard:null, toastTimer:null, auth:null, remoteVersion:null, polling:false, panel:null
+  draggedCard:null, toastTimer:null, auth:null, remoteVersion:null, polling:false, panel:null, selectionMode:false, selectedCards:new Map(), boardWatching:false, cardWatching:false
 };
 function stored(key, fallback = '') { try { return localStorage.getItem(`openboard.${key}`) || fallback; } catch { return fallback; } }
 function remember(key, value) { try { localStorage.setItem(`openboard.${key}`, value); } catch { /* Local preferences remain optional. */ } }
@@ -103,10 +104,13 @@ function updateBusy() {
   document.querySelectorAll('[data-write]').forEach((element) => { element.disabled = state.saving || state.loading || !canWrite(); });
   document.querySelectorAll('[data-manage]').forEach((element) => { element.disabled = state.saving || state.loading || !canManage(); });
   document.querySelectorAll('dialog[open] input, dialog[open] textarea, dialog[open] select, dialog[open] button').forEach((element) => {
-    element.disabled = state.saving || (element.hasAttribute('data-write') && !canWrite()) || (element.hasAttribute('data-manage') && !canManage());
+    element.disabled = state.saving || (element.hasAttribute('data-write') && !canWrite()) || (element.hasAttribute('data-manage') && !canManage()) || (element.hasAttribute('data-product-create') && !canCreateBoard());
   });
   document.querySelectorAll('[data-create-board],#create-board-sidebar,#create-board-link').forEach((element) => { element.disabled = state.saving || state.loading || !canCreateBoard(); });
   if ($('board-dialog').open && !state.boardEditor) $('save-board').disabled = state.saving || !canCreateBoard();
+  if ($('timer-toggle')) $('timer-toggle').disabled = state.saving || !canWrite() || !state.cardEditor?.id;
+  if ($('add-dependency')) $('add-dependency').disabled = state.saving || !canWrite() || !$('dependency-card').value;
+  if ($('bulk-complete')) { $('bulk-complete').disabled = state.saving || !canWrite() || !state.selectedCards.size; $('bulk-archive').disabled = $('bulk-complete').disabled; }
   if ($('confirm-import')) $('confirm-import').disabled = state.saving || state.loading || !canCreateBoard();
   $('add-card-main').disabled = state.saving || state.loading || !canWrite() || !state.board?.columns.length || !!state.board?.archived;
   $('star-board').disabled = state.saving || state.loading || !state.board;
@@ -135,7 +139,8 @@ async function committed(write, refresh, message) {
   return result;
 }
 function allCards() { return state.board?.columns.flatMap((column) => column.cards) || []; }
-function assignees() { return [...new Set(allCards().map((card) => card.assignee).filter(Boolean))].sort((a,b) => a.localeCompare(b,'it')); }
+function assignmentNames(card) { return [...new Set([card.assignee,...(card.assignees || []).map((user) => user.name)].filter(Boolean))]; }
+function assignees() { return [...new Set(allCards().flatMap(assignmentNames))].sort((a,b) => a.localeCompare(b,'it')); }
 function initials(name) { return String(name).trim().split(/\s+/).slice(0,2).map((part) => part.charAt(0)).join('').toLocaleUpperCase('it'); }
 function avatar(name) { return `<span class="avatar a-${Math.max(assignees().indexOf(name),0)%5}" title="${escapeHTML(name)}" aria-label="${escapeHTML(name)}">${escapeHTML(initials(name))}</span>`; }
 function cardLabels(card) { return [...new Set([card.label,...(Array.isArray(card.labels) ? card.labels : [])].filter((label) => labels[label]))]; }
@@ -160,6 +165,8 @@ function renderHeader() {
   $('star-board').setAttribute('aria-pressed',String(!!board?.starred));
   $('privacy-badge').textContent = board?.archived ? 'Archiviata' : state.auth?.enabled ? `Team · ${board?.role || state.auth.user?.role || ''}` : 'Workspace locale';
   $('archive-board').textContent = board?.archived ? 'Ripristina dall’archivio' : 'Archivia bacheca';
+  $('notifications').hidden = !state.auth?.enabled || !state.auth?.user;
+  $('watch-board').hidden = !state.auth?.enabled || !state.auth?.user;
   $('account-menu').textContent = initials(state.auth?.user?.name || 'Studio');
   $('account-menu').setAttribute('aria-label',`Account e preferenze${state.auth?.user ? ': '+state.auth.user.name : ''}`);
   $('avatar-stack').innerHTML = assignees().slice(0,4).map(avatar).join('');
@@ -174,11 +181,11 @@ function todayISO() { const date = new Date(); return `${date.getFullYear()}-${S
 function overdue(card) { return !!card.due_date && card.due_date < todayISO() && !card.completed; }
 function matches(card) {
   const query = state.query.trim().toLocaleLowerCase('it');
-  const text = `${card.title} ${card.description || card.description_preview || ''} ${card.assignee || ''}`.toLocaleLowerCase('it');
+  const text = `${card.title} ${card.description || card.description_preview || ''} ${assignmentNames(card).join(' ')}`.toLocaleLowerCase('it');
   return (!query || text.includes(query)) && (!state.label || cardLabels(card).includes(state.label)) &&
-    (!state.assignee || (state.assignee === '__none' ? !card.assignee : card.assignee === state.assignee)) &&
+    (!state.assignee || (state.assignee === '__none' ? !assignmentNames(card).length : assignmentNames(card).includes(state.assignee))) &&
     (!state.priority || (card.priority || 'normal') === state.priority) &&
-    (!state.status || (state.status === 'completed' ? card.completed : state.status === 'overdue' ? overdue(card) : !card.completed));
+    (!state.status || (state.status === 'blocked' ? !!card.blocked_reason : state.status === 'completed' ? card.completed : state.status === 'overdue' ? overdue(card) : !card.completed));
 }
 function sorted(cards) {
   const result = cards.filter(matches);
@@ -209,10 +216,12 @@ function checklistBadge(card) {
 function completionButton(card) { return `<button class="completion-button ${card.completed ? 'is-completed' : ''}" data-complete-card="${Number(card.id)}" type="button" data-write aria-label="${card.completed ? 'Riapri' : 'Completa'} scheda: ${escapeHTML(card.title)}">${icon(card.completed ? 'check-circle' : 'circle')}</button>`; }
 function labelBadges(card) { return cardLabels(card).map((label) => `<span class="card-label label-${label}">${labels[label]}</span>`).join(''); }
 function priorityBadge(card) { const priority = card.priority || 'normal'; return priority !== 'normal' ? `<span class="priority-badge priority-${priority}">${escapeHTML(priorities[priority])}</span>` : ''; }
+function selectionCheckbox(card) { return state.selectionMode ? `<label class="card-selection"><input type="checkbox" data-select-card="${Number(card.id)}" ${state.selectedCards.has(card.id) ? 'checked' : ''} aria-label="Seleziona scheda: ${escapeHTML(card.title)}">Seleziona</label>` : ''; }
+function blockedBadge(card) { return card.blocked_reason ? `<span class="blocked-badge" title="${escapeHTML(card.blocked_reason)}">Bloccata</span>` : ''; }
 function renderCard(card) {
   const cover = covers.includes(card.cover) && card.cover ? `<div class="card-cover cover-${card.cover}" aria-hidden="true"><span class="cover-shape"></span><span class="cover-detail"></span></div>` : '';
   const description = card.description_preview || card.description;
-  return `<article class="task-card ${card.completed ? 'completed' : ''}" tabindex="0" role="button" aria-label="Apri scheda: ${escapeHTML(card.title)}" draggable="${canWrite()}" data-card-id="${Number(card.id)}" data-column-id="${Number(card.column_id)}">${cover}<div class="card-body"><div class="card-tags">${labelBadges(card)}${priorityBadge(card)}${card.archived ? '<span class="priority-badge">Archiviata</span>' : ''}</div><h3>${escapeHTML(card.title)}</h3>${description ? `<p class="card-description">${escapeHTML(description)}</p>` : ''}<div class="card-footer">${completionButton(card)}${dueDate(card)}${checklistBadge(card)}${card.assignee ? `<span class="card-assignee">${avatar(card.assignee)}</span>` : ''}</div></div></article>`;
+  return `<article class="task-card ${card.completed ? 'completed' : ''}" tabindex="${state.selectionMode ? -1 : 0}" role="${state.selectionMode ? 'group' : 'button'}" aria-label="${state.selectionMode ? 'Scheda' : 'Apri scheda'}: ${escapeHTML(card.title)}" draggable="${canWrite()}" data-card-id="${Number(card.id)}" data-column-id="${Number(card.column_id)}">${cover}<div class="card-body">${selectionCheckbox(card)}<div class="card-tags">${labelBadges(card)}${priorityBadge(card)}${blockedBadge(card)}${card.archived ? '<span class="priority-badge">Archiviata</span>' : ''}</div><h3>${escapeHTML(card.title)}</h3>${description ? `<p class="card-description">${escapeHTML(description)}</p>` : ''}<div class="card-footer">${completionButton(card)}${dueDate(card)}${checklistBadge(card)}${assignmentNames(card).length ? `<span class="card-assignee">${assignmentNames(card).slice(0,3).map(avatar).join('')}</span>` : ''}</div></div></article>`;
 }
 function renderColumn(column) {
   const cards = sorted(column.cards);
@@ -221,7 +230,7 @@ function renderColumn(column) {
   return `<section class="kanban-column" aria-label="Lista ${escapeHTML(column.title)}"><div class="column-heading"><span class="column-dot"></span><h2>${escapeHTML(column.title)}</h2><span class="column-count ${wip && work >= wip ? 'at-limit' : ''}" title="${wip ? 'WIP: '+work+'/'+wip : 'Schede nella lista'}">${cards.length}${wip ? ' / '+wip : ''}</span><details class="dropdown"><summary class="icon-button" aria-label="Opzioni lista ${escapeHTML(column.title)}">${icon('more')}</summary><div class="dropdown-menu"><button type="button" data-edit-column="${Number(column.id)}" data-write>${icon('edit')}Modifica, WIP e ordine</button><button type="button" data-shift-column="${Number(column.id)}" data-shift="-1" data-write>← Sposta a sinistra</button><button type="button" data-shift-column="${Number(column.id)}" data-shift="1" data-write>Sposta a destra →</button><button type="button" class="danger" data-delete-column="${Number(column.id)}" data-write>${icon('trash')}Sposta nel cestino</button></div></details></div><div class="column-cards" data-drop-column="${Number(column.id)}">${cards.length ? cards.map(renderCard).join('') : '<div class="empty-column">Nessuna scheda da mostrare.</div>'}</div><button class="add-card-button" type="button" data-add-card="${Number(column.id)}" data-write>${icon('plus')}Aggiungi una scheda</button></section>`;
 }
 function renderList() {
-  return `<div class="list-view"><div class="list-header"><span>Scheda</span><span>Etichette e priorità</span><span>Scadenza</span><span>Responsabile</span></div>${state.board.columns.map((column) => `<div class="list-group-title"><span class="column-dot"></span>${escapeHTML(column.title)}<span>${sorted(column.cards).length}</span><button class="icon-button tiny" type="button" data-add-card="${Number(column.id)}" aria-label="Aggiungi scheda in ${escapeHTML(column.title)}" data-write>${icon('plus')}</button></div>${sorted(column.cards).map((card) => `<article class="list-row ${card.completed ? 'completed' : ''}" data-card-id="${Number(card.id)}" tabindex="0" role="button" aria-label="Apri scheda: ${escapeHTML(card.title)}"><div class="list-row-title">${completionButton(card)}<h3>${escapeHTML(card.title)}</h3></div><div class="card-tags">${labelBadges(card)}${priorityBadge(card)}</div><div>${dueDate(card) || '—'}</div><div class="list-assignee">${card.assignee ? `${avatar(card.assignee)}${escapeHTML(card.assignee)}` : 'Non assegnata'}</div></article>`).join('')}`).join('')}<div class="list-add-row"><button class="add-column-button" type="button" data-add-column data-write>${icon('plus')}Aggiungi una lista</button></div></div>`;
+  return `<div class="list-view"><div class="list-header"><span>Scheda</span><span>Etichette e priorità</span><span>Scadenza</span><span>Responsabile</span></div>${state.board.columns.map((column) => `<div class="list-group-title"><span class="column-dot"></span>${escapeHTML(column.title)}<span>${sorted(column.cards).length}</span><button class="icon-button tiny" type="button" data-add-card="${Number(column.id)}" aria-label="Aggiungi scheda in ${escapeHTML(column.title)}" data-write>${icon('plus')}</button></div>${sorted(column.cards).map((card) => `<article class="list-row ${card.completed ? 'completed' : ''}" data-card-id="${Number(card.id)}" tabindex="${state.selectionMode ? -1 : 0}" role="${state.selectionMode ? 'group' : 'button'}" aria-label="${state.selectionMode ? 'Scheda' : 'Apri scheda'}: ${escapeHTML(card.title)}"><div class="list-row-title">${selectionCheckbox(card)}${completionButton(card)}<h3>${escapeHTML(card.title)}</h3></div><div class="card-tags">${labelBadges(card)}${priorityBadge(card)}${blockedBadge(card)}</div><div>${dueDate(card) || '—'}</div><div class="list-assignee">${assignmentNames(card).length ? `${avatar(assignmentNames(card)[0])}${escapeHTML(assignmentNames(card).join(', '))}` : 'Non assegnata'}</div></article>`).join('')}`).join('')}<div class="list-add-row"><button class="add-column-button" type="button" data-add-column data-write>${icon('plus')}Aggiungi una lista</button></div></div>`;
 }
 function renderCalendar() {
   const cards = allCards().filter(matches);
@@ -245,7 +254,7 @@ function renderBoard() {
   else if (state.view === 'calendar') $('board-canvas').innerHTML = renderCalendar();
   else if (state.view === 'list') $('board-canvas').innerHTML = renderList();
   else $('board-canvas').innerHTML = `<div class="kanban-board">${state.board.columns.map(renderColumn).join('')}<button class="add-column-button" type="button" data-add-column data-write>${icon('plus')}Aggiungi una lista</button></div>`;
-  updateFilters(); updateBusy();
+  updateSelection(); updateFilters(); updateBusy();
 }
 function route(boardId, cardId = null, replace = false) {
   const hash = boardId ? `#board/${Number(boardId)}${cardId ? '/card/'+Number(cardId) : ''}` : '#';
@@ -258,6 +267,7 @@ async function selectBoard(id, {quiet = false,reset = true,navigate = true} = {}
   try {
     const result = await api(`/api/boards/${Number(id)}?summary=1${state.archived || state.archivedBoards ? '&include_archived=1' : ''}`);
     if (sequence !== state.loadSequence) return;
+    if (state.board?.id !== (result.board || result).id) { state.selectedCards.clear(); state.selectionMode = false; }
     state.board = result.board || result;
     state.board.columns = state.board.columns || [];
     state.board.columns.forEach((column) => { column.cards = column.cards || []; });
@@ -266,7 +276,7 @@ async function selectBoard(id, {quiet = false,reset = true,navigate = true} = {}
     state.remoteVersion = null; $('remote-change').hidden = true;
     state.loading = false; state.loadError = false;
     if (navigate) route(state.board.id);
-    renderSidebar(); renderHeader(); renderBoard();
+    renderSidebar(); renderHeader(); renderBoard(); refreshWatchState();
   } catch (error) {
     if (sequence !== state.loadSequence) return;
     state.loading = false;
@@ -284,7 +294,7 @@ async function loadInitial() {
   try {
     state.auth = await api('/api/auth/session');
     if (state.auth.enabled && !state.auth.user) { state.loading = false; showAuth(state.auth.setup_required); return; }
-    await refreshBoards();
+    await refreshBoards(); refreshNotifications();
     const requested = currentRoute();
     const fallback = state.boards.find((board) => board.id === Number(stored('board'))) || state.boards[0];
     const selectedId = requested.boardId || fallback?.id;
@@ -316,6 +326,8 @@ function cardData() {
     labels:[...new Set([$('card-label').value,...Array.from(document.querySelectorAll('input[name="extra-label"]:checked'),(input) => input.value)].filter(Boolean))],
     assignee:$('card-assignee').value.trim(), due_date:$('card-due-date').value,
     cover:state.cardEditor?.cover || '', completed:$('card-completed').checked,
+    start_date:$('card-start-date').value, blocked_reason:$('card-blocked-reason').value.trim(),
+    actual_minutes:Number($('card-actual').value)||0, reference_url:$('card-reference').value.trim(), assignee_ids:[...(state.cardEditor?.assigneeIds || [])],
     priority:$('card-priority').value, estimate_minutes:Number($('card-estimate').value)||0,
     checklist:(state.cardEditor?.checklist || []).map((item) => ({...item,text:item.text.trim()})).filter((item) => item.text)
   };
@@ -329,8 +341,21 @@ function editorDirty(id) {
 }
 function draftKey() { return `draft.${state.auth?.user?.id || 'local'}.${state.board?.id || 0}.${state.cardEditor?.id || 'new'}`; }
 function saveDraft() {
-  if (!state.cardEditor || !$('card-dialog').open || !editorDirty('card-dialog')) return;
-  remember(draftKey(),JSON.stringify({data:cardData(),version:state.cardEditor.version,pending:state.cardEditor.pending,checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,updated_at:Date.now()}));
+  const editor = state.cardEditor;
+  if (!editor || !$('card-dialog').open) return;
+  if (!editorDirty('card-dialog')) {
+    // A reverted edit may discard only the draft written by this editor. Keep
+    // an unread recovery draft, another tab's draft, or an uncertain POST retry.
+    if (productivity.shouldDiscardDraft(stored(draftKey()),editor.writtenDraft,editor.pendingAmbiguous)) {
+      if (editor.previousDraft) { remember(draftKey(),editor.previousDraft); $('draft-notice').hidden = false; }
+      else { forget(draftKey()); $('draft-notice').hidden = true; }
+      editor.writtenDraft = null; editor.previousDraft = null;
+    }
+    return;
+  }
+  if (!editor.writtenDraft && !editor.previousDraft && readDraft()) editor.previousDraft = stored(draftKey());
+  const serialized = JSON.stringify({data:cardData(),version:editor.version,pending:editor.pending,pendingAmbiguous:!!editor.pendingAmbiguous,checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,updated_at:Date.now()});
+  remember(draftKey(),serialized); editor.writtenDraft = serialized;
 }
 function readDraft() { try { const draft = JSON.parse(stored(draftKey(),'null')); return draft?.data && Date.now()-draft.updated_at < 30*86400000 ? draft : null; } catch { return null; } }
 function closeDialog(id, {force = false,navigate = true} = {}) {
@@ -373,7 +398,7 @@ function fillCard(data) {
   $('card-column').value = String(data.column_id || state.board.columns[0]?.id || '');
   document.querySelectorAll('input[name="extra-label"]').forEach((input) => { input.checked = Array.isArray(data.labels) && data.labels.includes(input.value); });
   state.cardEditor.checklist = (data.checklist || []).map((item) => ({...item}));
-  setCover(data.cover || ''); renderChecklist();
+  setCover(data.cover || ''); renderChecklist(); fillProductivityCard(data);
 }
 async function openCard(cardId, columnId, {navigate = true} = {}) {
   if (state.saving || state.loading || !state.board?.columns.length) return;
@@ -402,6 +427,7 @@ async function openCard(cardId, columnId, {navigate = true} = {}) {
     $('draft-notice').hidden = !readDraft();
     openDialog('card-dialog'); $('card-title').focus();
     if (navigate && cardId) route(state.board.id,cardId);
+    loadProductivityCard(cardId,boardId,sequence);
     if (cardId) loadComments(cardId);
   } catch (error) { toast(error.message,true); }
 }
@@ -441,19 +467,21 @@ function deleteColumn(columnId) {
 async function loadComments(cardId) {
   try {
     const result = await api(`/api/cards/${cardId}/comments`);
-    if (state.cardEditor?.id !== cardId) return;
-    $('comments-list').innerHTML = (result.comments || []).map((comment) => `<article class="comment"><header><strong>${escapeHTML(comment.author || 'Utente')}</strong><time>${escapeHTML(formatDate(comment.created_at))}</time>${canManage() || state.auth?.user?.id === comment.author_id || !state.auth?.enabled ? `<button type="button" class="icon-button tiny" data-delete-comment="${Number(comment.id)}" aria-label="Elimina commento" data-write>${icon('trash')}</button>` : ''}</header><p>${escapeHTML(comment.body)}</p></article>`).join('') || '<p class="helper-text">Nessun commento. Condividi il primo aggiornamento.</p>';
+    if (state.cardEditor?.id !== cardId || !$('card-dialog').open) return;
+    state.cardEditor.comments = result.comments || [];
+    $('comments-list').innerHTML = (result.comments || []).map((comment) => `<article class="comment"><header><strong>${escapeHTML(comment.author || 'Utente')}</strong><time>${escapeHTML(formatDate(comment.edited_at || comment.created_at))}${comment.edited_at ? ' · modificato' : ''}</time>${canWrite() && (state.auth?.user?.id === comment.author_id || !state.auth?.enabled) ? `<button type="button" class="subtle-button" data-edit-comment="${Number(comment.id)}" data-write>Modifica</button>` : ''}${canManage() || state.auth?.user?.id === comment.author_id || !state.auth?.enabled ? `<button type="button" class="icon-button tiny" data-delete-comment="${Number(comment.id)}" aria-label="Elimina commento" data-write>${icon('trash')}</button>` : ''}</header><p>${escapeHTML(comment.body)}</p></article>`).join('') || '<p class="helper-text">Nessun commento. Condividi il primo aggiornamento.</p>';
     updateBusy();
   } catch (error) { if (state.cardEditor?.id === cardId) $('comments-list').textContent = error.message; }
 }
 function formatDate(value) { if (!value) return ''; const date = new Date(String(value).includes('T') ? value : String(value).replace(' ','T')+'Z'); return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('it-IT'); }
 function panel(title, body, kind = null) {
-  state.panel = kind; $('panel-heading').textContent = title; $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); openDialog('panel-dialog');
+  state.panelSequence = (state.panelSequence || 0)+1; state.panel = kind; $('panel-heading').textContent = title; $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); openDialog('panel-dialog');
 }
 async function showPanel(title, loader, kind) {
   panel(title,'<p class="helper-text">Caricamento…</p>',kind);
-  try { const body = await loader(); if (state.panel === kind && $('panel-dialog').open) { $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); updateBusy(); } }
-  catch (error) { if (state.panel === kind) $('panel-body').innerHTML = `<p class="form-error" role="alert">${escapeHTML(error.message)}</p>`; }
+  const sequence = state.panelSequence;
+  try { const body = await loader(); if (state.panel === kind && state.panelSequence === sequence && $('panel-dialog').open) { $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); updateBusy(); } }
+  catch (error) { if (state.panel === kind && state.panelSequence === sequence) $('panel-body').innerHTML = `<p class="form-error" role="alert">${escapeHTML(error.message)}</p>`; }
 }
 function showAuth(setup) {
   $('auth-heading').textContent = setup ? 'Crea il primo amministratore' : 'Accedi a OpenBoard';
@@ -465,7 +493,7 @@ function showAuth(setup) {
 }
 function showAccount() {
   const user = state.auth?.user;
-  panel('Account e preferenze',`<p>${user ? `<strong>${escapeHTML(user.name)}</strong> · ${escapeHTML(user.username)} · ${escapeHTML(user.role)}` : 'Modalità locale: autenticazione disattivata sul server.'}</p><div class="preferences"><label class="field-label" for="theme-setting">Tema</label><select id="theme-setting"><option value="light">Chiaro</option><option value="dark">Scuro</option></select><label class="field-label" for="density-setting">Densità delle schede</label><select id="density-setting"><option value="comfortable">Comoda</option><option value="compact">Compatta</option></select></div>${user ? `<form id="password-form"><h3>Cambia password</h3><label class="field-label" for="current-password">Password attuale</label><input id="current-password" type="password" required autocomplete="current-password"><label class="field-label" for="new-password">Nuova password (almeno 12 caratteri)</label><input id="new-password" type="password" required minlength="12" maxlength="256" autocomplete="new-password"><button class="button secondary" type="submit">Aggiorna password</button></form>${user.role === 'admin' ? '<button id="manage-users" class="button secondary" type="button">Gestisci utenti</button>' : ''}<button id="logout" class="button danger-subtle" type="button">Esci dall’account</button>` : ''}<p id="panel-error" class="form-error" role="alert"></p>`,'account');
+  panel('Account e preferenze',`<p>${user ? `<strong>${escapeHTML(user.name)}</strong> · ${escapeHTML(user.username)} · ${escapeHTML(user.role)}` : 'Modalità locale: autenticazione disattivata sul server.'}</p><div class="preferences"><label class="field-label" for="theme-setting">Tema</label><select id="theme-setting"><option value="light">Chiaro</option><option value="dark">Scuro</option></select><label class="field-label" for="density-setting">Densità delle schede</label><select id="density-setting"><option value="comfortable">Comoda</option><option value="compact">Compatta</option></select></div>${user ? `<form id="profile-form"><h3>Il tuo profilo</h3><label class="field-label" for="profile-name">Nome visualizzato</label><input id="profile-name" required maxlength="100" value="${escapeHTML(user.name)}"><button class="button secondary" type="submit">Salva nome</button></form><button id="manage-sessions" class="button secondary" type="button">Sessioni attive</button><form id="password-form"><h3>Cambia password</h3><label class="field-label" for="current-password">Password attuale</label><input id="current-password" type="password" required autocomplete="current-password"><label class="field-label" for="new-password">Nuova password (almeno 12 caratteri)</label><input id="new-password" type="password" required minlength="12" maxlength="256" autocomplete="new-password"><button class="button secondary" type="submit">Aggiorna password</button></form>${user.role === 'admin' ? '<button id="manage-users" class="button secondary" type="button">Gestisci utenti</button>' : ''}<button id="logout" class="button danger-subtle" type="button">Esci dall’account</button>` : ''}<p id="panel-error" class="form-error" role="alert"></p>`,'account');
   $('theme-setting').value = stored('theme','light'); $('density-setting').value = stored('density','comfortable');
 }
 async function showUsers() {
@@ -572,6 +600,7 @@ function stableRequest(owner, data) {
 }
 let searchTimer;
 document.addEventListener('click',async (event) => {
+  if (event.target.closest('[data-select-card]') || event.target.closest('.card-selection')) return;
   const target = event.target.closest('button,[data-card-id]');
   if (!target) { if (!event.target.closest('details')) closeMenus(); return; }
   if (target.disabled) return;
@@ -631,10 +660,10 @@ document.addEventListener('click',async (event) => {
       state.cardEditor.version = state.conflictVersion; $('conflict-notice').hidden = true; saveDraft(); closeDialog('panel-dialog'); toast('Versione corrente acquisita. Completa la tua bozza e salva.'); break;
     case 'recover-draft': {
       const draft = readDraft();
-      if (draft) { fillCard(draft.data); $('checklist-new').value = draft.checklist_new || ''; $('comment-body').value = draft.comment_body || ''; state.cardEditor.version = draft.version; if (draft.pending) state.cardEditor.pending = draft.pending; $('draft-notice').hidden = true; saveDraft(); toast('Bozza recuperata. Verifica e salva quando pronta.'); }
+      if (draft) { fillCard(draft.data); $('checklist-new').value = draft.checklist_new || ''; $('comment-body').value = draft.comment_body || ''; state.cardEditor.version = draft.version; if (draft.pending) state.cardEditor.pending = draft.pending; state.cardEditor.pendingAmbiguous = draft.pendingAmbiguous ?? !!draft.pending; state.cardEditor.writtenDraft = stored(draftKey()); state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; saveDraft(); toast('Bozza recuperata. Verifica e salva quando pronta.'); }
       break;
     }
-    case 'discard-draft': forget(draftKey()); $('draft-notice').hidden = true; break;
+    case 'discard-draft': forget(draftKey()); state.cardEditor.writtenDraft = null; state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; break;
     case 'refresh-remote': await perform(refreshBoard); break;
     case 'reload-board': await perform(state.board ? refreshBoard : loadInitial); break;
     case 'show-archived-boards': state.archivedBoards = !state.archivedBoards; await perform(async () => { await refreshBoards(); renderHeader(); openDialog('boards-dialog'); }); break;
@@ -749,14 +778,17 @@ $('card-form').addEventListener('submit',(event) => {
   if (!data.title) { $('card-form-error').textContent = 'Dai un titolo alla tua scheda.'; $('card-title').focus(); return; }
   const key = stableRequest(editor,data); saveDraft();
   perform(() => committed(async () => {
+    editor.pendingAmbiguous = true; saveDraft();
     try {
       if (editor.id) await api(`/api/cards/${editor.id}`,'PATCH',data,{version:editor.version});
       else await api(`/api/columns/${data.column_id}/cards`,'POST',data,{key});
     } catch (error) {
+      editor.pendingAmbiguous = !error.status || error.status >= 500 || [408,429].includes(error.status);
+      saveDraft();
       if (error.status === 412) { $('conflict-notice').hidden = false; saveDraft(); throw new APIError('Conflitto: un’altra sessione ha aggiornato questa scheda. La tua bozza è conservata.',412); }
       throw error;
     }
-    forget(draftKey()); closeDialog('card-dialog',{force:true});
+    editor.pendingAmbiguous = false; forget(draftKey()); closeDialog('card-dialog',{force:true});
   },refreshBoard,editor.id ? 'Scheda aggiornata sul server.' : 'Scheda creata sul server.'),'','card-form-error');
 });
 $('delete-card').addEventListener('click',() => {
@@ -884,6 +916,294 @@ async function pollRevision() {
   } catch { /* Retain the current board and drafts when the server is temporarily unreachable. */ }
   finally { state.polling = false; }
 }
+
+/* OpenBoard 0.3: planning, reusable work, subscriptions and personal tools. */
+function updateSelection() {
+  $('bulk-toolbar').hidden = !state.selectionMode;
+  $('selection-mode').setAttribute('aria-pressed',String(state.selectionMode));
+  $('selection-count').textContent = `${state.selectedCards.size} selezionate`;
+  $('bulk-complete').disabled = $('bulk-archive').disabled = !canWrite() || !state.selectedCards.size || state.saving;
+}
+function dateOffset(days) { const date = new Date(); date.setDate(date.getDate()+days); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+function renderReference() {
+  const url = productivity.safeURL($('card-reference').value.trim());
+  $('reference-link').innerHTML = url ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer">Apri riferimento in una nuova scheda</a>` : '';
+}
+function timerKey() { return `timer.${state.auth?.user?.id || 'local'}.${state.cardEditor?.id || 'new'}`; }
+function readTimer() { try { const timer = JSON.parse(stored(timerKey(),'null')); return timer && Number.isFinite(timer.started) && timer.started > 0 && timer.started <= Date.now() && Number.isFinite(timer.base) ? timer : null; } catch { return null; } }
+function renderTimer() {
+  if (!state.cardEditor || !$('card-dialog').open) return;
+  const timer = readTimer();
+  $('timer-toggle').disabled = !state.cardEditor.id || !canWrite() || state.saving;
+  $('timer-toggle').textContent = timer ? 'Ferma e aggiungi minuti' : 'Avvia timer';
+  const seconds = timer ? Math.max(0,Math.floor((Date.now()-timer.started)/1000)) : 0;
+  $('timer-value').textContent = timer ? `${Math.floor(seconds/3600)}:${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')} · in corso` : state.cardEditor.id ? 'Fermo' : 'Salva la scheda per usare il timer';
+}
+function fillProductivityCard(data) {
+  $('card-start-date').value = data.start_date || '';
+  $('card-blocked-reason').value = data.blocked_reason || '';
+  $('card-actual').value = data.actual_minutes || 0;
+  $('card-reference').value = data.reference_url || '';
+  state.cardEditor.assigneeIds = Array.isArray(data.assignee_ids) ? data.assignee_ids.map(Number) : (data.assignees || []).map((user) => Number(user.id));
+  if (state.cardEditor.members) renderMemberAssignments(state.cardEditor.members);
+  else $('card-assignees').innerHTML = '<p class="helper-text">Caricamento membri…</p>';
+  $('dependencies-section').hidden = $('attachments-section').hidden = !state.cardEditor.id;
+  $('save-card-template').hidden = !state.cardEditor.id;
+  $('watch-card').hidden = !state.cardEditor.id || !state.auth?.enabled;
+  $('dependencies-list').innerHTML = ''; $('attachments-list').innerHTML = '';
+  $('attachment-file').value = '';
+  $('markdown-preview').innerHTML = productivity.markdown(data.description || '');
+  renderReference(); renderTimer();
+}
+function renderMemberAssignments(members) {
+  state.cardEditor.members = members;
+  const ids = state.cardEditor.assigneeIds || [];
+  $('assignees-field').hidden = !state.auth?.enabled;
+  $('card-assignees').innerHTML = members.length ? members.map((user) => `<label><input type="checkbox" data-assignee-id="${Number(user.user_id || user.id)}" data-write ${ids.includes(Number(user.user_id || user.id)) ? 'checked' : ''} ${!canWrite() ? 'disabled' : ''}>${escapeHTML(user.name)} <span class="helper-text">@${escapeHTML(user.username)}</span></label>`).join('') : '<p class="helper-text">Aggiungi membri alla bacheca per assegnare account reali.</p>';
+}
+async function loadProductivityCard(cardId,boardId,sequence) {
+  const isCurrent = () => state.board?.id === boardId && state.cardSequence === sequence && state.cardEditor?.id === (Number(cardId)||null) && $('card-dialog').open;
+  if (state.auth?.enabled) {
+    try { const members = await api(`/api/boards/${boardId}/members`); if (isCurrent()) renderMemberAssignments(members.members || []); }
+    catch (error) { if (isCurrent()) $('card-assignees').textContent = error.message; }
+  } else if (isCurrent()) renderMemberAssignments([]);
+  if (!cardId || !isCurrent()) return;
+  $('dependency-card').innerHTML = allCards().filter((card) => card.id !== Number(cardId) && !card.archived).map((card) => `<option value="${Number(card.id)}">${escapeHTML(card.title)}</option>`).join('');
+  await Promise.allSettled([loadDependencies(Number(cardId)),loadAttachments(Number(cardId)),refreshWatchState(Number(cardId))]);
+}
+async function loadDependencies(cardId) {
+  try {
+    const result = await api(`/api/cards/${cardId}/dependencies`);
+    if (state.cardEditor?.id !== cardId || !$('card-dialog').open) return;
+    const dependencies = result.dependencies || [];
+    $('dependencies-list').innerHTML = dependencies.map((card) => `<div class="dependency-row"><span class="dependency-status ${card.completed ? 'complete' : ''}">${card.completed ? '✓ Completata' : '○ Da completare'}</span><button type="button" class="subtle-button" data-dependency-open="${Number(card.id)}">${escapeHTML(card.title)}</button><button type="button" class="button danger-subtle" data-remove-dependency="${Number(card.id)}" data-write>Rimuovi</button></div>`).join('') || '<p class="helper-text">Nessuna dipendenza.</p>';
+    const used = new Set(dependencies.map((card) => card.id));
+    $('dependency-card').innerHTML = allCards().filter((card) => card.id !== cardId && !card.archived && !used.has(card.id)).map((card) => `<option value="${Number(card.id)}">${escapeHTML(card.title)}</option>`).join('');
+    updateBusy();
+  } catch (error) { if (state.cardEditor?.id === cardId) $('dependencies-list').textContent = error.message; }
+}
+async function refreshEditorVersion(cardId) {
+  const result = await api(`/api/cards/${cardId}`);
+  if (state.cardEditor?.id === cardId && $('card-dialog').open) { state.cardEditor.version = (result.card || result).version; saveDraft(); }
+}
+async function changeDependency(required,remove) {
+  const id = state.cardEditor?.id;
+  if (!id || !required) return;
+  if (editorDirty('card-dialog')) { toast('Salva la bozza prima di cambiare le dipendenze.',true); return; }
+  await perform(() => committed(() => api(`/api/cards/${id}/dependencies${remove ? '/'+Number(required) : ''}`,remove ? 'DELETE':'POST',remove ? undefined : {required_card_id:Number(required)},{version:state.cardEditor.version}),async () => { await refreshEditorVersion(id); await loadDependencies(id); },remove ? 'Dipendenza rimossa.' : 'Dipendenza aggiunta.'),'','card-form-error');
+}
+async function loadAttachments(cardId) {
+  try {
+    const result = await api(`/api/cards/${cardId}/attachments`);
+    if (state.cardEditor?.id !== cardId || !$('card-dialog').open) return;
+    $('attachments-list').innerHTML = (result.attachments || []).map((file) => `<div class="attachment-row"><div><strong>${escapeHTML(file.name)}</strong><span>${Math.ceil(Number(file.size)/1024)} KiB · ${file.deleted_at ? 'Nel cestino' : escapeHTML(formatDate(file.created_at))}</span></div>${file.deleted_at ? `<button type="button" class="button secondary" data-restore-attachment="${Number(file.id)}" data-write>Ripristina</button>` : `<button type="button" class="button secondary" data-download-attachment="${Number(file.id)}">Scarica</button><button type="button" class="button danger-subtle" data-delete-attachment="${Number(file.id)}" data-write>Elimina</button>`}</div>`).join('') || '<p class="helper-text">Nessun allegato.</p>';
+    updateBusy();
+  } catch (error) { if (state.cardEditor?.id === cardId) $('attachments-list').textContent = error.message; }
+}
+function downloadBlob(blob,name) {
+  const url = URL.createObjectURL(blob), link = document.createElement('a');
+  link.href = url; link.download = String(name || 'download').replace(/[\x00-\x1f\x7f/\\]/g,'_');
+  document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
+}
+async function uploadAttachment() {
+  const id = state.cardEditor?.id, file = $('attachment-file').files[0];
+  if (!id || !file) { toast('Scegli un file da caricare.',true); return; }
+  if (!file.size || file.size > 1024*1024) { toast('Il file deve contenere da 1 byte a 1 MiB.',true); return; }
+  await perform(async () => {
+    const bytes = new Uint8Array(await file.arrayBuffer()); let binary = '';
+    for (let offset=0;offset<bytes.length;offset+=16384) binary += String.fromCharCode(...bytes.subarray(offset,offset+16384));
+    if (state.cardEditor?.id !== id || !$('card-dialog').open) return;
+    await committed(() => api(`/api/cards/${id}/attachments`,'POST',{name:file.name,mime:file.type || 'application/octet-stream',data_base64:btoa(binary)}),async () => { if (state.cardEditor?.id === id) $('attachment-file').value = ''; await loadAttachments(id); },'Allegato caricato.');
+  },'','card-form-error');
+}
+async function downloadAttachment(id) {
+  await perform(async () => {
+    const result = await api(`/api/attachments/${Number(id)}`); const binary = atob(result.data_base64), bytes = Uint8Array.from(binary,(char) => char.charCodeAt(0));
+    downloadBlob(new Blob([bytes],{type:'application/octet-stream'}),result.name); toast('Allegato scaricato.');
+  });
+}
+async function refreshWatchState(cardId = null) {
+  if (!state.auth?.enabled || !state.auth?.user) return;
+  const boardId = state.board?.id;
+  try {
+    const result = await api('/api/me/watches');
+    if (state.board?.id === boardId) { state.boardWatching = (result.boards || []).some((board) => board.id === boardId); $('watch-board').textContent = state.boardWatching ? 'Non seguire più la bacheca' : 'Segui bacheca'; }
+    if (cardId && state.cardEditor?.id === cardId) { state.cardWatching = (result.cards || []).some((card) => card.id === cardId); $('watch-card').textContent = state.cardWatching ? 'Non seguire' : 'Segui scheda'; }
+  } catch { /* A subscription failure never hides the current board. */ }
+}
+async function toggleWatch(card) {
+  const id = card ? state.cardEditor?.id : state.board?.id;
+  if (!id || !state.auth?.user) return;
+  const watching = !(card ? state.cardWatching : state.boardWatching);
+  await perform(() => committed(() => api(`/api/${card ? 'cards':'boards'}/${id}/watch`,'PATCH',{watching}),() => refreshWatchState(card ? id : null),watching ? 'Riceverai le notifiche degli aggiornamenti.' : 'Notifiche disattivate per questo elemento.'));
+}
+async function refreshNotifications() {
+  if (!state.auth?.enabled || !state.auth?.user || document.hidden) return;
+  try { const result = await api('/api/notifications/unread-count'); const count = Number(result.unread_count)||0; $('unread-count').textContent = count > 99 ? '99+' : String(count); $('unread-count').hidden = !count; $('notifications').setAttribute('aria-label',`Notifiche: ${count} non lette`); } catch { /* Keep the last verified badge when offline. */ }
+}
+async function showNotifications(before = null,append = false) {
+  const build = async () => {
+    const result = await api(`/api/notifications?limit=30${before ? '&before='+Number(before) : ''}`);
+    state.notificationsItems = append ? [...(state.notificationsItems || []),...(result.items || [])] : (result.items || []);
+    return `<p>${Number(result.unread_count)||0} notifiche non lette</p><button id="notifications-read-all" type="button" class="button secondary">Segna tutte come lette</button><div class="notifications-list">${state.notificationsItems.map((item) => `<article class="notification-item ${item.read ? 'read':'unread'}"><div><strong>${escapeHTML(item.title || 'Aggiornamento')}</strong><p>${escapeHTML(item.actor || 'Un membro')} · ${escapeHTML(activityLabel(item.action))}</p><time>${escapeHTML(formatDate(item.created_at))}</time></div><button type="button" class="button secondary" data-notification-open="${Number(item.id)}" data-notification-board="${Number(item.board_id)}" ${item.entity_type === 'cards' ? `data-notification-card="${Number(item.entity_id)}"` : ''}>Apri</button>${!item.read ? `<button type="button" class="subtle-button" data-notification-read="${Number(item.id)}">Segna letta</button>` : '<span class="helper-text">Letta</span>'}</article>`).join('') || '<p>Nessuna notifica. Segui una bacheca o una scheda per ricevere gli aggiornamenti degli altri membri.</p>'}</div>${result.next_cursor ? `<button id="notifications-more" type="button" class="button secondary" data-before="${Number(result.next_cursor)}">Carica precedenti</button>` : ''}<p id="panel-error" class="form-error" role="alert"></p>`;
+  };
+  await showPanel('Le tue notifiche',build,'notifications'); refreshNotifications();
+}
+function activityLabel(action) { return ({created:'ha creato',updated:'ha modificato',deleted:'ha eliminato',restored:'ha ripristinato',commented:'ha commentato',moved:'ha spostato',archived:'ha archiviato',attached:'ha allegato un file'})[action] || action; }
+async function showMyTasks() {
+  if (!state.auth?.user) { panel('Mie attività','<p>Accedi con un account per vedere le schede assegnate a te attraverso i membri della bacheca.</p>','mytasks'); return; }
+  await showPanel('Mie attività',async () => {
+    const result = await api('/api/me/tasks'), cards = result.cards || [];
+    return `<p>${cards.length} schede assegnate a ${escapeHTML(state.auth.user.name)} · ${cards.filter((card) => overdue(card)).length} scadute</p>${cards.map((card) => `<button type="button" class="search-result" data-search-card="${Number(card.id)}" data-search-board="${Number(card.board_id)}"><strong>${card.completed ? '✓ ' : ''}${escapeHTML(card.title)}</strong><span>${escapeHTML(card.board_name)} / ${escapeHTML(card.column_title)}${card.due_date ? ' · '+escapeHTML(card.due_date) : ''}${card.blocked_reason ? ' · Bloccata' : ''}</span></button>`).join('') || '<p>Non hai schede assegnate. Apri una scheda e seleziona il tuo account in Membri assegnati.</p>'}`;
+  },'mytasks');
+}
+function currentFilters() { return {search:state.query,label:state.label,assignee:state.assignee,priority:state.priority,status:state.status,sort:state.sort}; }
+async function showSavedViews() {
+  const boardId = state.board?.id; if (!boardId) return;
+  state.savedViewsBoard = boardId;
+  await showPanel('Filtri salvati',async () => {
+    const result = await api(`/api/boards/${boardId}/views`); state.savedViews = result.views || [];
+    return `<p>Salva la ricerca, i filtri e l’ordinamento attuali per questa bacheca.</p><form id="saved-view-form" data-board="${boardId}"><label class="field-label" for="saved-view-name">Nome del filtro</label><input id="saved-view-name" maxlength="100" required><button class="button primary" type="submit">Salva filtri attuali</button></form><div class="saved-views">${state.savedViews.map((view) => `<form data-view-form="${Number(view.id)}"><label><span class="sr-only">Nome filtro salvato</span><input name="name" value="${escapeHTML(view.name)}" required maxlength="100"></label><button type="button" class="button secondary" data-apply-view="${Number(view.id)}">Applica</button><button type="submit" class="subtle-button">Rinomina</button><button type="button" class="button danger-subtle" data-delete-view="${Number(view.id)}">Elimina</button></form>`).join('') || '<p>Nessun filtro salvato.</p>'}</div><p id="panel-error" class="form-error" role="alert"></p>`;
+  },'views');
+}
+function applySavedView(id) {
+  if (state.savedViewsBoard !== state.board?.id) { toast('Riapri i filtri salvati per la bacheca corrente.',true); return; }
+  const view = (state.savedViews || []).find((item) => item.id === Number(id)); if (!view) return;
+  const filters = view.filters || {};
+  state.query = filters.search || ''; $('search-input').value = state.query;
+  for (const name of ['label','assignee','priority','status','sort']) { const value = filters[name] || (name === 'sort' ? 'manual' : ''); state[name] = value; $(`${name}-filter`).value = value; }
+  closeDialog('panel-dialog'); renderBoard(); toast(`Filtro “${view.name}” applicato.`);
+}
+function saveTemplate(kind) {
+  const id = kind === 'cards' ? state.cardEditor?.id : state.board?.id;
+  if (!id) return;
+  if (kind === 'cards' && editorDirty('card-dialog')) { toast('Salva la bozza prima di creare un modello.',true); return; }
+  panel(kind === 'cards' ? 'Salva modello di scheda' : 'Salva modello di bacheca',`<p>Il modello conserva i contenuti salvati. Commenti, allegati e account restano esclusi.</p><form id="save-template-form" data-kind="${kind}" data-source="${Number(id)}"><label class="field-label" for="template-name">Nome del modello</label><input id="template-name" required maxlength="100"><button type="submit" class="button primary" data-write>Salva modello</button></form><p id="panel-error" class="form-error" role="alert"></p>`,'save-template');
+  $('template-name').focus();
+}
+async function showTemplates() {
+  const boardId = state.board?.id, columns = [...(state.board?.columns || [])];
+  await showPanel('Modelli riutilizzabili',async () => {
+    const results = await Promise.all([api('/api/templates/cards'),api('/api/templates/boards')]);
+    return `<p>Usa un modello per creare nuovi elementi. La bacheca di partenza conserva i propri dati.</p><section><h3>Modelli di scheda</h3><label class="field-label" for="template-column">Lista di destinazione</label><select id="template-column">${columns.map((column) => `<option value="${Number(column.id)}">${escapeHTML(column.title)}</option>`).join('')}</select>${(results[0].templates || []).map((template) => `<div class="template-row"><strong>${escapeHTML(template.name)}</strong><button type="button" class="button secondary" data-instantiate-template="${Number(template.id)}" data-template-kind="cards" data-template-board="${Number(boardId)}" data-write>Crea scheda</button><button type="button" class="button danger-subtle" data-delete-template="${Number(template.id)}" data-template-kind="cards" data-write>Elimina modello</button></div>`).join('') || '<p>Nessun modello di scheda. Usa Salva modello nell’editor.</p>'}</section><section><h3>Modelli di bacheca</h3>${(results[1].templates || []).map((template) => `<div class="template-row"><strong>${escapeHTML(template.name)}</strong><button type="button" class="button secondary" data-instantiate-template="${Number(template.id)}" data-template-kind="boards" data-product-create ${!canCreateBoard() ? 'disabled' : ''}>Crea bacheca</button><button type="button" class="button danger-subtle" data-delete-template="${Number(template.id)}" data-template-kind="boards" data-write>Elimina modello</button></div>`).join('') || '<p>Nessun modello di bacheca. Usa Salva come modello nelle opzioni della bacheca.</p>'}</section><p id="panel-error" class="form-error" role="alert"></p>`;
+  },'templates');
+}
+async function bulkCards(action) {
+  const boardId = state.board?.id, cards = [...state.selectedCards].map(([id,version]) => ({id,version}));
+  if (!boardId || !cards.length || !canWrite()) return;
+  if (action === 'archive' && !confirm(`Archiviare ${cards.length} schede selezionate? Potrai recuperarle mostrando le schede archiviate.`)) return;
+  await perform(() => committed(() => api(`/api/boards/${boardId}/bulk`,'POST',{action,cards,value:true}),async () => { state.selectedCards.clear(); await refreshBoard(); },`${cards.length} schede ${action === 'complete' ? 'completate' : 'archiviate'}.`));
+}
+async function showSessions() {
+  await showPanel('Sessioni del tuo account',async () => {
+    const result = await api('/api/me/sessions');
+    const date = (value) => new Date(Number(value)*1000).toLocaleString('it-IT');
+    return `<p>Revoca l’accesso da altri dispositivi. Questa sessione resta aperta.</p><button id="revoke-other-sessions" class="button secondary" type="button">Revoca tutte le altre sessioni</button>${(result.sessions || []).map((session) => `<div class="session-row"><div><strong>${session.current ? 'Questa sessione' : 'Altra sessione'}</strong><span>Accesso: ${escapeHTML(date(session.created_at))}<br>Ultima attività: ${escapeHTML(date(session.last_seen))}<br>Scade: ${escapeHTML(date(session.expires_at))}</span></div>${!session.current ? `<button class="button danger-subtle" type="button" data-revoke-session="${escapeHTML(session.id)}">Revoca</button>` : ''}</div>`).join('')}<p id="panel-error" class="form-error" role="alert"></p>`;
+  },'sessions');
+}
+async function showEditComment(id) {
+  const editor = state.cardEditor, comment = (editor?.comments || []).find((item) => item.id === Number(id));
+  if (!comment) return;
+  panel('Modifica il tuo commento',`<form id="edit-comment-form" data-comment="${Number(id)}" data-version="${Number(comment.version)}" data-card="${Number(editor.id)}"><label class="field-label" for="edit-comment-body">Commento</label><textarea id="edit-comment-body" rows="5" required maxlength="5000">${escapeHTML(comment.body)}</textarea><button class="button primary" type="submit" data-write>Salva commento</button></form><p id="panel-error" class="form-error" role="alert"></p>`,'edit-comment');
+}
+async function exportProductivity(kind) {
+  const board = state.board; if (!board) return;
+  await perform(async () => {
+    const result = await api(`/api/boards/${board.id}/export`), full = result.board || result;
+    const csv = kind === 'csv'; downloadBlob(new Blob([csv ? productivity.csv(full) : productivity.calendar(full)],{type:csv ? 'text/csv;charset=utf-8' : 'text/calendar;charset=utf-8'}),`${board.name}.${csv ? 'csv':'ics'}`);
+    toast(csv ? 'CSV completo scaricato con celle protette per i fogli di calcolo.' : 'Calendario scaricato con scadenze e date di inizio.');
+  });
+}
+function showShortcuts() { panel('Scorciatoie da tastiera','<dl class="shortcuts"><dt>⌘ / Ctrl + K</dt><dd>Vai alla ricerca della bacheca</dd><dt>N</dt><dd>Nuova scheda</dd><dt>F</dt><dd>Ricerca nella bacheca</dd><dt>G</dt><dd>Ricerca globale</dd><dt>?</dt><dd>Mostra questa guida</dd><dt>Invio / Spazio su una scheda</dt><dd>Apri scheda</dd><dt>M su una scheda</dt><dd>Apri e sposta scheda</dd><dt>Esc</dt><dd>Chiudi il pannello o editor (con conferma per bozze)</dd></dl><p>Le scorciatoie N, F, G e ? funzionano quando non stai scrivendo e non ci sono finestre aperte.</p>','shortcuts'); }
+
+document.addEventListener('click',async (event) => {
+  const target = event.target.closest('button'); if (!target || target.disabled) return;
+  if (target.dataset.dateOffset !== undefined) { $('card-due-date').value = target.dataset.dateOffset === 'clear' ? '' : dateOffset(Number(target.dataset.dateOffset)); saveDraft(); return; }
+  if (target.dataset.removeDependency) { changeDependency(target.dataset.removeDependency,true); return; }
+  if (target.dataset.dependencyOpen) { if (closeDialog('card-dialog')) openCard(target.dataset.dependencyOpen); return; }
+  if (target.dataset.downloadAttachment) { downloadAttachment(target.dataset.downloadAttachment); return; }
+  if (target.dataset.deleteAttachment || target.dataset.restoreAttachment) {
+    const id = Number(target.dataset.deleteAttachment || target.dataset.restoreAttachment), cardId = state.cardEditor?.id, restore = !!target.dataset.restoreAttachment;
+    if (!restore && !confirm('Spostare questo allegato nel cestino?')) return;
+    perform(() => committed(() => api(`/api/attachments/${id}${restore ? '/restore':''}`,restore ? 'POST':'DELETE',restore ? {}:undefined),() => loadAttachments(cardId),restore ? 'Allegato ripristinato.' : 'Allegato eliminato.'),'','card-form-error'); return;
+  }
+  if (target.dataset.editComment) { showEditComment(target.dataset.editComment); return; }
+  if (target.dataset.applyView) { applySavedView(target.dataset.applyView); return; }
+  if (target.dataset.deleteView) { perform(() => committed(() => api(`/api/views/${Number(target.dataset.deleteView)}`,'DELETE'),showSavedViews,'Filtro eliminato.'),'','panel-error'); return; }
+  if (target.dataset.deleteTemplate) { if (!confirm('Eliminare questo modello? Gli elementi già creati restano disponibili.')) return; perform(() => committed(() => api(`/api/templates/${target.dataset.templateKind}/${Number(target.dataset.deleteTemplate)}`,'DELETE'),showTemplates,'Modello eliminato.'),'','panel-error'); return; }
+  if (target.dataset.instantiateTemplate) {
+    const kind = target.dataset.templateKind, boardId = state.board?.id;
+    if (kind === 'cards' && boardId !== Number(target.dataset.templateBoard)) return;
+    const data = kind === 'cards' ? {column_id:Number($('template-column').value)} : {};
+    perform(() => committed(() => api(`/api/templates/${kind}/${Number(target.dataset.instantiateTemplate)}/instantiate`,'POST',data),async (result) => { closeDialog('panel-dialog',{force:true}); if (kind === 'boards') { await refreshBoards(); await selectBoard(result.id,{quiet:true}); } else if (state.board?.id === boardId) await refreshBoard(); },kind === 'boards' ? 'Bacheca creata dal modello.' : 'Scheda creata dal modello.'),'','panel-error'); return;
+  }
+  if (target.dataset.notificationRead) { perform(() => committed(() => api(`/api/notifications/${Number(target.dataset.notificationRead)}`,'PATCH',{read:true}),showNotifications,'Notifica letta.'),'','panel-error'); return; }
+  if (target.dataset.notificationOpen) {
+    await perform(async () => { await api(`/api/notifications/${Number(target.dataset.notificationOpen)}`,'PATCH',{read:true}); refreshNotifications(); });
+    if (!closeEditors()) return; closeDialog('panel-dialog'); await selectBoard(target.dataset.notificationBoard); if (target.dataset.notificationCard && !state.loadError) await openCard(target.dataset.notificationCard); return;
+  }
+  if (target.dataset.revokeSession) { perform(() => committed(() => api(`/api/me/sessions/${target.dataset.revokeSession}`,'DELETE'),showSessions,'Sessione revocata.'),'','panel-error'); return; }
+  switch (target.id) {
+    case 'timer-toggle': {
+      if (!state.cardEditor?.id || !canWrite()) break;
+      const timer = readTimer();
+      if (timer) { $('card-actual').value = Math.min(1000000,Math.max(Number($('card-actual').value)||0,timer.base)+Math.ceil(Math.max(0,Date.now()-timer.started)/60000)); forget(timerKey()); saveDraft(); toast('Minuti aggiunti alla bozza. Salva la scheda per registrarli sul server.'); }
+      else { remember(timerKey(),JSON.stringify({started:Date.now(),base:Number($('card-actual').value)||0})); toast('Timer avviato. Resta disponibile su questo dispositivo anche dopo un ricaricamento.'); }
+      renderTimer(); break;
+    }
+    case 'add-dependency': changeDependency($('dependency-card').value,false); break;
+    case 'upload-attachment': uploadAttachment(); break;
+    case 'watch-board': toggleWatch(false); break;
+    case 'watch-card': toggleWatch(true); break;
+    case 'notifications': showNotifications(); break;
+    case 'notifications-read-all': perform(() => committed(() => api('/api/notifications/read-all','POST',{}),showNotifications,'Tutte le notifiche segnate come lette.'),'','panel-error'); break;
+    case 'notifications-more': showNotifications(target.dataset.before,true); break;
+    case 'my-tasks': showMyTasks(); break;
+    case 'saved-views': showSavedViews(); break;
+    case 'templates-board': showTemplates(); break;
+    case 'save-card-template': saveTemplate('cards'); break;
+    case 'save-board-template': saveTemplate('boards'); break;
+    case 'selection-mode': state.selectionMode = !state.selectionMode; if (!state.selectionMode) state.selectedCards.clear(); renderBoard(); break;
+    case 'clear-selection': state.selectionMode = false; state.selectedCards.clear(); renderBoard(); break;
+    case 'select-visible': for (const card of allCards().filter(matches)) state.selectedCards.set(card.id,card.version); renderBoard(); break;
+    case 'bulk-complete': bulkCards('complete'); break;
+    case 'bulk-archive': bulkCards('archive'); break;
+    case 'manage-sessions': showSessions(); break;
+    case 'revoke-other-sessions': perform(() => committed(() => api('/api/me/sessions/revoke-others','POST',{}),showSessions,'Altre sessioni revocate.'),'','panel-error'); break;
+    case 'export-csv': exportProductivity('csv'); break;
+    case 'export-ics': exportProductivity('ics'); break;
+    case 'shortcut-help': showShortcuts(); break;
+  }
+});
+document.addEventListener('change',(event) => {
+  const target = event.target;
+  if (target.dataset.selectCard) { const card = allCards().find((item) => item.id === Number(target.dataset.selectCard)); if (!card) return; if (target.checked) state.selectedCards.set(card.id,card.version); else state.selectedCards.delete(card.id); updateSelection(); }
+  if (target.dataset.assigneeId && state.cardEditor) { const id = Number(target.dataset.assigneeId), ids = new Set(state.cardEditor.assigneeIds); if (target.checked) ids.add(id); else ids.delete(id); state.cardEditor.assigneeIds = [...ids].sort((a,b) => a-b); saveDraft(); }
+});
+document.addEventListener('input',(event) => {
+  if (event.target.id === 'card-description') $('markdown-preview').innerHTML = productivity.markdown(event.target.value);
+  if (event.target.id === 'card-reference') renderReference();
+});
+document.addEventListener('submit',(event) => {
+  const form = event.target;
+  if (!['profile-form','saved-view-form','save-template-form','edit-comment-form'].includes(form.id) && !form.dataset.viewForm) return;
+  event.preventDefault();
+  if (form.id === 'profile-form') { perform(() => committed(() => api('/api/me/profile','PATCH',{name:$('profile-name').value.trim()}),async () => { state.auth = await api('/api/auth/session'); renderHeader(); showAccount(); },'Nome aggiornato.'),'','panel-error'); }
+  else if (form.id === 'saved-view-form') { const boardId = Number(form.dataset.board); if (state.board?.id !== boardId) return; perform(() => committed(() => api(`/api/boards/${boardId}/views`,'POST',{name:$('saved-view-name').value.trim(),filters:currentFilters()}),showSavedViews,'Filtri salvati.'),'','panel-error'); }
+  else if (form.dataset.viewForm) { perform(() => committed(() => api(`/api/views/${Number(form.dataset.viewForm)}`,'PATCH',{name:form.elements.name.value.trim()}),showSavedViews,'Filtro rinominato.'),'','panel-error'); }
+  else if (form.id === 'save-template-form') { const kind = form.dataset.kind, id = Number(form.dataset.source); perform(() => committed(() => api(`/api/templates/${kind}`,'POST',{name:$('template-name').value.trim(),[kind === 'cards' ? 'card_id':'board_id']:id}),showTemplates,'Modello salvato.'),'','panel-error'); }
+  else if (form.id === 'edit-comment-form') { const cardId = Number(form.dataset.card); perform(() => committed(() => api(`/api/comments/${Number(form.dataset.comment)}`,'PATCH',{body:$('edit-comment-body').value.trim()},{version:Number(form.dataset.version)}),async () => { closeDialog('panel-dialog',{force:true}); if (state.cardEditor?.id === cardId) await loadComments(cardId); },'Commento aggiornato.'),'','panel-error'); }
+});
+document.addEventListener('keydown',(event) => {
+  if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.target.closest('input,textarea,select,[contenteditable="true"]') || document.querySelector('dialog[open]')) return;
+  if (event.key === '?') { event.preventDefault(); showShortcuts(); }
+  else if (event.key.toLowerCase() === 'n' && canWrite()) { event.preventDefault(); openCard(); }
+  else if (event.key.toLowerCase() === 'f') { event.preventDefault(); $('search-input').focus(); }
+  else if (event.key.toLowerCase() === 'g') { event.preventDefault(); showGlobalSearch(); }
+});
+setInterval(renderTimer,1000);
+setInterval(refreshNotifications,15000);
+
 setInterval(pollRevision,5000);
 document.addEventListener('visibilitychange',() => { if (!document.hidden) pollRevision(); });
 loadInitial();

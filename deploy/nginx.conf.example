@@ -1,0 +1,17 @@
+# Dentro http{} di nginx. Sostituire dominio e percorsi del certificato.
+# Completare il setup admin localmente prima di abilitare questo virtual host.
+server {
+    listen 443 ssl;
+    server_name board.example.com;
+    ssl_certificate /etc/letsencrypt/live/board.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/board.example.com/privkey.pem;
+    client_max_body_size 2m;
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Request-ID $request_id;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_read_timeout 30s;
+    }
+}

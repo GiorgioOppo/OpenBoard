@@ -1,4 +1,6 @@
-# API di OpenBoard 0.2.0
+# API di OpenBoard 0.3.0
+
+Il contratto di base della versione 0.2 resta disponibile qui. Le nuove API sono descritte in [produttività e pianificazione](API_PRODUTTIVITA.md) e [collaborazione e account](API_COLLABORAZIONE.md); configurazione e metriche sono in [installazione e gestione](DEPLOYMENT.md).
 
 Le API sono disponibili sulla stessa origine dell'interfaccia, per impostazione predefinita `http://127.0.0.1:8080`. Il server ascolta su loopback; `--public-url https://board.example.com` configura host e origine pubblici per un reverse proxy. TLS è gestito dal proxy.
 
@@ -30,7 +32,7 @@ Questi endpoint sono disponibili anche senza sessione quando gli account sono ab
 | --- | --- | --- |
 | GET | `/api/health` | `{"status":"ok"}`: il processo risponde |
 | GET | `/api/ready` | `200 {"status":"ready"}` se il database è aperto in scrittura e la lettura di controllo riesce; altrimenti `503 {"status":"unavailable"}` |
-| GET | `/api/version` | `{"version":"0.2.0","sqlite":"…","auth_enabled":false,"workers":8}` |
+| GET | `/api/version` | `{"version":"0.3.0","sqlite":"…","auth_enabled":false,"workers":8}` |
 
 La readiness verifica apertura e lettura del database; non esegue una scrittura di prova.
 

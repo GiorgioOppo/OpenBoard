@@ -54,6 +54,7 @@ Le preferenze dell'interfaccia rimangono nel browser; bacheche e schede rimangon
 src/http.c          Trasporto HTTP concorrente, limiti e configurazione
 src/server.c        API di dominio, migrazioni e persistenza SQLite
 src/auth.c          Account, sessioni e autorizzazioni
+src/collaboration.c Notifiche, sottoscrizioni, allegati e strumenti personali
 web/index.html      Struttura dell'interfaccia
 web/styles.css      Stili e layout responsive
 web/app.js          Interazioni e comunicazione con le API
@@ -99,6 +100,16 @@ Cestino con ripristino, archivio, duplicazione, priorità, etichette multiple, s
 
 L’elenco numerato dei 100 interventi, con stato e verifiche, è in [docs/MIGLIORIE_100.md](docs/MIGLIORIE_100.md).
 
+## Funzioni della versione 0.3
+
+Data di inizio, blocchi, tempo effettivo e timer manuale; assegnazioni a più utenti, attività personali e dipendenze fra schede. Template personali per schede e bacheche, filtri salvati e completamento/archiviazione multipla con controllo delle versioni.
+
+Seguendo una bacheca o una scheda ricevi notifiche interne per gli aggiornamenti degli altri membri. Ogni scheda può conservare fino a 10 allegati attivi, di massimo 1 MiB ciascuno e 5 MiB complessivi. Gli allegati rimossi sono ripristinabili. Il pannello account permette di aggiornare il nome e revocare le altre sessioni.
+
+Sono disponibili anteprima Markdown, esportazioni CSV/iCalendar e scorciatoie documentate nell'app. L'[elenco dei nuovi 100 interventi](docs/MIGLIORIE_200.md) prosegue la numerazione fino a 200. Le nuove API sono documentate in [produttività](docs/API_PRODUTTIVITA.md) e [collaborazione](docs/API_COLLABORAZIONE.md).
+
+Le istruzioni per installazione, Docker/Compose su Linux, systemd, nginx HTTPS, configurazione da ambiente, metriche e manutenzione sono in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Il servizio continua ad ascoltare su loopback.
+
 ## Dati e backup
 
 Il database iniziale viene migrato automaticamente: una copia `.pre-vN.bak` precede l’aggiornamento. I database con schema futuro non supportato vengono rifiutati. `--no-demo` disattiva i dati dimostrativi sui database nuovi.
@@ -115,6 +126,12 @@ Per i controlli della memoria e del comportamento indefinito:
 
 ```sh
 make test-sanitize
+```
+
+Per verificare i formati prodotti dal frontend serve Node.js, usato soltanto nei test:
+
+```sh
+make test-frontend
 ```
 
 Il server usa per impostazione predefinita 8 worker; `--workers 1..32` ne cambia il numero. `--quiet` disattiva i log HTTP. `/api/health`, `/api/ready` e `/api/version` permettono rispettivamente controlli di processo, database e versione.

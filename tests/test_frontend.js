@@ -1,0 +1,18 @@
+'use strict';
+const assert = require('node:assert/strict');
+const p = require('../web/productivity.js');
+const hostile = p.markdown('<img src=x onerror=alert(1)>\n[click](javascript:alert)\n[safe](https://example.com?q="x")\n**bold**\n```\n<script>bad()</script>\n```');
+assert(!hostile.includes('<img')); assert(!hostile.includes('<script>')); assert(!hostile.includes('href="javascript:')); assert(hostile.includes('rel="noopener noreferrer nofollow"')); assert(hostile.includes('<strong>bold</strong>'));
+assert.equal(p.safeURL('https://me:secret@example.com'), '');
+for (const formula of ['=SUM(1,2)',' +123','\t@SUM(A1)','-1','\rfoo']) assert(p.csvCell(formula).startsWith('"\''));
+assert.equal(p.csvCell('a,"b"\nc'), '"a,""b""\nc"');
+const board = {id:7,name:'Demo\r\nInjected:test',columns:[{title:'List',cards:[{id:8,title:'Caffè, lavoro; fase\\1\r\nInjected:value',description:'A\nB',due_date:'2026-12-31',start_date:'2026-12-30',completed:false},{id:9,title:'Undated'},{id:10,title:'Impossible',due_date:'2026-02-30'}]}]};
+const ics = p.calendar(board,new Date('2026-10-15T12:00:00Z'));
+assert(ics.includes('UID:board-7-card-8@openboard\r\n')); assert(ics.includes('DTSTART;VALUE=DATE:20261230')); assert(ics.includes('DTEND;VALUE=DATE:20270101')); assert(!ics.includes('\r\nInjected:')); assert.equal((ics.match(/BEGIN:VEVENT/g)||[]).length,1); assert(ics.includes('Caffè\\, lavoro\\; fase\\\\1\\nInjected:value'));
+const long = p.foldLine('SUMMARY:'+ '🗂Caffè'.repeat(40)); assert(long.split('\r\n').every((line) => Buffer.byteLength(line,'utf8') <=75)); assert.equal(long.replace(/\r\n /g,''),'SUMMARY:'+ '🗂Caffè'.repeat(40));
+assert(p.csv(board).startsWith('\uFEFF"ID"')); assert(p.csv(board).includes('"Undated"'));
+assert(p.shouldDiscardDraft('owned','owned',false));
+assert(!p.shouldDiscardDraft('unread other draft',undefined,false));
+assert(!p.shouldDiscardDraft('other-tab','owned',false));
+assert(!p.shouldDiscardDraft('owned','owned',true));
+console.log('Frontend: Markdown, CSV e iCalendar verificati.');

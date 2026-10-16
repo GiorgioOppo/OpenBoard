@@ -1,0 +1,10 @@
+.git
+.codex
+.agents
+build
+data
+*.db
+*.db-*
+*.bak
+docs
+tests

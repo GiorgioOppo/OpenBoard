@@ -1,0 +1,21 @@
+# Linux: il processo resta su loopback, condiviso con un proxy sullo stesso host.
+services:
+  openboard:
+    build: .
+    image: openboard:0.3.0
+    network_mode: host
+    restart: unless-stopped
+    stop_grace_period: 25s
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp:rw,noexec,nosuid,size=16m]
+    volumes:
+      - openboard-data:/var/lib/openboard
+    environment:
+      OPENBOARD_AUTH: "true"
+      OPENBOARD_NO_DEMO: "true"
+      OPENBOARD_WORKERS: "8"
+      # Configurare OPENBOARD_PUBLIC_URL solo dopo il setup amministrativo locale.
+volumes:
+  openboard-data:

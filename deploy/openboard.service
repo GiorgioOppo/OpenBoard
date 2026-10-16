@@ -1,0 +1,30 @@
+[Unit]
+Description=OpenBoard kanban
+After=network.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+StateDirectory=openboard
+WorkingDirectory=/var/lib/openboard
+ExecStart=/usr/local/bin/openboard
+Environment=OPENBOARD_DB=/var/lib/openboard/openboard.db
+Environment=OPENBOARD_WEB_ROOT=/usr/local/share/openboard
+Environment=OPENBOARD_AUTH=true
+Environment=OPENBOARD_NO_DEMO=true
+EnvironmentFile=-/etc/openboard.env
+Restart=on-failure
+TimeoutStopSec=25
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_UNIX
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

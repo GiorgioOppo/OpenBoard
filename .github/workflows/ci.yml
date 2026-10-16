@@ -12,6 +12,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Install SQLite headers (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev libssl-dev pkg-config
@@ -22,5 +25,29 @@ jobs:
         run: make
       - name: Integration tests
         run: make test
+      - name: Frontend data formats
+        run: make test-frontend
       - name: Address and undefined behavior sanitizers
         run: make test-sanitize
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose
+        run: docker compose config --quiet
+      - name: Build image
+        run: docker build -t openboard:test .
+      - name: Container smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name openboard-smoke openboard:test
+          trap 'docker logs openboard-smoke; docker rm -f openboard-smoke' EXIT
+          for attempt in $(seq 1 30); do
+            if docker exec openboard-smoke curl --fail --silent http://127.0.0.1:8080/api/ready; then
+              docker exec openboard-smoke /usr/local/bin/openboard --integrity-check
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
