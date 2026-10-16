@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
+#include <openssl/hmac.h>
 #include <openssl/rand.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -17,14 +18,21 @@
 #define SESSION_LIFETIME (8 * 60 * 60)
 #define SESSION_IDLE (30 * 60)
 #define RATE_WINDOW 300
-#define RATE_SLOTS 256
+#define RATE_ROWS 4
+#define RATE_PEER_SLOTS 2048
+#define RATE_USER_SLOTS 8192
 
-/* A bounded, shared limiter reserves attempts before expensive password work. */
-typedef struct { char key[140]; time_t window; unsigned attempts; } RateEntry;
-static RateEntry rate_entries[RATE_SLOTS];
+/* Fixed-size count-min counters reserve attempts before password work. Four
+ * keyed indices make accidental sharing unlikely. Collisions
+ * can only reject too early, never reset a quota or admit extra attempts. No
+ * pool of account names can fill up and deny unrelated clients globally. */
+typedef struct { time_t window; unsigned attempts; } RateCounter;
+static RateCounter peer_rates[RATE_ROWS * RATE_PEER_SLOTS];
+static RateCounter user_rates[RATE_ROWS * RATE_USER_SLOTS];
+static unsigned char rate_secret[32];
+static bool rate_seeded;
+static time_t rate_current_window;
 static pthread_mutex_t rate_mutex = PTHREAD_MUTEX_INITIALIZER;
-static time_t global_window;
-static unsigned global_attempts;
 
 static bool is_write(const Request *r) {
     return strcmp(r->method, "GET") && strcmp(r->method, "HEAD") && strcmp(r->method, "OPTIONS");
@@ -97,32 +105,57 @@ static bool password_matches(const char *password, const char *salt, const char 
         CRYPTO_memcmp(actual, expected, 64) == 0;
     OPENSSL_cleanse(actual, sizeof actual); return ok;
 }
-static bool rate_one(const char *key, unsigned maximum, time_t now) {
-    size_t empty = RATE_SLOTS;
-    for (size_t i = 0; i < RATE_SLOTS; i++) {
-        if (!strcmp(rate_entries[i].key, key)) {
-            if (now - rate_entries[i].window >= RATE_WINDOW || now < rate_entries[i].window) {
-                rate_entries[i].window = now; rate_entries[i].attempts = 0;
-            }
-            if (rate_entries[i].attempts >= maximum) return false;
-            rate_entries[i].attempts++; return true;
-        }
-        if (empty == RATE_SLOTS && (!rate_entries[i].key[0] || now - rate_entries[i].window >= RATE_WINDOW)) empty = i;
+static bool rate_indices(const char *key, size_t width, size_t indices[RATE_ROWS]) {
+    unsigned char digest[EVP_MAX_MD_SIZE]; unsigned length = 0;
+    bool ok = HMAC(EVP_sha256(), rate_secret, sizeof rate_secret,
+        (const unsigned char *)key, strlen(key), digest, &length) != NULL && length == 32;
+    if (ok) for (size_t row = 0; row < RATE_ROWS; row++) {
+        size_t offset = row * 4;
+        uint32_t hash = ((uint32_t)digest[offset] << 24) | ((uint32_t)digest[offset + 1] << 16) |
+            ((uint32_t)digest[offset + 2] << 8) | digest[offset + 3];
+        indices[row] = row * width + hash % width;
     }
-    /* Do not evict live entries: rotating account names cannot reset quotas. */
-    if (empty == RATE_SLOTS) return false;
-    snprintf(rate_entries[empty].key, sizeof rate_entries[empty].key, "%s", key);
-    rate_entries[empty].window = now; rate_entries[empty].attempts = 1; return true;
+    OPENSSL_cleanse(digest, sizeof digest); return ok;
 }
-static bool rate_allowed(const Request *r, const char *username) {
-    char user_key[140], peer_key[140]; time_t now = time(NULL);
-    snprintf(user_key, sizeof user_key, "user:%s", username ? username : "setup");
-    snprintf(peer_key, sizeof peer_key, "peer:%s", r->peer[0] ? r->peer : "local");
+static bool rate_available(RateCounter *rates, const size_t indices[RATE_ROWS], unsigned maximum, time_t now) {
+    unsigned minimum = UINT_MAX;
+    for (size_t row = 0; row < RATE_ROWS; row++) {
+        RateCounter *entry = &rates[indices[row]];
+        if (now != entry->window) {
+            entry->window = now; entry->attempts = 0;
+        }
+        if (entry->attempts < minimum) minimum = entry->attempts;
+    }
+    return minimum < maximum;
+}
+static void rate_reserve(RateCounter *rates, const size_t indices[RATE_ROWS]) {
+    for (size_t row = 0; row < RATE_ROWS; row++)
+        if (rates[indices[row]].attempts < UINT_MAX) rates[indices[row]].attempts++;
+}
+static bool rate_allowed_at(const Request *r, const char *scope, const char *username, time_t now) {
+    char user_key[180], peer_key[80];
+    const char *peer = r->peer[0] ? r->peer : "local";
+    snprintf(user_key, sizeof user_key, "user:%s|%s|%s", peer, scope, username ? username : "");
+    snprintf(peer_key, sizeof peer_key, "peer:%s", peer);
+    size_t peer_indices[RATE_ROWS], user_indices[RATE_ROWS];
     pthread_mutex_lock(&rate_mutex);
-    if (now - global_window >= RATE_WINDOW || now < global_window) { global_window = now; global_attempts = 0; }
-    bool ok = global_attempts < 80 && rate_one(peer_key, 60, now) && rate_one(user_key, 10, now);
-    if (ok) global_attempts++;
+    /* A request sampled before the window boundary may acquire this mutex
+     * after a newer request. Never let it roll counters back to an old window. */
+    if (now < rate_current_window) now = rate_current_window;
+    else rate_current_window = now;
+    if (!rate_seeded) rate_seeded = RAND_bytes(rate_secret, sizeof rate_secret) == 1;
+    bool ok = rate_seeded && rate_indices(peer_key, RATE_PEER_SLOTS, peer_indices) &&
+        rate_indices(user_key, RATE_USER_SLOTS, user_indices) &&
+        rate_available(peer_rates, peer_indices, 60, now) && rate_available(user_rates, user_indices, 10, now);
+    if (ok) { rate_reserve(peer_rates, peer_indices); rate_reserve(user_rates, user_indices); }
     pthread_mutex_unlock(&rate_mutex); return ok;
+}
+static bool rate_allowed(const Request *r, const char *scope, const char *username) {
+    struct timespec stamp;
+    if (clock_gettime(CLOCK_MONOTONIC, &stamp) != 0) return false;
+    /* Every row uses the same fixed monotonic five-minute window. A collision
+     * must not expire one row early and let an existing key reset its quota. */
+    return rate_allowed_at(r, scope, username, stamp.tv_sec / RATE_WINDOW);
 }
 static Response auth_error(int status, const char *message) {
     Response r = error_response(status, message);
@@ -308,7 +341,7 @@ static Response setup_account(Request *r) {
         json_string(r->body, "username", &username, 64) == 1 && username_valid(username) &&
         json_string(r->body, "password", &password, 256) == 1 && password_valid(password);
     if (!valid) { ob_free(name); ob_free(username); secret_free(password); return auth_error(400, "Nome, username (3–64 caratteri a-z, 0-9, . _ -) e password (12–256 byte) sono obbligatori."); }
-    if (!rate_allowed(r, "setup")) { ob_free(name); ob_free(username); secret_free(password); return auth_error(429, "Troppi tentativi. Riprova tra cinque minuti."); }
+    if (!rate_allowed(r, "setup", "")) { ob_free(name); ob_free(username); secret_free(password); return auth_error(429, "Troppi tentativi. Riprova tra cinque minuti."); }
     char salt[33], hash[65], token[65] = "", csrf[65] = "";
     bool ok = random_hex(salt, 16) && password_hash(password, salt, hash); secret_free(password);
     AuthTransaction t = transaction_begin(); bool already = t.begun && count_users() != 0;
@@ -334,7 +367,7 @@ static Response login_account(Request *r) {
     bool valid = json_string(r->body, "username", &username, 64) == 1 && username_valid(username) &&
         json_string(r->body, "password", &password, 256) == 1 && password && strlen(password) <= 256;
     if (!valid) { ob_free(username); secret_free(password); return auth_error(400, "Username o password non validi."); }
-    if (!rate_allowed(r, username)) { ob_free(username); secret_free(password); return auth_error(429, "Troppi tentativi. Riprova tra cinque minuti."); }
+    if (!rate_allowed(r, "login", username)) { ob_free(username); secret_free(password); return auth_error(429, "Troppi tentativi. Riprova tra cinque minuti."); }
     sqlite3_stmt *s = prepare("SELECT id,role,salt,password_hash,active FROM users WHERE username=?1 COLLATE NOCASE");
     bind_text(s, 1, username); ob_free(username);
     bool exists = sqlite3_step(s) == SQLITE_ROW;
@@ -375,7 +408,7 @@ static Response change_password(Request *r) {
         json_string(r->body, "password", &password, 256) == 1 && password_valid(password);
     if (!valid) { secret_free(current); secret_free(password); return auth_error(400, "Fornisci la password attuale e una nuova password di 12–256 byte."); }
     char rate_key[64]; snprintf(rate_key, sizeof rate_key, "password:%lld", (long long)r->user_id);
-    if (!rate_allowed(r, rate_key)) { secret_free(current); secret_free(password); return auth_error(429, "Troppi tentativi. Riprova tra cinque minuti."); }
+    if (!rate_allowed(r, "password", rate_key)) { secret_free(current); secret_free(password); return auth_error(429, "Troppi tentativi. Riprova tra cinque minuti."); }
     sqlite3_stmt *s = prepare("SELECT salt,password_hash FROM users WHERE id=?1 AND active=1"); sqlite3_bind_int64(s, 1, r->user_id);
     bool ok = sqlite3_step(s) == SQLITE_ROW && password_matches(current, (const char *)sqlite3_column_text(s, 0), (const char *)sqlite3_column_text(s, 1));
     char verified_hash[65] = ""; if (ok) snprintf(verified_hash, sizeof verified_hash, "%s", sqlite3_column_text(s, 1));

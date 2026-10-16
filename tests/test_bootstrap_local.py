@@ -39,8 +39,17 @@ class FakeStack:
             return 200, copy.deepcopy(self.hosts)
         if method == "POST" and path == "/api/nginx/proxy-hosts":
             assert self.app_setup
-            self.hosts.append(copy.deepcopy(payload))
-            return 201, {**payload,"meta":{"nginx_online":True}}
+            host = {**copy.deepcopy(payload), "id":len(self.hosts)+1}
+            self.hosts.append(host)
+            return 201, {**host,"meta":{"nginx_online":True}}
+        if method == "PUT" and path.startswith("/api/nginx/proxy-hosts/"):
+            identifier = int(path.rsplit("/",1)[1])
+            for index, host in enumerate(self.hosts):
+                if host["id"] == identifier:
+                    updated = {**copy.deepcopy(payload), "id":identifier}
+                    self.hosts[index] = updated
+                    return 200, {**updated,"meta":{"nginx_online":True}}
+            return 404, {}
         raise AssertionError((method,path))
 
     def app(self, method, path, payload=None):
@@ -113,6 +122,73 @@ class LocalBootstrap(unittest.TestCase):
             bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path)
         self.assertNotIn(("npm","POST","/api/users"),self.stack.calls)
         self.assertNotIn(("app","POST","/api/auth/setup"),self.stack.calls)
+
+    def test_legacy_proxy_upgrade_is_explicit_and_preserves_id_accounts_and_secrets(self):
+        bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path)
+        original_credentials = self.path.read_bytes()
+        self.stack.hosts[0] = {**bootstrap_local.proxy_configuration(legacy=True), "id":7}
+        legacy = copy.deepcopy(self.stack.hosts)
+        self.stack.calls.clear()
+        with self.assertRaises(bootstrap_local.BootstrapError):
+            bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path)
+        self.assertEqual(self.stack.hosts, legacy)
+        self.assertFalse(any(method == "PUT" for _,method,_ in self.stack.calls))
+        self.stack.calls.clear()
+        bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path,upgrade_proxy=True)
+        self.assertEqual(self.path.read_bytes(), original_credentials)
+        self.assertEqual(self.stack.hosts, [{**bootstrap_local.proxy_configuration(), "id":7}])
+        self.assertEqual([call for call in self.stack.calls if call[1] == "PUT"], [("npm","PUT","/api/nginx/proxy-hosts/7")])
+        self.assertNotIn(("npm","POST","/api/users"),self.stack.calls)
+        self.assertNotIn(("app","POST","/api/auth/setup"),self.stack.calls)
+        self.assertNotIn(("npm","POST","/api/nginx/proxy-hosts"),self.stack.calls)
+        self.stack.calls.clear()
+        bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path,upgrade_proxy=True)
+        self.assertFalse(any(method == "PUT" for _,method,_ in self.stack.calls))
+
+    def test_upgrade_refuses_modified_legacy_hosts_and_ambiguous_ids(self):
+        bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path)
+        original_credentials = self.path.read_bytes()
+        variations = ({"forward_host":"other-service"}, {"ssl_forced":True},
+                      {"advanced_config":bootstrap_local.LEGACY_API_LOCATION+"\n# custom"},
+                      {"locations":[{"path":"/private"}]}, {"id":None}, {"id":True})
+        for change in variations:
+            with self.subTest(change=change):
+                self.stack.hosts = [{**bootstrap_local.proxy_configuration(legacy=True), "id":7, **change}]
+                original = copy.deepcopy(self.stack.hosts)
+                self.stack.calls.clear()
+                with self.assertRaises(bootstrap_local.BootstrapError):
+                    bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path,upgrade_proxy=True)
+                self.assertEqual(self.stack.hosts, original)
+                self.assertEqual(self.path.read_bytes(), original_credentials)
+                self.assertFalse(any(method in ("PUT","DELETE") for _,method,_ in self.stack.calls))
+
+    def test_upgrade_requires_confirmed_response_from_npm(self):
+        bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path)
+        self.stack.hosts = [{**bootstrap_local.proxy_configuration(legacy=True), "id":7}]
+        original = copy.deepcopy(self.stack.hosts)
+        def unavailable(method, path, payload=None, token=None):
+            if method == "PUT":
+                return 500, {"error":"private response that must not be printed"}
+            return self.stack.npm(method,path,payload,token)
+        with self.assertRaises(bootstrap_local.BootstrapError) as error:
+            bootstrap_local.bootstrap(unavailable,self.stack.app,self.path,upgrade_proxy=True)
+        self.assertNotIn("private response", str(error.exception))
+        self.assertEqual(self.stack.hosts, original)
+
+    def test_proxy_network_parameters_reject_gateway_and_outside_addresses(self):
+        spec = importlib.util.spec_from_file_location("init_environment", ROOT/"scripts/init-env.py")
+        init = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(init)
+        self.assertEqual(init.proxy_network("172.30.240.0/24","172.30.240.2"), ("172.30.240.0/24","172.30.240.2"))
+        self.assertEqual(init.proxy_network("10.80.0.0/24","10.80.0.7"), ("10.80.0.0/24","10.80.0.7"))
+        for subnet, proxy in (("172.30.240.0/24","172.30.241.2"), ("172.30.240.0/24","172.30.240.1"),
+                              ("172.30.240.0/24","172.30.240.0"), ("172.30.240.0/24","172.30.240.255"),
+                              ("172.30.240.0/24","172.30.240.128"), ("172.30.240.0/24","172.30.240.200"),
+                              ("172.30.240.0/31","172.30.240.2"), ("192.0.2.0/24","192.0.2.2"),
+                              ("172.30.240.2/24","172.30.240.3"), ("::1/128","::1")):
+            with self.subTest(subnet=subnet,proxy=proxy):
+                with self.assertRaises(ValueError):
+                    init.proxy_network(subnet,proxy)
 
     def test_remote_origins_and_wrong_ports_are_rejected(self):
         env=Path(self.temp.name)/".env"

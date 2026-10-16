@@ -1,22 +1,22 @@
-# API di produttività — OpenBoard 0.3
+# Productivity API — OpenBoard 0.6.1
 
-Queste API aggiungono pianificazione, assegnatari, dipendenze, modelli personali, filtri salvati e modifiche collettive. Usano le stesse sessioni, CSRF, risposte JSON e regole di accesso descritte in [API.md](API.md). In modalità locale gli oggetti personali appartengono all'utente locale `0`.
+These APIs, introduced in 0.3, provide planning, assignees, dependencies, personal templates, saved filters, and bulk changes. They use the sessions, CSRF protection, JSON responses, and access rules described in [API.md](API.md). Authentication is enabled by default. In explicit `--no-auth` development mode, personal objects belong to the local user `0`.
 
-Le scritture condivise richiedono il permesso di modifica della bacheca. I filtri salvati richiedono soltanto la lettura della bacheca e appartengono all'utente corrente: anche un osservatore può crearli, rinominarli ed eliminarli. Nessuno può leggere o modificare i filtri di un altro account.
+Shared writes require board write access. Saved filters require only board read access and belong to the current user: observers can create, rename, and delete their own filters. Users cannot read or modify another account's filters.
 
-## Pianificazione delle schede
+## Card planning
 
-`POST /api/columns/:id/cards` e `PATCH /api/cards/:id` accettano questi campi aggiuntivi. Le risposte della scheda completa e della bacheca `?summary=1` li includono.
+`POST /api/columns/:id/cards` and `PATCH /api/cards/:id` accept these additional fields. Full card responses and board `?summary=1` responses include them.
 
-| Campo | Tipo e vincoli | Valore iniziale |
+| Field | Type and constraints | Initial value |
 | --- | --- | --- |
-| `start_date` | Data di calendario valida `YYYY-MM-DD`, oppure stringa vuota. Se entrambe presenti, inizio ≤ `due_date`. Anche una modifica parziale verifica la data già salvata. | `""` |
-| `blocked_reason` | Stringa, massimo 1.000 caratteri. | `""` |
-| `actual_minutes` | Intero fra 0 e 1.000.000. | `0` |
-| `reference_url` | Stringa vuota o URL `http://`/`https://`, massimo 2.000 caratteri; niente caratteri di controllo, spazi, backslash o credenziali nel dominio. | `""` |
-| `assignee_ids` | Array di massimo 100 ID numerici positivi, senza duplicati. | `[]` |
+| `start_date` | Valid calendar date `YYYY-MM-DD`, or an empty string. When both dates are present, start ≤ `due_date`. Partial updates also check the saved date. | `""` |
+| `blocked_reason` | String, up to 1,000 characters. | `""` |
+| `actual_minutes` | Integer from 0 to 1,000,000. | `0` |
+| `reference_url` | Empty string or `http://`/`https://` URL, up to 2,000 characters; no control characters, spaces, backslashes, or credentials in the authority. | `""` |
+| `assignee_ids` | Array of up to 100 positive numeric IDs, without duplicates. | `[]` |
 
-Esempio di aggiornamento con controllo di concorrenza:
+Example update with concurrency control:
 
 ```http
 PATCH /api/cards/42
@@ -24,79 +24,79 @@ Content-Type: application/json
 If-Match: "7"
 X-CSRF-Token: <token>
 
-{"start_date":"2026-11-02","due_date":"2026-11-05","blocked_reason":"In attesa della revisione","actual_minutes":90,"reference_url":"https://example.org/specification","assignee_ids":[3,8]}
+{"start_date":"2026-11-02","due_date":"2026-11-05","blocked_reason":"Waiting for review","actual_minutes":90,"reference_url":"https://example.org/specification","assignee_ids":[3,8]}
 ```
 
-Le stringhe vuote cancellano i campi testuali. I campi omessi conservano il valore precedente. Date o tipi non validi producono `400`; una versione `If-Match` superata produce `412`.
+An authenticated request also needs the session cookie. Empty strings clear text fields. Omitted fields retain their previous values. Invalid dates or types produce `400`; a stale `If-Match` version produces `412`.
 
-## Assegnatari reali e attività personali
+## Account assignees and personal tasks
 
-Gli ID devono indicare utenti attivi che possano leggere la bacheca: amministratori globali oppure suoi membri espliciti. La validazione e la scrittura avvengono nella stessa transazione della scheda; un assegnatario non valido annulla l'intera modifica. In modalità senza account è ammesso soltanto l'array vuoto.
+IDs must identify active users who can read the board: global administrators or explicit board members. Validation and writing occur in the card's transaction; an invalid assignee rolls back the entire change. Only an empty array is allowed in `--no-auth` mode.
 
-Il campo storico `assignee`, una stringa libera, rimane indipendente per compatibilità. Gli ID reali non sono dedotti dai nomi.
+The legacy `assignee` field, a free-text string, remains independent for compatibility. Account IDs are not inferred from names.
 
-| Metodo e percorso | Corpo / risposta |
+| Method and path | Body / response |
 | --- | --- |
-| `GET /api/cards/:id/assignees` | `{"assignees":[{"id":3,"name":"Ada","username":"ada"}]}` |
-| `PATCH /api/cards/:id/assignees` | Corpo `{"user_ids":[3,8]}`. Risposta `{"ok":true,"id":42,"version":8}`. Supporta `If-Match`. |
-| `GET /api/me/tasks` | `{"cards":[...]}`; ogni scheda completa contiene anche `board_id`, `board_name`, `column_title`. |
+| `GET /api/cards/:id/assignees` | `{"assignees":[{"id":3,"name":"Alex","username":"alex"}]}` |
+| `PATCH /api/cards/:id/assignees` | Body `{"user_ids":[3,8]}`. Response `{"ok":true,"id":42,"version":8}`. Supports `If-Match`. |
+| `GET /api/me/tasks` | `{"cards":[...]}`; each full card also contains `board_id`, `board_name`, `column_title`. |
 
-La scheda completa include sia `assignee_ids` sia `assignees`. “Mie attività” comprende soltanto schede assegnate all'ID della sessione corrente, aperte, non archiviate, appartenenti a bacheche non archiviate e attualmente accessibili. Non usa il nome libero `assignee`. La revoca dell'accesso alla bacheca rende immediatamente invisibili le relative attività; un osservatore può consultare le proprie attività senza acquisire il permesso di modificarle.
+Full card responses include both `assignee_ids` and `assignees`. Personal tasks include only open, unarchived cards assigned to the current session's user ID, on unarchived boards the user can currently access. They do not use the free-text `assignee` name. Revoking board access immediately hides the related tasks; observers can read their own tasks without gaining write access.
 
-## Dipendenze
+## Dependencies
 
-Una dipendenza `A → B` significa che B deve essere completata prima di completare A.
+A dependency `A → B` means B must be completed before A can be completed.
 
-| Metodo e percorso | Corpo / risposta |
+| Method and path | Body / response |
 | --- | --- |
-| `GET /api/cards/:id/dependencies` | `{"dependencies":[{"id":15,"title":"Revisione","completed":false}]}` |
-| `POST /api/cards/:id/dependencies` | Corpo `{"required_card_id":15}`. Risposta `201` con ID e nuova versione della scheda. |
-| `DELETE /api/cards/:id/dependencies/:required_id` | Elimina il collegamento; risposta `200` con ID e nuova versione. |
+| `GET /api/cards/:id/dependencies` | `{"dependencies":[{"id":15,"title":"Review","completed":false}]}` |
+| `POST /api/cards/:id/dependencies` | Body `{"required_card_id":15}`. Response `201` with the card's ID and new version. |
+| `DELETE /api/cards/:id/dependencies/:required_id` | Removes the link; response `200` with ID and new version. |
 
-Le schede devono appartenere alla stessa bacheca. Una dipendenza verso se stessa produce `400`, un ciclo diretto o indiretto `409`. Il controllo del ciclo avviene nella transazione di scrittura: due richieste concorrenti non possono creare un ciclo.
+Cards must belong to the same board. A self-dependency produces `400`; a direct or indirect cycle produces `409`. Cycle detection occurs in the write transaction: concurrent requests cannot create a cycle.
 
-Il completamento con dipendenze incomplete produce `409`. Una scheda prerequisito cestinata, o la cui lista sia cestinata, rimane insoddisfatta; la dipendenza va rimossa oppure il prerequisito ripristinato e completato. Non si può aggiungere un prerequisito incompleto a una scheda già completata. Le modifiche ai collegamenti supportano `If-Match`, incrementano la versione della scheda e registrano l'attività della bacheca.
+Completing a card with incomplete dependencies produces `409`. A trashed prerequisite, or one in a trashed list, remains unsatisfied; remove the dependency or restore and complete the prerequisite. An incomplete prerequisite cannot be added to an already completed card. Link changes support `If-Match`, increment the card version, and record board activity.
 
-## Modelli personali
+## Personal templates
 
-Un modello conserva uno snapshot al momento della creazione. Successive modifiche o eliminazioni dell'originale non lo cambiano. Elenco e istanziazione sono riservati al proprietario; il proprietario e un amministratore globale possono eliminare il modello. Le operazioni condivise restano soggette ai permessi della destinazione.
+A template retains a snapshot taken at creation. Later changes to, or deletion of, the original do not affect it. Listing and instantiation are limited to the owner; the owner or a global administrator can delete a template. Shared operations remain subject to destination permissions.
 
-| Metodo e percorso | Corpo / risposta |
+| Method and path | Body / response |
 | --- | --- |
-| `POST /api/templates/cards` | `{"card_id":42,"name":"Scheda di revisione"}` → `201`, `{"ok":true,"id":5}` |
-| `GET /api/templates/cards` | `{"templates":[{"id":5,"name":"Scheda di revisione","created_at":"..."}]}` |
-| `POST /api/templates/cards/:id/instantiate` | `{"column_id":9}` → `201`, ID e versione della nuova scheda. Il limite WIP è applicato dal server. |
-| `DELETE /api/templates/cards/:id` | Elimina il modello, senza eliminare schede già create. |
-| `POST /api/templates/boards` | `{"board_id":2,"name":"Progetto standard"}` → `201`, ID del modello. |
-| `GET /api/templates/boards` | Stessa struttura `templates` dell'elenco dei modelli di scheda. |
-| `POST /api/templates/boards/:id/instantiate` | `{"name":"Nuovo progetto"}` oppure `{}`. Crea una bacheca con liste, limiti WIP e schede dello snapshot. La nuova bacheca è attiva e non preferita. |
-| `DELETE /api/templates/boards/:id` | Elimina il modello. |
+| `POST /api/templates/cards` | `{"card_id":42,"name":"Review card"}` → `201`, `{"ok":true,"id":5}` |
+| `GET /api/templates/cards` | `{"templates":[{"id":5,"name":"Review card","created_at":"..."}]}` |
+| `POST /api/templates/cards/:id/instantiate` | `{"column_id":9}` → `201`, ID and version of the new card. The server enforces WIP. |
+| `DELETE /api/templates/cards/:id` | Deletes the template without deleting cards already created from it. |
+| `POST /api/templates/boards` | `{"board_id":2,"name":"Standard project"}` → `201`, template ID. |
+| `GET /api/templates/boards` | Same `templates` structure as the card template list. |
+| `POST /api/templates/boards/:id/instantiate` | `{"name":"New project"}` or `{}`. Creates a board with lists, WIP limits, and cards from the snapshot. The new board is active and not starred. |
+| `DELETE /api/templates/boards/:id` | Deletes the template. |
 
-I modelli non assegnano automaticamente membri della bacheca sorgente alla destinazione e non copiano ID di assegnatari reali. I nomi liberi storici restano parte del contenuto della scheda. I modelli di scheda non copiano dipendenze, allegati, commenti, attività o cestino.
+Templates do not automatically assign source board members to the destination or copy account assignee IDs. Legacy free-text names remain part of the card content. Card templates do not copy dependencies, attachments, comments, activity, or trash.
 
-## Filtri salvati
+## Saved filters
 
-| Metodo e percorso | Corpo / risposta |
+| Method and path | Body / response |
 | --- | --- |
-| `POST /api/boards/:id/views` | `{"name":"Urgenti aperte","filters":{"priority":"urgent","status":"open","sort":"due"}}` → `201`, ID della vista. |
-| `GET /api/boards/:id/views` | `{"views":[{"id":6,"name":"Urgenti aperte","filters":{...}}]}` |
-| `PATCH /api/views/:id` | `{"name":"Nuovo nome"}` e/o `{"filters":{...}}`. L'oggetto `filters`, se presente, sostituisce quello precedente. |
-| `DELETE /api/views/:id` | Elimina la vista personale. |
+| `POST /api/boards/:id/views` | `{"name":"Open urgent tasks","filters":{"priority":"urgent","status":"open","sort":"due"}}` → `201`, view ID. |
+| `GET /api/boards/:id/views` | `{"views":[{"id":6,"name":"Open urgent tasks","filters":{...}}]}` |
+| `PATCH /api/views/:id` | `{"name":"New name"}` and/or `{"filters":{...}}`. When supplied, `filters` replaces the previous object. |
+| `DELETE /api/views/:id` | Deletes the personal view. |
 
-Il nome deve contenere testo e avere massimo 200 caratteri. L'oggetto `filters` ammette soltanto chiavi note, senza duplicati; tutti i valori sono stringhe di massimo 200 caratteri.
+The name must contain non-whitespace text and have at most 200 characters. The `filters` object accepts known keys only, without duplicates; every value is a string of up to 200 characters.
 
-| Chiave | Valori ammessi dal server |
+| Key | Values accepted by the server |
 | --- | --- |
-| `search`, `query` | Testo libero; `query` è un alias compatibile. |
+| `search`, `query` | Free text; `query` is a compatibility alias. |
 | `label` | `""`, `design`, `sviluppo`, `ricerca`, `marketing`, `urgente` |
-| `assignee` | Nome libero o valore di filtro del client. |
+| `assignee` | Free-text name or a client filter value. |
 | `priority` | `""`, `low`, `normal`, `high`, `urgent` |
 | `status` | `""`, `open`, `completed`, `overdue`, `due-soon`, `blocked` |
 | `sort` | `manual`, `due`, `priority`, `title`, `created`, `updated` |
 
-La persistenza non esegue query o codice inviato dal client. L'interfaccia 0.3 propone i filtri e gli ordinamenti che sa applicare; l'API conserva soltanto valori conformi alla whitelist.
+These identifiers remain unchanged across interface languages. Persistence does not execute queries or code supplied by the client. The interface offers filters and ordering it can apply; the API stores only values from the allowlist.
 
-## Modifiche collettive atomiche
+## Atomic bulk changes
 
 ```http
 POST /api/boards/2/bulk
@@ -105,20 +105,20 @@ Content-Type: application/json
 {"action":"complete","value":true,"cards":[{"id":42,"version":7},{"id":43,"version":12}]}
 ```
 
-`action` accetta `complete` o `archive`; `value` è un booleano. Sono richieste da 1 a 500 schede, con ID univoci e versione intera positiva per ciascuna. Risposta: `{"ok":true,"updated":2}`.
+The original actions `complete` and `archive` take a boolean `value`; [planning](API_PIANIFICAZIONE.md) documents the additional `priority`, `labels`, and `milestone` actions introduced in 0.4. Requests contain 1–500 cards, each with a unique ID and a positive integer version. Response: `{"ok":true,"updated":2}`. Authenticated writes also require the session cookie and CSRF token.
 
-Tutte le schede devono essere attive e appartenere alla bacheca indicata. Prima della scrittura il server verifica ogni versione e l'intero stato finale richiesto. Una versione superata produce `412`; dipendenze insoddisfatte o WIP superato producono `409`; una scheda estranea o non accessibile produce `404`. In ogni caso di errore nessuna scheda viene modificata.
+All cards must be active and belong to the specified board. Before writing, the server checks every version and the entire requested final state. A stale version produces `412`; unsatisfied dependencies or exceeded WIP produce `409`; an unrelated or inaccessible card produces `404`. On any error, no card changes.
 
-Un batch può completare insieme una scheda e i suoi prerequisiti. Riapertura e ripristino dall'archivio verificano il WIP collettivo nelle sole liste coinvolte, impedendo che più schede riaperte contemporaneamente aggirino il limite. Ogni scheda modificata genera un evento; versioni, eventi e notifiche vengono confermati nella stessa transazione. Per un nuovo tentativo dopo un risultato ambiguo si può riusare la stessa `Idempotency-Key` e lo stesso corpo.
+A batch can complete a card and its prerequisites together. Reopening and unarchiving check collective WIP only in affected lists, preventing multiple cards from bypassing the limit when reopened together. Each changed card generates an event; versions, events, and notifications commit in the same transaction. After an ambiguous outcome, retry with the same `Idempotency-Key` and body; current permissions are checked before a stored response is replayed.
 
-## Esportazione, importazione e conservazione
+## Export, import, and retention
 
-Il formato JSON resta `openboard`, versione `2`, compatibile con i file precedenti. Le quattro nuove proprietà testuali/numeriche di pianificazione sono esportate, validate durante l'importazione e conservate anche nelle copie delle bacheche.
+The JSON format remains `openboard`, version `2`, compatible with previous files. The four additional text/numeric planning properties are exported, validated on import, and preserved when boards are copied.
 
-L'esportazione include gli ID degli assegnatari nello snapshot della scheda, ma l'importazione li ignora: gli ID di account non sono portabili tra installazioni e non danno automaticamente accesso alla nuova bacheca. Occorre riassegnare gli utenti reali dopo l'importazione. La copia di una scheda nella stessa bacheca può conservare gli assegnatari ancora validi; la copia o istanziazione di una bacheca non copia queste relazioni.
+Export includes assignee IDs in card snapshots, but import ignores them: account IDs are not portable between installations and do not automatically grant access to the new board. Reassign account users after import. Copying a card within the same board may retain still-valid assignees; copying or instantiating a board does not copy these relationships.
 
-Il JSON di bacheca non contiene dipendenze, account, membership, sessioni, allegati, commenti, attività, modelli personali o filtri salvati. Un backup SQLite conserva l'intero database, incluse queste relazioni. Cestino e archivio sono operazioni reversibili: non liberano automaticamente lo spazio fisico. I modelli e i filtri personali si eliminano mediante i rispettivi endpoint; i loro contenuti restano indipendenti dagli originali.
+Board JSON does not contain dependencies, accounts, memberships, sessions, attachments, comments, activity, personal templates, or saved filters. A full application backup preserves these relationships: use SQLite backup in local mode or the PostgreSQL/MongoDB snapshot procedure in the [deployment guide](DEPLOYMENT.md). Trash and archive operations are reversible and do not automatically reclaim physical space. Personal templates and filters are deleted through their respective endpoints; their content remains independent of the originals.
 
-## Verifica
+## Verification
 
-[tests/test_productivity.py](../tests/test_productivity.py) verifica campi e date parziali, round trip JSON, grafo delle dipendenze e richieste concorrenti, prerequisiti cestinati, snapshot dei modelli, WIP, persistenza e isolamento dei filtri, assegnatari attivi, revoca degli accessi, batch atomici, versioni superate e privilegi degli osservatori. I test del dominio precedente restano eseguiti nella suite completa.
+[tests/test_productivity.py](../tests/test_productivity.py) checks fields and partial date updates, JSON round trips, the dependency graph and concurrent requests, trashed prerequisites, template snapshots, WIP, filter persistence and isolation, active assignees, access revocation, atomic batches, stale versions, and observer permissions. Earlier domain tests remain part of the full suite.

@@ -1,0 +1,22 @@
+name: Support question
+description: Ask a setup or usage question after checking the documentation.
+title: "[Question]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read SUPPORT.md and docs/TROUBLESHOOTING.md first.
+        Do not paste passwords, tokens, environment files or database connection strings.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question and what you have tried
+      description: Include the relevant environment and a short redacted error if applicable.
+    validations:
+      required: true

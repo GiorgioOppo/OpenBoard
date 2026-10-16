@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 """Create a private Compose environment without shared or printed credentials."""
 import argparse
+import importlib.util
+import ipaddress
 import os
 from pathlib import Path
 import secrets
 import sys
-from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+_spec = importlib.util.spec_from_file_location("openboard_deployment", Path(__file__).with_name("check-deployment.py"))
+_deployment = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_deployment)
 
 
 def public_origin(value):
     try:
-        parsed = urlsplit(value)
-        if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
-            raise ValueError
-        if parsed.path or parsed.query or parsed.fragment or "\\" in value or any(c.isspace() or ord(c)<32 or ord(c)==127 for c in value):
-            raise ValueError
-        if parsed.port is not None and not 1 <= parsed.port <= 65535:
-            raise ValueError
-        value.encode("ascii")
-    except (ValueError, UnicodeError):
-        raise argparse.ArgumentTypeError("Usa un'origine http(s) con dominio e porta opzionale, senza percorso o credenziali.") from None
-    return value
+        return _deployment.public_origin(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from None
 
 
 def port(value):
@@ -32,6 +28,22 @@ def port(value):
     return number
 
 
+def proxy_network(subnet, address):
+    try:
+        network = ipaddress.IPv4Network(subnet)
+        proxy = ipaddress.IPv4Address(address)
+        private_ranges = (ipaddress.IPv4Network(value) for value in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"))
+        if not any(network.subnet_of(private) for private in private_ranges) or network.prefixlen > 29:
+            raise ValueError
+        if proxy not in network or proxy in (network.network_address, network.network_address + 1, network.broadcast_address):
+            raise ValueError
+        if proxy in list(network.subnets(prefixlen_diff=1))[1]:
+            raise ValueError
+    except (ValueError, TypeError):
+        raise ValueError("Usa una subnet IPv4 privata /29 o più ampia e un IP proxy nella metà bassa, distinto da rete e gateway iniziale; la metà alta è riservata alle assegnazioni dinamiche.") from None
+    return str(network), str(proxy)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--path", type=Path, default=ROOT / ".env")
@@ -39,6 +51,8 @@ def main():
     parser.add_argument("--http-port", type=port, default=80)
     parser.add_argument("--https-port", type=port, default=443)
     parser.add_argument("--admin-port", type=port, default=81)
+    parser.add_argument("--frontend-subnet", default="172.30.240.0/24", help="Private Docker frontend subnet; select another range if it overlaps an existing network.")
+    parser.add_argument("--proxy-ip", default="172.30.240.2", help="Fixed NPM IPv4 address trusted by the backend.")
     parser.add_argument("--publish-ip", choices=("127.0.0.1", "0.0.0.0"), default="127.0.0.1",
                         help="Bind proxy ports to loopback by default; use 0.0.0.0 for explicit network exposure.")
     args = parser.parse_args()
@@ -47,10 +61,18 @@ def main():
     if args.public_url is None:
         suffix = f":{args.http_port}" if args.http_port != 80 else ""
         args.public_url = f"http://openboard.localhost{suffix}"
+    try:
+        _deployment.publication(args.public_url, args.publish_ip, args.http_port, args.https_port)
+        args.frontend_subnet, args.proxy_ip = proxy_network(args.frontend_subnet, args.proxy_ip)
+    except ValueError as error:
+        parser.error(str(error))
     values = {name: secrets.token_hex(32) for name in (
         "POSTGRES_PASSWORD", "POSTGRES_APP_PASSWORD", "MONGO_ROOT_PASSWORD", "MONGO_APP_PASSWORD")}
     values.update(OPENBOARD_PUBLIC_URL=args.public_url, OPENBOARD_PUBLISH_IP=args.publish_ip, OPENBOARD_HTTP_PORT=str(args.http_port),
-                  OPENBOARD_HTTPS_PORT=str(args.https_port), OPENBOARD_NPM_ADMIN_PORT=str(args.admin_port), TZ="Europe/Rome")
+                  OPENBOARD_HTTPS_PORT=str(args.https_port), OPENBOARD_NPM_ADMIN_PORT=str(args.admin_port),
+                  OPENBOARD_FRONTEND_SUBNET=args.frontend_subnet,
+                  OPENBOARD_FRONTEND_IP_RANGE=str(list(ipaddress.IPv4Network(args.frontend_subnet).subnets(prefixlen_diff=1))[1]),
+                  OPENBOARD_PROXY_IP=args.proxy_ip, TZ="Europe/Rome")
     contents = "# Private deployment credentials. Do not commit or print this file.\n" + "".join(f"{key}={value}\n" for key, value in values.items())
     try:
         flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)

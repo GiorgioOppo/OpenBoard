@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Initialize a fresh local stack and its proxy without displaying credentials."""
 import http.client
+import argparse
 import json
 import os
 from pathlib import Path
@@ -13,7 +14,7 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 CREDENTIAL_KEYS = ("OPENBOARD_ADMIN_USERNAME", "OPENBOARD_ADMIN_PASSWORD", "NPM_ADMIN_EMAIL", "NPM_ADMIN_PASSWORD")
-API_LOCATION = """location ^~ /api/ {
+LEGACY_API_LOCATION = """location ^~ /api/ {
     resolver 127.0.0.11 valid=10s ipv6=off;
     set $openboard_api app:8080;
     client_max_body_size 2m;
@@ -23,6 +24,7 @@ API_LOCATION = """location ^~ /api/ {
     proxy_pass http://$openboard_api;
 }
 """
+API_LOCATION = (ROOT / "deploy/npm/openboard-api.conf").read_text(encoding="utf-8")
 
 
 class BootstrapError(RuntimeError):
@@ -160,14 +162,18 @@ def require(status, expected, label):
         raise BootstrapError(f"{label} non riuscito (HTTP {status}); nessuna credenziale mostrata.")
 
 
-def proxy_configuration():
+def proxy_configuration(legacy=False):
     return {"domain_names": ["openboard.localhost"], "forward_scheme": "http", "forward_host": "frontend", "forward_port": 8080,
             "certificate_id": 0, "ssl_forced": False, "hsts_enabled": False, "hsts_subdomains": False, "http2_support": False,
             "block_exploits": False, "caching_enabled": False, "allow_websocket_upgrade": False, "access_list_id": 0,
-            "advanced_config": API_LOCATION, "enabled": True, "locations": [], "meta": {}}
+            "advanced_config": LEGACY_API_LOCATION if legacy else API_LOCATION, "enabled": True, "locations": [], "meta": {}}
 
 
-def bootstrap(npm, app, credential_path):
+def matching_proxy(host, expected):
+    return isinstance(host, dict) and all(host.get(key) == value for key, value in expected.items() if key != "meta")
+
+
+def bootstrap(npm, app, credential_path, *, upgrade_proxy=False):
     status, health = npm("GET", "/api/")
     require(status, 200, "Verifica NPM")
     if not isinstance(health, dict) or not isinstance(health.get("setup"), bool) or health.get("version") != {"major": 2, "minor": 16, "revision": 0}:
@@ -213,8 +219,19 @@ def bootstrap(npm, app, credential_path):
     matching = [host for host in hosts if isinstance(host, dict) and "openboard.localhost" in host.get("domain_names", [])]
     expected = proxy_configuration()
     if matching:
-        if len(matching) != 1 or any(matching[0].get(key) != value for key, value in expected.items() if key != "meta"):
+        if len(matching) != 1:
             raise BootstrapError("Proxy openboard.localhost già presente con configurazione diversa. Nessun host modificato.")
+        host = matching[0]
+        if not matching_proxy(host, expected):
+            if not upgrade_proxy or not matching_proxy(host, proxy_configuration(legacy=True)):
+                raise BootstrapError("Proxy locale differente: nessun host modificato. --upgrade-proxy aggiorna soltanto la configurazione legacy OpenBoard esatta.")
+            identifier = host.get("id")
+            if isinstance(identifier, bool) or not isinstance(identifier, int) or identifier <= 0:
+                raise BootstrapError("Identificatore del proxy legacy non valido. Nessun host modificato.")
+            status, updated = npm("PUT", f"/api/nginx/proxy-hosts/{identifier}", expected, token=token)
+            require(status, 200, "Aggiornamento del solo proxy legacy OpenBoard")
+            if not matching_proxy(updated, expected) or updated.get("id") != identifier or updated.get("meta", {}).get("nginx_online") is False:
+                raise BootstrapError("Aggiornamento proxy non confermato da NPM. Verifica il virtual host prima della pubblicazione.")
     else:
         status, host = npm("POST", "/api/nginx/proxy-hosts", expected, token=token)
         require(status, 201, "Creazione proxy locale")
@@ -223,11 +240,14 @@ def bootstrap(npm, app, credential_path):
     return values
 
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--upgrade-proxy", action="store_true", help="Upgrade only the exact legacy local OpenBoard proxy, keeping its ID and private credentials.")
+    args = parser.parse_args(argv)
     try:
         origin, authority, public_port, admin_port = settings()
         path = ROOT / ".env.local-admin"
-        bootstrap(npm_transport(admin_port), app_transport(origin, authority), path)
+        bootstrap(npm_transport(admin_port), app_transport(origin, authority), path, upgrade_proxy=args.upgrade_proxy)
         for attempt in range(10):
             status, body, headers = loopback_request(public_port, "GET", "/", authority=authority)
             api_status, api_body, _ = loopback_request(public_port, "GET", "/api/auth/session", authority=authority)

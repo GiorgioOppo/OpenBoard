@@ -1,27 +1,51 @@
-# Sicurezza di OpenBoard
+# Security policy
 
-Il backend OpenBoard 0.6 espone soltanto API, abilita gli account per impostazione predefinita e ascolta per impostazione predefinita su `127.0.0.1`. Il container imposta esplicitamente `OPENBOARD_BIND=0.0.0.0` sulla rete Docker privata; app, PostgreSQL e MongoDB non pubblicano porte sull'host. Nginx Proxy Manager espone HTTP/HTTPS su loopback per impostazione predefinita (`OPENBOARD_PUBLISH_IP=127.0.0.1`); il pannello amministrativo è sempre vincolato a `127.0.0.1:81`. L'esposizione alla rete richiede una scelta esplicita. Configurare prima l'amministratore OpenBoard e poi il Proxy Host. Per accesso remoto usare un dominio HTTPS come `OPENBOARD_PUBLIC_URL`.
+OpenBoard is an early preview. Security fixes target the latest preview release and the default branch. The project does not offer security certification, a bug bounty, a response-time guarantee or an enterprise support agreement.
 
-Le credenziali dei database vengono generate in `.env` con permessi `0600`, escluso da Git e dal contesto di build. Le utenze dell'app sono separate dagli amministratori dei database. In modalità esterna i documenti JSON, gli allegati e i corpi dell'idempotenza sono in MongoDB; dati scalari, account e sessioni sono in PostgreSQL. Entrambi gli archivi e i backup contengono dati riservati. La cache SQLite ricostruibile usa un tmpfs nel container.
+## Supported versions
 
-Gli account usano password di almeno 12 byte, PBKDF2-HMAC-SHA256 con 600.000 iterazioni e salt casuali. Le sessioni hanno token casuali memorizzati come hash, cookie HttpOnly/SameSite Strict, inattività massima di 30 minuti e durata assoluta di 8 ore. Con origine pubblica HTTPS il cookie ha anche l'attributo Secure. Le scritture autenticate richiedono un token CSRF.
+| Version | Security maintenance |
+| --- | --- |
+| 0.6.1 preview / current `main` | Current development target; upgrade to the latest reviewed fixes |
+| 0.6.0 and earlier | No separate maintenance branch; upgrade after backing up and reviewing migrations |
 
-I ruoli sono amministratore, membro e osservatore. L'amministratore dell'istanza può accedere a tutte le bacheche; gli altri utenti accedono soltanto a quelle condivise. Un osservatore non modifica i dati della bacheca, ma può gestire i propri preferiti. Le modifiche ai permessi sono verificate dal server a ogni richiesta.
+Support status is a maintenance policy, not a claim that the current release has no vulnerabilities. See the [audit](docs/SECURITY_AUDIT_2026-10-16.md), [remediation report](docs/SECURITY_REMEDIATION_2026-10-16.md) and [known limitations](docs/ROADMAP.md#current-limitations).
 
-La modalità esplicita `--no-auth` serve soltanto per lo sviluppo locale ed è rifiutata con bind diverso da `127.0.0.1`. Gli endpoint pubblici sono limitati a health/readiness/versione e alle operazioni necessarie per configurazione iniziale e accesso. Il frontend statico non riceve credenziali di PostgreSQL o MongoDB; il browser riceve solo dati consentiti dalle API e metadati del catalogo. Le revisioni controllate con `If-Match` proteggono le modifiche inviate dall'interfaccia; i client API devono inviare a loro volta la revisione attesa. Le bozze vengono conservate nel browser, che va considerato parte dell'ambiente dell'utente.
+## Report a vulnerability
 
-Gli allegati vengono validati per formato, nome e dimensione, conservati nel database e scaricati come file: la pagina non ne esegue il contenuto. I limiti sono 1 MiB per file, 10 file attivi e 5 MiB attivi per scheda. Il cestino conserva i contenuti per il ripristino, quindi queste quote non limitano lo spazio fisico totale del database. Non è inclusa una scansione antivirus: controllare i file ricevuti prima di aprirli.
+Use **GitHub Private Vulnerability Reporting**: open the repository's [Security advisories](https://github.com/GiorgioOppo/OpenBoard/security/advisories) and choose **Report a vulnerability**. This is the project's sole private vulnerability-reporting channel; no reporting email is published.
 
-Notifiche e sottoscrizioni rispettano l'accesso corrente alla bacheca. I template e i filtri salvati sono personali. Le metriche richiedono amministrazione globale con account attivi. CSV e Markdown applicano rispettivamente protezione dalle formule e escaping HTML; i link di riferimento ammettono solo HTTP/HTTPS.
+Private reporting must be enabled when the repository becomes public. If the button is unavailable, open a support issue asking the maintainer to enable private reporting, without including vulnerability details. See [GitHub's reporting instructions](https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/privately-reporting-a-security-vulnerability).
 
-Revisioni e report personali richiedono un account. Il richiedente non può votare la propria revisione; i revisori devono essere membri attivi con permessi di scrittura. La revoca, il ruolo osservatore e la disattivazione invalidano permanentemente le loro decisioni, anche dopo un reinvito. Le richieste di revisione sono un supporto al coordinamento, senza firme elettroniche o blocco automatico delle schede. I report personali salvano filtri, non copie dei dati né autorizzazioni: ogni ricerca ricalcola la visibilità corrente.
+Include the affected version/commit or image digest, configuration, impact, minimal reproduction and any proposed fix. Use synthetic data. Do not send live credentials, customer databases or personal information. Do not post an exploit or reproduction in public issues before coordinated disclosure.
 
-Sprint e moduli interni richiedono account. Pubblicare un modulo lo rende compilabile dai membri della bacheca, senza renderlo pubblico su Internet. Gli osservatori possono inviare e modificare le proprie richieste ancora in valutazione e aggiungere note; la valutazione e la conversione in schede richiedono permessi di scrittura. Le risposte mantengono uno schema originale, vengono validate per tipo e rispettano i permessi correnti. La conversione usa le stesse regole di creazione delle schede ed è atomica con il suo storico.
+The maintainer will investigate, coordinate a fix and discuss disclosure through the private report. Response and remediation are best effort; no deadline or bounty is promised. Keep supporting evidence available privately until the report has been assessed.
 
-Per una segnalazione di sicurezza, contattare privatamente il maintainer attraverso il profilo GitHub del progetto prima di pubblicare dettagli riproducibili. Non includere password, token, database aziendali o informazioni personali nelle issue pubbliche.
+## Deployment boundaries
 
-I test descrivono il perimetro verificato della release; il progetto non dichiara certificazioni di sicurezza, SSO, isolamento SaaS multi-tenant o alta disponibilità.
+- Authentication is enabled by default. `--no-auth` is explicitly restricted to loopback development.
+- The C backend exposes JSON APIs only; a separate static frontend has no database credentials.
+- Compose publishes only the proxy ports, bound to loopback by default. The NPM administration port remains on loopback. Set up both administrators before public service access.
+- Public service access requires a real HTTPS origin and certificate. The exact public origin controls Host/Origin checks and Secure cookies.
+- PostgreSQL structured rows and MongoDB JSON documents form one sensitive dataset. The application's database accounts are not database administrators. The SQLite cache is rebuildable and temporary in Compose.
+- Secrets are generated in private environment files; backups, database volumes and NPM certificates/configuration also need protection. A board JSON export is not a complete application backup.
 
-## Audit prima della pubblicazione
+Run `python3 scripts/check-deployment.py` before exposing a service. It verifies actual port bindings, setup, origin, authentication, trusted proxy, live storage readiness and loaded nginx controls. For HTTPS it checks the certificate and exact redirect. `--config-only` does not verify running readiness. See [deployment and recovery](docs/DEPLOYMENT.md).
 
-[Audit del 16 ottobre 2026](docs/SECURITY_AUDIT_2026-10-16.md): perimetro, correzioni, regressioni e dipendenze da verificare prima dell’esposizione Internet. Il backend usa l’indirizzo TCP effettivo e ignora gli header IP inoltrati non attendibili. Dietro un unico reverse proxy la quota IP di login rimane aggregata: applicare limiti per client al perimetro prima di un servizio pubblico. Le risposte di idempotenza vengono restituite soltanto dopo la verifica dei permessi correnti; le scritture ricontrollano sessione e ruolo nella transazione.
+## Authentication and authorization
+
+Passwords use random salts and PBKDF2-HMAC-SHA256 with 600,000 iterations. Sessions use random tokens stored as hashes, HttpOnly/SameSite Strict cookies, a 30-minute idle timeout and an eight-hour absolute lifetime. HTTPS origins add Secure. Authenticated writes require CSRF tokens.
+
+Instance administrators can access every board. Members and observers require current board access; observers cannot modify board data, but can use permitted personal features. Sessions and roles are rechecked inside protected writes, and current permissions are checked before replaying idempotent responses. The frontend discards responses belonging to a previous signed-in account.
+
+Only the exact IPv4 peer configured in `OPENBOARD_TRUSTED_PROXY` may provide one numeric `X-Real-IP`. Other forwarded headers do not determine identity. NPM uses a static address outside Docker's dynamic pool, overwrites IP headers with its TCP peer and has no implicit private-network/CDN trust. Adding another upstream proxy requires a reviewed trust configuration.
+
+The backend permits 60 authentication attempts per IP in fixed monotonic five-minute windows. A second limit allows 10 per IP/scope/username for login, per IP/scope for setup, and per IP/scope/account ID for password changes. Fixed-memory keyed counters cannot be evicted by rotating usernames; collisions can reject attempts early. There is no shared global login quota. Nginx adds five authentication requests/minute/client with burst 10 and API concurrency limits of eight/client and 32/virtual host. NPM adds 10 attempts/five minutes/IP/route for login, second factor and user creation. Fixed-window quotas and per-IP limits do not stop a distributed attack.
+
+## Data and known limits
+
+Attachments are validated and downloaded as files rather than executed. Limits are 1 MiB/file, 10 active files/card and 5 MiB active attachment data/card. Trash retains data, so active quotas do not bound physical storage. Antivirus scanning is not included.
+
+CSV exports guard against spreadsheet formulas, rendered Markdown escapes HTML, and reference links accept HTTP/HTTPS. Notifications, reports, reviews, sprints and forms enforce current account and board permissions. Publishing an internal form makes it available to eligible board members, not anonymous Internet users.
+
+The project has no SSO, SaaS tenant isolation, automatic retention policy or high-availability guarantee. Dependency findings remain documented even when the affected execution component is absent. A later image rebuild can change packages and must be reviewed and tested as a new artifact. The recorded scans do not establish a clean scan of every final release image.

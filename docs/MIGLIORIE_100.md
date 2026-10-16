@@ -1,5 +1,7 @@
 # Le 100 migliorie di OpenBoard
 
+> **Historical archive (Italian).** This document records an earlier analysis or implementation checklist. Its setup examples, security assumptions and roadmap may be superseded. For current guidance, use the [documentation index](README.md), [deployment guide](DEPLOYMENT.md) and [changelog](../CHANGELOG.md).
+
 Obiettivo: evolvere la base locale in un'applicazione collaborativa mantenendo C e SQLite. Ogni voce identifica una capacità concreta; la spunta viene aggiunta dopo implementazione e verifica. Le funzionalità enterprise non incluse, come SSO/SAML, allegati, SCIM e alta disponibilità, restano nella roadmap dello studio.
 
 ## Server e protocollo

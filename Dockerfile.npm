@@ -1,0 +1,59 @@
+# syntax=docker/dockerfile:1
+# Preserve upstream NPM 2.16's application, API, certificates and s6 entrypoint.
+FROM jc21/nginx-proxy-manager:2.16.0@sha256:4393e642e233e5efd5adeb7f10918d4aaea71c9ed875b94190273fc8e87f9594 AS dependencies
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# Keep the package-manager runtime distinct from /app dependencies. Every
+# reviewed replacement is pinned; yarn retains the base lock's other versions.
+RUN npm install --global --ignore-scripts --no-audit --no-fund npm@12.2.0 \
+    && npm --version
+COPY scripts/patch-npm-dependencies.mjs scripts/patch-npm-bundle.mjs scripts/verify-npm-dependencies.mjs /usr/local/lib/openboard/
+RUN node /usr/local/lib/openboard/patch-npm-dependencies.mjs \
+    && yarn install --production --ignore-scripts --non-interactive \
+    && yarn check --integrity --production --ignore-scripts --offline \
+    && yarn cache clean \
+    && node /usr/local/lib/openboard/patch-npm-bundle.mjs \
+    && npm cache clean --force \
+    && node /usr/local/lib/openboard/verify-npm-dependencies.mjs
+
+# pyOpenSSL must be upgraded with cryptography; its previous version rejects
+# cryptography >=49. Preserve Certbot itself and all installed DNS providers.
+RUN /opt/certbot/bin/python -m pip install --no-cache-dir --only-binary=:all: \
+        'pyOpenSSL==26.4.0' 'cryptography==50.0.2' \
+    && /opt/certbot/bin/python -m pip check
+COPY scripts/patch-pip-vendor.py /usr/local/lib/openboard/patch-pip-vendor.py
+RUN /opt/certbot/bin/python /usr/local/lib/openboard/patch-pip-vendor.py \
+    && /opt/certbot/bin/python -m pip check \
+    && /opt/certbot/bin/certbot --version \
+    && /opt/certbot/bin/certbot plugins
+
+FROM dependencies AS patched
+COPY deploy/npm/harden.py deploy/npm/auth-rate-limit.mjs /usr/local/lib/openboard/
+COPY deploy/npm/http_top.conf /etc/nginx/openboard-http.conf
+RUN python3 /usr/local/lib/openboard/harden.py
+
+# Include the complete patched filesystem without obsolete vulnerable binaries
+# from superseded lower layers. Restore all upstream runtime metadata below.
+FROM scratch
+COPY --from=patched / /
+ENV PATH=/opt/certbot/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
+    OPENRESTY_VERSION=1.31.1.1 CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
+    SUPPRESS_NO_CONFIG_WARNING=1 S6_BEHAVIOUR_IF_STAGE2_FAILS=1 \
+    S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 S6_FIX_ATTRS_HIDDEN=1 \
+    S6_KILL_FINISH_MAXTIME=10000 S6_VERBOSITY=1 NODE_ENV=production \
+    NPM_BUILD_VERSION=2.16.0 NPM_BUILD_COMMIT=a29eae9d \
+    NPM_BUILD_DATE="2026-09-24 09:43:00 UTC" \
+    NODE_OPTIONS=--openssl-legacy-provider
+LABEL org.opencontainers.image.title="OpenBoard Nginx Proxy Manager" \
+    org.opencontainers.image.base.name="jc21/nginx-proxy-manager:2.16.0" \
+    org.opencontainers.image.base.digest="sha256:4393e642e233e5efd5adeb7f10918d4aaea71c9ed875b94190273fc8e87f9594" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.source="https://github.com/GiorgioOppo/OpenBoard"
+WORKDIR /app
+VOLUME /data
+EXPOSE 80 81 443
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENTRYPOINT ["/init"]

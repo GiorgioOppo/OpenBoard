@@ -1,0 +1,23 @@
+name: Feature request
+description: Explain the user problem and a proposed improvement.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who encounters this problem and what are they trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the desired result, without assuming an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and scope
+      description: Mention existing workarounds, related roadmap items and compatibility considerations.

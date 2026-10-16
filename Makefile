@@ -21,7 +21,7 @@ PREFIX ?= /usr/local
 DESTDIR ?=
 NODE ?= node
 
-.PHONY: all build run test test-sanitize test-frontend test-cloud install install-frontend clean FORCE
+.PHONY: all build run test test-sanitize test-frontend test-security test-docs test-cloud install install-frontend clean FORCE
 all: build
 build: build/openboard
 build/.config: FORCE
@@ -48,6 +48,10 @@ test-frontend:
 	$(NODE) tests/test_workflows.js
 test-cloud: build/openboard
 	OPENBOARD_CLOUD_TEST=1 python3 -m unittest discover -s tests -p 'test_cloud.py' -v
+test-security:
+	$(NODE) tests/test_npm_limits.mjs
+test-docs:
+	python3 scripts/check-docs.py
 install: build/openboard
 	install -d "$(DESTDIR)$(PREFIX)/bin"
 	install -m 755 build/openboard "$(DESTDIR)$(PREFIX)/bin/openboard"

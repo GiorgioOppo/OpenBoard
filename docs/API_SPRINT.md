@@ -1,117 +1,117 @@
-# Sprint e capacità — OpenBoard 0.6
+# Sprints and capacity — OpenBoard 0.6
 
-Gli sprint organizzano schede esistenti della stessa bacheca in iterazioni pianificate, attive o chiuse. Sono richiesti account autenticato, accesso attuale alla bacheca e, per le mutazioni, token CSRF e origine valida. In modalità `--no-auth` queste API restituiscono `403`; in modalità autenticata gli anonimi ricevono `401`.
+Sprints organize existing cards from the same board into planned, active or closed iterations. They require an authenticated account, current board access and, for mutations, a CSRF token and valid origin. These APIs return `403` in `--no-auth` mode; anonymous requests in authenticated mode receive `401`.
 
-## Le 25 migliorie 401–425
+## Features 401–425
 
-| ID | Miglioria | Metodo e percorso |
+| ID | Feature | Method and path |
 |---|---|---|
-| 401 | Creazione con nome, obiettivo e intervallo | `POST /api/boards/{board}/sprints` |
-| 402 | Elenco della bacheca con ricerca, stato e cursore | `GET /api/boards/{board}/sprints` |
-| 403 | Dettaglio con permessi correnti | `GET /api/sprints/{id}` |
-| 404 | Modifica di nome, obiettivo e date | `PATCH /api/sprints/{id}` |
-| 405 | Attivazione di un solo sprint per bacheca | `POST /api/sprints/{id}/activate` |
-| 406 | Chiusura senza completare artificialmente le schede | `POST /api/sprints/{id}/close` |
-| 407 | Riapertura come pianificato con verifica conflitti | `POST /api/sprints/{id}/reopen` |
-| 408 | Eliminazione recuperabile | `DELETE /api/sprints/{id}` |
-| 409 | Ripristino con verifica sprint attivi e assegnazioni | `POST /api/sprints/{id}/restore` |
-| 410 | Inserimento di una scheda esistente | `POST /api/sprints/{id}/cards` |
-| 411 | Rimozione di una scheda dallo sprint | `DELETE /api/sprints/{id}/cards/{card}` |
-| 412 | Pianificazione atomica di massimo 100 schede | `POST /api/sprints/{id}/cards/bulk` |
-| 413 | Rimozione atomica di massimo 100 schede | `DELETE /api/sprints/{id}/cards/bulk` |
-| 414 | Backlog delle schede non pianificate | `GET /api/boards/{board}/backlog` |
-| 415 | Schede filtrate per ricerca, stato, priorità e assegnatario | `GET /api/sprints/{id}/cards` |
-| 416 | Capacità dichiarata per membro attivo scrivente | `GET /api/sprints/{id}/capacity`; `PATCH /capacity/{user}` |
-| 417 | Carichi individuali con ripartizione esatta delle schede condivise | `GET /api/sprints/{id}/capacity-report` |
-| 418 | Fotografia esplicita della giornata UTC corrente | `POST /api/sprints/{id}/snapshots` |
-| 419 | Serie delle fotografie storiche | `GET /api/sprints/{id}/snapshots` |
-| 420 | Eliminazione di una fotografia errata | `DELETE /api/sprints/{id}/snapshots/{YYYY-MM-DD}` |
-| 421 | Avanzamento da schede, stime e registrazioni reali | `GET /api/sprints/{id}/progress` |
-| 422 | Confronto descrittivo tra residuo stimato e capacità | `GET /api/sprints/{id}/forecast` |
-| 423 | Attività personali negli sprint attivi accessibili | `GET /api/me/sprint-tasks` |
-| 424 | Piano CSV con protezione dalle formule | `GET /api/sprints/{id}/export` |
-| 425 | Storico delle modifiche con cursore | `GET /api/sprints/{id}/history` |
+| 401 | Creation with a name, goal and date range | `POST /api/boards/{board}/sprints` |
+| 402 | Board listing with search, state and cursor | `GET /api/boards/{board}/sprints` |
+| 403 | Details with current permissions | `GET /api/sprints/{id}` |
+| 404 | Updating the name, goal and dates | `PATCH /api/sprints/{id}` |
+| 405 | Activating one sprint per board | `POST /api/sprints/{id}/activate` |
+| 406 | Closing without marking unfinished cards complete | `POST /api/sprints/{id}/close` |
+| 407 | Reopening as planned with conflict checks | `POST /api/sprints/{id}/reopen` |
+| 408 | Recoverable deletion | `DELETE /api/sprints/{id}` |
+| 409 | Restoration with active-sprint and assignment checks | `POST /api/sprints/{id}/restore` |
+| 410 | Adding an existing card | `POST /api/sprints/{id}/cards` |
+| 411 | Removing a card from a sprint | `DELETE /api/sprints/{id}/cards/{card}` |
+| 412 | Atomically scheduling up to 100 cards | `POST /api/sprints/{id}/cards/bulk` |
+| 413 | Atomically removing up to 100 cards | `DELETE /api/sprints/{id}/cards/bulk` |
+| 414 | Backlog of unscheduled cards | `GET /api/boards/{board}/backlog` |
+| 415 | Cards filtered by search, status, priority and assignee | `GET /api/sprints/{id}/cards` |
+| 416 | Declared capacity for active members with write access | `GET /api/sprints/{id}/capacity`; `PATCH /capacity/{user}` |
+| 417 | Individual workloads with exact allocation of shared cards | `GET /api/sprints/{id}/capacity-report` |
+| 418 | Explicit snapshot of the current UTC day | `POST /api/sprints/{id}/snapshots` |
+| 419 | Historical snapshot series | `GET /api/sprints/{id}/snapshots` |
+| 420 | Removing an incorrect snapshot | `DELETE /api/sprints/{id}/snapshots/{YYYY-MM-DD}` |
+| 421 | Progress from actual cards, estimates and work logs | `GET /api/sprints/{id}/progress` |
+| 422 | Descriptive comparison of estimated remaining work and capacity | `GET /api/sprints/{id}/forecast` |
+| 423 | Personal tasks in accessible active sprints | `GET /api/me/sprint-tasks` |
+| 424 | CSV plan with formula protection | `GET /api/sprints/{id}/export` |
+| 425 | Change history with cursor | `GET /api/sprints/{id}/history` |
 
-## Creazione, dettaglio e permessi
+## Creation, details and permissions
 
-Creazione:
+Creation:
 
 ```json
 {"name":"Sprint accessibilità","goal":"Completare i flussi da tastiera","start_date":"2026-11-02","end_date":"2026-11-13"}
 ```
 
-`name` è obbligatorio, contiene almeno un carattere diverso da spazi e ha massimo 120 caratteri; `goal` è facoltativo, massimo 4000 caratteri. Le date sono facoltative, vuote oppure date reali `YYYY-MM-DD`, con anno almeno 1900. Quando presenti entrambe, l'inizio non supera la fine. Non sono imposti durata, giorni lavorativi o calendario aziendale. Una modifica accetta almeno un campo tra questi quattro; una stringa vuota rimuove obiettivo o data. Campi sconosciuti, NUL, tipi errati e valori fuori limite restituiscono `400`.
+`name` is required, contains at least one non-whitespace character, and has at most 120 characters; `goal` is optional, with at most 4000 characters. Dates are optional: empty strings or real `YYYY-MM-DD` dates with a year of at least 1900. When both are present, the start cannot follow the end. No duration, working-day or company-calendar rules are imposed. An update accepts at least one of these four fields; an empty string removes the goal or date. Unknown fields, NUL, wrong types and out-of-range values return `400`.
 
-Il dettaglio è restituito con `201` alla creazione e con `200` nelle altre mutazioni:
+Details are returned with `201` on creation and `200` for other mutations:
 
 ```json
 {"id":2,"board_id":1,"name":"Sprint accessibilità","goal":"Completare i flussi da tastiera","start_date":"2026-11-02","end_date":"2026-11-13","state":"planned","creator_id":1,"version":1,"deleted_at":null,"created_at":"2026-10-16T12:00:00.000Z","updated_at":"2026-10-16T12:00:00.000Z","permissions":{"manage":true,"schedule":true}}
 ```
 
-Amministratori globali o della bacheca con accesso in scrittura gestiscono dettagli, ciclo di vita, capacità e fotografie. I membri scriventi possono aggiungere e rimuovere schede negli sprint pianificati o attivi. Gli osservatori possono leggere; non possono modificare uno sprint anche se erano creatori o amministratori prima della retrocessione. `permissions` riflette l'utente corrente e lo stato dello sprint. Risorse non accessibili o antenati eliminati restituiscono `404`; una mutazione vietata di una risorsa leggibile restituisce `403`.
+Global or board administrators with write access manage details, lifecycle, capacity and snapshots. Members with write access can add and remove cards in planned or active sprints. Observers can read; they cannot modify a sprint even if they were its creator or an administrator before demotion. `permissions` reflects the current user and sprint state. Inaccessible resources or deleted ancestors return `404`; a forbidden mutation of a readable resource returns `403`.
 
-Tutte le mutazioni di uno sprint esistente accettano `If-Match: "versione"` oppure un intero positivo senza virgolette. Una versione superata restituisce `412`, un header non valido `400`. Ogni modifica riuscita incrementa una volta la versione dello sprint, aggiorna quella della bacheca e registra evento e attività nella stessa transazione. La sostituzione di una fotografia odierna richiede sempre `If-Match`; se assente restituisce `409`.
+All mutations of an existing sprint accept `If-Match: "version"` or an unquoted positive integer. A stale version returns `412`, and an invalid header returns `400`. Every successful change increments the sprint version once, updates the board version, and records an event and activity in the same transaction. Replacing today's snapshot always requires `If-Match`; omitting it returns `409`.
 
-I `POST` supportano l'idempotenza globale del router: stesso utente, percorso, chiave e corpo restituiscono il risultato originale; un corpo diverso con la stessa chiave restituisce `409`. Le risposte autenticate usano `Cache-Control: no-store`.
+POST requests support the router's global idempotency: the same user, path, key and body return the original result after current authorization is checked; a different body with the same key returns `409`. Authenticated responses use `Cache-Control: no-store`.
 
-## Ciclo di vita e pianificazione
+## Lifecycle and scheduling
 
-Gli endpoint `activate`, `close`, `reopen` e `restore` ricevono `{}`. La creazione produce `planned`; soltanto uno sprint pianificato può diventare `active`, e al massimo uno sprint non eliminato può essere attivo per bacheca. `close` richiede `active` e produce `closed`. La chiusura conserva appartenenze, capacità e fotografie e non modifica il completamento delle schede. Le schede ancora aperte possono quindi rimanere nello storico ed essere pianificate in un nuovo sprint.
+The `activate`, `close`, `reopen` and `restore` endpoints receive `{}`. Creation produces `planned`; only a planned sprint can become `active`, and a board can have at most one active, non-deleted sprint. `close` requires `active` and produces `closed`. Closing preserves memberships, capacity and snapshots, without changing card completion. Open cards can therefore remain in history and be scheduled in a new sprint.
 
-`reopen` richiede `closed` e produce `planned`. Prima della riapertura il backend verifica che nessuna scheda tuttora appartenente alla bacheca sia già assegnata a un altro sprint pianificato o attivo: in tal caso restituisce `409` senza sottrarre schede al nuovo piano. La verifica include schede archiviate o cestinate e liste cestinate, che potrebbero essere ripristinate in seguito: nascondere una scheda non consente una doppia pianificazione. Le stesse verifiche valgono nel ripristino di uno sprint eliminato; uno sprint ripristinato conserva il suo stato precedente. Ripristinare uno sprint attivo mentre la bacheca ne ha già un altro attivo restituisce `409`.
+`reopen` requires `closed` and produces `planned`. Before reopening, the backend checks that no card still belonging to the board is already assigned to another planned or active sprint: if one is, it returns `409` without removing cards from the newer plan. The check includes archived or trashed cards and trashed lists that could later be restored: hiding a card does not permit double scheduling. The same checks apply when restoring a deleted sprint; a restored sprint retains its previous state. Restoring an active sprint when the board already has another active sprint returns `409`.
 
-Negli sprint chiusi non si modificano dettagli, schede o capacità; occorre riaprirli. L'eliminazione conserva tutti i dati. Il dettaglio e l'elenco ordinari escludono gli sprint eliminati; `include_deleted=1` li include per consentire il ripristino. Lo storico è leggibile anche dopo l'eliminazione. Gli altri aggregati e le liste collegate richiedono uno sprint non eliminato.
+Details, cards and capacity cannot be changed in closed sprints; reopen them first. Deletion preserves all data. Regular details and lists exclude deleted sprints; `include_deleted=1` includes them for restoration. History remains readable after deletion. Other aggregates and related lists require a non-deleted sprint.
 
-Un inserimento singolo usa `{"card_id":42}`. I batch usano `{"card_ids":[42,43]}`, con 1–100 interi positivi distinti, senza stringhe, booleani o decimali. Tutte le schede devono essere vive, non archiviate e appartenere a liste vive della stessa bacheca. Una scheda può appartenere a più sprint chiusi, ma a un solo sprint pianificato o attivo non eliminato. L'inserimento duplicato o in conflitto restituisce `409`; una scheda estranea o nascosta `404`. Rimuovere una scheda che non appartiene allo sprint restituisce `409`.
+A single insertion uses `{"card_id":42}`. Batches use `{"card_ids":[42,43]}` with 1–100 distinct positive integers, excluding strings, booleans and decimals. All cards must be non-deleted, unarchived and in non-deleted lists of the same board. A card may belong to several closed sprints but only one planned or active, non-deleted sprint. Duplicate or conflicting insertion returns `409`; an unrelated or hidden card returns `404`. Removing a card that does not belong to the sprint returns `409`.
 
-I batch verificano interamente l'input prima delle scritture e salvano oppure annullano tutte le appartenenze insieme. Anche errori di storico o di persistenza annullano schede, versioni e attività. I limiti sono 200 sprint per bacheca, compresi quelli eliminati; 1000 appartenenze per sprint; 10000 eventi per sprint. Le mutazioni che superano un limite restituiscono `409`.
+Batches validate all input before writing and save or roll back all memberships together. History or persistence errors also roll back cards, versions and activity. Limits are 200 sprints per board, including deleted sprints; 1000 memberships per sprint; and 10000 events per sprint. Mutations exceeding a limit return `409`.
 
-## Elenchi, backlog e attività personali
+## Lists, backlog and personal tasks
 
-L'elenco sprint, le liste di schede e lo storico restituiscono `{items,next_cursor}` e sono ordinati per ID decrescente. `limit` è 1–100, predefinito 30; `before` è un ID positivo ed esclude tale ID. `next_cursor` è l'ultimo ID restituito se esistono ulteriori risultati, altrimenti `null`. Gli ID mantengono la paginazione stabile rispetto a nuovi inserimenti. Conservare gli stessi filtri nelle pagine successive.
+Sprint lists, card lists and history return `{items,next_cursor}` in descending ID order. `limit` is 1–100, default 30; `before` is a positive ID and excludes that ID. `next_cursor` is the last returned ID if more results exist, otherwise `null`. IDs keep pagination stable when new records are inserted. Keep the same filters for subsequent pages.
 
-L'elenco sprint accetta `q`, `state=planned|active|closed`, `include_deleted=0|1`. La ricerca è una sottostringa letterale su nome e obiettivo. Le liste schede, il backlog, le attività personali e il CSV accettano:
+The sprint list accepts `q`, `state=planned|active|closed` and `include_deleted=0|1`. Search matches a literal substring in the name and goal. Card lists, backlog, personal tasks and CSV accept:
 
-| Parametro | Significato |
+| Parameter | Meaning |
 |---|---|
-| `q` | Sottostringa letterale su titolo e descrizione, massimo 200 caratteri; `%` e `_` non sono wildcard. |
-| `status` | `all` (predefinito), `open`, `completed`, `blocked`. |
-| `priority` | `low`, `normal`, `high`, `urgent`; assente non restringe. |
-| `assignee_id` | ID positivo presente negli assegnatari strutturati della scheda. |
-| `before`, `limit` | Cursore e dimensione pagina. |
+| `q` | Literal substring in the title and description, at most 200 characters; `%` and `_` are not wildcards. |
+| `status` | `all` (default), `open`, `completed`, `blocked`. |
+| `priority` | `low`, `normal`, `high`, `urgent`; omitting it does not restrict results. |
+| `assignee_id` | Positive ID present among the card's structured assignees. |
+| `before`, `limit` | Cursor and page size. |
 
-`blocked` include schede aperte con motivo di blocco o dipendenze incomplete tuttora leggibili e vive. Parametri duplicati o valori non validi restituiscono `400`. Le schede restituite contengono il riepilogo standard e `board_id`, `board_name`, `column_title`, `sprint_id`, `sprint_name`.
+`blocked` includes open cards with a blocking reason or incomplete dependencies that remain readable and non-deleted. Duplicate parameters or invalid values return `400`. Returned cards contain the standard summary plus `board_id`, `board_name`, `column_title`, `sprint_id` and `sprint_name`.
 
-Il backlog comprende schede non archiviate che non appartengono a sprint pianificati o attivi non eliminati. Un'appartenenza storica a uno sprint chiuso non rimuove una scheda dal backlog. L'inbox personale include soltanto schede strutturalmente assegnate all'utente corrente in sprint attivi, in bacheche non archiviate tuttora accessibili. L'accesso è rivalutato dopo ogni revoca.
+The backlog contains unarchived cards that do not belong to planned or active, non-deleted sprints. Historical membership in a closed sprint does not remove a card from the backlog. The personal inbox includes only cards with the current user as a structured assignee in active sprints, on unarchived boards that remain accessible. Access is rechecked after every revocation.
 
-Tutti i conteggi, carichi, esportazioni e liste seguono la bacheca attuale della scheda e antenati vivi. Schede archiviate, eliminate o trasferite altrove mediante importazioni o interventi amministrativi non rivelano dati attraverso vecchie appartenenze.
+All counts, workloads, exports and lists follow the card's current board and non-deleted ancestors. Archived, deleted or transferred cards, including transfers through imports or administrative changes, do not disclose data through old memberships.
 
-## Capacità, avanzamento e confronto
+## Capacity, progress and comparison
 
-`PATCH /api/sprints/{id}/capacity/{user}` riceve `{"minutes":2400}`. Il valore è intero tra 0 e 1000000. La persona deve essere attiva, membro effettivo della bacheca con accesso in scrittura e ruolo globale diverso da osservatore. Gli amministratori globali richiedono comunque una membership per ricevere capacità. Il valore zero è una dichiarazione esplicita, distinta da capacità non configurata.
+`PATCH /api/sprints/{id}/capacity/{user}` receives `{"minutes":2400}`. The value is an integer between 0 and 1000000. The person must be active, an actual board member with write access, and have a global role other than observer. Global administrators still need board membership to receive capacity. Zero is an explicit declaration, distinct from unconfigured capacity.
 
-`GET /capacity` restituisce `{items:[{user_id,name,minutes}]}` per tutti i membri attualmente idonei, anche senza configurazione, che vale zero. Rimozione dalla bacheca, retrocessione a osservatore e disattivazione eliminano la capacità memorizzata; un reinvito o una riattivazione non ripristinano vecchi valori. Le query verificano comunque l'idoneità corrente.
+`GET /capacity` returns `{items:[{user_id,name,minutes}]}` for all currently eligible members, including those without configuration, which counts as zero. Removal from the board, demotion to observer and deactivation delete stored capacity; reinvitation or reactivation does not restore old values. Queries still check current eligibility.
 
-`GET /progress` restituisce:
+`GET /progress` returns:
 
 ```json
 {"total":3,"completed":1,"open":2,"estimate_minutes":121,"completed_estimate_minutes":20,"remaining_minutes":82,"logged_minutes":19,"completion_percent":33.33}
 ```
 
-`logged_minutes` comprende minuti effettivi manuali della scheda più worklog non eliminati, anche per schede completate. Il residuo per una scheda aperta è `max(0, stima - effettivo manuale - worklog)`; quello di una scheda completata è zero. La percentuale misura schede completate su schede totali, arrotondata a due decimali; uno sprint vuoto restituisce zero.
+`logged_minutes` includes a card's manual actual time plus non-deleted work logs, including completed cards. Remaining work for an open card is the maximum of zero and its estimate minus manual actual time and work logs; it is zero for a completed card. The percentage measures completed cards divided by total cards, rounded to two decimal places; an empty sprint returns zero.
 
-`GET /capacity-report` restituisce `{items:[{user_id,name,capacity_minutes,assigned_minutes,logged_minutes,remaining_minutes,over_capacity}],totals:{capacity_minutes,assigned_minutes,remaining_minutes,unassigned_minutes}}`. Una scheda con più assegnatari attualmente idonei ripartisce equamente stima, minuti registrati e residuo: gli eventuali minuti di resto vanno agli ID utente minori. In questo modo 101 minuti tra due persone diventano 51 e 50, senza raddoppiare i totali. Le schede senza assegnatari idonei contribuiscono comunque ai totali e a `unassigned_minutes`. `over_capacity` confronta residuo attribuito alla persona e capacità dichiarata.
+`GET /capacity-report` returns `{items:[{user_id,name,capacity_minutes,assigned_minutes,logged_minutes,remaining_minutes,over_capacity}],totals:{capacity_minutes,assigned_minutes,remaining_minutes,unassigned_minutes}}`. A card with several currently eligible assignees splits its estimate, logged minutes and remaining work equally: remainder minutes go to the lowest user IDs. Thus 101 minutes shared by two people become 51 and 50 without doubling totals. Cards without eligible assignees still contribute to totals and `unassigned_minutes`. `over_capacity` compares a person's allocated remaining work with their declared capacity.
 
-`GET /forecast` aggiunge ai campi dell'avanzamento `capacity_minutes`, `capacity_gap_minutes`, `estimate_missing`, `unestimated_cards`, `capacity_user_count`, `capacity_configured`, `description`. `estimate_missing` e `unestimated_cards` sono lo stesso conteggio delle schede aperte con stima zero: il loro impegno non è noto e non va interpretato come lavoro gratuito. `capacity_configured` è vero se esiste almeno una dichiarazione valida, anche zero; `capacity_user_count` conta tali persone. Il divario è `max(0, residuo stimato - capacità dichiarata)`. Questo confronto descrittivo non calcola date di consegna, velocità storica, festività o capacità giornaliera e non garantisce il completamento dello sprint.
+`GET /forecast` adds `capacity_minutes`, `capacity_gap_minutes`, `estimate_missing`, `unestimated_cards`, `capacity_user_count`, `capacity_configured` and `description` to the progress fields. `estimate_missing` and `unestimated_cards` are the same count of open cards with zero estimates: their effort is unknown and must not be treated as free work. `capacity_configured` is true if at least one valid declaration exists, including zero; `capacity_user_count` counts those people. The gap is the maximum of zero and estimated remaining work minus declared capacity. This descriptive comparison does not calculate delivery dates, historical velocity, holidays or daily capacity, and does not guarantee sprint completion.
 
-## Fotografie UTC, storico e CSV
+## UTC snapshots, history and CSV
 
-`POST /snapshots` con `{}` registra i conteggi e minuti correnti dello sprint attivo nella giornata UTC corrente. Non accetta una data retroattiva o futura e non viene eseguito implicitamente dalle letture o da uno scheduler. Una seconda cattura nello stesso giorno sostituisce la prima soltanto con `If-Match` della versione corrente. Sono conservabili fino a 366 giornate; oltre il limite si restituisce `409`, mentre la sostituzione di una giornata esistente rimane possibile.
+`POST /snapshots` with `{}` records the active sprint's current counts and minutes for the current UTC day. It does not accept past or future dates and is not triggered implicitly by reads or a scheduler. A second capture on the same day replaces the first only with `If-Match` for the current version. Up to 366 days can be retained; exceeding the limit returns `409`, while replacing an existing day remains possible.
 
-`GET /snapshots` restituisce `{items:[{day,total,completed,estimate_minutes,completed_estimate_minutes,remaining_minutes,logged_minutes,captured_at}]}` ordinati per giornata crescente. I valori restano quelli realmente catturati, anche se schede e stime cambiano in seguito. `DELETE /snapshots/{YYYY-MM-DD}` elimina una fotografia errata, anche dopo la chiusura dello sprint, con permessi di gestione e versione dello sprint. Una giornata assente restituisce `404`. Le correzioni sono registrate nello storico.
+`GET /snapshots` returns `{items:[{day,total,completed,estimate_minutes,completed_estimate_minutes,remaining_minutes,logged_minutes,captured_at}]}` in ascending day order. Values remain those actually captured, even if cards and estimates later change. `DELETE /snapshots/{YYYY-MM-DD}` removes an incorrect snapshot, even after sprint closure, with management permission and the sprint version. An absent day returns `404`. Corrections are recorded in history.
 
-`GET /history` restituisce eventi `{id,actor_id,actor,action,subject_id,note,created_at}`. Le azioni sono `sprint_created`, `sprint_edited`, `sprint_activated`, `sprint_closed`, `sprint_reopened`, `sprint_deleted`, `sprint_restored`, `sprint_cards_added`, `sprint_cards_removed`, `sprint_capacity_set`, `sprint_snapshot_captured`, `sprint_snapshot_deleted`. Il nome dell'autore è conservato al momento dell'azione; `subject_id` identifica la scheda nelle operazioni singole o la persona per una capacità. I batch conservano il numero delle schede nella nota.
+`GET /history` returns events containing `{id,actor_id,actor,action,subject_id,note,created_at}`. Actions are `sprint_created`, `sprint_edited`, `sprint_activated`, `sprint_closed`, `sprint_reopened`, `sprint_deleted`, `sprint_restored`, `sprint_cards_added`, `sprint_cards_removed`, `sprint_capacity_set`, `sprint_snapshot_captured` and `sprint_snapshot_deleted`. The author's name is retained at the time of the action; `subject_id` identifies the card for single-card operations or the person for capacity. Batches retain the card count in the note.
 
-`GET /export` usa i filtri delle schede e restituisce `{filename,csv,truncated:false,record_count}`. Ignora `before` e `limit` e include tutte le schede corrispondenti fino a 1000; oltre 1000 oppure 2 MiB restituisce `413`, senza CSV parziali. Le colonne sono `id,title,column,priority,completed,estimate_minutes,logged_minutes,assignee,due_date`. Il formato usa virgole e CRLF; testo libero quotato, virgolette raddoppiate e formule `=`, `+`, `-`, `@` neutralizzate con un apostrofo anche dopo spazi e caratteri bianchi.
+`GET /export` uses the card filters and returns `{filename,csv,truncated:false,record_count}`. It ignores `before` and `limit` and includes all matching cards up to 1000; more than 1000 or 2 MiB returns `413`, without partial CSV output. Columns are `id,title,column,priority,completed,estimate_minutes,logged_minutes,assignee,due_date`. The format uses commas and CRLF; free text is quoted, quotation marks are doubled, and formulas beginning with `=`, `+`, `-` or `@` are neutralized with an apostrophe, including after spaces or whitespace characters.
 
-La migrazione 7 aggiunge soltanto le tabelle relazionali `sprints`, `sprint_cards`, `sprint_capacity`, `sprint_snapshots`, `sprint_events`, relativi indici e trigger di invalidazione della capacità. L'archiviazione esterna conserva tutti questi valori in PostgreSQL; non crea documenti JSON artificiali. `tests/test_sprints.py` verifica le 25 funzioni con sessioni reali, concorrenza, ACL, revoche, storico, rollback iniettato, quote, conteggi effettivi e CSV ostile.
+Migration 7 adds only the relational tables `sprints`, `sprint_cards`, `sprint_capacity`, `sprint_snapshots` and `sprint_events`, their indexes, and capacity-invalidation triggers. External storage retains all these values in PostgreSQL; it does not create artificial JSON documents. `tests/test_sprints.py` checks all 25 features with real sessions, concurrency, ACLs, revocations, history, injected rollback, quotas, actual counts and hostile CSV input.

@@ -191,6 +191,31 @@ static bool valid_origin(const Request *r) {
     return true;
   return !ob_config.public_url && !strcmp(r->origin, local);
 }
+/* Only a configured immediate TCP peer may identify a client. X-Forwarded-For
+ * and Forwarded are intentionally never parsed: the edge must replace this
+ * single address, not append an untrusted chain received from a browser. */
+static bool trusted_peer(const Request *r) {
+  return ob_config.trusted_proxy && !strcmp(r->peer, ob_config.trusted_proxy);
+}
+static bool client_address(const char *value, char out[64]) {
+  struct in_addr ipv4;
+  struct in6_addr ipv6;
+  /* Some platforms accept IPv6 zone identifiers in inet_pton. A proxy header
+   * must contain just the numeric address, with no interface, port or list. */
+  for (const char *p = value; *p; p++)
+    if (!isxdigit((unsigned char)*p) && *p != ':' && *p != '.')
+      return false;
+  if (inet_pton(AF_INET, value, &ipv4) == 1)
+    return inet_ntop(AF_INET, &ipv4, out, 64) != NULL;
+  if (inet_pton(AF_INET6, value, &ipv6) != 1)
+    return false;
+  /* Equivalent mapped IPv4 spellings must consume the same rate bucket. */
+  if (IN6_IS_ADDR_V4MAPPED(&ipv6)) {
+    memcpy(&ipv4, &ipv6.s6_addr[12], sizeof ipv4);
+    return inet_ntop(AF_INET, &ipv4, out, 64) != NULL;
+  }
+  return inet_ntop(AF_INET6, &ipv6, out, 64) != NULL;
+}
 static int read_request(int fd, Request *r) {
   char headers[OB_HEADER_LIMIT + 1];
   size_t used = 0, header_end = 0;
@@ -238,6 +263,8 @@ static int read_request(int fd, Request *r) {
   cursor = line_end + 2;
   size_t length = 0;
   unsigned seen = 0;
+  bool proxy = trusted_peer(r);
+  char forwarded_client[64] = "";
   while (*cursor) {
     line_end = strstr(cursor, "\r\n");
     if (!line_end)
@@ -311,6 +338,11 @@ static int read_request(int fd, Request *r) {
       if (strcasecmp(value, "identity"))
         return 415;
     }
+    else if (proxy && !strcasecmp(cursor, "X-Real-IP")) {
+      flag = 1u << 12;
+      if (!client_address(value, forwarded_client))
+        return 400;
+    }
     else if (!strcasecmp(cursor, "Transfer-Encoding") ||
              !strcasecmp(cursor, "Expect")) return 400;
 #undef FIELD
@@ -325,6 +357,11 @@ static int read_request(int fd, Request *r) {
   }
   if (!(seen & 1) || !valid_host(r->host))
     return 403;
+  if (proxy) {
+    if (!(seen & (1u << 12)))
+      return 400;
+    snprintf(r->peer, sizeof r->peer, "%s", forwarded_client);
+  }
   if (initial > length)
     return 400;
   r->body = malloc(length + 1);
@@ -578,13 +615,14 @@ static void usage(const char *name) {
       "delle richieste\n",
       OB_VERSION, name);
   puts("  --busy-timeout MS Attesa lock SQLite (1..60000, default 5000)\n"
+       "  --trusted-proxy IP Singolo proxy IPv4 che sovrascrive X-Real-IP\n"
        "  --body-limit N    Limite corpo HTTP in byte (4096..2097152)\n"
        "  --integrity-check Controlla il DB esistente, senza migrazioni\n"
        "  --checkpoint      Checkpoint WAL TRUNCATE del DB esistente\n"
        "  --diagnostics     JSON con versioni, schema e limiti; nessun server\n"
        "Variabili OPENBOARD_PORT, WORKERS, DB, PUBLIC_URL, BIND, "
        "AUTH, "
-       "NO_DEMO, QUIET, BUSY_TIMEOUT, BODY_LIMIT (tutte con prefisso "
+       "NO_DEMO, QUIET, BUSY_TIMEOUT, BODY_LIMIT, TRUSTED_PROXY (tutte con prefisso "
        "OPENBOARD_). CLI prevale.\n"
        "OPENBOARD_POSTGRES_URL e OPENBOARD_MONGODB_URI attivano insieme lo "
        "storage separato.");
@@ -606,6 +644,14 @@ static bool config_number(const char *value, int *out, int min, int max) {
     return false;
   *out = (int)n;
   return true;
+}
+static bool valid_trusted_proxy(const char *value) {
+  struct in_addr address;
+  if (inet_pton(AF_INET, value, &address) != 1)
+    return false;
+  uint32_t host = ntohl(address.s_addr);
+  return host != INADDR_ANY && host != INADDR_BROADCAST &&
+         (host & 0xf0000000u) != 0xe0000000u;
 }
 static bool env_bool(const char *name, bool *out) {
   const char *v = getenv(name);
@@ -649,6 +695,12 @@ static bool environment_config(void) {
       return false;
     ob_config.bind_address = v;
   }
+  v = getenv("OPENBOARD_TRUSTED_PROXY");
+  if (v && *v) {
+    if (!valid_trusted_proxy(v))
+      return false;
+    ob_config.trusted_proxy = v;
+  }
   return env_bool("OPENBOARD_AUTH", &ob_config.auth_enabled) &&
          env_bool("OPENBOARD_NO_DEMO", &ob_config.no_demo) &&
          env_bool("OPENBOARD_QUIET", &ob_config.quiet);
@@ -670,11 +722,13 @@ static int maintenance(void) {
     sqlite3_close(connection);
     printf("{\"version\":\"%s\",\"sqlite\":\"%s\",\"openssl\":\"%s\",\"sqlite_"
            "threadsafe\":%d,\"schema_version\":%d,\"auth_enabled\":%s,"
-           "\"workers\":%d,\"busy_timeout_ms\":%d,\"body_limit\":%d}\n",
+           "\"workers\":%d,\"busy_timeout_ms\":%d,\"body_limit\":%d,"
+           "\"trusted_proxy\":\"%s\"}\n",
            OB_VERSION, sqlite3_libversion(), OpenSSL_version(OPENSSL_VERSION),
            sqlite3_threadsafe(), schema,
            ob_config.auth_enabled ? "true" : "false", ob_config.workers,
-           ob_config.busy_timeout_ms, ob_config.body_limit);
+           ob_config.busy_timeout_ms, ob_config.body_limit,
+           ob_config.trusted_proxy ? ob_config.trusted_proxy : "");
     return 0;
   }
   if (opened != SQLITE_OK) {
@@ -788,6 +842,10 @@ int main(int argc, char **argv) {
         return 1;
       }
       ob_config.public_url = value;
+    } else if (!strcmp(option, "--trusted-proxy")) {
+      if (!valid_trusted_proxy(value))
+        return 1;
+      ob_config.trusted_proxy = value;
     } else {
       usage(argv[0]);
       return 1;

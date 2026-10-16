@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
+      - dependency-name: mongo
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: jc21/nginx-proxy-manager
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]

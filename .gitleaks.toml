@@ -1,0 +1,14 @@
+title = "OpenBoard secret scanning"
+
+[extend]
+useDefault = true
+
+# This is a public request-deduplication example, not an authentication secret.
+# Both its file and the complete detected match must agree; other findings remain active.
+[[allowlists]]
+description = "Synthetic Idempotency-Key example in the API reference"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''(^|/)docs/API\.md$''']
+regexTarget = "match"
+regexes = ['''^Idempotency-Key: (creazione|create)-2026-10-15-001$''']

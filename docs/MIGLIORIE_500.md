@@ -1,5 +1,7 @@
 # Quinto gruppo di 100 migliorie di OpenBoard
 
+> **Historical archive (Italian).** This document records an earlier analysis or implementation checklist. Its setup examples, security assumptions and roadmap may be superseded. For current guidance, use the [documentation index](README.md), [deployment guide](DEPLOYMENT.md) and [changelog](../CHANGELOG.md).
+
 OpenBoard 0.6 aggiunge sprint e moduli interni per raccogliere richieste strutturate. La numerazione continua da 401 a 500. Le funzioni API e le corrispondenti interazioni dell'interfaccia sono interventi separati, come nei gruppi precedenti. Le 100 voci sono implementate e coperte dalle verifiche riportate in fondo.
 
 ## Sprint e iterazioni: API

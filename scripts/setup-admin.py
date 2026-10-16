@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Create the first OpenBoard administrator before publishing its NPM proxy host."""
 import getpass
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -10,6 +11,9 @@ import sys
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+_spec = importlib.util.spec_from_file_location("openboard_deployment", Path(__file__).with_name("check-deployment.py"))
+_deployment = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_deployment)
 
 
 def public_url():
@@ -23,9 +27,8 @@ def public_url():
         except OSError:
             pass
     value = value or "http://openboard.localhost"
+    _deployment.public_origin(value)
     parsed = urlsplit(value)
-    if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment:
-        raise ValueError("OPENBOARD_PUBLIC_URL non è un'origine http(s) valida.")
     return value, parsed.netloc
 
 
@@ -42,7 +45,10 @@ def api(method, path, payload=None):
         raise RuntimeError("Connessione all'app non riuscita. Verifica docker compose ps e lo stato del servizio app.")
     try:
         body, status = result.stdout.rsplit(b"\n", 1)
-        return int(status), json.loads(body)
+        decoded = json.loads(body)
+        if not isinstance(decoded, dict):
+            raise ValueError
+        return int(status), decoded
     except (ValueError, UnicodeError):
         raise RuntimeError("Risposta inattesa dall'app. Nessun dato di sessione mostrato.") from None
 
@@ -68,7 +74,7 @@ def main():
             raise ValueError("Le password devono coincidere e contenere da 12 a 256 byte.")
         status, body = api("POST", "/api/auth/setup", {"name": name, "username": username, "password": password})
         if status != 201:
-            raise RuntimeError(body.get("error", "Creazione amministratore non riuscita."))
+            raise RuntimeError("Creazione amministratore non riuscita. Nessuna risposta privata mostrata.")
         print("Amministratore OpenBoard creato. Ora configura il Proxy Host in Nginx Proxy Manager e accedi con queste credenziali.")
         return 0
     except (OSError, subprocess.SubprocessError, RuntimeError, ValueError) as error:

@@ -1,104 +1,104 @@
-# API dei moduli e delle richieste interne — OpenBoard 0.6
+# Internal forms and requests API — OpenBoard 0.6
 
-Le richieste raccolgono esigenze dei membri di una bacheca prima di creare una scheda. Tutte le API richiedono un account autenticato e appartenenza attuale alla bacheca; gli amministratori globali mantengono l'accesso. Le route restituiscono `403` anche in modalità locale `--no-auth`. Non sono moduli pubblici, non inviano email e non contengono credenziali nel frontend.
+Requests collect board members' needs before creating a card. All APIs require an authenticated account and current board membership; global administrators retain access. Routes also return `403` in local `--no-auth` mode. These are not public forms, do not send email and do not place credentials in the frontend.
 
-Le mutazioni usano sessione e `X-CSRF-Token`. `If-Match: "version"` è facoltativo per i client API ed è inviato dal frontend; una versione superata restituisce `412`, un header malformato `400`. Le operazioni POST supportano l'idempotenza globale con `Idempotency-Key`: ripetere chiave e payload restituisce lo stesso risultato senza duplicare record. Ogni scrittura, storico e conversione in scheda partecipa alla stessa transazione: un fallimento annulla tutte le modifiche.
+Mutations use a session and `X-CSRF-Token`. `If-Match: "version"` is optional for API clients and is sent by the frontend; a stale version returns `412`, and a malformed header returns `400`. POST operations support global idempotency with `Idempotency-Key`: repeating the key and payload returns the same result without duplicating records, after current authorization is checked. Every write, history event and card conversion participates in the same transaction: a failure rolls back all changes.
 
-## Permessi
+## Permissions
 
-| Operazione | Accesso |
+| Operation | Access |
 | --- | --- |
-| Leggere moduli, richieste, note e storico attivi | Membri attuali, compresi osservatori; amministratori globali |
-| Creare/modificare/pubblicare/cestinare/ripristinare moduli e campi | Amministratori della bacheca con ruolo globale scrivente; amministratori globali |
-| Inviare una richiesta | Tutti i membri attuali, compresi osservatori, su modulo pubblicato |
-| Modificare titolo/risposte | Solo autore, finché lo stato è `new` o `in_review`, senza scheda convertita |
-| Aggiungere note | Autore o membri scriventi della bacheca |
-| Cambiare stato e convertire | Membri scriventi della bacheca |
-| Cestinare/ripristinare una richiesta | Autore o membri scriventi della bacheca |
+| Read active forms, requests, notes and history | Current members, including observers; global administrators |
+| Create/update/publish/trash/restore forms and fields | Board administrators with a global role that allows writing; global administrators |
+| Submit a request | All current members, including observers, on a published form |
+| Update the title/answers | Author only, while the state is `new` or `in_review`, with no converted card |
+| Add notes | Author or board members with write access |
+| Change state and convert | Board members with write access |
+| Trash/restore a request | Author or board members with write access |
 
-Ogni lettura ricontrolla appartenenza e bacheca attiva. Una richiesta il cui modulo o bacheca è nel cestino non viene restituita neppure negli elenchi personali. La rimozione di un membro revoca subito l'accesso, anche conservando una sessione già aperta. La pausa del modulo blocca nuovi invii e mantiene leggibili le richieste esistenti.
+Every read rechecks membership and the active board. A request whose form or board is in the trash is not returned, even in personal lists. Removing a member revokes access immediately, including with an already open session. Pausing a form blocks new submissions while keeping existing requests readable.
 
-## Moduli: migliorie 426–432
+## Forms: features 426–432
 
-| Metodo e percorso | Payload / risultato |
+| Method and path | Payload / result |
 | --- | --- |
-| `POST /api/boards/:board/intake/forms` | `{name, description?, column_id}` → modulo `201` |
+| `POST /api/boards/:board/intake/forms` | `{name, description?, column_id}` → form, `201` |
 | `GET /api/boards/:board/intake/forms` | `{items: [...], next_cursor: id|null}` |
-| `GET /api/intake/forms/:id` | Modulo e campi attivi ordinati |
-| `PATCH /api/intake/forms/:id` | Almeno uno di `{name, description, column_id}` |
-| `POST /api/intake/forms/:id/publish` | `{}` → pubblica il modulo |
-| `POST /api/intake/forms/:id/pause` | `{}` → sospende gli invii |
-| `DELETE /api/intake/forms/:id` | Cestino; mantiene campi, risposte e storico |
-| `POST /api/intake/forms/:id/restore` | `{}` → ripristina il modulo |
+| `GET /api/intake/forms/:id` | Form and ordered active fields |
+| `PATCH /api/intake/forms/:id` | At least one of `{name, description, column_id}` |
+| `POST /api/intake/forms/:id/publish` | `{}` → publishes the form |
+| `POST /api/intake/forms/:id/pause` | `{}` → pauses submissions |
+| `DELETE /api/intake/forms/:id` | Trash; retains fields, answers and history |
+| `POST /api/intake/forms/:id/restore` | `{}` → restores the form |
 
-Il modulo contiene `id`, `board_id`, `name`, `description`, `column_id`, `published` booleano, `version`, `created_at`, `updated_at`, `deleted_at`, `can_manage` booleano e `fields`. Nome: 1–200 caratteri non vuoti; descrizione: fino a 4000 caratteri. La destinazione deve essere una colonna attiva della stessa bacheca. Massimo 100 moduli per bacheca, compresi quelli nel cestino. Se una colonna viene rimossa definitivamente, la destinazione diventa `null`, la versione del modulo aumenta e lo storico registra `target_column_removed`: modulo e richieste restano leggibili. Un amministratore deve selezionare una nuova colonna attiva prima di pubblicare nuovamente o convertire richieste.
+A form contains `id`, `board_id`, `name`, `description`, `column_id`, boolean `published`, `version`, `created_at`, `updated_at`, `deleted_at`, boolean `can_manage` and `fields`. The name has 1–200 characters and cannot consist only of whitespace; the description has up to 4000 characters. The destination must be an active column on the same board. At most 100 forms are allowed per board, including trashed forms. If a column is permanently removed, the destination becomes `null`, the form version increases, and history records `target_column_removed`: the form and requests remain readable. An administrator must select a new active column before publishing again or converting requests.
 
-Gli elenchi supportano `before=<id positivo>` e `limit=1..100` (predefinito 30), in ordine decrescente di ID. `include_deleted=1` negli elenchi e nei dettagli dei moduli è riservato agli amministratori e include anche i campi cestinati. Per membri e osservatori usare il dettaglio senza questo parametro.
+Lists support a positive `before` ID and `limit=1..100` (default 30), in descending ID order. `include_deleted=1` in form lists and details is restricted to administrators and also includes trashed fields. Members and observers should use details without this parameter.
 
-## Campi: migliorie 433–437
+## Fields: features 433–437
 
-| Metodo e percorso | Payload / risultato |
+| Method and path | Payload / result |
 | --- | --- |
-| `POST /api/intake/forms/:id/fields` | `{key, name, type, required?, options?}` → campo `201`; `If-Match` del modulo |
-| `PATCH /api/intake/fields/:id` | Almeno uno di `{name, type, required, options}`; `If-Match` del campo |
-| `POST /api/intake/forms/:id/fields/reorder` | `{field_ids: [id,...]}`: ogni campo attivo esattamente una volta; `If-Match` del modulo |
-| `DELETE /api/intake/fields/:id` | Cestina il campo; `If-Match` del campo |
-| `POST /api/intake/fields/:id/restore` | `{}`; `If-Match` del campo |
+| `POST /api/intake/forms/:id/fields` | `{key, name, type, required?, options?}` → field, `201`; form `If-Match` |
+| `PATCH /api/intake/fields/:id` | At least one of `{name, type, required, options}`; field `If-Match` |
+| `POST /api/intake/forms/:id/fields/reorder` | `{field_ids: [id,...]}`: every active field exactly once; form `If-Match` |
+| `DELETE /api/intake/fields/:id` | Trashes the field; field `If-Match` |
+| `POST /api/intake/fields/:id/restore` | `{}`; field `If-Match` |
 
-Un campo contiene `id`, `key`, `name`, `type`, `required` booleano, `options` array, `position`, `version`, `deleted_at`. La chiave immutabile segue `[a-z][a-z0-9_]{0,39}`; `constructor`, `prototype` e `__proto__` sono vietate. Le chiavi restano univoche nel modulo anche dopo il cestinamento. Nome fino a 200 caratteri; massimo 20 campi attivi. Ripristinare oltre questa quota restituisce `409`.
+A field contains `id`, `key`, `name`, `type`, boolean `required`, array `options`, `position`, `version` and `deleted_at`. The immutable key follows `[a-z][a-z0-9_]{0,39}`; `constructor`, `prototype` and `__proto__` are forbidden. Keys remain unique within the form even after trashing. Names have at most 200 characters; at most 20 fields may be active. Restoring beyond this quota returns `409`.
 
-Tipi ammessi: `text`, `number`, `date`, `boolean`, `select`, forniti anche da `/api/catalog`. `required` accetta booleani JSON, non numeri. I campi `select` richiedono da 1 a 30 opzioni testuali distinte e non vuote, fino a 400 byte ciascuna; gli altri tipi richiedono opzioni vuote. Per cambiare un campo select in un altro tipo inviare anche `options: []`. Ogni variazione di campo incrementa la sua versione e quella del modulo.
+Allowed types are `text`, `number`, `date`, `boolean` and `select`, also supplied by `/api/catalog`. `required` accepts JSON booleans, not numbers. `select` fields require 1–30 distinct non-empty text options of up to 400 bytes each; other types require empty options. When changing a select field to another type, also send `options: []`. Every field change increments its version and the form version.
 
-## Invio, inbox e dettagli: migliorie 438–441
+## Submission, inbox and details: features 438–441
 
-| Metodo e percorso | Payload / risultato |
+| Method and path | Payload / result |
 | --- | --- |
-| `POST /api/intake/forms/:id/requests` | `{title, answers: {key: typedValue}}` → richiesta `201`; `If-Match` del modulo |
-| `GET /api/boards/:board/intake/requests` | Inbox della bacheca, paginata |
-| `GET /api/me/intake/requests` | Solo richieste dell'autore, ricontrollando accesso attuale |
-| `GET /api/intake/requests/:id` | Richiesta, risposte, schema storico e note |
+| `POST /api/intake/forms/:id/requests` | `{title, answers: {key: typedValue}}` → request, `201`; form `If-Match` |
+| `GET /api/boards/:board/intake/requests` | Paginated board inbox |
+| `GET /api/me/intake/requests` | Only the author's requests, rechecking current access |
+| `GET /api/intake/requests/:id` | Request, answers, historical schema and notes |
 
-Titolo: 1–300 caratteri non vuoti. `answers` è un oggetto JSON fino a 50000 byte, con sole chiavi dei campi attivi. Il server rifiuta proprietà duplicate, sconosciute, tipi errati, valori null e valori non finiti. Testo: fino a 8000 byte; numeri JSON conservano `0`; booleani conservano `false`; date reali nel formato `YYYY-MM-DD`; scelte presenti nell'elenco delle opzioni. Un campo obbligatorio deve essere presente; testo obbligatorio non può contenere solo spazi, mentre `false` e `0` sono risposte valide. Una data facoltativa può essere stringa vuota. Massimo 10000 richieste per bacheca, compresi record cestinati.
+The title has 1–300 characters and cannot consist only of whitespace. `answers` is a JSON object of up to 50000 bytes containing only active field keys. The server rejects duplicate or unknown properties, wrong types, null values and non-finite values. Text: up to 8000 bytes; JSON numbers preserve `0`; booleans preserve `false`; dates are real `YYYY-MM-DD` dates; choices must be present in the options. A required field must be present; required text cannot consist only of whitespace, while `false` and `0` are valid answers. An optional date may be an empty string. At most 10000 requests are allowed per board, including trashed records.
 
-L'invio salva una copia immutabile dei campi ordinati in `schema_snapshot`, le risposte JSON e `form_version`. Le modifiche successive ai campi non alterano lo storico. Se il client invia `If-Match`, l'invio con modulo cambiato restituisce `412` prima della validazione delle risposte.
+Submission saves an immutable copy of the ordered fields in `schema_snapshot`, the JSON answers and `form_version`. Subsequent field changes do not alter history. If the client sends `If-Match`, submitting against a changed form returns `412` before validating answers.
 
-La richiesta contiene `id`, `form_id`, `form_name`, `board_id`, `author_id`, `author`, `title`, `answers`, `schema_snapshot`, `state`, `converted_card_id`, `converted_card_available` booleano, `version`, `form_version`, `form_changed` booleano, timestamp, `deleted_at`, `can_triage`, `can_edit`, `notes_count` e, nel dettaglio, `notes`. `form_changed` segnala modifiche del modulo successive all'invio. Il frontend usa lo schema storico per le richieste esistenti.
+A request contains `id`, `form_id`, `form_name`, `board_id`, `author_id`, `author`, `title`, `answers`, `schema_snapshot`, `state`, `converted_card_id`, boolean `converted_card_available`, `version`, `form_version`, boolean `form_changed`, timestamps, `deleted_at`, `can_triage`, `can_edit`, `notes_count` and, in details, `notes`. `form_changed` indicates form changes after submission. The frontend uses the historical schema for existing requests.
 
-Gli elenchi della bacheca e personali omettono il corpo delle note e includono solo `notes_count`, così il loro payload non cresce con la discussione. Le note complete restano disponibili nel dettaglio e nell’endpoint dedicato.
+Board and personal lists omit note bodies and include only `notes_count`, so their payload does not grow with the discussion. Complete notes remain available in details and the dedicated endpoint.
 
-Gli elenchi supportano `before`, `limit`, `state=new|in_review|accepted|rejected`, `q=<testo fino a 200 caratteri>` e `include_deleted=0|1`. La ricerca usa titolo, autore e nome modulo; i caratteri `%` e `_` sono letterali. I record cestinati vengono restituiti solo all'autore o ai membri scriventi; il dettaglio richiede esplicitamente `?include_deleted=1`.
+Lists support `before`, `limit`, `state=new|in_review|accepted|rejected`, a `q` search string of up to 200 characters, and `include_deleted=0|1`. Search covers the title, author and form name; `%` and `_` are literal characters. Trashed records are returned only to their author or members with write access; details explicitly require `?include_deleted=1`.
 
-## Gestione e conversione: migliorie 442–447
+## Management and conversion: features 442–447
 
-| Metodo e percorso | Payload / risultato |
+| Method and path | Payload / result |
 | --- | --- |
 | `POST /api/intake/requests/:id/state` | `{state: "new"|"in_review"|"accepted"|"rejected"}` |
-| `POST /api/intake/requests/:id/notes` | `{body}` → dettaglio aggiornato `201` |
-| `GET /api/intake/requests/:id/notes` | `{items: [note,...]}` in ordine cronologico |
-| `PATCH /api/intake/requests/:id` | Almeno uno di `{title, answers}`; solo autore e stato modificabile |
-| `POST /api/intake/requests/:id/convert` | `{description?: string}` → dettaglio con `converted_card_id` |
-| `DELETE /api/intake/requests/:id` | Cestina la richiesta |
-| `POST /api/intake/requests/:id/restore` | `{}` → ripristina |
+| `POST /api/intake/requests/:id/notes` | `{body}` → updated details, `201` |
+| `GET /api/intake/requests/:id/notes` | `{items: [note,...]}` in chronological order |
+| `PATCH /api/intake/requests/:id` | At least one of `{title, answers}`; author only and an editable state |
+| `POST /api/intake/requests/:id/convert` | `{description?: string}` → details with `converted_card_id` |
+| `DELETE /api/intake/requests/:id` | Trashes the request |
+| `POST /api/intake/requests/:id/restore` | `{}` → restores the request |
 
-Le note sono append-only, con autore e data, fino a 2000 caratteri; massimo 1000 per richiesta. Le modifiche alle risposte vengono validate contro **lo schema originale**, anche se il modulo è cambiato, è in pausa o un campo è stato rimosso. Una richiesta accettata o rifiutata può essere rimessa in esame da un membro scrivente prima della modifica dell'autore.
+Notes are append-only, with author and date, up to 2000 characters each; at most 1000 per request. Answer updates are validated against **the original schema**, even if the form has changed, is paused or a field has been removed. A member with write access may return an accepted or rejected request to review before the author edits it.
 
-La conversione richiede stato `accepted`, destinazione attiva e permesso di scrittura. Crea una sola scheda con il titolo della richiesta e una descrizione derivata dai nomi e dalle risposte dello schema storico, conservando `false` e `0`. Rispetta quote, WIP, ACL ed eventi della normale creazione schede. Senza descrizione esplicita, testo derivato oltre 10000 byte restituisce `413` senza creare schede. Il client può inviare `description` fino a 10000 caratteri per un riassunto esplicito; le risposte complete restano sulla richiesta. Non vengono troncate silenziosamente.
+Conversion requires state `accepted`, an active destination and write permission. It creates one card with the request title and a description derived from the historical schema's names and answers, preserving `false` and `0`. It respects the quotas, WIP limits, ACLs and events of regular card creation. Without an explicit description, derived text longer than 10000 bytes returns `413` without creating cards. The client may send `description` up to 10000 characters for an explicit summary; complete answers remain on the request. They are not silently truncated.
 
-Creazione scheda e associazione alla richiesta sono atomiche: anche un errore durante l'associazione annulla la scheda. Una seconda conversione senza replay idempotente restituisce `409`. Dopo la conversione titolo, risposte e stato della richiesta non sono modificabili; note e cestino restano disponibili. Cestinare la richiesta non cestina la scheda creata. L’associazione `converted_card_id` resta un riferimento storico immutabile, senza vincolo FK, anche se la scheda viene eliminata definitivamente; la richiesta non diventa nuovamente convertibile e resta conteggiata tra quelle convertite. `converted_card_available` è vero solo quando scheda, colonna e bacheca sono attive e la scheda appartiene ancora alla stessa bacheca: il frontend evita collegamenti indisponibili o ad altre bacheche.
+Card creation and association with the request are atomic: even a failure during association rolls back the card. A second conversion without idempotent replay returns `409`. After conversion, the request title, answers and state cannot be changed; notes and trash remain available. Trashing the request does not trash the created card. `converted_card_id` remains an immutable historical reference without a foreign-key constraint, even if the card is permanently deleted; the request does not become convertible again and remains included in converted counts. `converted_card_available` is true only when the card, column and board are active and the card still belongs to the same board: the frontend avoids unavailable links or links to other boards.
 
-## Storico, statistiche ed esportazione: migliorie 448–450
+## History, statistics and export: features 448–450
 
-| Metodo e percorso | Risultato |
+| Method and path | Result |
 | --- | --- |
-| `GET /api/intake/requests/:id/history` | `{items, next_cursor}`: eventi con autore, azione, data e nota |
-| `GET /api/intake/forms/:id/history` | Storico del modulo e delle sue richieste |
-| `GET /api/boards/:board/intake/stats` | Conteggi `total`, `new`, `in_review`, `accepted`, `rejected`, `converted` |
-| `GET /api/boards/:board/intake/export` | CSV UTF-8 con download e risposte/schema JSON senza perdita di tipi |
+| `GET /api/intake/requests/:id/history` | `{items, next_cursor}`: events with author, action, date and note |
+| `GET /api/intake/forms/:id/history` | History of the form and its requests |
+| `GET /api/boards/:board/intake/stats` | Counts: `total`, `new`, `in_review`, `accepted`, `rejected`, `converted` |
+| `GET /api/boards/:board/intake/export` | UTF-8 CSV download with JSON answers/schema preserving their types |
 
-Lo storico usa lo stesso cursore `before` e `limit=1..100`, ed è disponibile anche nel cestino ai soggetti autorizzati a leggere il record cancellato. Le mutazioni registrano creazione, modifica, pubblicazione, pausa, gestione campi, invio, note, stato, conversione, cestino e ripristino. Le statistiche e il CSV escludono richieste o moduli cestinati.
+History uses the same `before` cursor and `limit=1..100`, and is also available in the trash to people authorized to read the deleted record. Mutations record creation, updates, publication, pauses, field management, submission, notes, state, conversion, trash and restoration. Statistics and CSV exclude trashed requests or forms.
 
-Il CSV contiene `id,form,author,title,state,answers_json,schema_snapshot_json,converted_card_id,created_at`, con quoting corretto per virgole, virgolette e ritorni a capo. I testi che possono essere interpretati come formule vengono prefissati da apostrofo; i documenti JSON restano validi e mantengono le risposte originali. Limite di 1000 richieste o 2 MiB: oltre il limite risponde `413`, senza esportazione parziale.
+The CSV contains `id,form,author,title,state,answers_json,schema_snapshot_json,converted_card_id,created_at`, with correct quoting for commas, quotation marks and newlines. Text that could be interpreted as a formula is prefixed with an apostrophe; JSON documents remain valid and retain the original answers. The limit is 1000 requests or 2 MiB: exceeding it returns `413`, without a partial export.
 
-## Verifica
+## Verification
 
-`tests/test_intake.py` copre le 25 capacità 426–450, incluse autorizzazioni attuali e revocate, ruolo osservatore, CSRF, concorrenza ottimistica, schema evolutivo, date bisestili, `false`/`0`, quote, idempotenza, errori transazionali dopo la creazione della scheda, WIP, cestino, cursori e CSV sicuro. Tutti i dati dei test sono temporanei.
+`tests/test_intake.py` covers all 25 capabilities 426–450, including current and revoked permissions, the observer role, CSRF, optimistic concurrency, schema evolution, leap dates, `false`/`0`, quotas, idempotency, transactional errors after card creation, WIP limits, trash, cursors and safe CSV. All test data is temporary.

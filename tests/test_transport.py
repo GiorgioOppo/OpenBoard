@@ -22,7 +22,7 @@ class TransportTests(unittest.TestCase):
         self.addCleanup(self.stop)
         self.start()
 
-    def start(self, *options, local=True):
+    def start(self, *options, local=True, health_headers=None):
         with socket.socket() as s:
             s.bind(('127.0.0.1', 0)); self.port = s.getsockname()[1]
         self.process = subprocess.Popen([str(BINARY), '--port', str(self.port), '--db', str(Path(self.temp.name)/'test.db'), '--quiet', *(['--no-auth'] if local else []), *options], stdout=self.log, stderr=self.log)
@@ -31,7 +31,7 @@ class TransportTests(unittest.TestCase):
             if self.process.poll() is not None:
                 self.fail('Server startup failed: '+(Path(self.temp.name)/'server.log').read_text())
             try:
-                if self.request('GET','/api/health')[0] == 200: return
+                if self.request('GET','/api/health',headers=health_headers)[0] == 200: return
             except (OSError, http.client.HTTPException): pass
             time.sleep(.025)
         self.fail('Server startup timeout')
@@ -56,7 +56,7 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(status,200);self.assertEqual(json.loads(b)['status'],'ready')
         status,v,b=self.request('GET','/api/version')
         version=json.loads(b)
-        self.assertEqual(version['version'],'0.6.0');self.assertGreaterEqual(version['workers'],2)
+        self.assertEqual(version['version'],'0.6.1');self.assertGreaterEqual(version['workers'],2)
         self.assertNotEqual(h['X-Request-ID'],v['X-Request-ID'])
         status,h,b=self.request('HEAD','/api/health')
         self.assertEqual(status,200);self.assertEqual(b,b'');self.assertGreater(int(h['Content-Length']),0)
@@ -147,6 +147,88 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(login(source,'unknown-final','wrong','198.51.100.1'),401)
         self.assertEqual(login(source,'unknown-after-limit','wrong','198.51.100.2'),429)
 
+    def test_trusted_proxy_accepts_only_one_numeric_client_address(self):
+        self.stop()
+        headers = {'X-Real-IP':'192.0.2.10'}
+        self.start('--trusted-proxy','127.0.0.1',health_headers=headers)
+        self.assertEqual(self.request('GET','/api/health',headers=headers)[0],200)
+        self.assertEqual(self.request('GET','/api/health')[0],400)
+        for invalid in ('', 'unknown', '192.0.2.10, 192.0.2.11', 'localhost',
+                        '192.0.2.10:1234', '[2001:db8::1]', 'fe80::1%lo0'):
+            with self.subTest(value=invalid):
+                self.assertEqual(self.request('GET','/api/health',headers={'X-Real-IP':invalid})[0],400)
+        for valid in ('192.0.2.11','2001:db8::1','::ffff:192.0.2.11'):
+            with self.subTest(value=valid):
+                self.assertEqual(self.request('GET','/api/health',headers={'X-Real-IP':valid})[0],200)
+        with socket.create_connection(('127.0.0.1',self.port),timeout=3) as c:
+            c.sendall((f'GET /api/health HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\n'
+                       'X-Real-IP: 192.0.2.10\r\nX-Real-IP: 192.0.2.11\r\n\r\n').encode())
+            response=http.client.HTTPResponse(c)
+            try:
+                response.begin(); self.assertEqual(response.status,400); response.read()
+            finally:
+                response.close()
+
+    def test_forwarded_headers_from_untrusted_peer_are_ignored(self):
+        self.stop(); self.start('--trusted-proxy','192.0.2.254')
+        self.assertEqual(self.request('GET','/api/health')[0],200)
+        self.assertEqual(self.request('GET','/api/health',headers={
+            'X-Real-IP':'not-an-address','X-Forwarded-For':'192.0.2.1','Forwarded':'for=192.0.2.1'})[0],200)
+        with socket.create_connection(('127.0.0.1',self.port),timeout=3) as c:
+            c.sendall((f'GET /api/health HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\n'
+                       'X-Real-IP: 192.0.2.10\r\nX-Real-IP: 192.0.2.11\r\n\r\n').encode())
+            response=http.client.HTTPResponse(c)
+            try:
+                response.begin(); self.assertEqual(response.status,200); response.read()
+            finally:
+                response.close()
+
+    def proxy_login(self, client, username, password):
+        return self.request('POST','/api/auth/login',json.dumps({'username':username,'password':password}),
+                            {'Content-Type':'application/json','X-Real-IP':client})
+
+    def start_proxy_auth(self):
+        self.stop()
+        self.start('--trusted-proxy','127.0.0.1',local=False,health_headers={'X-Real-IP':'192.0.2.254'})
+        password='correct-password-123'
+        status,_,response=self.request('POST','/api/auth/setup',json.dumps({
+            'name':'Administrator','username':'admin','password':password}),
+            {'Content-Type':'application/json','X-Real-IP':'192.0.2.254'})
+        self.assertEqual(status,201,response)
+        return password
+
+    def test_proxy_login_quotas_do_not_block_other_clients_or_accounts(self):
+        password=self.start_proxy_auth()
+        for _ in range(10):
+            self.assertEqual(self.proxy_login('192.0.2.1','admin','wrong')[0],401)
+        self.assertEqual(self.proxy_login('192.0.2.1','ADMIN',password)[0],429)
+        status,headers,body=self.proxy_login('192.0.2.2','admin',password)
+        self.assertEqual(status,200,body)
+        self.assertIn('HttpOnly',headers['Set-Cookie'])
+        self.assertIn('SameSite=Strict',headers['Set-Cookie'])
+        self.assertEqual(len(json.loads(body)['csrf']),64)
+        for attempt in range(50):
+            self.assertEqual(self.proxy_login('192.0.2.1',f'unknown-{attempt}','wrong')[0],401)
+        self.assertEqual(self.proxy_login('192.0.2.1','unknown-over-limit','wrong')[0],429)
+        # Exceed the retired global budget and rotate more account names. Only
+        # the attacking client's quota may stop authentication work.
+        for attempt in range(25):
+            self.assertEqual(self.proxy_login('192.0.2.2',f'unknown-{attempt}','wrong')[0],401)
+        self.assertEqual(self.proxy_login('192.0.2.3','admin',password)[0],200)
+        self.assertEqual(self.request('POST','/api/boards','{}',{
+            'Content-Type':'application/json','X-Real-IP':'192.0.2.3','Origin':'https://attacker.example'})[0],403)
+
+    def test_proxy_ipv6_and_mapped_ipv4_spellings_share_quotas(self):
+        self.start_proxy_auth()
+        for aliases in (('2001:db8::1','2001:0db8:0000:0000:0000:0000:0000:1'),
+                        ('192.0.2.1','::ffff:192.0.2.1','::ffff:c000:0201')):
+            with self.subTest(aliases=aliases):
+                for attempt in range(10):
+                    self.assertEqual(self.proxy_login(aliases[attempt%len(aliases)],'unknown','wrong')[0],401)
+                status,headers,_=self.proxy_login(aliases[-1],'unknown','wrong')
+                self.assertEqual(status,429)
+                self.assertEqual(headers['Retry-After'],'300')
+
     def test_public_https_origin_configuration(self):
         self.stop();self.start('--public-url','https://board.example.test')
         body=json.dumps({'name':'HTTPS proxy board'})
@@ -176,7 +258,11 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(self.request('GET','/api/ready')[0],200)
 
     def test_invalid_cli_bounds(self):
-        for args in [('--workers','0'),('--workers','33'),('--port','65536'),('--public-url','https://host/path'),('--bind','192.0.2.1'),('--bind','localhost'),('--bind','0.0.0.0','--no-auth'),('--web-root','web')]:
+        for args in [('--workers','0'),('--workers','33'),('--port','65536'),('--public-url','https://host/path'),('--bind','192.0.2.1'),('--bind','localhost'),('--bind','0.0.0.0','--no-auth'),('--web-root','web'),
+                     ('--trusted-proxy','localhost'),('--trusted-proxy','127.0.0.1/8'),
+                     ('--trusted-proxy','127.0.0.1,192.0.2.1'),('--trusted-proxy','0.0.0.0'),
+                     ('--trusted-proxy','255.255.255.255'),('--trusted-proxy','224.0.0.1'),
+                     ('--trusted-proxy','::1'),('--trusted-proxy','')]:
             with self.subTest(args=args):
                 r=subprocess.run([str(BINARY),*args],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=3)
                 self.assertNotEqual(r.returncode,0)

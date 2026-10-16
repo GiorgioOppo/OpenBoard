@@ -1,226 +1,228 @@
-# API di OpenBoard 0.6.0
+# OpenBoard 0.6.1 API
 
-Il contratto di base della versione 0.2 resta disponibile qui. Le API della 0.3 sono descritte in [produttività](API_PRODUTTIVITA.md) e [collaborazione e account](API_COLLABORAZIONE.md); la 0.4 aggiunge [campi e traguardi](API_PIANIFICAZIONE.md) e [tempo e conversazioni](API_TEAMWORK.md). La 0.5 aggiunge [revisioni e approvazioni](API_REVISIONI.md) e [portfolio e report personali](API_PORTFOLIO.md); la 0.6 aggiunge [sprint e capacità](API_SPRINT.md) e [moduli e richieste](API_RICHIESTE.md). Configurazione, database separati e metriche sono in [installazione e gestione](DEPLOYMENT.md).
+This reference describes the core API supported by the current release. Additional endpoints are documented in [productivity](API_PRODUTTIVITA.md), [collaboration and accounts](API_COLLABORAZIONE.md), [custom fields and milestones](API_PIANIFICAZIONE.md), [time tracking and conversations](API_TEAMWORK.md), [reviews and approvals](API_REVISIONI.md), [portfolio and personal reports](API_PORTFOLIO.md), [sprints and capacity](API_SPRINT.md), and [forms and requests](API_RICHIESTE.md). Configuration, separate databases, and metrics are covered in the [deployment guide](DEPLOYMENT.md).
 
-Le API sono disponibili sulla stessa origine dell'interfaccia, per impostazione predefinita `http://127.0.0.1:8090` in sviluppo o `http://openboard.localhost` con Compose. Il backend risponde soltanto con API JSON e restituisce `404` per HTML/CSS/JavaScript e tutti i percorsi non API. Il server locale ascolta su loopback; il container imposta `--bind 0.0.0.0` su una rete privata. `--public-url https://board.example.com` configura host e origine pubblici per il reverse proxy. TLS è gestito da Nginx Proxy Manager.
+The API uses the same origin as the interface: by default, `http://127.0.0.1:8090` in development or `http://openboard.localhost` with Compose. The backend serves APIs only and returns `404` for HTML, CSS, JavaScript, and every non-API path. The native server listens on loopback; the container explicitly sets `--bind 0.0.0.0` on a private network. `--public-url https://board.example.com` configures the public host and origin used behind a reverse proxy. Nginx Proxy Manager terminates TLS.
 
-## Convenzioni HTTP
+## HTTP conventions
 
-- Le risposte API usano `application/json; charset=utf-8` e `Cache-Control: no-store`.
-- `POST` e `PATCH` richiedono `Content-Type: application/json` e un oggetto JSON, anche quando non servono campi: inviare `{}`.
-- `DELETE` accetta un corpo vuoto. Se presente, il corpo deve essere un oggetto JSON con lo stesso content type.
-- `HEAD` è disponibile per i percorsi `GET` e restituisce gli stessi header senza corpo. `OPTIONS` non è implementato.
-- I campi omessi in un aggiornamento mantengono il valore precedente. I campi conosciuti hanno tipi rigorosi: ad esempio `false` è un booleano, `0` un intero e `null` non equivale a un campo omesso. I campi sconosciuti vengono ignorati.
-- Il JSON e le stringhe devono essere UTF-8 validi. Le chiavi duplicate nell'oggetto della richiesta e nelle strutture validate vengono rifiutate.
-- Gli identificativi dei percorsi sono interi decimali positivi. Usare URL senza slash finale.
-- Ogni risposta comprende `X-Request-ID`, utile per collegare un errore ai log.
-- Le scritture verificano `Host`, `Origin` quando presente e `Sec-Fetch-Site`. Le richieste dichiarate `cross-site` vengono rifiutate. Non sono disponibili API CORS.
+- API responses use `application/json; charset=utf-8` and `Cache-Control: no-store`, except endpoints explicitly documented as CSV or another format.
+- `POST` and `PATCH` require `Content-Type: application/json` and a JSON object, including when no fields are needed: send `{}`.
+- `DELETE` accepts an empty body. If present, its body must be a JSON object with the same content type.
+- `HEAD` is available for `GET` paths and returns the same headers without a body. `OPTIONS` is not implemented.
+- Omitted update fields retain their previous values. Known fields have strict types: for example, `false` is a boolean, `0` is an integer, and `null` does not mean an omitted field. Unknown fields are ignored unless an endpoint explicitly rejects them.
+- JSON and strings must be valid UTF-8. Duplicate keys in the request object and validated structures are rejected.
+- Resource IDs in paths are positive decimal integers, except the opaque session IDs documented in the [collaboration reference](API_COLLABORAZIONE.md#personal-sessions). Use URLs without a trailing slash.
+- Processed requests include `X-Request-ID` in their response to correlate errors with logs; rejection before request processing, such as an overloaded queue, may omit it.
+- Writes validate `Host`, `Origin` when supplied, and `Sec-Fetch-Site`. Requests declared `cross-site` are rejected. There is no CORS API.
 
-Le creazioni di bacheche, colonne, schede e commenti restituiscono `201`; le altre modifiche restituiscono normalmente `200`. Le mutazioni di bacheche, colonne e schede restituiscono:
+Creating a board, column, card, or comment returns `201`; other mutations normally return `200`. Board, column, and card mutations return:
 
 ```json
 {"ok": true, "id": 123, "version": 4}
 ```
 
-Account, membri e commenti restituiscono `{"ok":true,"id":123}` quando non restituiscono una sessione. La configurazione iniziale restituisce una sessione con `201`, l'accesso una sessione con `200`.
+Account, member, and comment operations return `{"ok":true,"id":123}` when they do not return a session or a more specific response documented below. Initial setup returns a session with `201`; login returns a session with `200`.
 
-## Stato del servizio
+## Service status
 
-Questi endpoint sono disponibili anche senza sessione quando gli account sono abilitati.
+These endpoints are available without a session.
 
-| Metodo | Percorso | Risposta |
+| Method | Path | Response |
 | --- | --- | --- |
-| GET | `/api/health` | `{"status":"ok"}`: il processo risponde |
-| GET | `/api/ready` | `200 {"status":"ready"}` se il database è aperto in scrittura e la lettura di controllo riesce; altrimenti `503 {"status":"unavailable"}` |
-| GET | `/api/version` | `{"version":"0.6.0","sqlite":"…","auth_enabled":false,"workers":8,"storage":"sqlite"}`; lo storage esterno riporta `postgresql+mongodb` |
+| GET | `/api/health` | `{"status":"ok"}`: the process responds |
+| GET | `/api/ready` | `200 {"status":"ready"}` when the database is open for writing and a test read succeeds; otherwise `503 {"status":"unavailable"}` |
+| GET | `/api/version` | For example, `{"version":"0.6.1","sqlite":"…","auth_enabled":true,"workers":8,"storage":"sqlite"}`; external storage reports `postgresql+mongodb` |
 
-La readiness verifica apertura e lettura del database e, in modalità esterna, raggiungibilità di PostgreSQL e MongoDB; non esegue una scrittura di prova. Una scrittura non persistita sui servizi esterni restituisce `503`; riusare la stessa `Idempotency-Key` quando si ritenta un `POST` supportato.
+Readiness checks database access and, in external-storage mode, connectivity to PostgreSQL and MongoDB; it does not perform a test write. A write that cannot be persisted to the external services returns `503`; reuse the same `Idempotency-Key` when retrying a supported `POST`.
 
-## Cataloghi per il frontend
+## Frontend catalogues
 
-`GET /api/catalog` richiede una sessione e restituisce `labels`, `priorities`, `covers` e `custom_field_types`. Il frontend costruisce i selettori da questi metadati; le definizioni personalizzate e i dati delle bacheche arrivano dai rispettivi endpoint. Il backend resta responsabile di convalida e permessi.
+`GET /api/catalog` requires a session in the default authenticated mode and returns `labels`, `priorities`, `covers`, and `custom_field_types`. The frontend builds selectors from these metadata; custom definitions and board data come from their respective endpoints. Validation and permissions remain the backend's responsibility.
 
-## Account e sessioni
+## Accounts and sessions
 
-Con l'opzione esplicita `--no-auth`, ammessa solo su loopback, l'istanza opera in modalità di sviluppo locale: tutte le bacheche sono accessibili e non occorre un token CSRF. Per impostazione predefinita gli endpoint di dominio richiedono una sessione. Le eccezioni pubbliche sono stato del servizio, lettura della sessione, configurazione iniziale e accesso.
+Authentication is enabled by default. Domain endpoints require a session; the public exceptions are service status, session status, initial setup, and login. The explicit `--no-auth` option, or `OPENBOARD_AUTH=false`, enables local development without accounts and is allowed only on loopback. In that mode, boards are accessible without a session or CSRF token; endpoints that require an account remain unavailable.
 
-| Metodo | Percorso | Corpo / comportamento |
+| Method | Path | Body / behavior |
 | --- | --- | --- |
-| GET | `/api/auth/session` | Stato della sessione e token CSRF, anche per un visitatore anonimo |
-| POST | `/api/auth/setup` | `{"name":"Giorgio","username":"giorgio","password":"una-password-lunga"}`; crea il primo amministratore e apre una sessione. Disponibile solo quando non esistono utenti; poi `409` |
-| POST | `/api/auth/login` | `{"username":"giorgio","password":"una-password-lunga"}`; apre una sessione |
-| POST | `/api/auth/logout` | `{}`; revoca la sessione corrente e cancella il cookie |
-| POST | `/api/auth/password` | `{"current_password":"…","password":"nuova-password-lunga"}`; modifica la propria password e revoca le altre sessioni dello stesso account |
+| GET | `/api/auth/session` | Session status and CSRF token, including for an anonymous visitor |
+| POST | `/api/auth/setup` | `{"name":"Alex","username":"alex","password":"example-password-change-me"}`; creates the first administrator and opens a session. Available only when no users exist; subsequently returns `409` |
+| POST | `/api/auth/login` | `{"username":"alex","password":"example-password-change-me"}`; opens a session |
+| POST | `/api/auth/logout` | `{}`; revokes the current session and clears the cookie |
+| POST | `/api/auth/password` | `{"current_password":"…","password":"new-example-password-change-me"}`; changes the current user's password and revokes their other sessions |
 
-Esempio di risposta di sessione autenticata:
+The passwords above are illustrative; choose a unique password for your installation. Example authenticated session response:
 
 ```json
 {
   "enabled": true,
   "setup_required": false,
-  "user": {"id": 1, "name": "Giorgio", "username": "giorgio", "role": "admin"},
-  "csrf": "token-esadecimale-di-64-caratteri"
+  "user": {"id": 1, "name": "Alex", "username": "alex", "role": "admin"},
+  "csrf": "<64-character hexadecimal token>"
 }
 ```
 
-Per un visitatore anonimo `user` è `null` e `csrf` è vuoto. Senza `--auth`, `enabled` e `setup_required` sono `false`. Gli altri endpoint account, utenti e membri restituiscono `403` in modalità locale.
+For an anonymous visitor, `user` is `null` and `csrf` is empty. In explicit `--no-auth` mode, `enabled` and `setup_required` are `false`; other account, user, and member endpoints return `403`.
 
-La sessione usa il cookie `ob_session`, `HttpOnly`, `SameSite=Strict`, `Path=/`. Con un URL pubblico HTTPS il cookie ha anche `Secure`. La durata massima è 8 ore, con scadenza dopo 30 minuti di inattività; un account può avere fino a 10 sessioni. Il token CSRF restituito dalla sessione deve essere inviato nell'header `X-CSRF-Token` per tutte le scritture autenticate, incluso il logout. Setup e login non richiedono una sessione precedente. Dopo un `401`, rileggere la sessione o effettuare nuovamente l'accesso.
+Sessions use the `ob_session` cookie with `HttpOnly`, `SameSite=Strict`, and `Path=/`. An HTTPS public URL also enables `Secure`. Sessions last at most 8 hours and expire after 30 minutes of inactivity; an account can have up to 10 sessions. Send the CSRF token returned by the session endpoint in `X-CSRF-Token` for every authenticated write, including logout. Setup and login do not require a previous session. After a `401`, fetch the session again or sign in again.
 
-Setup, login e cambio password hanno un limite di tentativi: 10 per chiave account, 60 per peer e 80 globali ogni 5 minuti. La risposta `429` include `Retry-After: 300`. Dietro il proxy i peer sono visti dal server come indirizzi della rete Docker; gli header inoltrati non sono usati per aggirare il limite.
+Setup, login, and password changes consume a shared per-client allowance of 60 attempts in a fixed monotonic five-minute window. A second allowance permits 10 attempts per client IP and operation key: the normalized username for login, one setup key per client, or the authenticated account ID for password changes. Counters have fixed memory and keyed hashing; collisions may cause an earlier refusal but cannot increase an allowance. There is no global authentication budget shared by every client. A backend `429` includes `Retry-After: 300`.
 
-### Utenti e permessi
+The client address normally comes from the TCP peer. Only the exact IPv4 peer configured in `OPENBOARD_TRUSTED_PROXY` or `--trusted-proxy` may supply a single numeric `X-Real-IP` address. A trusted peer with a missing, duplicate, or malformed address receives `400`; addresses with ports, zones, or comma-separated lists are invalid. The backend ignores forwarded client identities from other peers and never uses `X-Forwarded-For` or `Forwarded` to choose the client. Compose assigns NPM a static address and configures that exact trusted peer; NPM replaces client-supplied IP headers with the TCP client address. The proxy applies additional authentication and connection limits documented in [SECURITY.md](../SECURITY.md) and the [deployment guide](DEPLOYMENT.md).
 
-| Metodo | Percorso | Corpo / risposta | Permesso |
+### Users and permissions
+
+| Method | Path | Body / response | Permission |
 | --- | --- | --- | --- |
-| GET | `/api/users` | `{"users":[{"id":1,"name":"…","username":"…","role":"admin","active":true,"created_at":"…"}]}` | Amministratore globale |
-| POST | `/api/users` | `name`, `username`, `password`; `role` facoltativo, predefinito `member`; risposta `201` | Amministratore globale |
-| PATCH | `/api/users/:id` | Uno o più campi tra `name`, `role`, `active` | Amministratore globale |
-| GET | `/api/boards/:id/members` | `{"members":[{"user_id":1,"name":"…","username":"…","role":"admin","global_role":"admin","active":true}]}` | Lettura della bacheca |
-| POST | `/api/boards/:id/members` | `{"user_id":2,"role":"member"}`; aggiunge o aggiorna l'appartenenza; risposta `200` | Amministratore globale o della bacheca |
-| DELETE | `/api/boards/:id/members/:user_id` | Rimuove l'appartenenza; corpo facoltativo | Amministratore globale o della bacheca |
+| GET | `/api/users` | `{"users":[{"id":1,"name":"…","username":"…","role":"admin","active":true,"created_at":"…"}]}` | Global administrator |
+| POST | `/api/users` | `name`, `username`, `password`; optional `role`, default `member`; returns `201` | Global administrator |
+| PATCH | `/api/users/:id` | One or more of `name`, `role`, `active` | Global administrator |
+| GET | `/api/boards/:id/members` | `{"members":[{"user_id":1,"name":"…","username":"…","role":"admin","global_role":"admin","active":true}]}` | Board read access |
+| POST | `/api/boards/:id/members` | `{"user_id":2,"role":"member"}`; adds or updates membership; returns `200` | Global or board administrator |
+| DELETE | `/api/boards/:id/members/:user_id` | Removes membership; optional body | Global or board administrator |
 
-I ruoli ammessi sono `admin`, `member`, `observer`, sia per l'account sia per la bacheca. L'amministratore globale accede a tutte le bacheche. Gli altri utenti vedono soltanto quelle di cui sono membri. Un ruolo globale `observer` impedisce le mutazioni del dominio anche se l'appartenenza alla bacheca è più permissiva; un ruolo di bacheca `observer` consente soltanto letture su quella bacheca. I preferiti personali restano modificabili anche dagli osservatori.
+The allowed roles are `admin`, `member`, and `observer`, for both accounts and board memberships. Global administrators can access every board. Other users can access only boards they belong to. A global `observer` role prevents domain mutations even when board membership is more permissive; a board `observer` role allows only reads on that board. Observers may still manage their personal favorites.
 
-Chi crea, duplica o importa una bacheca ne diventa amministratore. La configurazione iniziale assegna al primo amministratore le bacheche già presenti. La disattivazione di un account revoca le sue sessioni; non è consentito disattivare o degradare l'ultimo amministratore globale attivo (`409`). Non esiste un endpoint di registrazione pubblica o di cancellazione fisica degli utenti.
+Creating, duplicating, or importing a board makes the current user its administrator. Initial setup assigns existing boards to the first administrator. Deactivating an account revokes its sessions; deactivating or demoting the last active global administrator is rejected with `409`. There is no public signup endpoint or endpoint for physically deleting users.
 
-## Bacheche
+## Boards
 
-| Metodo | Percorso | Operazione |
+| Method | Path | Operation |
 | --- | --- | --- |
-| GET | `/api/boards` | `{"boards":[...]}` con soli metadati, senza colonne o schede; esclude bacheche archiviate |
-| GET | `/api/boards?include_archived=1` | Comprende anche le bacheche archiviate |
-| POST | `/api/boards` | Creates the board and three initial lists. Optional `language` selects their names; omitted language preserves the Italian defaults. |
-| GET | `/api/boards/:id` | Bacheca completa con colonne e schede; le schede archiviate sono escluse |
-| GET | `/api/boards/:id?summary=1` | Bacheca con schede in formato riepilogativo |
-| GET | `/api/boards/:id?summary=1&include_archived=1` | Riepilogo comprensivo delle schede archiviate |
-| GET | `/api/boards/:id/revision` | `{"version":12}` per controllare gli aggiornamenti |
-| PATCH | `/api/boards/:id` | Modifica uno o più campi scrivibili |
-| PATCH | `/api/boards/:id/star` | `{"starred":true}`; modifica il preferito personale con account, oppure locale senza account |
-| DELETE | `/api/boards/:id` | Sposta nel cestino la bacheca; colonne e schede diventano invisibili |
-| POST | `/api/boards/:id/restore` | `{}`; ripristina una bacheca nel cestino |
-| POST | `/api/boards/:id/duplicate` | `{}` o `{"name":"Nuovo progetto"}`; crea una copia con nuove identità e restituisce `201` |
-| GET | `/api/boards/:id/activity` | Ultimi 200 eventi, dal più recente |
-| GET | `/api/boards/:id/stats` | Conteggi e raggruppamenti delle schede attive |
-| GET | `/api/boards/:id/export` | Esportazione OpenBoard v2, descritta sotto |
+| GET | `/api/boards` | `{"boards":[...]}` with metadata only, without columns or cards; excludes archived boards |
+| GET | `/api/boards?include_archived=1` | Includes archived boards |
+| POST | `/api/boards` | Creates a board and three initial lists. Optional `language` selects their names; omitting it preserves the Italian defaults |
+| GET | `/api/boards/:id` | Full board with columns and cards; excludes archived cards |
+| GET | `/api/boards/:id?summary=1` | Board with summarized cards |
+| GET | `/api/boards/:id?summary=1&include_archived=1` | Summary including archived cards |
+| GET | `/api/boards/:id/revision` | `{"version":12}` for checking updates |
+| PATCH | `/api/boards/:id` | Updates one or more writable fields |
+| PATCH | `/api/boards/:id/star` | `{"starred":true}`; updates the personal favorite with accounts, or the local favorite without accounts |
+| DELETE | `/api/boards/:id` | Moves the board to the trash; its columns and cards become invisible |
+| POST | `/api/boards/:id/restore` | `{}`; restores a board from the trash |
+| POST | `/api/boards/:id/duplicate` | `{}` or `{"name":"New project"}`; creates a copy with new identities and returns `201` |
+| GET | `/api/boards/:id/activity` | Most recent 200 events, newest first |
+| GET | `/api/boards/:id/stats` | Counts and groupings for active cards |
+| GET | `/api/boards/:id/export` | OpenBoard v2 export, described below |
 
-| Campo scrivibile | Tipo / valore iniziale | Limite |
+| Writable field | Type / initial value | Limit |
 | --- | --- | --- |
-| `name` | Stringa obbligatoria alla creazione, non vuota né composta solo da spazi | 200 caratteri Unicode |
-| `description` | Stringa, `""` | 2.000 caratteri Unicode |
-| `color` | Stringa, `"sage"` | `sage`, `peach`, `lavender`, `blue` |
-| `starred` | Booleano, `false` | Con account viene anche salvato il preferito personale; per modificare soltanto il preferito usare `/star` |
-| `archived` | Booleano, `false` | `true` archivia; `false` riapre |
+| `name` | Required string on creation; nonempty and not whitespace-only | 200 Unicode characters |
+| `description` | String, `""` | 2,000 Unicode characters |
+| `color` | String, `"sage"` | `sage`, `peach`, `lavender`, `blue` |
+| `starred` | Boolean, `false` | Also saves the personal favorite when accounts are enabled; use `/star` to update only the favorite |
+| `archived` | Boolean, `false` | `true` archives; `false` reopens |
 | `language` | Optional string, creation only; default `"it"` | Exactly `it`, `en`, `fr`, `es`, `de`, `zh-CN`, or `ja`; unknown values and non-string values return `400` |
 
 `POST /api/boards` accepts `language` only as a creation hint for the three initial list names. For example, `{"name":"Release","language":"en"}` creates `To do`, `In progress`, and `Done`; the board name and other user content are preserved exactly. French defaults are `À faire`, `En cours`, `Terminé`; Spanish: `Por hacer`, `En curso`, `Completado`; German: `Zu erledigen`, `In Arbeit`, `Erledigt`; Simplified Chinese: `待办`, `进行中`, `已完成`; Japanese: `未着手`, `進行中`, `完了`. The legacy Italian defaults remain `Da fare`, `In corso`, `Completato`.
 
 This hint is not persisted as a board property or returned by reads. Existing boards and lists are never translated. Any `language` field on `PATCH /api/boards/:id`, including `null`, returns `400` and leaves the board unchanged. Renaming a list continues to use its normal API. Board creation permissions, transaction boundaries, and idempotency rules remain unchanged.
 
-La risposta contiene anche `id`, `created_at`, `updated_at`, `version`, `role`, `membership_role` e `readonly`. Le due proprietà di ruolo riportano il ruolo restituito per la bacheca; `readonly` tiene conto anche di un eventuale ruolo globale di sola lettura. Le risposte di dettaglio aggiungono `columns`.
+Responses also contain `id`, `created_at`, `updated_at`, `version`, `role`, `membership_role`, and `readonly`. The two role properties report the role returned for the board; `readonly` also accounts for a global observer role. Detail responses add `columns`.
 
-L'archiviazione non equivale al cestino: una bacheca archiviata è ancora leggibile tramite il proprio URL diretto. `include_archived=1` sulla bacheca controlla le schede incluse, mentre sull'elenco controlla le bacheche incluse.
+Archiving differs from trashing: an archived board remains readable through its direct URL. On a board detail request, `include_archived=1` controls which cards are included; on the board list, it controls which boards are included.
 
-## Colonne e ordinamento
+## Columns and ordering
 
-| Metodo | Percorso | Operazione |
+| Method | Path | Operation |
 | --- | --- | --- |
-| POST | `/api/boards/:id/columns` | Crea una colonna; richiede `title`; accetta `position` e `wip_limit` |
-| PATCH | `/api/columns/:id` | Modifica `title`, `position` e/o `wip_limit` |
-| DELETE | `/api/columns/:id` | Sposta la colonna nel cestino e nasconde le sue schede |
-| POST | `/api/columns/:id/restore` | `{}`; ripristina la colonna se la bacheca è attiva |
+| POST | `/api/boards/:id/columns` | Creates a column; requires `title`; accepts `position` and `wip_limit` |
+| PATCH | `/api/columns/:id` | Updates `title`, `position`, and/or `wip_limit` |
+| DELETE | `/api/columns/:id` | Moves the column to the trash and hides its cards |
+| POST | `/api/columns/:id/restore` | `{}`; restores the column if its board is active |
 
-Le colonne si leggono dentro la bacheca: non è disponibile un `GET /api/columns/:id`. Ogni colonna contiene `id`, `title`, `position`, `wip_limit`, `version`, `created_at`, `updated_at` e `cards`.
+Read columns within their board; there is no `GET /api/columns/:id`. Each column contains `id`, `title`, `position`, `wip_limit`, `version`, `created_at`, `updated_at`, and `cards`.
 
-`title` deve contenere da 1 a 200 caratteri Unicode e non può essere composto soltanto da spazi. `position` è un intero da zero: alla creazione può essere al massimo il numero delle colonne esistenti, in modifica al massimo il numero delle altre colonne. Le posizioni delle colonne visibili vengono mantenute dense (`0,1,2,…`). Se omessa alla creazione, la colonna è aggiunta in fondo.
+`title` must contain 1–200 Unicode characters and cannot be whitespace-only. `position` is a zero-based integer: at creation, its maximum is the number of existing columns; on update, its maximum is the number of other columns. Visible columns maintain dense positions (`0,1,2,…`). Omitting `position` on creation appends the column.
 
-`wip_limit` è un intero tra 0 e 100.000, predefinito 0, che significa nessun limite. Il conteggio WIP comprende le schede della colonna non eliminate, non archiviate e non completate. Creare, spostare, riaprire, ripristinare o togliere dall'archivio una scheda che supererebbe il limite restituisce `409`. Le schede completate possono entrare nella colonna senza consumare WIP. Ridurre il limite sotto il conteggio attuale è consentito: le schede esistenti restano presenti, ma le successive aggiunte sono bloccate.
+`wip_limit` is an integer from 0 to 100,000; the default, 0, means no limit. WIP counts cards in the column that are neither deleted, archived, nor completed. Creating, moving, reopening, restoring, or unarchiving a card that would exceed the limit returns `409`. Completed cards can enter a column without consuming WIP. Lowering the limit below the current count is allowed: existing cards remain, but subsequent additions are blocked.
 
-## Schede
+## Cards
 
-| Metodo | Percorso | Operazione |
+| Method | Path | Operation |
 | --- | --- | --- |
-| POST | `/api/columns/:id/cards` | Crea una scheda nella colonna del percorso; basta `title` |
-| GET | `/api/cards/:id` | Dettaglio completo, anche quando la scheda è archiviata |
-| PATCH | `/api/cards/:id` | Modifica, sposta, riordina, completa o archivia |
-| DELETE | `/api/cards/:id` | Sposta la scheda nel cestino |
-| POST | `/api/cards/:id/restore` | `{}`; ripristina se bacheca e colonna sono attive e il WIP lo consente |
-| POST | `/api/cards/:id/duplicate` | `{}` o `{"column_id":4}`; copia nella colonna attuale o in un'altra della stessa bacheca; restituisce `201` |
+| POST | `/api/columns/:id/cards` | Creates a card in the path's column; only `title` is required |
+| GET | `/api/cards/:id` | Full detail, including when the card is archived |
+| PATCH | `/api/cards/:id` | Updates, moves, reorders, completes, or archives a card |
+| DELETE | `/api/cards/:id` | Moves the card to the trash |
+| POST | `/api/cards/:id/restore` | `{}`; restores when its board and column are active and WIP allows it |
+| POST | `/api/cards/:id/duplicate` | `{}` or `{"column_id":4}`; copies into the current column or another column on the same board; returns `201` |
 
-Esempio di dettaglio:
+Example detail:
 
 ```json
 {
   "id": 123,
   "column_id": 4,
-  "title": "Preparare il lancio",
-  "description": "Dettagli dell'attività",
+  "title": "Prepare the launch",
+  "description": "Task details",
   "label": "sviluppo",
   "labels": ["sviluppo", "urgente"],
   "due_date": "2026-10-20",
-  "assignee": "Giulia",
+  "assignee": "Alex",
   "cover": "sage",
   "position": 0,
   "completed": false,
   "archived": false,
   "priority": "high",
   "estimate_minutes": 90,
-  "checklist": [{"id": "item-1", "text": "Revisione", "done": false}],
+  "checklist": [{"id": "item-1", "text": "Review", "done": false}],
   "version": 4,
   "created_at": "2026-10-15T10:00:00.000Z",
   "updated_at": "2026-10-15T10:05:00.000Z"
 }
 ```
 
-| Campo scrivibile | Tipo / valore iniziale | Validazione |
+| Writable field | Type / initial value | Validation |
 | --- | --- | --- |
-| `title` | Stringa obbligatoria alla creazione | 1–300 caratteri Unicode; non solo spazi |
-| `description` | Stringa, `""` | Massimo 10.000 caratteri Unicode |
-| `label` | Stringa, `""` | Etichetta singola compatibile con la prima versione |
-| `labels` | Array di stringhe, `[]` | Massimo 5 etichette ammesse, senza duplicati |
-| `due_date` | Stringa, `""` | Data di calendario valida `YYYY-MM-DD`, anno 0001–9999, oppure vuota |
-| `assignee` | Stringa, `""` | Massimo 100 caratteri Unicode; è testo libero, non un ID utente |
-| `cover` | Stringa, `""` | Vuota oppure `sage`, `peach`, `lavender`, `blue` |
-| `completed` | Booleano, `false` | Non viene modificato automaticamente dal titolo della colonna |
-| `archived` | Booleano, `false` | Archiviazione distinta dal cestino |
-| `priority` | Stringa, `"normal"` | `low`, `normal`, `high`, `urgent` |
-| `estimate_minutes` | Intero, `0` | 0–100.000 |
-| `checklist` | Array, `[]` | Massimo 100 voci, ciascuna con `id`, `text`, `done` |
-| `column_id` | Intero positivo | Solo per lo spostamento in `PATCH`; la creazione usa la colonna del percorso |
-| `position` | Intero da zero | Posizione di inserimento dopo la rimozione dalla posizione precedente |
+| `title` | Required string on creation | 1–300 Unicode characters; not whitespace-only |
+| `description` | String, `""` | Up to 10,000 Unicode characters |
+| `label` | String, `""` | Single label retained for compatibility with the first version |
+| `labels` | Array of strings, `[]` | Up to 5 allowed labels, without duplicates |
+| `due_date` | String, `""` | Valid calendar date `YYYY-MM-DD`, year 0001–9999, or empty |
+| `assignee` | String, `""` | Up to 100 Unicode characters; free text, not a user ID |
+| `cover` | String, `""` | Empty, or `sage`, `peach`, `lavender`, `blue` |
+| `completed` | Boolean, `false` | Does not change automatically based on the column title |
+| `archived` | Boolean, `false` | Archiving is separate from trashing |
+| `priority` | String, `"normal"` | `low`, `normal`, `high`, `urgent` |
+| `estimate_minutes` | Integer, `0` | 0–100,000 |
+| `checklist` | Array, `[]` | Up to 100 entries, each with `id`, `text`, `done` |
+| `column_id` | Positive integer | Moving via `PATCH` only; creation uses the path's column |
+| `position` | Zero-based integer | Insertion position after removing the previous position |
 
-Le etichette ammesse sono `design`, `sviluppo`, `ricerca`, `marketing`, `urgente`. `label` ammette anche la stringa vuota. Fornire `labels` sincronizza `label` con il primo elemento o con `""` per l'array vuoto, anche se nella richiesta è presente `label`. Fornire soltanto `label` aggiorna anche `labels` a un array di un elemento oppure vuoto.
+Allowed label identifiers are `design`, `sviluppo`, `ricerca`, `marketing`, and `urgente`. These API values do not change with the interface language. `label` also accepts an empty string. Supplying `labels` synchronizes `label` to its first element or `""` for an empty array, even when the request also contains `label`. Supplying only `label` also updates `labels` to a one-element array or an empty array.
 
-Ogni voce della checklist richiede un `id` non vuoto fino a 100 caratteri Unicode, un `text` non vuoto fino a 500 caratteri Unicode e un booleano `done`. Gli ID devono essere univoci nella scheda. La modifica di `checklist` sostituisce l'intero array: usare `If-Match` per proteggere le modifiche concorrenti.
+Each checklist entry requires a nonempty `id` of up to 100 Unicode characters, nonempty `text` of up to 500 Unicode characters, and a boolean `done`. IDs must be unique within the card. Updating `checklist` replaces the entire array: use `If-Match` to protect concurrent changes.
 
-Gli spostamenti sono consentiti soltanto tra colonne della stessa bacheca (`400` altrimenti). Se si cambia colonna senza `position`, la scheda viene aggiunta in fondo. Il server aggiorna origine, destinazione e ordinamento in una transazione. Le schede non archiviate vengono ordinate prima di quelle archiviate e mantengono posizioni visibili dense. Anche la duplicazione conserva descrizione, checklist, etichette, priorità, stima, assegnatario, scadenza, completamento e archiviazione; non copia i commenti.
+Moves are allowed only between columns of the same board; otherwise the response is `400`. Changing columns without `position` appends the card. The server updates the source, destination, and ordering in one transaction. Unarchived cards are ordered before archived cards and maintain dense visible positions. Duplication also preserves description, checklist, labels, priority, estimate, assignee, due date, completion, and archive state; it does not copy comments. Additional planning fields and assignment behavior are described in the [productivity reference](API_PRODUTTIVITA.md).
 
-Nel riepilogo `summary=1`, ciascuna scheda conserva i metadati ma sostituisce `description` e `checklist` con:
+With `summary=1`, each card retains its metadata but replaces `description` and `checklist` with:
 
 ```json
-{"description_preview":"Prime 160 lettere…","checklist_total":3,"checklist_done":1}
+{"description_preview":"First 160 characters…","checklist_total":3,"checklist_done":1}
 ```
 
-Il client deve leggere `/api/cards/:id` per aprire e modificare il dettaglio completo.
+The client must read `/api/cards/:id` to open and edit full detail.
 
-## Commenti, attività, ricerca e statistiche
+## Comments, activity, search, and statistics
 
-| Metodo | Percorso | Contratto |
+| Method | Path | Contract |
 | --- | --- | --- |
-| GET | `/api/cards/:id/comments` | `{"comments":[{"id":1,"body":"…","author_id":1,"author":"Giorgio","created_at":"…"}]}`, dal meno recente |
-| POST | `/api/cards/:id/comments` | `{"body":"Testo del commento"}`; da 1 a 5.000 caratteri Unicode, non solo spazi; restituisce `201` |
-| DELETE | `/api/comments/:id` | Autore o amministratore globale, con permesso di scrittura sulla bacheca; tutti gli utenti locali senza account possono eliminare i commenti locali |
-| GET | `/api/boards/:id/activity` | `{"events":[{"id":1,"action":"updated","entity_type":"cards","entity_id":123,"title":"…","actor":"Giorgio","actor_id":1,"created_at":"…"}]}` |
-| GET | `/api/search?q=testo` | `{"cards":[{"id":123,"title":"…","board_id":1,"board_name":"…","column_title":"…","priority":"normal","due_date":""}]}` |
-| GET | `/api/boards/:id/stats` | Statistiche delle schede non eliminate e non archiviate in colonne attive |
+| GET | `/api/cards/:id/comments` | `{"comments":[{"id":1,"body":"…","author_id":1,"author":"Alex","created_at":"…"}]}`, oldest first; comment editing metadata and replies are documented in the supplementary references |
+| POST | `/api/cards/:id/comments` | `{"body":"Comment text"}`; 1–5,000 Unicode characters, not whitespace-only; returns `201` |
+| DELETE | `/api/comments/:id` | Author or global administrator, with board write access; local users without accounts may delete local comments |
+| GET | `/api/boards/:id/activity` | `{"events":[{"id":1,"action":"updated","entity_type":"cards","entity_id":123,"title":"…","actor":"Alex","actor_id":1,"created_at":"…"}]}` |
+| GET | `/api/search?q=text` | `{"cards":[{"id":123,"title":"…","board_id":1,"board_name":"…","column_title":"…","priority":"normal","due_date":""}]}` |
+| GET | `/api/boards/:id/stats` | Statistics for non-deleted, unarchived cards in active columns |
 
-In modalità locale i commenti hanno `author_id: 0` e `author: "Locale"`. Il corpo è testo, senza interpretazione HTML da parte del server.
+In explicit `--no-auth` mode, comments have `author_id: 0` and `author: "Locale"`. The body is text; the server does not interpret it as HTML. The canonical local-author value remains language-independent.
 
-L'attività comprende creazioni, modifiche, spostamenti, archiviazioni, cestino, ripristini, importazioni, duplicazione delle bacheche, commenti e modifiche alle appartenenze. I preferiti personali non producono attività condivisa. Il risultato contiene al massimo 200 eventi; non è disponibile la paginazione.
+Activity includes creations, updates, moves, archiving, trashing, restores, imports, board duplication, comments, and membership changes. Personal favorites do not generate shared activity. `/api/boards/:id/activity` returns at most 200 events without pagination; use the [paginated activity endpoint](API_COLLABORAZIONE.md#paginated-activity) to continue beyond a page.
 
-La ricerca richiede `q` non vuoto, fino a 200 caratteri Unicode, codificato nella query string. Cerca sottostringhe di titolo, descrizione e assegnatario, sulle sole bacheche autorizzate. Esclude bacheche e schede archiviate salvo `include_archived=1`, restituisce al massimo 200 schede e ordina per ultimo aggiornamento. Usa `lower()` di SQLite: la conversione delle maiuscole standard copre ASCII e non offre una ricerca linguistica Unicode completa.
+Search requires nonempty `q` of up to 200 Unicode characters, encoded in the query string. It searches substrings in titles, descriptions, and assignees only on authorized boards. It excludes archived boards and cards unless `include_archived=1`, returns at most 200 cards, and sorts by latest update. It uses SQLite `lower()`: default case conversion covers ASCII and does not provide full Unicode linguistic search.
 
-Esempio di statistiche:
+Example statistics:
 
 ```json
 {
@@ -229,50 +231,50 @@ Esempio di statistiche:
   "overdue": 2,
   "estimate_minutes": 360,
   "by_label": {"design": 4, "urgente": 2},
-  "by_assignee": {"Giulia": 5, "Non assegnato": 3},
+  "by_assignee": {"Alex": 5, "Non assegnato": 3},
   "by_priority": {"normal": 6, "high": 2}
 }
 ```
 
-`overdue` conta schede non completate con scadenza precedente alla data UTC corrente; la scadenza odierna non è scaduta. `by_label` conta tutte le etichette della scheda, quindi la somma può superare `total`. `estimate_minutes` somma le stime anche delle schede completate incluse.
+`overdue` counts incomplete cards with a due date before the current UTC date; a card due today is not overdue. `by_label` counts every label on a card, so its sum can exceed `total`. `estimate_minutes` sums estimates including completed cards in the result. `Non assegnato` is the backend's canonical key for an unassigned card.
 
-## Versioni e conflitti
+## Versions and conflicts
 
-Bacheche, colonne e schede espongono `version`, `created_at` e `updated_at`. I timestamp sono UTC in formato ISO 8601 con millisecondi. Le versioni crescono con le modifiche; un'operazione può incrementarle più volte, quindi non assumere un incremento esatto di uno. Gli aggiornamenti del dominio e delle appartenenze incrementano anche la revisione della bacheca; i preferiti personali non la incrementano.
+Boards, columns, and cards expose `version`, `created_at`, and `updated_at`. Timestamps are UTC ISO 8601 with milliseconds. Versions increase with changes; an operation may increment them multiple times, so do not assume an exact increment of one. Domain and membership updates also increment the board revision; personal favorites do not.
 
-`PATCH` e `DELETE` di `/api/boards/:id`, `/api/columns/:id` e `/api/cards/:id` supportano una precondizione facoltativa:
+`PATCH` and `DELETE` on `/api/boards/:id`, `/api/columns/:id`, and `/api/cards/:id` support an optional precondition:
 
 ```http
 PATCH /api/cards/123 HTTP/1.1
 If-Match: "4"
 Content-Type: application/json
 
-{"title":"Titolo aggiornato"}
+{"title":"Updated title"}
 ```
 
-Se la versione corrente è diversa, la risposta è `412` e la mutazione non viene applicata. Rileggere la risorsa e presentare il conflitto all'utente mantenendo la sua bozza. Non ritentare automaticamente con una versione più recente sostituendo l'intera scheda.
+Authenticated writes also require the session cookie and `X-CSRF-Token` described above. If the current version differs, the response is `412` and the mutation is not applied. Read the resource again and present the conflict while preserving the user's draft. Do not automatically retry with a newer version and replace the entire card.
 
-È accettato un singolo numero decimale, con o senza virgolette. Non sono implementati wildcard `*`, liste di tag o tag deboli `W/`. Senza header l'aggiornamento resta consentito per compatibilità. Ripristino, duplicazione, commenti, appartenenze e account non applicano questa precondizione. Le API non inviano un ETag delle risorse: usare il campo `version`; gli ETag e `If-None-Match` riguardano gli asset statici.
+A single decimal number is accepted, with or without quotes. Wildcard `*`, tag lists, and weak tags `W/` are not implemented. Omitting the header remains allowed for compatibility. Core restore, duplicate, membership, and account operations do not apply this precondition. [Comment editing](API_COLLABORAZIONE.md#editing-comments), card assignments and dependencies, and later APIs document their own version requirements. API resource responses do not send a resource ETag: use the `version` field. Static frontend assets have separate caching behavior.
 
-## Idempotenza delle creazioni
+## Idempotent creation and commands
 
-I `POST` del dominio accettano l'header facoltativo `Idempotency-Key`, fino a 127 byte. È applicato a creazioni di bacheche, colonne, schede e commenti, duplicazioni, ripristini e importazioni. Non è applicato agli endpoint account, utenti e appartenenze, né a `PATCH` o `DELETE`.
+Domain `POST` endpoints accept the optional `Idempotency-Key` header, up to 127 bytes. Core supported operations include board, column, card, and comment creation, duplication, restoration, and import. Supplementary references describe additional domain `POST` commands. The header does not apply to account, user, or membership endpoints, or to `PATCH` and `DELETE`.
 
 ```http
 POST /api/columns/4/cards HTTP/1.1
 Content-Type: application/json
-Idempotency-Key: creazione-2026-10-15-001
+Idempotency-Key: create-2026-10-15-001
 
-{"title":"Preparare il lancio"}
+{"title":"Prepare the launch"}
 ```
 
-La chiave è associata all'utente, al percorso senza query string e al corpo originale. Ripetere la stessa richiesta restituisce lo stesso status e corpo della prima risposta riuscita, con `Idempotency-Replayed: true`, senza creare altre risorse. Riutilizzare la stessa chiave sullo stesso percorso con un corpo differente restituisce `409`; anche differenze di spaziatura o ordine delle proprietà JSON costituiscono un corpo differente.
+The key is scoped to the user, path without its query string, and original body. Repeating the same request returns the status and body of the first successful response, with `Idempotency-Replayed: true`, without creating more resources, provided that current authorization still permits the operation. Revoked access or a removed resource can prevent replay; a stored success does not bypass current permissions. Reusing the same key on the same path with a different body returns `409`; differences in whitespace or JSON property order also count as a different body.
 
-Mutazione e registrazione della chiave vengono confermate nella stessa transazione. Le risposte d'errore non vengono memorizzate. Le chiavi persistono nel database senza scadenza automatica: generarne una nuova per ogni operazione distinta e conservarla durante i tentativi della stessa operazione. In modalità locale tutte le richieste condividono l'identità locale `0`.
+The mutation and key record commit in the same transaction. Errors are not stored. Keys persist in the database without automatic expiry: generate a new key for each distinct operation and retain it for retries of the same operation. In explicit `--no-auth` mode, requests share the local identity `0`.
 
-## Cestino e ripristino
+## Trash and restoration
 
-`DELETE` esegue una cancellazione logica e conserva i dati. Una bacheca nel cestino nasconde tutte le sue colonne e schede; una colonna nel cestino nasconde le sue schede. Le letture delle risorse nascoste restituiscono `404`.
+`DELETE` performs a logical deletion and retains data. A trashed board hides all its columns and cards; a trashed column hides its cards. Reading a hidden resource returns `404`.
 
 ```http
 GET /api/trash
@@ -281,14 +283,14 @@ GET /api/trash
 ```json
 {
   "items": [
-    {"kind":"cards","id":123,"title":"Preparare il lancio","deleted_at":"2026-10-15T11:00:00.000Z","board_id":1}
+    {"kind":"cards","id":123,"title":"Prepare the launch","deleted_at":"2026-10-15T11:00:00.000Z","board_id":1}
   ]
 }
 ```
 
-Il cestino comprende soltanto risorse esplicitamente eliminate e appartenenti a bacheche autorizzate. I discendenti nascosti dalla cancellazione del genitore non vengono aggiunti individualmente. I valori di `kind` sono plurali: `boards`, `columns`, `cards`.
+The trash contains only explicitly deleted resources on authorized boards. Descendants hidden by a parent's deletion are not added individually. `kind` values are plural: `boards`, `columns`, `cards`.
 
-Oltre ai percorsi `/api/:kind/:id/restore`, è disponibile:
+In addition to `/api/:kind/:id/restore`, the following is available:
 
 ```http
 POST /api/trash/cards/123/restore
@@ -297,11 +299,11 @@ Content-Type: application/json
 {}
 ```
 
-Ripristinare prima la bacheca, poi la colonna e infine la scheda. Un genitore ancora nel cestino, una risorsa già ripristinata o un limite WIP raggiunto producono `409`. Il ripristino di un genitore rende nuovamente visibili i figli che non erano stati eliminati individualmente. Lo stato `archived` precedente viene conservato. Non esiste un endpoint per svuotare definitivamente il cestino.
+Restore the board first, then the column, then the card. A parent still in the trash, an already restored resource, or a reached WIP limit produces `409`. Restoring a parent makes children visible again unless they were individually deleted. Previous `archived` state is preserved. There is no endpoint for permanently emptying the trash.
 
-## Esportazione e importazione
+## Export and import
 
-`GET /api/boards/:id/export` restituisce JSON e `Content-Disposition: attachment; filename="openboard-1.json"`:
+`GET /api/boards/:id/export` returns JSON and `Content-Disposition: attachment; filename="openboard-1.json"`:
 
 ```json
 {
@@ -309,7 +311,7 @@ Ripristinare prima la bacheca, poi la colonna e infine la scheda. Un genitore an
   "version": 2,
   "board": {
     "id": 1,
-    "name": "Progetto",
+    "name": "Project",
     "description": "",
     "color": "sage",
     "starred": false,
@@ -321,64 +323,66 @@ Ripristinare prima la bacheca, poi la colonna e infine la scheda. Un genitore an
     "membership_role": "admin",
     "readonly": false,
     "columns": [
-      {"id": 4, "title": "Da fare", "position": 0, "wip_limit": 0, "version": 1,
+      {"id": 4, "title": "To do", "position": 0, "wip_limit": 0, "version": 1,
        "created_at": "2026-10-15T10:00:00.000Z", "updated_at": "2026-10-15T10:00:00.000Z", "cards": []}
     ]
   }
 }
 ```
 
-L'esportazione comprende le colonne non eliminate e il dettaglio completo delle loro schede non eliminate, incluse le schede archiviate, anche se la schermata usa il riepilogo. Non comprende commenti, attività, appartenenze, account, sessioni o cestino. Non è un backup completo del database.
+The export contains non-deleted columns and full detail for their non-deleted cards, including archived cards, even when the interface uses summaries. It does not contain comments, activity, memberships, accounts, sessions, or trash. It is not a complete database backup; supplementary references describe the additional fields supported by format version 2.
 
-`POST /api/import` accetta lo stesso oggetto con `format: "openboard"`, `version: 2` e un oggetto `board` contenente `name` e un array `columns`. Ogni colonna richiede `title` e un array `cards`; ogni scheda richiede `title`. Gli array possono essere vuoti. Sono consentite al massimo 100 colonne e 10.000 schede complessive, entro il limite HTTP di 2 MiB, applicando gli stessi limiti dei campi dei normali endpoint.
+`POST /api/import` accepts the same object with `format: "openboard"`, `version: 2`, and a `board` object containing `name` and a `columns` array. Each column requires `title` and a `cards` array; each card requires `title`. Arrays may be empty. At most 100 columns and 10,000 cards are allowed overall, within the 2 MiB HTTP limit and normal endpoint field limits.
 
-L'importazione crea sempre una nuova bacheca: non aggiorna né sostituisce quella di origine. Genera nuovi ID, timestamp e revisioni; ricostruisce l'ordine dagli array ignorando i vecchi `position` e `column_id`. Conserva i campi funzionali supportati, compresi archivio, completamento, checklist, stime, etichette e limiti WIP. L'importatore applica i limiti WIP dopo aver caricato le schede, quindi può ripristinare una bacheca già oltre il limite senza perdere attività. Il preferito esportato è quello visibile al richiedente e viene applicato al nuovo proprietario.
+Import always creates a new board; it does not update or replace the source. It generates new IDs, timestamps, and revisions, and rebuilds ordering from arrays, ignoring old `position` and `column_id` values. It preserves supported functional fields, including archive state, completion, checklist, estimates, labels, and WIP limits. The importer applies WIP limits after loading cards, allowing a board already above its limit to be restored without losing work. The exported favorite reflects the requesting user and is applied to the new owner.
 
-L'operazione è atomica: se una colonna o una scheda non è valida, nessuna parte della nuova bacheca viene conservata. Una risposta riuscita è `201 {"ok":true,"id":…,"version":…}`. Non è implementata l'importazione diretta del JSON Trello.
+The operation is atomic: if any column or card is invalid, no part of the new board is retained. Success returns `201 {"ok":true,"id":…, "version":…}`. Direct import of Trello JSON is not implemented.
 
-Per una copia completa usare il comando `./build/openboard --db data/openboard.db --backup /percorso/backup.db`, che esegue il backup consistente tramite l'API SQLite ed esce. Il ripristino del database è un'operazione amministrativa descritta nel README, distinta da `/api/import`.
+For a complete local SQLite copy, use `./build/openboard --db data/openboard.db --backup /path/to/backup.db`; this performs a consistent backup through the SQLite API and exits. For PostgreSQL/MongoDB, use the full application backup procedure in the [deployment guide](DEPLOYMENT.md). Database restoration is an administrative operation, separate from `/api/import`.
 
-## Errori e limiti operativi
+## Errors and operational limits
 
-Gli errori applicativi hanno forma:
+Application errors have this shape:
 
 ```json
-{"error":"Messaggio leggibile"}
+{"error":"Human-readable message"}
 ```
 
-| Status | Significato |
+The message above illustrates the shape; backend messages retain their canonical language and are translated by the frontend for display. Clients should use HTTP status codes and the documented contract rather than matching translated text.
+
+| Status | Meaning |
 | --- | --- |
-| `400` | JSON, tipi, valori, posizioni o richiesta HTTP non validi |
-| `401` | Sessione assente/scaduta o credenziali errate |
-| `403` | Host/origine, token CSRF o ruolo non consentiti; funzionalità account disabilitata |
-| `404` | Percorso o risorsa non trovata, eliminata, nascosta da un genitore oppure non accessibile |
-| `405` | Metodo non supportato per il percorso |
-| `408` | Scadenza del tempo di ricezione della richiesta |
-| `409` | WIP, ripristino non possibile, username già usato, setup già completato, ultima amministrazione protetta o chiave idempotente incompatibile |
-| `412` | Versione `If-Match` obsoleta o non corrispondente |
-| `413` | Corpo oltre 2.097.152 byte (2 MiB) |
-| `415` | Content type diverso da JSON per una scrittura che richiede un corpo |
-| `429` | Troppi tentativi di autenticazione/cambio password |
-| `431` | Intestazioni oltre 16.384 byte |
-| `500` | Errore interno, per esempio lettura di un asset statico |
-| `503` | Database temporaneamente indisponibile/occupato o servizio non pronto |
+| `400` | Invalid JSON, types, values, positions, forwarded client address, or HTTP request |
+| `401` | Missing/expired session or incorrect credentials |
+| `403` | Host/origin, CSRF token, or role not permitted; account feature disabled |
+| `404` | Path or resource not found, deleted, hidden by a parent, or inaccessible |
+| `405` | Method not supported for the path |
+| `408` | Request receive deadline exceeded |
+| `409` | WIP, restore conflict, duplicate username, setup already complete, last-administrator protection, or incompatible idempotency key |
+| `412` | Stale or mismatched `If-Match` version |
+| `413` | Body exceeds 2,097,152 bytes (2 MiB) |
+| `415` | Content type is not JSON for a write that requires a body |
+| `429` | Authentication attempt allowance or proxy request/connection limit exceeded |
+| `431` | Headers exceed 16,384 bytes |
+| `500` | Internal processing error |
+| `503` | Database temporarily unavailable/busy, service not ready, or request queue overloaded |
 
-La risposta negativa di `/api/ready` usa `{"status":"unavailable"}` invece di `error`. Non tutte le limitazioni di trasporto producono una risposta JSON: una coda di connessioni piena o un socket già chiuso possono determinare la chiusura della connessione.
+An unsuccessful `/api/ready` response uses `{"status":"unavailable"}` instead of `error`. Not every transport limit produces a JSON response: an already closed socket or a connection deadline may lead to a closed connection. The reverse proxy may produce its own error body, including for its `429` limits.
 
-| Limite | Valore |
+| Limit | Value |
 | --- | --- |
-| Corpo HTTP | 2 MiB |
-| Intestazioni HTTP complessive | 16 KiB |
-| Target della richiesta, percorso e query insieme | 1.023 byte |
-| `If-Match` | 79 byte |
-| `Idempotency-Key` | 127 byte |
-| Nome visualizzato di un utente | 1–100 caratteri Unicode, non solo spazi |
-| Username | 3–64 caratteri ASCII: lettere, numeri, `.`, `_`, `-`; normalizzato in minuscolo |
-| Password nuova | 12–256 byte UTF-8 |
-| Ricezione degli header | 5 secondi complessivi |
-| Ricezione del corpo | 10 secondi complessivi dopo gli header |
-| Invio della risposta | 10 secondi complessivi |
-| Worker | 8 predefiniti; `--workers` accetta 1–32 |
-| Coda di connessioni | 64 |
+| HTTP body | 2 MiB by default |
+| Total HTTP headers | 16 KiB |
+| Request target, path and query combined | 1,023 bytes |
+| `If-Match` | 79 bytes |
+| `Idempotency-Key` | 127 bytes |
+| User display name | 1–100 Unicode characters; not whitespace-only |
+| Username | 3–64 ASCII characters: letters, digits, `.`, `_`, `-`; normalized to lowercase |
+| New password | 12–256 UTF-8 bytes |
+| Header receive deadline | 5 seconds total |
+| Body receive deadline | 10 seconds total after headers |
+| Response send deadline | 10 seconds total |
+| Workers | 8 by default; `--workers` accepts 1–32 |
+| Connection queue | 64 |
 
-È servita una richiesta HTTP/1.1 per connessione, poi la connessione viene chiusa. `Transfer-Encoding`, `Expect` e intestazioni sensibili duplicate vengono rifiutati; usare `Content-Length` per i corpi delle richieste.
+The server handles one HTTP/1.1 request per connection, then closes the connection. `Transfer-Encoding`, `Expect`, and duplicate sensitive headers are rejected; use `Content-Length` for request bodies.

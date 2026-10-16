@@ -1,137 +1,137 @@
-# API di collaborazione — OpenBoard 0.3
+# Collaboration API — OpenBoard 0.6.1
 
-Le risposte sono JSON, salvo le metriche documentate altrove. Le scritture richiedono `Content-Type: application/json` e un oggetto JSON; `DELETE` può avere corpo vuoto. Con `--auth`, occorrono il cookie `ob_session` e, per le scritture, `X-CSRF-Token` restituito da `/api/auth/session`. Le scritture passano attraverso una transazione SQLite: errori di attività o notifiche annullano anche la modifica iniziale. I nuovi endpoint `POST` accettano l'intestazione `Idempotency-Key` già supportata dal server.
+These endpoints were introduced in 0.3. Responses are JSON, except metrics documented elsewhere. Writes require `Content-Type: application/json` and a JSON object; `DELETE` may have an empty body. Authentication is enabled by default: send the `ob_session` cookie and, for writes, the `X-CSRF-Token` returned by `/api/auth/session`. Writes use a transaction: activity or notification errors roll back the original change. Domain `POST` endpoints accept `Idempotency-Key` as described in [API.md](API.md); replay also verifies current authorization. In external-storage mode, the application acknowledges writes after its MongoDB documents and PostgreSQL transaction have persisted.
 
-Watch, notifiche, profilo e gestione delle sessioni richiedono `--auth`: in modalità locale rispondono `403`. Allegati, modifica dei commenti e cronologia paginata funzionano anche in modalità locale. Con gli account, ogni accesso ai dati di una bacheca verifica i permessi correnti; una risorsa assente o non accessibile restituisce normalmente `404`.
+Watches, notifications, profiles, and session management require an account and return `403` in explicit loopback-only `--no-auth` development mode. Attachments, comment editing, and paginated activity also work in that mode. With accounts enabled, every board data access checks current permissions; a missing or inaccessible resource normally returns `404`.
 
-## Seguire bacheche e schede
+## Watching boards and cards
 
-`PATCH` oppure `POST /api/boards/:id/watch` e `/api/cards/:id/watch`:
+`PATCH` or `POST /api/boards/:id/watch` and `/api/cards/:id/watch`:
 
 ```json
 {"watching":true}
 ```
 
-Risposta `200`:
+Response `200`:
 
 ```json
 {"ok":true,"id":1,"watching":true}
 ```
 
-`false` interrompe la sottoscrizione. È sufficiente il permesso di lettura: anche un osservatore può seguire una risorsa.
+`false` stops the subscription. Read access is sufficient: observers can watch a resource.
 
-`GET /api/me/watches` restituisce esclusivamente sottoscrizioni proprie ancora accessibili, escludendo risorse e antenati eliminati:
+`GET /api/me/watches` returns only the current user's subscriptions that remain accessible, excluding deleted resources and resources with deleted ancestors:
 
 ```json
-{"boards":[{"id":1,"name":"Progetto"}],"cards":[{"id":7,"title":"Revisione","board_id":1}]}
+{"boards":[{"id":1,"name":"Project"}],"cards":[{"id":7,"title":"Review","board_id":1}]}
 ```
 
-## Notifiche personali
+## Personal notifications
 
 `GET /api/notifications?limit=30&before=82`:
 
 ```json
 {
   "items":[{
-    "id":81,"activity_id":120,"board_id":1,"actor":"Sofia","actor_id":2,
+    "id":81,"activity_id":120,"board_id":1,"actor":"Alex","actor_id":2,
     "action":"updated","entity_type":"cards","entity_id":7,
-    "title":"Revisione","created_at":"2026-10-15T20:00:00.000Z","read":false
+    "title":"Review","created_at":"2026-10-15T20:00:00.000Z","read":false
   }],
   "next_cursor":null,
   "unread_count":1
 }
 ```
 
-L'ordine è per ID decrescente. `limit` è un intero da **1 a 100**, predefinito **30**. `before` è un ID positivo esclusivo. Se esistono altri risultati, `next_cursor` contiene l'ID dell'ultimo elemento della pagina; usarlo come `before` nella richiesta successiva. Altrimenti vale `null`. Parametri duplicati, limiti o cursori non validi restituiscono `400`. `unread_count` conta tutte le notifiche non lette attualmente accessibili, indipendentemente dalla pagina.
+Results use descending ID order. `limit` is an integer from **1 to 100**, default **30**. `before` is an exclusive positive ID. When more results exist, `next_cursor` contains the last item's ID; use it as `before` in the next request. Otherwise, it is `null`. Duplicate parameters, invalid limits, or invalid cursors return `400`. `unread_count` counts all currently accessible unread notifications, independently of the page. Additional filters are documented in the [teamwork reference](API_TEAMWORK.md).
 
 - `GET /api/notifications/unread-count` → `{"unread_count":1}`.
-- `PATCH /api/notifications/:id` con `{"read":true}` segna una notifica come letta; `false` la rende nuovamente non letta. Risposta `200`: `{"ok":true,"id":81}`.
-- `POST /api/notifications/read-all` con `{}` segna come lette tutte le notifiche proprie attualmente accessibili. Risposta `200`: `{"ok":true,"id":0}`.
+- `PATCH /api/notifications/:id` with `{"read":true}` marks a notification as read; `false` marks it unread again. Response `200`: `{"ok":true,"id":81}`.
+- `POST /api/notifications/read-all` with `{}` marks all currently accessible notifications belonging to the current user as read. Response `200`: `{"ok":true,"id":0}`.
 
-Le notifiche sono **interne all'app**, senza invio email o push. Un trigger SQLite le genera insieme all'inserimento dell'attività per chi segue la bacheca o la scheda. L'autore dell'azione è escluso; seguire entrambe le risorse produce una sola notifica per attività. Gli utenti disattivati o privi di accesso non ricevono nuove notifiche. Ogni lettura e modifica dello stato verifica nuovamente l'accesso: revocare l'appartenenza nasconde anche le notifiche precedenti, salvo l'accesso globale degli amministratori. Gli osservatori possono gestire le proprie notifiche.
+Notifications are **in-app only**, without email or push delivery. A SQLite trigger creates them together with the activity record for users watching the board or card. The actor is excluded; watching both resources creates only one notification per activity. Deactivated users and users without access do not receive new notifications. Every read and state change rechecks access: revoking membership also hides earlier notifications, except for global administrator access. Observers may manage their own notifications.
 
-## Allegati
+## Attachments
 
 `POST /api/cards/:id/attachments`:
 
 ```json
-{"name":"nota.txt","mime":"text/plain","data_base64":"Y2lhbw=="}
+{"name":"note.txt","mime":"text/plain","data_base64":"Y2lhbw=="}
 ```
 
-Risposta `201`: `{"ok":true,"id":12}`. `data_base64` usa base64 canonico RFC 4648, con padding quando necessario: spazi, ritorni a capo, alfabeti alternativi e bit di padding non canonici sono rifiutati.
+Response `201`: `{"ok":true,"id":12}`. `data_base64` uses canonical RFC 4648 base64, padded when necessary: whitespace, line breaks, alternative alphabets, and noncanonical padding bits are rejected.
 
-Limiti e validazione:
+Limits and validation:
 
-- **1 MiB decodificato per file**, **10 file attivi** e **5 MiB decodificati attivi per scheda**.
-- Nome da 1 a **180 caratteri Unicode**, UTF-8 valido; vietati `/`, `\`, caratteri di controllo ASCII, `.` e `..` come nome completo.
-- MIME obbligatorio, massimo **100 caratteri**, nella forma `tipo/sottotipo` senza parametri o spazi.
-- Un file vuoto è ammesso e occupa una delle dieci posizioni.
-- Dati non validi restituiscono `400`; quota della scheda superata restituisce `409`. Il limite HTTP configurabile può rifiutare prima il corpo con `413`.
+- **1 MiB decoded per file**, **10 active files**, and **5 MiB decoded active data per card**.
+- Names contain 1–**180 Unicode characters** and must be valid UTF-8; `/`, `\`, ASCII control characters, and the complete names `.` and `..` are forbidden.
+- MIME is required, at most **100 characters**, in `type/subtype` form without parameters or spaces.
+- Empty files are allowed and occupy one of the ten slots.
+- Invalid data returns `400`; exceeding the card quota returns `409`. The configured HTTP body limit may reject the request earlier with `413`.
 
-`GET /api/cards/:id/attachments` restituisce i metadati, inclusi gli allegati eliminati recuperabili, dal più recente:
+`GET /api/cards/:id/attachments` returns metadata, including recoverable deleted attachments, newest first:
 
 ```json
-{"attachments":[{"id":12,"card_id":7,"name":"nota.txt","mime":"text/plain","size":4,"created_at":"2026-10-15T20:00:00.000Z","deleted_at":null}]}
+{"attachments":[{"id":12,"card_id":7,"name":"note.txt","mime":"text/plain","size":4,"created_at":"2026-10-15T20:00:00.000Z","deleted_at":null}]}
 ```
 
-`GET /api/attachments/:id` restituisce un involucro JSON; il contenuto caricato non viene servito direttamente come HTML o script:
+`GET /api/attachments/:id` returns a JSON envelope; uploaded content is not served directly as HTML or script:
 
 ```json
-{"id":12,"name":"nota.txt","mime":"text/plain","data_base64":"Y2lhbw=="}
+{"id":12,"name":"note.txt","mime":"text/plain","data_base64":"Y2lhbw=="}
 ```
 
-La risposta include `Cache-Control: no-store` e `Content-Disposition: attachment; filename="attachment.json"`. Il client può decodificare il contenuto e scaricarlo usando il nome originale. L'interfaccia usa un download esplicito, senza visualizzare il contenuto caricato nella pagina.
+The response includes `Cache-Control: no-store` and `Content-Disposition: attachment; filename="attachment.json"`. Clients can decode the content and download it using the original name. The interface requires an explicit download and does not render uploaded content in the page.
 
-`DELETE /api/attachments/:id` imposta `deleted_at`, libera la quota attiva e restituisce `200` con `{"ok":true,"id":12}`. Il download di un allegato eliminato restituisce `404`. `POST /api/attachments/:id/restore` con `{}` lo ripristina soltanto se le quote attive lo consentono; altrimenti restituisce `409`. Eliminare un allegato già eliminato o ripristinarne uno già attivo restituisce `200` senza duplicarlo.
+`DELETE /api/attachments/:id` sets `deleted_at`, releases the active quota, and returns `200` with `{"ok":true,"id":12}`. Downloading a deleted attachment returns `404`. `POST /api/attachments/:id/restore` with `{}` restores it only if active quotas permit; otherwise it returns `409`. Deleting an already deleted attachment or restoring an already active attachment returns `200` without duplication.
 
-La lettura richiede accesso alla scheda; caricamento, eliminazione e ripristino richiedono il permesso di scrittura sulla bacheca. Gli osservatori possono leggere e scaricare, ma non modificare allegati. Scheda, lista e bacheca devono essere ancora attive rispetto all'eliminazione; l'archiviazione non equivale all'eliminazione.
+Reading requires card access; uploading, deleting, and restoring require board write access. Observers may read and download attachments but cannot change them. The card, column, and board must not be deleted; archiving differs from deletion.
 
-Il contenuto è conservato come base64 validato in **SQLite**, senza percorsi di upload sul filesystem. Il backup SQLite include gli allegati, anche eliminati; l'esportazione JSON della singola bacheca non li include e non sostituisce un backup completo.
+Content is retained as validated base64 in **SQLite** in local mode and in **MongoDB** with structured metadata in PostgreSQL in external-storage mode; there are no filesystem upload paths. A full application backup includes attachments, including deleted ones. Single-board JSON export excludes attachments and does not replace a full backup. Deleted files remain stored for restoration, so the active-file quotas do not cap total database size. OpenBoard does not include antivirus scanning; see [SECURITY.md](../SECURITY.md) for the supported security boundary.
 
-## Modifica dei commenti
+## Editing comments
 
-`PATCH /api/comments/:id` con `{"body":"Testo aggiornato"}`. Il testo deve contenere da **1 a 5000 caratteri** e non può essere composto soltanto da spazi. Occorrono accesso in scrittura alla scheda e, con `--auth`, la proprietà del commento oppure il ruolo di amministratore globale.
+`PATCH /api/comments/:id` with `{"body":"Updated text"}`. Text must contain **1–5,000 characters** and cannot be whitespace-only. Board write access is required; with accounts enabled, the caller must also own the comment or be a global administrator.
 
-L'intestazione facoltativa `If-Match: "1"` confronta la versione corrente; è ammessa anche la forma numerica senza virgolette. Una versione diversa restituisce `412` senza modificare il commento. Risposta `200`:
+The optional `If-Match: "1"` header checks the current version; an unquoted decimal number is also accepted. A different version returns `412` without changing the comment. Response `200`:
 
 ```json
 {"ok":true,"id":9,"version":2}
 ```
 
-`GET /api/cards/:id/comments`, già esistente, restituisce ora anche `version` ed `edited_at` per ciascun commento; `edited_at` vale `null` fino alla prima modifica. La modifica registra l'attività `comment_edited` e aggiorna la revisione della bacheca.
+`GET /api/cards/:id/comments` also returns `version` and `edited_at` for each comment; `edited_at` is `null` until the first edit. Editing records `comment_edited` activity and updates the board revision. Replies, reactions, and pinning are described in the [teamwork reference](API_TEAMWORK.md).
 
-## Profilo personale
+## Personal profile
 
 `GET /api/me/profile`:
 
 ```json
-{"id":2,"name":"Sofia","username":"sofia","role":"member"}
+{"id":2,"name":"Alex","username":"alex","role":"member"}
 ```
 
-`PATCH /api/me/profile` con `{"name":"Sofia Rossi"}` modifica esclusivamente il nome visualizzato e restituisce lo stesso oggetto aggiornato. Nome obbligatorio, non composto soltanto da spazi, massimo **100 caratteri**. Il ruolo e l'username non sono modificabili tramite questo endpoint. Anche gli osservatori possono aggiornare il proprio nome.
+`PATCH /api/me/profile` with `{"name":"Alex Morgan"}` changes only the display name and returns the updated object. The name is required, cannot be whitespace-only, and has a maximum of **100 characters**. This endpoint cannot change the role or username. Observers may also update their own display name.
 
-## Sessioni personali
+## Personal sessions
 
-`GET /api/me/sessions` elenca le sessioni proprie attive, escludendo quelle scadute o inattive da almeno 30 minuti:
+`GET /api/me/sessions` lists the current user's active sessions, excluding sessions that have expired or have been inactive for at least 30 minutes:
 
 ```json
 {"sessions":[{"id":"50b854be40754db09d220907ab1aecaa6","created_at":1792094400,"last_seen":1792094700,"expires_at":1792123200,"current":true}]}
 ```
 
-Le date sono **secondi Unix**. Gli ID pubblici sono stringhe esadecimali casuali di 32 caratteri, distinti dai token e dai loro hash; l'endpoint non espone credenziali o token CSRF.
+Dates are **Unix seconds**. Public IDs are random 32-character hexadecimal strings, distinct from tokens and their hashes; the endpoint does not expose credentials or CSRF tokens.
 
-- `DELETE /api/me/sessions/:id` revoca una sessione propria diversa da quella corrente. Risposta `200`: `{"ok":true,"id":0}`. ID assente o di un altro utente: `404`.
-- Tentare di revocare la sessione corrente restituisce **409**: usare `/api/auth/logout` per uscire dalla sessione corrente.
-- `POST /api/me/sessions/revoke-others` con `{}` revoca tutte le altre sessioni dell'utente e mantiene quella corrente. Risposta `200`: `{"ok":true,"id":0}`.
+- `DELETE /api/me/sessions/:id` revokes another session belonging to the current user. Response `200`: `{"ok":true,"id":0}`. An unknown ID or another user's session returns `404`.
+- Attempting to revoke the current session returns **409**: use `/api/auth/logout` to sign out of the current session.
+- `POST /api/me/sessions/revoke-others` with `{}` revokes every other session belonging to the current user and retains the current one. Response `200`: `{"ok":true,"id":0}`.
 
-Anche gli osservatori possono consultare e revocare le proprie sessioni. La revoca rende non valide le successive richieste della sessione interessata.
+Observers may also list and revoke their own sessions. Revocation invalidates subsequent requests from the affected session, including writes that recheck the session within their transaction.
 
-## Cronologia paginata
+## Paginated activity
 
-`GET /api/boards/:id/activity-page?limit=30&before=121` richiede accesso in lettura alla bacheca e usa gli stessi limiti e cursori esclusivi delle notifiche:
+`GET /api/boards/:id/activity-page?limit=30&before=121` requires board read access and uses the same limits and exclusive cursors as notifications:
 
 ```json
-{"items":[{"id":120,"action":"updated","entity_type":"cards","entity_id":7,"title":"Revisione","actor":"Sofia","actor_id":2,"created_at":"2026-10-15T20:00:00.000Z"}],"next_cursor":null}
+{"items":[{"id":120,"action":"updated","entity_type":"cards","entity_id":7,"title":"Review","actor":"Alex","actor_id":2,"created_at":"2026-10-15T20:00:00.000Z"}],"next_cursor":null}
 ```
 
-L'endpoint precedente `/api/boards/:id/activity` rimane disponibile; quello nuovo consente di proseguire oltre la prima pagina senza offset.
+The original `/api/boards/:id/activity` endpoint remains available; the paginated endpoint continues beyond the first page without offsets.

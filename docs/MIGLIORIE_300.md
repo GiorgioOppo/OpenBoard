@@ -1,5 +1,7 @@
 # Terzo gruppo di 100 migliorie di OpenBoard
 
+> **Historical archive (Italian).** This document records an earlier analysis or implementation checklist. Its setup examples, security assumptions and roadmap may be superseded. For current guidance, use the [documentation index](README.md), [deployment guide](DEPLOYMENT.md) and [changelog](../CHANGELOG.md).
+
 OpenBoard 0.4 aggiunge pianificazione strutturata, registri del tempo e collaborazione nei commenti. Questi interventi sono distinti dai gruppi precedenti e proseguono la numerazione da 201 a 300. Le spunte attestano l'implementazione nel perimetro di verifica riportato in fondo.
 
 ## Pianificazione strutturata

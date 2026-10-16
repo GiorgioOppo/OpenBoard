@@ -22,18 +22,32 @@ class OperationsTests(unittest.TestCase):
     def test_environment_configuration_and_cli_precedence(self):
         env = {k:v for k,v in os.environ.items() if not k.startswith('OPENBOARD_')}
         env.update(OPENBOARD_WORKERS='3', OPENBOARD_AUTH='true', OPENBOARD_BUSY_TIMEOUT='1200',
-                   OPENBOARD_BODY_LIMIT='8192', OPENBOARD_DB=str(Path(self.temp.name)/'missing.db'))
-        result = self.command('--diagnostics', '--workers', '2', env=env)
+                   OPENBOARD_BODY_LIMIT='8192', OPENBOARD_DB=str(Path(self.temp.name)/'missing.db'),
+                   OPENBOARD_TRUSTED_PROXY='192.0.2.1')
+        result = self.command('--diagnostics', '--workers', '2', '--trusted-proxy','192.0.2.2',env=env)
         self.assertEqual(result.returncode, 0, result.stderr)
         data = json.loads(result.stdout)
         self.assertEqual(data['workers'], 2)
         self.assertEqual(data['busy_timeout_ms'], 1200)
         self.assertEqual(data['body_limit'], 8192)
         self.assertTrue(data['auth_enabled'])
+        self.assertEqual(data['trusted_proxy'],'192.0.2.2')
+        self.assertEqual(json.loads(self.command('--diagnostics',env=env).stdout)['trusted_proxy'],'192.0.2.1')
         self.assertEqual(data['schema_version'], -1)
         self.assertFalse(Path(env['OPENBOARD_DB']).exists())
         env['OPENBOARD_AUTH'] = 'maybe'
         self.assertNotEqual(self.command('--diagnostics', env=env).returncode, 0)
+
+    def test_trusted_proxy_environment_rejects_ambiguous_or_broad_values(self):
+        env={k:v for k,v in os.environ.items() if not k.startswith('OPENBOARD_')}
+        env['OPENBOARD_TRUSTED_PROXY']=''
+        result=self.command('--diagnostics',env=env)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(json.loads(result.stdout)['trusted_proxy'],'')
+        for value in ('*','localhost','0.0.0.0/0','192.0.2.1,192.0.2.2','192.0.2.1:8080','0.0.0.0'):
+            with self.subTest(value=value):
+                env['OPENBOARD_TRUSTED_PROXY']=value
+                self.assertNotEqual(self.command('--diagnostics',env=env).returncode,0)
 
     def test_configured_body_limit_encoding_and_request_id(self):
         self.stop(); self.start('--body-limit', '4096')

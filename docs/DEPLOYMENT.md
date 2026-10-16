@@ -1,29 +1,31 @@
-# Deployment Docker Compose con PostgreSQL, MongoDB e Nginx Proxy Manager
+# Docker Compose deployment
 
-Questo stack separa il frontend statico Nginx dal backend C con API autenticate. PostgreSQL conserva righe e proprietà strutturate, MongoDB i documenti JSON e Nginx Proxy Manager (NPM) gestisce ingressi HTTP/HTTPS e certificati. Il frontend contiene soltanto asset pubblici e chiamate HTTP: credenziali database, query e persistenza applicativa restano nel backend. I driver C reali `libpq` e `libmongoc` vengono compilati nell'immagine. SQLite è una cache locale ricostruibile in `/tmp`, senza volume persistente dell'app.
+OpenBoard separates its static Nginx frontend from its authenticated C API backend. PostgreSQL stores structured rows and properties, MongoDB stores JSON documents, and Nginx Proxy Manager (NPM) handles HTTP/HTTPS ingress and certificates. The frontend contains public assets and HTTP calls; database credentials, queries and persistence stay in the backend. The backend image includes the real `libpq` and `libmongoc` C drivers. SQLite is a reconstructible local cache in `/tmp`, without an application data volume.
 
 ```mermaid
 flowchart LR
     Browser -->|80 / 443| NPM[Nginx Proxy Manager]
-    Admin[Amministratore locale] -->|127.0.0.1:81| NPM
-    NPM -->|/ e asset, HTTP 8080| Frontend[Nginx statico]
+    Admin[Local administrator] -->|127.0.0.1:81| NPM
+    NPM -->|Pages and assets, HTTP 8080| Frontend[Static Nginx]
     NPM -->|/api, HTTP 8080| App[OpenBoard C API]
-    App -->|rete backend interna| PG[(PostgreSQL)]
-    App -->|rete backend interna| Mongo[(MongoDB JSON)]
-    App -.-> Cache[SQLite temporaneo]
+    App -->|Internal backend network| PG[(PostgreSQL)]
+    App -->|Internal backend network| Mongo[(MongoDB JSON)]
+    App -.-> Cache[Temporary SQLite cache]
 ```
 
-Solo NPM pubblica porte dell'host, vincolate a `127.0.0.1` per impostazione predefinita. Il frontend non riceve variabili o credenziali database e non inoltra richieste API. NPM raggiunge separatamente frontend e backend sulla rete `frontend`; app e database comunicano sulle reti Docker; `backend` è interna. La gestione NPM resta su loopback. L'app usa UID/GID `10001`, filesystem di sola lettura, nessuna capability Linux e un `tmpfs` da 256 MiB per cache e file temporanei. Il frontend usa UID/GID `101`, filesystem di sola lettura e un piccolo `tmpfs` per PID e file temporanei Nginx. PostgreSQL, MongoDB e NPM hanno volumi nominati distinti. Gli utenti database dell'app non sono amministratori globali.
+Only NPM publishes host ports, bound to `127.0.0.1` by default. The frontend receives no database credentials and does not proxy API requests. NPM reaches frontend and backend separately on the `frontend` network; the application and databases share the internal `backend` network. NPM administration stays on loopback. The app runs as UID/GID `10001`, with a read-only filesystem, no Linux capabilities and a 256 MiB `tmpfs` for its cache and temporary files. The frontend runs as UID/GID `101`, with a read-only filesystem and a small `tmpfs` for Nginx PID and temporary files. PostgreSQL, MongoDB and NPM use separate named volumes. Application database users are not global administrators.
 
-## Requisiti e immagini
+## Requirements and images
 
-Servono Docker Engine/Desktop avviato, Docker Compose con supporto a `depends_on.condition: service_healthy`, Python 3 per gli script locali e porte HTTP/HTTPS libere. L'app si compila in Debian Trixie usando `libpq-dev` e [`libmongoc-dev`](https://packages.debian.org/trixie/libmongoc-dev).
+Start Docker Engine or Docker Desktop. You also need Docker Compose with `depends_on.condition: service_healthy` support, Python 3 for the local scripts and available HTTP/HTTPS ports. The application builds on Debian Trixie with `libpq-dev` and [`libmongoc-dev`](https://packages.debian.org/trixie/libmongoc-dev).
 
-Le immagini sono `postgres:17-trixie`, `mongo:8.0-noble`, `jc21/nginx-proxy-manager:2.16.0` e, per gli asset, `nginxinc/nginx-unprivileged:1.30.6-alpine-slim`. Il frontend avvia Nginx direttamente con PID e directory temporanee in `/tmp`. [Immagine Nginx senza privilegi](https://github.com/nginx/docker-nginx-unprivileged/blob/main/README.md). Le prime due seguono aggiornamenti della versione selezionata; per distribuzioni riproducibili registrare i digest approvati. PostgreSQL 17 persiste in `/var/lib/postgresql/data`; PostgreSQL 18 cambia percorso e richiede un piano di migrazione, quindi cambiare soltanto il tag non è un aggiornamento sufficiente. [Documentazione dell'immagine PostgreSQL](https://hub.docker.com/_/postgres), [tag ufficiali MongoDB](https://github.com/docker-library/docs/tree/master/mongo#supported-tags-and-respective-dockerfile-links).
+Compose builds five project images: `openboard:0.6.1`, `openboard-frontend:0.6.1`, `openboard-postgres:0.6.1`, `openboard-mongo:0.6.1` and `openboard-proxy:0.6.1`. The database and proxy images pin PostgreSQL 17.11, MongoDB 8.0.34 and NPM 2.16.0 bases by digest, update distribution packages and rebuild affected components. They retain the database major versions and data formats. The first build also downloads Go sources and dependencies, so subsequent builds are faster. The [remediation report](SECURITY_REMEDIATION_2026-10-16.md) records versions, verification and residual findings. Review image pins and repeat scans when updating dependencies.
 
-## Primo avvio locale
+The frontend uses `nginxinc/nginx-unprivileged:1.30.6-alpine-slim` with distribution updates and starts Nginx directly with temporary directories in `/tmp`. PostgreSQL 17 persists in `/var/lib/postgresql/data`; upgrading to PostgreSQL 18 requires a migration plan. See the [PostgreSQL image documentation](https://hub.docker.com/_/postgres) and the [frontend image documentation](https://github.com/nginx/docker-nginx-unprivileged/blob/main/README.md).
 
-Dalla directory del progetto:
+## First local start
+
+Run from the repository root:
 
 ```sh
 python3 scripts/init-env.py
@@ -31,91 +33,162 @@ docker compose config --quiet
 docker compose up -d --build --wait
 ```
 
-HTTP e HTTPS restano su loopback: `OPENBOARD_PUBLISH_IP=127.0.0.1`. Per un server pubblico occorre scegliere esplicitamente `OPENBOARD_PUBLISH_IP=0.0.0.0` (oppure `init-env.py --publish-ip 0.0.0.0` su una nuova installazione) dopo aver configurato TLS e amministrazione privata.
+HTTP and HTTPS bind to loopback: `OPENBOARD_PUBLISH_IP=127.0.0.1`. A public server requires an explicit `OPENBOARD_PUBLISH_IP=0.0.0.0` and a matching HTTPS origin. For a fresh installation, for example, use `python3 scripts/init-env.py --publish-ip 0.0.0.0 --public-url https://board.example.org`; complete administrator setup and TLS before opening the firewall.
 
-`init-env.py` crea `.env` con permessi `0600` e quattro password casuali distinte da 256 bit. Non stampa i segreti e non sovrascrive un file esistente. `.env` è escluso da Git e dal contesto Docker. `.env.example` lascia intenzionalmente vuote le password: Compose rifiuta l'avvio finché non sono state configurate. Non usare `docker compose config` senza `--quiet` in log condivisi: la configurazione espansa contiene le stringhe di connessione.
+`init-env.py` creates `.env` with permissions `0600` and four distinct random 256-bit passwords. It does not print secrets or overwrite an existing file. `.env` is excluded from Git and the Docker build context. Passwords in `.env.example` are deliberately empty; Compose refuses to start until they are set. Use `docker compose config --quiet` in shared logs: expanded configuration includes connection strings.
 
-Se le porte standard sono già occupate:
+If standard ports are occupied:
 
 ```sh
 python3 scripts/init-env.py --http-port 8088 --https-port 8443 --admin-port 8181
 ```
 
-Con queste opzioni l'origine locale generata diventa `http://openboard.localhost:8088`. Se `.env` esiste già, modificarne manualmente porte e origine mantenendole coerenti.
+This generates the local origin `http://openboard.localhost:8088`. If `.env` already exists, edit its ports and public origin together.
 
-### Setup automatico locale
+### Automatic local setup
 
-Per completare entrambi gli amministratori e il proxy del dominio locale:
+Complete both administrator accounts and the local proxy host:
 
 ```sh
 python3 scripts/bootstrap-local.py
+python3 scripts/check-deployment.py
 ```
 
-Lo script usa le API ufficiali locali NPM e OpenBoard, genera password casuali distinte e le conserva in `.env.local-admin` con permessi `0600`, senza stamparle. Gli account sono `admin` per OpenBoard e `admin@openboard.localhost` per NPM. Crea il primo amministratore OpenBoard prima di pubblicare il proxy. Al termine `http://openboard.localhost` serve il frontend e le sue API autenticate; la console NPM resta su `http://127.0.0.1:81`.
+The bootstrap uses the local official NPM and OpenBoard APIs, generates distinct random passwords and saves them in `.env.local-admin` with permissions `0600`, without printing them. The accounts are `admin` for OpenBoard and `admin@openboard.localhost` for NPM. It creates the first OpenBoard administrator before publishing the proxy host. Then `http://openboard.localhost` serves the frontend and authenticated APIs; NPM administration remains at `http://127.0.0.1:81`.
 
-È limitato all'origine `http://openboard.localhost[:porta]`. La seconda esecuzione riusa le credenziali private senza cambiare password, account o host. Un'installazione già configurata senza credenziali note, oppure un proxy locale diverso, causa un arresto senza sovrascrittura. Non imposta `INITIAL_ADMIN_*` nel container. Per scegliere personalmente nome utente e password, oppure usare un dominio pubblico, seguire il setup manuale.
+This bootstrap supports only `http://openboard.localhost[:port]`. Running it again reuses private credentials without changing passwords, accounts or hosts. An existing installation with unknown credentials, or a different local proxy host configuration, stops the bootstrap without overwriting anything. It does not set `INITIAL_ADMIN_*` in the container. Use manual setup for a public domain or your own account names and passwords.
 
-### Setup manuale
+### Manual setup
 
 ```sh
 python3 scripts/setup-admin.py
 ```
 
-`setup-admin.py` crea il primo amministratore OpenBoard attraverso un `docker compose exec` locale. Richiede nome, username e password senza mostrarla; non modifica account già configurati e non stampa cookie o token. Eseguirlo **prima di aggiungere il Proxy Host pubblico** evita che il primo visitatore configuri l'istanza. L'immagine attiva account e permessi e parte senza dati dimostrativi.
+`setup-admin.py` creates the first OpenBoard administrator through a local `docker compose exec`. It prompts for name, username and password without displaying the password; it does not modify existing accounts or print cookies or tokens. Run it **before adding a public Proxy Host** so the first visitor cannot claim the instance. The Compose image enables accounts and permissions and starts without demonstration data.
 
-### Configurare Nginx Proxy Manager
+### Configure Nginx Proxy Manager
 
-1. Aprire `http://127.0.0.1:81` (o la porta amministrativa scelta) e completare il setup iniziale NPM con il proprio account.
-2. In **Hosts → Proxy Hosts → Add Proxy Host** inserire Domain Names `openboard.localhost`, Scheme `http`, Forward Hostname `frontend`, Forward Port `8080`. Il dominio non include schema o porta.
-3. Lasciare vuoto **Custom locations**. Nella scheda **Advanced** incollare il blocco API qui sotto; NPM inoltrerà gli asset a `frontend` e le API direttamente ad `app`.
-4. Salvare e aprire `http://openboard.localhost`. Con porte personalizzate usare l'origine presente in `.env`.
-5. Accedere con l'amministratore OpenBoard creato dallo script. Verificare che `/api/auth/session` restituisca JSON e `/` restituisca il frontend.
+1. Open `http://127.0.0.1:81` (or your chosen administration port) and complete the initial NPM account setup.
+2. Select **Hosts → Proxy Hosts → Add Proxy Host**. Set Domain Names to `openboard.localhost`, Scheme to `http`, Forward Hostname to `frontend` and Forward Port to `8080`. The domain field excludes the scheme and port.
+3. Leave **Custom locations** empty. Paste the complete API block below into **Advanced**. NPM sends assets to `frontend` and API requests directly to `app`.
+4. Save and open `http://openboard.localhost`. For custom ports, use the origin configured in `.env`.
+5. Sign in with the OpenBoard administrator created earlier. Check that `/api/auth/session` returns JSON and `/` returns the frontend.
 
-Nel campo **Advanced**:
+Use the contents of [`deploy/npm/openboard-api.conf`](../deploy/npm/openboard-api.conf) in **Advanced**:
 
 ```nginx
+# Paste this entire file into the OpenBoard NPM Proxy Host Advanced field.
+# The OpenBoard proxy image supplies the shared zones and HTTP 429 status.
 location ^~ /api/ {
     resolver 127.0.0.11 valid=10s ipv6=off;
     set $openboard_api app:8080;
     client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
     proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_pass http://$openboard_api;
+}
+
+location = /api/auth/login {
+    limit_req zone=openboard_auth burst=10 nodelay;
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $openboard_api app:8080;
+    client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://$openboard_api;
+}
+
+location = /api/auth/setup {
+    limit_req zone=openboard_auth burst=10 nodelay;
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $openboard_api app:8080;
+    client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://$openboard_api;
+}
+
+location = /api/auth/password {
+    limit_req zone=openboard_auth burst=10 nodelay;
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $openboard_api app:8080;
+    client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
     proxy_pass http://$openboard_api;
 }
 ```
 
-Il `proxy_pass` senza percorso conserva `/api/...` e la query; `$http_host` conserva dominio e porta anche con porte pubbliche personalizzate. Il resolver Docker e la variabile upstream permettono di aggiornare l'indirizzo di `app` quando un aggiornamento ricrea il container. [Direttiva proxy_pass Nginx](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass), [resolver Nginx](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver). Le rotte di autenticazione, salute e versione passano dallo stesso blocco. [Configurazione delle location in NPM 2.16.0](https://github.com/NginxProxyManager/nginx-proxy-manager/blob/v2.16.0/backend/templates/_location.conf).
+`proxy_pass` without a path preserves `/api/...` and its query string. `$http_host` preserves the domain and port, including nonstandard public ports. The Docker resolver and upstream variable let Nginx refresh the `app` address after container recreation. See the Nginx [`proxy_pass`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass) and [`resolver`](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver) directives. Exact authentication locations apply a per-client rate limit and share connection limits with other API routes. Keep these blocks and avoid additional API locations that bypass their controls. See [NPM 2.16.0 location configuration](https://github.com/NginxProxyManager/nginx-proxy-manager/blob/v2.16.0/backend/templates/_location.conf).
 
-NPM 2.16.0 mostra il wizard quando non esistono utenti e non sono impostate credenziali iniziali. Lo stack usa questo percorso e non distribuisce una password amministrativa condivisa. I volumi `/data` e `/etc/letsencrypt` conservano configurazione e certificati. [Setup NPM](https://nginxproxymanager.com/setup/), [comportamento iniziale nella release 2.16.0](https://github.com/NginxProxyManager/nginx-proxy-manager/blob/v2.16.0/backend/setup.js).
+NPM 2.16.0 displays its setup wizard when no users exist and no initial credentials are configured. This stack uses that path instead of a shared administrator password. The `/data` and `/etc/letsencrypt` volumes retain proxy configuration and certificates. See [NPM setup](https://nginxproxymanager.com/setup/) and the [2.16.0 initialization implementation](https://github.com/NginxProxyManager/nginx-proxy-manager/blob/v2.16.0/backend/setup.js).
 
-### Dominio pubblico e TLS
+### Proxy address and configuration upgrades
 
-Prima di esporre il servizio consultare [il security audit](SECURITY_AUDIT_2026-10-16.md), compresi i finding residui delle immagini e il limite di login aggregato dietro proxy. Impostare in `.env` `OPENBOARD_PUBLISH_IP=0.0.0.0` e, ad esempio, `OPENBOARD_PUBLIC_URL=https://board.example.org`, configurare il DNS verso l'host e usare quel dominio nel Proxy Host. Nella scheda SSL richiedere un certificato Let's Encrypt e attivare Force SSL. `.localhost` serve alle prove locali e non riceve un certificato pubblico. Ricreare l'app dopo aver cambiato l'origine:
+`OPENBOARD_FRONTEND_SUBNET=172.30.240.0/24`, `OPENBOARD_FRONTEND_IP_RANGE=172.30.240.128/25` and `OPENBOARD_PROXY_IP=172.30.240.2` reserve the NPM address. Dynamic allocation uses the upper half of the subnet, keeping the proxy outside that pool and avoiding startup conflicts. The backend trusts only this peer for `X-Real-IP`; NPM overwrites the header with its TCP client address. Browser-supplied headers cannot select a new authentication quota. Private networks and CDN headers are not implicitly trusted.
+
+If this subnet overlaps an existing network, choose another pair with `init-env.py --frontend-subnet ... --proxy-ip ...` on a fresh installation. For an existing installation, update all three variables consistently before recreating its network. Plan for the resulting interruption and retain the volumes.
+
+For a local installation created by the previous bootstrap, back up the data, update the images and run:
+
+```sh
+python3 scripts/bootstrap-local.py --upgrade-proxy
+python3 scripts/check-deployment.py
+```
+
+The upgrade recognizes only the exact legacy configuration generated by this project. It retains the proxy host ID and reuses existing administrator accounts. It refuses manually changed configurations: update **Advanced** using `deploy/npm/openboard-api.conf` without resetting users or passwords. Ordinary bootstrap reruns remain strictly idempotent.
+
+### Public domain and TLS
+
+Before exposure, read the [remediation report](SECURITY_REMEDIATION_2026-10-16.md), including remaining image findings. Set `OPENBOARD_PUBLISH_IP=0.0.0.0` and, for example, `OPENBOARD_PUBLIC_URL=https://board.example.org` in `.env`. Point DNS at the host and use that domain in the Proxy Host. Request a Let's Encrypt certificate in **SSL** and enable **Force SSL**. `.localhost` is for local evaluation and cannot receive a public certificate. Recreate the app after changing its public origin:
 
 ```sh
 docker compose up -d app npm
 ```
 
-L'origine esatta controlla Host, Origin e cookie Secure: deve includere una porta pubblica non standard, se presente. NPM inoltra il nome originale dell'host sia alla posizione `/api` sia al frontend. Non sostituirlo con `app:8080`. Il backend non serve HTML, CSS, JavaScript o file di progetto; il frontend risponde `404` a `/api` quando viene contattato direttamente. Per allegati da 1 MiB, il blocco API del proxy e il backend accettano corpi JSON fino a 2 MiB.
+The exact public origin controls Host and Origin validation and Secure cookies. Include any nonstandard public port. NPM forwards the original host to the API and frontend; keep it instead of `app:8080`. The backend serves no HTML, CSS, JavaScript or project files. Direct frontend requests to `/api` return `404`. For attachments of up to 1 MiB, both the API proxy block and backend allow JSON request bodies of up to 2 MiB.
 
-Su server remoto, mantenere la console NPM privata e aprirla con un tunnel SSH, ad esempio `ssh -L 8181:127.0.0.1:81 utente@server`, poi visitare `http://127.0.0.1:8181`.
+After completing both administrator setups and the certificate configuration, run:
 
-## Persistenza e coerenza
+```sh
+python3 scripts/check-deployment.py
+```
 
-Le righe strutturate vengono salvate in PostgreSQL. Le colonne JSON, compresi checklist, etichette, campi personalizzati, modelli, filtri e record di idempotenza, sono documenti immutabili in MongoDB identificati dal contenuto; PostgreSQL conserva i riferimenti. La pubblicazione scrive prima i documenti e poi la transazione SQL che li rende visibili. Un documento MongoDB non referenziato dopo un errore non modifica lo stato applicativo.
+The preflight reads Compose without printing secrets. It checks live container port bindings, complete `nginx -T` configuration, the trusted proxy and anonymous responses. For HTTPS, it verifies the certificate with SNI and a trusted CA over a loopback connection and requires HTTP redirection to the exact public origin. It performs no login or certificate requests. `--config-only` does not verify runtime readiness. With a public HTTPS port other than 443, configure NPM's redirect to retain that port: standard **Force SSL** alone may omit it, which the preflight rejects.
 
-Prima di un'operazione l'app acquisisce un lock PostgreSQL condiviso tra processi, aggiorna la cache se è cambiata la revisione esterna e poi esegue l'API. Le scritture vengono confermate al client dopo il salvataggio esterno. Un errore restituisce `503` e invalida la cache, che viene ricostruita alla richiesta successiva. Anche account, sessioni, permessi e idempotenza sono persistenti. Eliminare o ricreare il container app non elimina i dati nei database.
+Keep NPM administration private on a remote server. For example, use `ssh -L 8181:127.0.0.1:81 user@server`, then open `http://127.0.0.1:8181` locally.
 
-In modalità esterna sono accettati documenti JSON fino a 90 livelli di annidamento; le chiavi non possono contenere NUL. Le richieste che superano questi vincoli ricevono `400` prima della scrittura. Anche JSON malformato o NUL letterali nel corpo sono errori di richiesta; `503` indica un'indisponibilità dello storage, non un limite JSON. Il corpo HTTP massimo predefinito è 2 MiB e il client deve usare `application/json`.
+## Persistence and consistency
 
-Questa implementazione serializza le operazioni che accedono ai dati e salva uno snapshot delle righe ad ogni cambiamento, comprese le letture autenticate che aggiornano `last_seen` della sessione. È adatta a valutazioni e team piccoli: prima di un carico aziendale elevato servono misure sul dataset reale, salvataggi incrementali e una strategia di disponibilità dei due database. Aumentare i worker HTTP non rende parallele queste transazioni. Il `tmpfs` da 256 MiB deve contenere cache, WAL e temporanei: aumentarlo dopo aver misurato l'uso, senza trattarlo come archivio persistente.
+PostgreSQL holds structured rows. JSON columns, including checklists, labels, custom fields, templates, filters and idempotency records, become immutable content-addressed MongoDB documents; PostgreSQL retains their references. Publication writes the documents before committing the SQL transaction that makes them visible. An unreferenced MongoDB document left after a failure does not change application state.
 
-## Aggiornamento alla versione 0.6
+Before a data operation, the application acquires a PostgreSQL lock shared across processes, refreshes its cache if the external revision changed and then executes the API operation. Writes are acknowledged after external persistence succeeds. A storage failure returns `503` and invalidates the cache, which is reconstructed on the next request. Accounts, sessions, permissions and idempotency records also persist. Recreating the app container does not delete database contents.
 
-La versione 0.6 usa lo schema 7. SQLite crea un backup privato `*.pre-vN.bak` prima di migrare un database precedente: per esempio `.pre-v6.bak` per la 0.5. I dati già esistenti vengono conservati.
+External storage accepts JSON nesting up to 90 levels and rejects keys containing NUL. Requests exceeding these constraints return `400` before publication. Malformed JSON and literal NUL in request bodies are also request errors; `503` means storage unavailability. The default HTTP body limit is 2 MiB, and JSON requests must use `application/json`.
 
-Lo storage esterno supporta esplicitamente gli aggiornamenti 5 → 7 e 6 → 7, composti solo dall'aggiunta di tabelle. Sono conservati anche revisioni, voti, report e tutti i riferimenti ai documenti JSON precedenti. Prima creare e verificare un backup completo con la versione in uso; poi fermare tutte le repliche dell'app, costruire le immagini 0.6 e avviare la nuova app e il frontend:
+The current implementation serializes data operations and saves a row snapshot on each change, including authenticated reads that update session `last_seen`. It targets evaluation and small-team pilots. Before a large enterprise workload, measure your real dataset, introduce incremental persistence and plan availability for both databases. More HTTP workers do not make these transactions parallel. The 256 MiB `tmpfs` must hold cache, WAL and temporary files; increase it based on measured use and do not treat it as permanent storage.
+
+## Upgrade to version 0.6
+
+Version 0.6 uses schema 7. Before migrating an older local database, SQLite mode creates a private `*.pre-vN.bak` backup, such as `.pre-v6.bak` for a version 0.5 database. Existing data is retained.
+
+External storage explicitly supports additive schema upgrades 5 → 7 and 6 → 7. Revisions, votes, reports and existing JSON document references are retained. First create and verify a full backup using the running version. Stop every application replica, build the 0.6 images and start the new app and frontend:
 
 ```sh
 python3 scripts/backup.py
@@ -124,35 +197,33 @@ docker compose build app frontend
 docker compose up -d --wait app frontend
 ```
 
-La nuova app acquisisce il lock PostgreSQL, aggiunge le tabelle, ricostruisce e controlla la cache dai dati esistenti e aggiorna schema e revisione nella stessa transazione SQL. Un documento MongoDB mancante impedisce l'aggiornamento: le nuove tabelle e il cambio di versione vengono annullati. Le righe e i riferimenti JSON precedenti non vengono riscritti dalla migrazione. Un'eventuale vecchia replica rimasta attiva rifiuta le richieste dopo il cambio di schema, invece di sovrascrivere le nuove tabelle.
+The new application acquires the PostgreSQL lock, adds tables, reconstructs and checks the cache against existing data, then updates schema and revision in the same SQL transaction. A missing MongoDB document prevents the upgrade: the new tables and version change are rolled back. The migration does not rewrite previous rows or JSON references. An old application replica still running rejects requests after the schema changes rather than overwriting newer tables.
 
-Controllare `/api/version`, `/api/ready`, accesso con l'account esistente, portfolio, revisioni, sprint e moduli. Non tornare direttamente a un binario precedente dopo la migrazione: per un rollback ripristinare il backup su una nuova coppia di database vuoti seguendo la procedura sotto. Gli altri salti di versione esterna non vengono dedotti automaticamente e gli schemi futuri sono rifiutati. I volumi di PostgreSQL, MongoDB e NPM rimangono persistenti.
+Check `/api/version`, `/api/ready`, existing-account sign-in, portfolio, reviews, sprints and forms. To roll back after migration, restore the backup into a new pair of empty databases as described below. Other external schema jumps are not inferred automatically, and future schemas are rejected. PostgreSQL, MongoDB and NPM volumes remain persistent.
 
-## Backup completo
-
-Usare:
+## Full backup
 
 ```sh
 python3 scripts/backup.py
 ```
 
-Lo script esegue il comando `--backup` con una cache temporanea separata, sotto lo stesso lock esterno delle API, poi copia uno snapshot SQLite completo in `backups/` con permessi `0600`. Il risultato comprende righe SQL e JSON MongoDB reidratati, utenti, sessioni, commenti, allegati e metadati. Non è il solo export JSON di una bacheca. Una destinazione alternativa si indica con `--output /percorso/backup.sqlite3`; i file esistenti non vengono sovrascritti. Il backup è sensibile come i database: copiarlo su un archivio protetto e verificarne il ripristino.
+The script runs `--backup` with a separate temporary cache under the same external lock as API operations, then copies a complete SQLite snapshot into `backups/` with permissions `0600`. It includes SQL rows and rehydrated MongoDB JSON, users, sessions, comments, attachments and metadata. A board's JSON export does not replace this full backup. Use `--output /path/to/backup.sqlite3` for another destination; existing files are not overwritten. Protect the backup like the databases, copy it to secure storage and verify restoration.
 
-Per controllarlo offline su una copia:
+To check a copy offline:
 
 ```sh
-./build/openboard --db backups/openboard-COPIA.sqlite3 --integrity-check
+./build/openboard --db backups/openboard-COPY.sqlite3 --integrity-check
 ```
 
-Questo comando locale va eseguito senza le variabili `OPENBOARD_POSTGRES_URL` e `OPENBOARD_MONGODB_URI`, affinché controlli il file offline. Per backup nativi, fermare tutte le app che scrivono, acquisire insieme dump PostgreSQL e MongoDB, poi riavviare. Un dump PostgreSQL isolato può riferirsi a documenti MongoDB assenti; non considerare separati i due archivi.
+Run this local command without `OPENBOARD_POSTGRES_URL` and `OPENBOARD_MONGODB_URI`, so it checks the offline file. For native database dumps, stop every writing app, capture PostgreSQL and MongoDB together, then restart. A PostgreSQL-only dump may reference absent MongoDB documents; treat the two stores as one backup unit.
 
-Conservare anche `.env` attraverso il proprio sistema di gestione dei segreti e i volumi NPM per ripristinare accessi amministrativi, configurazione e certificati del proxy. Il backup applicativo non include NPM.
+Also retain `.env` in your secret-management system and back up NPM volumes to recover proxy administrator access, configuration and certificates. The application backup excludes NPM.
 
-### Ripristino o importazione da SQLite
+### Restore or import from SQLite
 
-Usare una **nuova istanza con database PostgreSQL e MongoDB vuoti**, mantenendo intatta quella precedente finché il risultato non è stato verificato. La creazione degli utenti database avviene soltanto sui volumi nuovi; cambiare una password in `.env` non cambia utenti già presenti. [Inizializzazione PostgreSQL](https://hub.docker.com/_/postgres), [inizializzazione MongoDB](https://hub.docker.com/_/mongo).
+Use a **new instance with empty PostgreSQL and MongoDB databases**. Retain the old instance until verification completes. Database users are created only on new volumes; changing a password in `.env` does not change an existing user's password. See [PostgreSQL initialization](https://hub.docker.com/_/postgres) and [MongoDB initialization](https://hub.docker.com/_/mongo).
 
-Avviare soltanto i database e importare lo snapshot dalla propria macchina tramite stdin:
+Start only the databases, then import the snapshot from the host through stdin:
 
 ```sh
 docker compose up -d --wait postgres mongo
@@ -160,17 +231,17 @@ docker compose run --rm -T --entrypoint /bin/sh app -c 'umask 077; cat > /tmp/re
 docker compose up -d --wait app frontend npm
 ```
 
-Il bootstrap pubblica i dati del file solo quando l'archivio PostgreSQL è vuoto. Se è già inizializzato, lo stato esterno prevale: questo comando non sovrascrive automaticamente un'installazione esistente. Non avviare prima l'app vuota sul nuovo archivio, perché ne inizializzerebbe lo stato. Ripristinare il proxy o ricrearne il Proxy Host e verificare account, schede, campi personalizzati, allegati e registrazioni di lavoro. Il backup completo ripristina anche le sessioni: se l'incidente lo richiede, revocarle dall'amministrazione dopo il ripristino.
+The bootstrap publishes the file contents only when PostgreSQL storage is empty. If storage is already initialized, external state takes precedence; this command does not overwrite an existing installation. Do not start an empty app against the new storage first, because that initializes it. Restore NPM or recreate its Proxy Host, then verify accounts, cards, custom fields, attachments and time entries. Full backups also restore sessions; revoke them through account administration when the incident requires it.
 
-## Esecuzione nativa e compatibilità delle configurazioni precedenti
+## Native deployment and previous configurations
 
-`deploy/openboard.service` avvia soltanto il backend C autenticato su `127.0.0.1:8080`. Nginx serve separatamente gli asset e inoltra `/api/` al backend. L'unità non contiene più `OPENBOARD_WEB_ROOT`; anche l'opzione CLI `--web-root` è stata rimossa. Un vecchio file ambiente che la conteneva va aggiornato: il frontend non appartiene al processo C.
+`deploy/openboard.service` starts only the authenticated C backend on `127.0.0.1:8080`. Nginx separately serves static assets and proxies `/api/` to the backend. The unit no longer uses `OPENBOARD_WEB_ROOT`, and the CLI option `--web-root` has been removed. Update old environment files that contain it: the frontend is a separate process.
 
-L'autenticazione è attiva per impostazione predefinita. `--no-auth` o `OPENBOARD_AUTH=false` sono ammessi soltanto con bind su loopback per sviluppo locale; il container Compose usa `OPENBOARD_AUTH=true` e `OPENBOARD_BIND=0.0.0.0`. Le opzioni CLI prevalgono sulle variabili ambiente. `OPENBOARD_POSTGRES_URL` e `OPENBOARD_MONGODB_URI` attivano insieme i database separati; con entrambe assenti il backend usa SQLite locale. Le stringhe di connessione native possono essere fornite tramite `/etc/openboard.env`, protetto, letto da systemd.
+Authentication is enabled by default. `--no-auth` or `OPENBOARD_AUTH=false` are allowed only with a loopback bind for local development. Compose uses `OPENBOARD_AUTH=true` and `OPENBOARD_BIND=0.0.0.0`. CLI options override environment variables. Setting both `OPENBOARD_POSTGRES_URL` and `OPENBOARD_MONGODB_URI` enables separate external databases; with both absent, the backend uses local SQLite. A protected `/etc/openboard.env`, read by systemd, can provide native connection strings. A native reverse proxy must match `--trusted-proxy` to its exact peer address; see [`deploy/nginx.conf.example`](../deploy/nginx.conf.example).
 
-Per trasferire un vecchio database SQLite, usare la procedura di importazione su nuovi database vuoti descritta sopra: la copia viene migrata allo schema corrente prima di essere pubblicata. I flag `--diagnostics`, `--integrity-check` e `--checkpoint` operano sul file SQLite offline e rifiutano l'esecuzione con lo storage esterno attivo. `--backup` supporta invece lo snapshot completo dello storage esterno; usare sempre una cache temporanea separata da quella del server attivo.
+To transfer an older SQLite database, follow the import procedure above with new empty databases. The copied database migrates to the current schema before publication. `--diagnostics`, `--integrity-check` and `--checkpoint` operate on offline SQLite files and refuse execution with external storage enabled. `--backup` supports complete external snapshots; use a temporary cache separate from the active server cache.
 
-## Gestione
+## Routine operations
 
 ```sh
 docker compose ps
@@ -179,4 +250,6 @@ docker compose stop
 docker compose start
 ```
 
-L'healthcheck del frontend interroga `/health`, mentre quello dell'app interroga `/api/ready` usando l'Host della propria origine pubblica. I database hanno verifiche che autenticano l'utente dell'app. `stop` e `down` conservano i volumi; `down --volumes` elimina i database e i dati NPM, quindi non è un comando ordinario di aggiornamento. Per aggiornare creare e verificare un backup, costruire la nuova app, eseguire `docker compose up -d --build --wait` e controllare le funzioni principali. I cambi di versione maggiore dei database richiedono procedure di migrazione dedicate.
+The frontend healthcheck requests `/health`; the app healthcheck requests `/api/ready` using the Host from its public origin. Database healthchecks authenticate as the application user. `stop` and `down` retain volumes. `down --volumes` deletes databases and NPM data, so it is not an update command. To update, create and verify a backup, build the new images, run `docker compose up -d --build --wait` and check core workflows. Database major-version upgrades need dedicated migration procedures.
+
+For common startup and proxy failures, see [Troubleshooting](TROUBLESHOOTING.md).

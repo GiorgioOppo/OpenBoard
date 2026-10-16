@@ -1,0 +1,735 @@
+{
+  "date": "2026-10-16",
+  "baseline_commit": "41e2b8297f4fbced71a19105d54d1d8d599f4ee3",
+  "scope": "Local Linux ARM64 QA images. Counts are package/advisory findings, not proven exploits. No findings suppressed.",
+  "scanner": "Docker Scout 1.25.0",
+  "external_rescan_status": "The final proxy and release backend were not rescanned externally. The owner must authorize any new image metadata/SBOM upload. Measured predecessor results and local-only verification are recorded separately.",
+  "measured_images": [
+    {
+      "image": "openboard-postgres:security",
+      "identity": "sha256:b7fdc40f5f4d5a51485054e1d51fb2f6c08ed6e804d3fb64ff61f07fe5046466",
+      "identity_kind": "image index digest",
+      "platform": "linux/arm64",
+      "package_findings": 64,
+      "unique_advisory_ids": 64,
+      "severity_counts": {
+        "LOW": 54,
+        "MEDIUM": 7,
+        "HIGH": 3
+      },
+      "raw_sarif_sha256": "e5788dc5f775762a7cad2edb7a65c0dbcb32f942ce2dd4a28db95cdfc0a1178a",
+      "high_and_critical": [
+        {
+          "advisory": "CVE-2026-86140",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/libxml2@2.12.7%2Bdfsg%2Breally2.9.14-2.1%2Bdeb13u3?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-86140?s=debian&n=libxml2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/lib/aarch64-linux-gnu/libxml2.so.2.9.14",
+            "/usr/share/doc/libxml2/copyright",
+            "/var/lib/dpkg/info/libxml2:arm64.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-85091",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/zlib@1%3A1.3.dfsg%2Breally1.3.1-1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-85091?s=debian&n=zlib&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/lib/aarch64-linux-gnu/libz.so.1.3.1",
+            "/usr/share/doc/zlib1g/copyright",
+            "/var/lib/dpkg/info/zlib1g:arm64.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-74860",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/libxml2@2.12.7%2Bdfsg%2Breally2.9.14-2.1%2Bdeb13u3?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-74860?s=debian&n=libxml2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/lib/aarch64-linux-gnu/libxml2.so.2.9.14",
+            "/usr/share/doc/libxml2/copyright",
+            "/var/lib/dpkg/info/libxml2:arm64.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        }
+      ],
+      "is_final_artifact": true
+    },
+    {
+      "image": "openboard-mongo:security",
+      "identity": "sha256:922a790e32940589b4edaa5c18001d5c27ec6b6367d9961feb3b9e6f47ad72d4",
+      "identity_kind": "image index digest",
+      "platform": "linux/arm64",
+      "package_findings": 40,
+      "unique_advisory_ids": 40,
+      "severity_counts": {
+        "UNSPECIFIED": 1,
+        "LOW": 12,
+        "MEDIUM": 27
+      },
+      "raw_sarif_sha256": "551b6d454451d2c890757a56def5b2afc3814a55cb07e36276411494b5da377b",
+      "high_and_critical": [],
+      "is_final_artifact": true
+    },
+    {
+      "image": "openboard-proxy:security (predecessor)",
+      "identity": "sha256:2f6f7d3517770b02c33e69638a1c65208dc4b7dce37b15094203d558bd0baa92",
+      "identity_kind": "image config digest",
+      "platform": "linux/arm64",
+      "package_findings": 188,
+      "unique_advisory_ids": 188,
+      "severity_counts": {
+        "LOW": 159,
+        "MEDIUM": 11,
+        "HIGH": 15,
+        "CRITICAL": 3
+      },
+      "raw_sarif_sha256": "dc622ee956e35b9f409ef058e2189a2c7f7c7d0bbb8cc28b2a61ce8a0edcfcc8",
+      "high_and_critical": [
+        {
+          "advisory": "CVE-2026-73637",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-73637?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-46729",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-46729?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-47360",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-47360?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-48005",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-48005?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56153",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-56153?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56449",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-56449?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63045",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63045?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63292",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63292?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63686",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63686?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63718",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63718?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-47273",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:pypi/setuptools@70.3.0"
+          ],
+          "fixed_version": "78.1.1",
+          "reference": "https://scout.docker.com/v/CVE-2025-47273?s=github&n=setuptools&t=pypi&vr=%3C78.1.1",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/pip/_vendor/bom.cdx.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-73636",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-73636?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-85091",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/zlib@1%3A1.3.dfsg%2Breally1.3.1-1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-85091?s=debian&n=zlib&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/lib/aarch64-linux-gnu/libz.so.1.3.1",
+            "/usr/share/doc/zlib1g/copyright",
+            "/var/lib/dpkg/info/zlib1g:arm64.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-93748",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:npm/http-cache-semantics@4.2.0"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-93748?s=github&n=http-cache-semantics&t=npm&vr=%3C%3D4.2.0",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/http-cache-semantics/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-93546",
+          "severity": "HIGH",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-93546?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56154",
+          "severity": "CRITICAL",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-56154?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-57941",
+          "severity": "CRITICAL",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-57941?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-59797",
+          "severity": "CRITICAL",
+          "packages": [
+            "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13"
+          ],
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-59797?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile",
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status"
+          ]
+        }
+      ],
+      "is_final_artifact": false
+    }
+  ],
+  "backend_local_comparison": {
+    "final_image_id": "sha256:8b829a5b76deffdcd984d62db38fc3a09b30aa3c3fe46f3479b0889bde1d5f85",
+    "baseline_image_id": "sha256:e85056bb8756570905b2a09c982bb2708584fc8ae547ef886e09098b7a5782e8",
+    "os_package_count": 109,
+    "os_packages_identical": true,
+    "fresh_scan": false,
+    "baseline_package_findings": 52,
+    "baseline_severity_counts": {
+      "LOW": 50,
+      "MEDIUM": 1,
+      "HIGH": 1
+    }
+  },
+  "frontend": {
+    "image_id": "sha256:8a25563f52b79eb99314253ec92ecb3c1ab1d1ca704eeab1e9c761017fec931f",
+    "image_unchanged": true,
+    "fresh_scan": false,
+    "baseline_package_findings": 0
+  },
+  "final_proxy_local_verification": {
+    "image": "openboard-proxy:security",
+    "image_id": "sha256:7590434c40735460e1c86b34595a496842597e56581e44885d4d2711cb55460a",
+    "node_packages": [
+      {
+        "path": "/app/package.json",
+        "name": "nginx-proxy-manager",
+        "version": "2.16.0"
+      },
+      {
+        "path": "/app/node_modules/proxy-addr/package.json",
+        "name": "proxy-addr",
+        "version": "2.0.8"
+      },
+      {
+        "path": "/app/node_modules/basic-ftp/package.json",
+        "name": "basic-ftp",
+        "version": "6.2.3"
+      },
+      {
+        "path": "/app/node_modules/brace-expansion/package.json",
+        "name": "brace-expansion",
+        "version": "5.0.12"
+      },
+      {
+        "path": "/app/node_modules/node-gyp/node_modules/undici/package.json",
+        "name": "undici",
+        "version": "6.28.1"
+      },
+      {
+        "path": "/app/node_modules/undici/package.json",
+        "name": "undici",
+        "version": "8.10.2"
+      },
+      {
+        "path": "/usr/lib/node_modules/npm/package.json",
+        "name": "npm",
+        "version": "12.2.0"
+      },
+      {
+        "path": "/usr/lib/node_modules/npm/node_modules/brace-expansion/package.json",
+        "name": "brace-expansion",
+        "version": "5.0.12"
+      },
+      {
+        "path": "/usr/lib/node_modules/npm/node_modules/undici/package.json",
+        "name": "undici",
+        "version": "6.28.1"
+      },
+      {
+        "path": "/usr/lib/node_modules/npm/node_modules/http-cache-semantics/package.json",
+        "name": "http-cache-semantics",
+        "version": "4.3.0"
+      }
+    ],
+    "python_and_feature_presence": {
+      "installed": {
+        "pip": "26.2.1",
+        "certbot": "5.8.0",
+        "pyOpenSSL": "26.4.0",
+        "cryptography": "50.0.2",
+        "urllib3": "2.8.0",
+        "setuptools": "84.0.0"
+      },
+      "vendored": [
+        {
+          "bom-ref": "pkg:pypi/msgpack@1.2.3",
+          "name": "msgpack",
+          "purl": "pkg:pypi/msgpack@1.2.3",
+          "type": "library",
+          "version": "1.2.3",
+          "externalReferences": [
+            {
+              "type": "distribution",
+              "url": "https://files.pythonhosted.org/packages/0a/e7/bb605a7bab2d8425a64b3fa762b39dc1bf1c7e3f11ba6fb5413d6db0ff8c/msgpack-1.2.3.tar.gz",
+              "hashes": [
+                {
+                  "alg": "SHA-256",
+                  "content": "32edb81a2b5eb7cd7c9d941b2bfbbb082fd2cd09e0e725930316af6b708db186"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "bom-ref": "pkg:pypi/setuptools@70.3.0",
+          "name": "setuptools",
+          "purl": "pkg:pypi/setuptools@70.3.0",
+          "type": "library",
+          "version": "70.3.0"
+        },
+        {
+          "bom-ref": "pkg:pypi/urllib3@2.8.0",
+          "name": "urllib3",
+          "purl": "pkg:pypi/urllib3@2.8.0",
+          "type": "library",
+          "version": "2.8.0",
+          "externalReferences": [
+            {
+              "type": "distribution",
+              "url": "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl",
+              "hashes": [
+                {
+                  "alg": "SHA-256",
+                  "content": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pip_vendor_has_setuptools_package_index": false,
+      "pip_vendor_has_setuptools_sdist": false,
+      "apache_server_present": false,
+      "apache_modules_present": false
+    },
+    "os_selected_packages": [
+      "apache2-utils\t2.4.68-1~deb13u1",
+      "curl\t8.14.1-2+deb13u7",
+      "libexpat1:arm64\t2.9.0-1~deb13u1",
+      "nodejs\t22.23.3-1nodesource1",
+      "openssl\t3.5.7-1~deb13u3",
+      "zlib1g:arm64\t1:1.3.dfsg+really1.3.1-1+b1"
+    ],
+    "last_scan_note": "The 188-result SARIF describes predecessor config 2f6f7d3517770b02c33e69638a1c65208dc4b7dce37b15094203d558bd0baa92. http-cache-semantics 4.3.0 and the internal authentication-route correction were applied afterwards. No final external scan was performed.",
+    "fresh_scan": false,
+    "changes_after_last_scan": [
+      "Replaced npm bundled http-cache-semantics 4.2.0 with verified 4.3.0 code and runtime lock.",
+      "Corrected authentication route normalization for nginx-stripped /api prefix; aliases share quota."
+    ]
+  },
+  "verification": {
+    "python_full_suite": {
+      "tests": 220,
+      "skipped": 21,
+      "result": "passed"
+    },
+    "asan_ubsan_full_suite": {
+      "tests": 220,
+      "skipped": 21,
+      "result": "passed"
+    },
+    "later_deployment_tests": {
+      "tests": 18,
+      "result": "passed"
+    },
+    "bootstrap_tests": {
+      "tests": 9,
+      "result": "passed"
+    },
+    "external_storage_tests": {
+      "tests": 12,
+      "result": "passed"
+    },
+    "database_image_tests": {
+      "tests": 4,
+      "result": "passed"
+    },
+    "real_proxy_tests_final_image": {
+      "tests": 3,
+      "result": "passed"
+    },
+    "frontend_node_suites": 5,
+    "npm_limiter_node_suite": "passed",
+    "full_five_service_stack_and_legacy_proxy_upgrade": "passed on final images; isolated project and volumes removed",
+    "ci_amd64": "Workflow validated locally; execution awaits next GitHub run."
+  }
+}

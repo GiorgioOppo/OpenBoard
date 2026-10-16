@@ -1,5 +1,7 @@
 # Studio delle migliorie di OpenBoard per team e aziende
 
+> **Historical archive (Italian).** This document records an earlier analysis or implementation checklist. Its setup examples, security assumptions and roadmap may be superseded. For current guidance, use the [documentation index](README.md), [deployment guide](DEPLOYMENT.md) and [changelog](../CHANGELOG.md).
+
 Data: 15 ottobre 2026. Versione analizzata: [93493c5](https://github.com/GiorgioOppo/OpenBoard/commit/93493c5b74b8ad527e42691439233f457bf5990d).
 
 OpenBoard dispone di una base kanban locale funzionante. Per diventare un'alternativa completa a Trello per team e aziende, il prossimo investimento deve rendere affidabili dati, identità e collaborazione. Aggiungere molte viste prima di queste fondamenta aumenterebbe il costo delle modifiche successive.

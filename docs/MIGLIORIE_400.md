@@ -1,5 +1,7 @@
 # Quarto gruppo di 100 migliorie di OpenBoard
 
+> **Historical archive (Italian).** This document records an earlier analysis or implementation checklist. Its setup examples, security assumptions and roadmap may be superseded. For current guidance, use the [documentation index](README.md), [deployment guide](DEPLOYMENT.md) and [changelog](../CHANGELOG.md).
+
 OpenBoard 0.5 aggiunge revisioni formali sulle schede e un portfolio fra bacheche. La numerazione continua da 301 a 400. Le voci API e le corrispondenti interazioni dell'interfaccia sono interventi separati, come nei gruppi precedenti. Le spunte attestano l'implementazione nel perimetro di verifica descritto in fondo.
 
 ## Revisioni e approvazioni: API

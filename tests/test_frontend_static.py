@@ -1,6 +1,6 @@
 """Opt-in HTTP tests against an isolated, read-only frontend container.
 
-OPENBOARD_FRONTEND_IMAGE=openboard-frontend:0.6.0 python3 -m unittest discover
+OPENBOARD_FRONTEND_IMAGE=openboard-frontend:0.6.1 python3 -m unittest discover
 -s tests -p test_frontend_static.py -v
 The fixture starts and removes only its own container. No database is used.
 """

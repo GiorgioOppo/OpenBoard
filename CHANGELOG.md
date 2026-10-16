@@ -1,6 +1,16 @@
 # Changelog
 
+Version sections describe the code's development history. They do not imply that a corresponding GitHub release or tag has been published. See [GitHub releases](https://github.com/GiorgioOppo/OpenBoard/releases) for published artifacts.
+
 ## Unreleased
+
+No unreleased changes.
+
+## 0.6.1 — 2026-10-16 (Early preview)
+
+Prepare the repository for public contributions: consolidate English documentation, document architecture and everyday workflows, add troubleshooting and community guidance, record third-party licensing, and distinguish historical improvement checklists from current operating instructions.
+
+Remediate the audit's proxy and database dependency findings with patched, pinned base images and rebuilt Go tools. Replace shared authentication quotas with bounded per-client counters; explicitly trust the proxy's static IPv4 address and reject ambiguous forwarded client IPs. Add nginx authentication and connection limits, an NPM authentication limiter, a checked local proxy upgrade and a read-only deployment preflight for private ports, setup completion, HTTPS and effective nginx controls. Record residual upstream findings and test the real proxy chain in disposable containers.
 
 Security review: isolate late frontend responses across account changes; recheck sessions and roles inside protected write transactions; verify current authorization before idempotency replay; use the real TCP peer for login quotas. Add regression tests, explicit loopback publication defaults, hardened container compilation and frontend distribution security updates. Record dependency findings and publication conditions in the security audit.
 
@@ -8,44 +18,44 @@ Add English, French, Spanish, German, Simplified Chinese and Japanese alongside 
 
 ## 0.6.0
 
-Quinto gruppo di 100 interventi: sprint, backlog, assegnazione multipla atomica, capacità per persona, confronti dell'impegno residuo, osservazioni giornaliere esplicite, attività personali, cronologia e CSV. Una sola iterazione attiva per bacheca; le schede incomplete restano tali alla chiusura. Quote di stima e tempo ripartite fra gli assegnatari attuali del team.
+The fifth set of 100 improvements adds sprints, a backlog, atomic bulk assignment, per-person capacity, remaining-effort comparisons, explicitly captured daily snapshots, personal tasks, history and CSV exports. A board has at most one active sprint; unfinished cards remain unfinished when it closes. Estimates and logged time are apportioned across current team assignees.
 
-Moduli interni con campi tipizzati, schema conservato nelle richieste, inbox, valutazione, note, modifiche personali, cestino e conversione atomica in schede con controllo WIP. Interfaccia costruita dalle API, bozze personali, versioni, filtri e recupero dai conflitti. [Elenco 401–500 e verifiche](docs/MIGLIORIE_500.md).
+Internal forms add typed fields, retained submission schemas, inboxes, triage, notes, personal edits, trash and atomic conversion to cards with WIP checks. The API-driven interface includes personal drafts, versions, filters and conflict recovery. See the [401–500 checklist and verification](docs/MIGLIORIE_500.md).
 
-Schema 7 additivo, backup SQLite prima della migrazione e aggiornamenti esterni espliciti 5/6 → 7 sotto lock PostgreSQL. Opzioni, risposte e schemi dei moduli in MongoDB; relazioni e dati scalari in PostgreSQL. Frontend e backend 0.6 separati, nuovi asset autorizzati nei due server statici.
+Additive schema 7 includes a pre-migration SQLite backup and explicit external 5/6 → 7 upgrades under the PostgreSQL lock. Form options, answers and schemas live in MongoDB; relationships and scalar values live in PostgreSQL. Separate 0.6 frontend and backend images include the new assets in both static-server allowlists.
 
 ## 0.5.0
 
-Quarto gruppo di 100 interventi: revisioni delle schede con revisori nominativi, quorum tutti/almeno uno, decisioni motivate, ritiro del voto, annullamento, riapertura, duplicazione, cestino, cronologia e inbox filtrate. Nessuna autoapprovazione; autorizzazioni correnti e invalidazione permanente dei voti alla revoca dei permessi. Conflitti gestiti tramite versioni.
+The fourth set of 100 improvements adds card review requests with named reviewers, all-reviewer or any-reviewer approval rules, explained decisions, vote withdrawal, cancellation, reopening, duplication, trash, history and filtered inboxes. Requesters cannot approve their own requests. Current permissions are enforced, and revoking access permanently invalidates previous votes. Versions handle conflicts.
 
-Portfolio autorizzato fra bacheche, ricerca paginata, report personali modificabili e fissabili, attività giornaliera, fasce di ritardo, carico per persona, confronto stime/tempo, WIP, checklist, dipendenze e traguardi. CSV protetti dalle formule dei fogli di calcolo. Interfaccia responsive con bozze personali, gestione dei conflitti e protezione dalle risposte tardive. [Elenco 301–400 e verifiche](docs/MIGLIORIE_400.md).
+An authorized cross-board portfolio adds paginated search, editable and pinnable personal reports, daily activity, overdue bands, per-person workload, estimate/time comparisons, WIP, checklists, dependencies and milestones. CSV exports protect against spreadsheet formulas. The responsive interface includes personal drafts, conflict handling and protection from late responses. See the [301–400 checklist and verification](docs/MIGLIORIE_400.md).
 
-Schema SQLite 6 con backup precedente, migrazione esterna esplicita 5 → 6 sotto lock PostgreSQL e rollback se la ricostruzione fallisce. Dati strutturati delle revisioni in SQL, filtri JSON dei report in MongoDB. Immagini backend/frontend 0.5 separate; nuovi asset inclusi nelle whitelist di Nginx e del server di sviluppo.
+SQLite schema 6 creates a pre-migration backup. External 5 → 6 migration runs under a PostgreSQL lock and rolls back if cache reconstruction fails. Structured review data lives in SQL; report-filter JSON lives in MongoDB. Separate 0.5 backend and frontend images include the new assets in the Nginx and development-server allowlists.
 
 ## 0.4.0
 
-Terzo gruppo di 100 interventi: campi personalizzati tipizzati, traguardi, azioni multiple per priorità/etichette/traguardi, linee guida e carico di lavoro. Registrazioni del tempo con cestino, riepiloghi per scheda, bacheca e settimana personale, CSV dal server. Risposte ai commenti, reazioni, commenti in evidenza, segnalibri personali e notifiche filtrate prima della paginazione.
+The third set of 100 improvements adds typed custom fields, milestones, bulk priority/label/milestone actions, guidelines and workload views. Time entries include trash, card/board/personal-week summaries and server-generated CSV exports. Comments gain replies, reactions and pinning; users gain personal bookmarks and notifications filtered before pagination.
 
-Interfaccia con gestione dei campi, traguardi, report e vista tabellare. Le bozze delle risposte sopravvivono ai refresh; risposte HTTP tardive non sovrascrivono filtri e segnalibri. Schema locale 5 con backup prima della migrazione. JSON v2 comprende definizioni, valori e traguardi; il backup completo conserva le relazioni personali e collaborative. [Elenco 201–300 e verifiche](docs/MIGLIORIE_300.md).
+The interface includes field management, milestones, reports and a table view. Reply drafts survive refreshes, and late HTTP responses do not overwrite filters or bookmarks. Local schema 5 creates a pre-migration backup. JSON v2 includes definitions, values and milestones; full backups retain personal and collaborative relationships. See the [201–300 checklist and verification](docs/MIGLIORIE_300.md).
 
-Docker Compose separa backend C con sole API autenticate, frontend statico, PostgreSQL, MongoDB e Nginx Proxy Manager. Il binario e la sua immagine non contengono asset grafici; autenticazione predefinita e modalità senza account solo esplicita su loopback. Il frontend carica dati e cataloghi dalle API sulla stessa origine. PostgreSQL conserva colonne scalari tipizzate e riferimenti ai documenti JSON immutabili in MongoDB; SQLite diventa una cache ricostruibile. Commit SQL e lock tra processi coordinano la pubblicazione degli snapshot. Modalità locale SQLite conservata. Volumi persistenti separati, credenziali generate e reti private; [gestione e limiti](docs/DEPLOYMENT.md).
+Docker Compose separates the authenticated C API backend, static frontend, PostgreSQL, MongoDB and Nginx Proxy Manager. The binary and backend image contain no graphical assets. Authentication becomes the default; account-free mode is an explicit loopback-only option. The frontend loads data and catalogues from same-origin APIs. PostgreSQL stores typed scalar columns and references to immutable MongoDB JSON documents; SQLite becomes a reconstructible cache. SQL commits and cross-process locks coordinate snapshot publication. Local SQLite mode remains available. Separate persistent volumes, generated credentials and private networks support deployment; see [operations and limitations](docs/DEPLOYMENT.md).
 
 ## 0.3.0
 
-Secondo gruppo di 100 interventi: pianificazione e blocchi, tempo effettivo, assegnazioni multiple a utenti, attività personali, dipendenze senza cicli, template personali, filtri salvati e azioni multiple atomiche. Notifiche interne con sottoscrizioni, allegati recuperabili nel database, modifica dei commenti, profilo e revoca delle sessioni.
+The second set of 100 improvements adds scheduling and blockers, actual time, multiple user assignees, personal tasks, cycle-free dependencies, personal templates, saved filters and atomic bulk actions. Internal notifications include subscriptions. Attachments stored in the database are recoverable; comments can be edited, and users can update their profiles and revoke sessions.
 
-L'interfaccia include timer manuale, anteprima Markdown, export CSV e iCalendar, comandi rapidi e nuove funzioni per i team. Installazione con PREFIX/DESTDIR, Docker/Compose Linux, esempio systemd/nginx, configurazione da ambiente, metriche e manutenzione SQLite. Lo schema passa alla versione 4 con backup precedente.
+The interface adds a manual timer, Markdown preview, CSV and iCalendar exports, keyboard shortcuts and team workflows. Operations add PREFIX/DESTDIR installation, Linux Docker/Compose, systemd and Nginx examples, environment configuration, metrics and SQLite maintenance. Schema 4 creates a pre-migration backup.
 
-Elenco e verifiche in [docs/MIGLIORIE_200.md](docs/MIGLIORIE_200.md). JSON v2 conserva i nuovi campi scalari delle schede; relazioni fra account, dipendenze, allegati e notifiche richiedono il backup SQLite.
+See the [101–200 checklist and verification](docs/MIGLIORIE_200.md). JSON v2 retains new scalar card fields; account relationships, dependencies, attachments and notifications require a full SQLite backup.
 
 ## 0.2.0
 
-Evoluzione collaborativa con server concorrente, migrazioni, revisioni e conflitti, cestino, archivio, commenti, cronologia, import/export versionati, account opzionali e permessi per bacheca. L'interfaccia aggiunge bozze recuperabili, link diretti, viste statistiche e calendario, tema e densità configurabili.
+Collaboration adds a concurrent server, migrations, revisions and conflict handling, trash, archives, comments, history, versioned import/export, optional accounts and per-board permissions. The interface adds recoverable drafts, direct links, statistics and calendar views, and configurable theme and density.
 
-L'elenco completo e verificabile è in [docs/MIGLIORIE_100.md](docs/MIGLIORIE_100.md).
+See the complete [001–100 checklist](docs/MIGLIORIE_100.md).
 
-Nuova dipendenza di compilazione: OpenSSL libcrypto e pkg-config. Il database della versione iniziale viene aggiornato senza reinserire i dati dimostrativi; prima della migrazione viene creata una copia con suffisso `.pre-vN.bak`.
+OpenSSL libcrypto and pkg-config become build dependencies. Initial-version databases migrate without reseeding demonstration data. A copy with a `.pre-vN.bak` suffix is created before migration.
 
 ## 0.1.0
 
-Prima versione locale: server C, SQLite, bacheche, colonne e schede, checklist, scadenze, ricerca e trascinamento. Licenza MIT.
+Initial local version: a C server, SQLite, boards, lists, cards, checklists, due dates, search and drag-and-drop. MIT license.

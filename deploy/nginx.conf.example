@@ -1,20 +1,81 @@
-# Dentro http{} di nginx. Sostituire dominio e percorsi del certificato.
-# Completare il setup admin localmente prima di abilitare questo virtual host.
+# Include inside nginx http{}; replace the domain and certificate paths.
+# Complete the first administrator locally before enabling this virtual host.
+# Start OpenBoard with --public-url https://board.example.com
+# and --trusted-proxy 127.0.0.1; forwarded IP headers from clients are untrusted.
+limit_req_zone $binary_remote_addr zone=openboard_auth:10m rate=5r/m;
+limit_conn_zone $binary_remote_addr zone=openboard_api_clients:10m;
+limit_conn_zone $server_name zone=openboard_api_total:1m;
+limit_req_status 429;
+limit_conn_status 429;
+
+server {
+    listen 80;
+    server_name board.example.com;
+    return 308 https://board.example.com$request_uri;
+}
+
 server {
     listen 443 ssl;
     server_name board.example.com;
     ssl_certificate /etc/letsencrypt/live/board.example.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/board.example.com/privkey.pem;
     client_max_body_size 2m;
-    # Installare gli asset separatamente con make install-frontend.
+    # Install the separate static assets with make install-frontend.
     root /usr/local/share/openboard;
     index index.html;
     add_header X-Content-Type-Options nosniff always;
     add_header X-Frame-Options DENY always;
     add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'" always;
     location ^~ /api/ {
+        limit_conn openboard_api_clients 8;
+        limit_conn openboard_api_total 32;
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Request-ID $request_id;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_read_timeout 30s;
+    }
+    location = /api/auth/login {
+        limit_req zone=openboard_auth burst=10 nodelay;
+        limit_conn openboard_api_clients 8;
+        limit_conn openboard_api_total 32;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Request-ID $request_id;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_read_timeout 30s;
+    }
+    location = /api/auth/setup {
+        limit_req zone=openboard_auth burst=10 nodelay;
+        limit_conn openboard_api_clients 8;
+        limit_conn openboard_api_total 32;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Request-ID $request_id;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_read_timeout 30s;
+    }
+    location = /api/auth/password {
+        limit_req zone=openboard_auth burst=10 nodelay;
+        limit_conn openboard_api_clients 8;
+        limit_conn openboard_api_total 32;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Request-ID $request_id;
         proxy_set_header Connection "";
         proxy_http_version 1.1;

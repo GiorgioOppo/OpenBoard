@@ -1,85 +1,97 @@
-# API di pianificazione — OpenBoard 0.4
+# Planning API — OpenBoard 0.4
 
-Le funzioni 201–230 aggiungono campi personalizzati, traguardi, regole della bacheca e report di carico. Le richieste richiedono la stessa sessione, CSRF e autorizzazione della bacheca delle altre API. Le scritture sono transazionali: un errore annulla l'intera richiesta; gli osservatori possono leggere. Gli ID numerici sono locali al database, mentre le chiavi di campo e traguardo sono stabili nell'esportazione.
+Features 201–230 add custom fields, milestones, board guidelines and workload reports. Requests use the same session, CSRF protection and board authorization as the other APIs. Writes are transactional: an error rolls back the entire request; observers can read. Numeric IDs are local to the database, while field and milestone keys remain stable in exports.
 
-## Campi personalizzati
+## Custom fields
 
-- `GET /api/boards/:id/fields` → `{fields:[...]}`. `?include_deleted=1` comprende il cestino.
-- `POST /api/boards/:id/fields` → `201 {ok,id}`. Corpo: `{key,name,type,options?,position?}`.
-- `PATCH /api/fields/:id` → `{ok,id}`. Corpo: `{name?,position?}`.
-- `DELETE /api/fields/:id` nasconde la definizione conservando i valori delle schede.
-- `POST /api/fields/:id/restore`, corpo `{}`, riattiva la definizione in fondo all'elenco.
+- `GET /api/boards/:id/fields` → `{fields:[...]}`. `?include_deleted=1` includes the trash.
+- `POST /api/boards/:id/fields` → `201 {ok,id}`. Body: `{key,name,type,options?,position?}`.
+- `PATCH /api/fields/:id` → `{ok,id}`. Body: `{name?,position?}`.
+- `DELETE /api/fields/:id` hides the definition while retaining card values.
+- `POST /api/fields/:id/restore`, with body `{}`, reactivates the definition at the end of the list.
 
-La chiave è immutabile, unica nella bacheca anche nel cestino e segue `[a-z][a-z0-9_]{0,39}`. Il nome contiene da 1 a 100 caratteri, con almeno un carattere non bianco. Anche il tipo e le opzioni sono immutabili: cambiare tipo potrebbe reinterpretare dati già salvati. Per un'altra struttura si crea un nuovo campo. `position` è un indice da zero. La bacheca ammette 20 definizioni attive e 100 complessive, comprese quelle eliminate.
+The key is immutable, unique within the board even in the trash, and follows `[a-z][a-z0-9_]{0,39}`. The name contains 1–100 characters, including at least one non-whitespace character. The type and options are also immutable: changing the type could reinterpret existing data. Create a new field for a different structure. `position` is a zero-based index. A board allows 20 active definitions and 100 overall, including deleted definitions.
 
-Ogni definizione restituisce `{id,key,name,type,options,position,deleted_at}`. Tipi e valori:
+Each definition returns `{id,key,name,type,options,position,deleted_at}`. Types and values:
 
-| Tipo | Valore JSON consentito |
+| Type | Allowed JSON value |
 | --- | --- |
-| `text` | Stringa Unicode valida, al massimo 2000 caratteri; niente NUL |
-| `number` | Numero JSON finito compreso fra −10¹² e 10¹² |
-| `date` | Stringa `YYYY-MM-DD` con data di calendario valida |
-| `boolean` | `true` o `false` |
-| `select` | Stringa identica a una delle opzioni |
+| `text` | Valid Unicode string, at most 2000 characters; no NUL |
+| `number` | Finite JSON number between −10¹² and 10¹² |
+| `date` | `YYYY-MM-DD` string containing a valid calendar date |
+| `boolean` | `true` or `false` |
+| `select` | String matching one of the options exactly |
 
-I campi `select` richiedono da 1 a 30 opzioni distinte, di 1–100 caratteri. Gli altri tipi usano un array vuoto. Chiavi JSON duplicate, valori strutturati, chiavi sconosciute e valori di tipo errato producono `400`.
+`select` fields require 1–30 distinct options of 1–100 characters each. Other types use an empty array. Duplicate JSON keys, structured values, unknown keys and values of the wrong type return `400`.
 
-Le schede complete e riassunte includono `custom_values`, un oggetto con chiavi stabili e valori JSON tipizzati. `POST` e `PATCH` ordinari della scheda accettano `custom_values`. In alternativa:
+Full card responses and card summaries include `custom_values`, an object with stable keys and typed JSON values. The regular card `POST` and `PATCH` endpoints accept `custom_values`. Alternatively:
 
 - `GET /api/cards/:id/fields` → `{values,version}`.
-- `PATCH /api/cards/:id/fields` con `{values:{cost:120,approved:false,note:null}}` → `{ok,id,version}`.
+- `PATCH /api/cards/:id/fields` with `{values:{cost:120,approved:false,note:null}}` → `{ok,id,version}`.
 
-Le modifiche sono un'unione parziale: i campi omessi mantengono il valore e `null` rimuove un valore. `If-Match: <version>` protegge dalle scritture concorrenti e restituisce `412` se la versione è cambiata. Si possono inviare soltanto chiavi attive; i valori dei campi eliminati restano conservati e tornano visibili ripristinando la definizione. Per modificare un'altra proprietà della scheda basta ometterli dalla richiesta.
+Updates are partial merges: omitted fields retain their values and `null` removes a value. `If-Match: <version>` protects against concurrent writes and returns `412` if the version has changed. Only active keys may be submitted; values of deleted fields remain stored and become visible again when the definition is restored. Omit these values when changing another card property.
 
-`GET /api/boards/:id/field-search?key=approved&value=false` cerca un valore tipizzato esatto tra le schede attive della bacheca e restituisce `{cards:[...]}`. Il parametro `value` è JSON codificato nell'URL: una stringa richiede le virgolette, ad esempio `%22Italia%22`. I numeri interi e reali equivalenti corrispondono. Restano applicati i limiti HTTP sulla lunghezza della query.
+`GET /api/boards/:id/field-search?key=approved&value=false` searches for an exact typed value among the board's active cards and returns `{cards:[...]}`. The `value` parameter is URL-encoded JSON: a string requires quotation marks, for example `%22Italia%22`. Equivalent integer and real numbers match. HTTP query-length limits still apply.
 
-## Traguardi
+## Milestones
 
 - `GET /api/boards/:id/milestones` → `{milestones:[...]}`.
-- `POST /api/boards/:id/milestones` con `{key?,title,due_date?,completed?}` → `201 {ok,id}`.
-- `PATCH /api/milestones/:id` con `{title?,due_date?,completed?}` → `{ok,id}`.
-- `DELETE /api/milestones/:id` e `POST /api/milestones/:id/restore` con `{}` gestiscono il cestino.
+- `POST /api/boards/:id/milestones` with `{key?,title,due_date?,completed?}` → `201 {ok,id}`.
+- `PATCH /api/milestones/:id` with `{title?,due_date?,completed?}` → `{ok,id}`.
+- `DELETE /api/milestones/:id` and `POST /api/milestones/:id/restore` with `{}` manage the trash.
 
-Il titolo contiene 1–200 caratteri non tutti bianchi. La scadenza è una data valida o `""`; `completed` è booleano. Se omessa, la chiave viene generata. Le chiavi rispettano lo stesso formato dei campi, restano immutabili e uniche anche nel cestino. Limiti: 100 traguardi attivi, 200 complessivi.
+The title contains 1–200 characters and cannot consist only of whitespace. The due date is a valid date or `""`; `completed` is a boolean. A key is generated if omitted. Keys follow the same format as field keys and remain immutable and unique even in the trash. Limits: 100 active milestones and 200 overall.
 
-Gli elementi restituiscono `{id,key,title,due_date,completed,deleted_at,total,done,overdue}`. I conteggi includono le schede non archiviate e non eliminate in liste attive; `done` conta quelle completate. Il completamento del traguardo è esplicito, indipendente dal conteggio delle schede. `overdue` è vero per un traguardo attivo non completato con scadenza precedente alla data UTC del server. `?overdue=1` filtra questo report; `?include_deleted=1` include il cestino.
+Items return `{id,key,title,due_date,completed,deleted_at,total,done,overdue}`. Counts include cards that are neither archived nor deleted in active lists; `done` counts completed cards. Milestone completion is explicit and independent of card counts. `overdue` is true for an active, incomplete milestone whose due date precedes the server's UTC date. `?overdue=1` filters this report; `?include_deleted=1` includes the trash.
 
-Le schede includono `milestone_key`. Il salvataggio ordinario accetta una chiave attiva della stessa bacheca; `""` disassocia la scheda. Eliminare il traguardo conserva le associazioni per il ripristino. Le modifiche successive devono omettere la chiave eliminata se invariata, oppure inviare `""` per rimuoverla.
+Cards include `milestone_key`. Regular saves accept an active key from the same board; `""` unlinks the card. Deleting a milestone retains its associations for restoration. Subsequent updates must omit an unchanged deleted key, or submit `""` to remove it.
 
-## Azioni multiple e linee guida
+## Bulk actions and guidelines
 
-`POST /api/boards/:id/bulk` accetta, oltre a completamento e archiviazione, queste azioni:
+In addition to completion and archiving, `POST /api/boards/:id/bulk` accepts these actions:
+
+Set priority:
 
 ```json
 {"action":"priority","value":"high","cards":[{"id":12,"version":3}]}
+```
+
+Replace labels:
+
+```json
 {"action":"labels","value":["design","ricerca"],"cards":[{"id":12,"version":4}]}
+```
+
+Assign a milestone:
+
+```json
 {"action":"milestone","value":"release","cards":[{"id":12,"version":5}]}
 ```
 
-Sono ammesse 1–500 schede univoche della bacheca. Ogni versione è verificata prima della scrittura; un conflitto restituisce `412` e nessuna scheda viene modificata. Priorità ed etichette mantengono gli enum dell'API ordinaria. L'azione `labels` sostituisce l'insieme e aggiorna anche l'etichetta primaria; `milestone` accetta `""` per disassociare. La risposta è `{ok:true,updated:N}`. `Idempotency-Key` usa le stesse garanzie delle altre richieste POST.
+The request accepts 1–500 distinct cards from the board. Every version is checked before writing; a conflict returns `412` and no card is changed. Priorities and labels use the regular API enums. The `labels` action replaces the set and also updates the primary label; `milestone` accepts `""` to unlink cards. The response is `{ok:true,updated:N}`. `Idempotency-Key` uses the same guarantees as other POST requests, including current authorization checks before replay.
 
-`POST /api/boards` e `PATCH /api/boards/:id` accettano `guidelines`, testo Markdown Unicode fino a 10000 caratteri. La bacheca completa lo restituisce; l'interfaccia visualizza un sottoinsieme sicuro del Markdown senza eseguire HTML.
+`POST /api/boards` and `PATCH /api/boards/:id` accept `guidelines`, Unicode Markdown text up to 10000 characters. The full board response includes it; the interface renders a safe Markdown subset without executing HTML.
 
-## Report di carico
+## Workload report
 
-`GET /api/boards/:id/workload` restituisce:
+`GET /api/boards/:id/workload` returns:
 
-- `total`, `completed`, `blocked` per schede attive, non archiviate, in liste attive.
+- `total`, `completed`, `blocked` for active, unarchived cards in active lists.
 - `estimate_minutes`, `actual_minutes`, `logged_minutes`, `total_minutes`.
-- `by_priority`, oggetto priorità → conteggio.
-- `by_milestone`, righe con `key,title,total,completed,estimate_minutes,total_minutes`.
-- `cards`, dettagli sintetici per scheda con priorità, traguardo, tempi e motivo di blocco.
+- `by_priority`, a priority → count object.
+- `by_milestone`, rows containing `key,title,total,completed,estimate_minutes,total_minutes`.
+- `cards`, summary details for each card, including priority, milestone, time and blocking reason.
 
-Una scheda è bloccata se ha un motivo esplicito oppure una dipendenza incompleta o eliminata, inclusa una dipendenza in una lista eliminata. `actual_minutes` è il tempo manuale preesistente. `logged_minutes` somma soltanto registrazioni di lavoro attive. `total_minutes` è la loro somma; le registrazioni non modificano il tempo manuale. Anche le schede complete e riassunte restituiscono questi ultimi due campi. Le somme possono superare il limite di una singola registrazione.
+A card is blocked if it has an explicit reason or an incomplete or deleted dependency, including a dependency in a deleted list. `actual_minutes` is the existing manual time. `logged_minutes` sums only active work logs. `total_minutes` is their sum; work logs do not change manual time. Full card responses and summaries also return these last two fields. Totals may exceed the limit of a single work log.
 
-## Esportazione, importazione e copie
+## Export, import and copies
 
-Il formato JSON OpenBoard versione 2 rimane retrocompatibile. La bacheca esportata aggiunge `guidelines`, `custom_fields`, `milestones`; le schede aggiungono `custom_values` e `milestone_key`. Le definizioni eliminate sono incluse con `deleted_at`, così i valori nascosti possono essere ripristinati dopo il trasferimento. L'importazione verifica tipi, opzioni, chiavi, limiti attivi e riferimenti prima del commit. Gli ID vengono rigenerati; lo stato di eliminazione viene conservato con un nuovo timestamp. La posizione segue l'ordine delle definizioni esportate. Un errore in qualsiasi scheda annulla l'intera importazione.
+OpenBoard JSON format version 2 remains backward compatible. Exported boards add `guidelines`, `custom_fields` and `milestones`; cards add `custom_values` and `milestone_key`. Deleted definitions are included with `deleted_at`, so hidden values can be restored after transfer. Imports validate types, options, keys, active limits and references before committing. IDs are regenerated; deleted state is retained with a new timestamp. Positions follow the order of the exported definitions. An error in any card rolls back the entire import.
 
-Le copie e i modelli di bacheca preservano regole, definizioni, traguardi e valori anche nascosti. La copia di una singola scheda mantiene i soli valori di campi attivi e un traguardo attivo; il modello di una singola scheda esclude tutti i campi personalizzati e l'associazione al traguardo per poter essere usato in un'altra bacheca. Le registrazioni di lavoro, i commenti e le reazioni non sono clonati dal formato bacheca: per il trasferimento del tempo usare l'esportazione dedicata, per un recupero completo usare il backup SQLite.
+Board copies and templates preserve guidelines, definitions, milestones and values, including hidden ones. Copying a single card retains only values of active fields and an active milestone; a single-card template excludes all custom fields and the milestone association so it can be used on another board. Work logs, comments and reactions are not cloned by the board format: use the dedicated export to transfer time records, or a SQLite backup for complete recovery.
 
-L'aggiornamento al database schema 5 conserva i dati precedenti e crea prima un backup `*.pre-v4.bak` con permessi `0600`.
+The upgrade to database schema 5 preserves existing data and first creates a `*.pre-v4.bak` backup with `0600` permissions.
 
-## Verifiche
+## Verification
 
-`tests/test_planning.py` copre i cinque tipi, Unicode/NUL e limiti, merge e cancellazione, conflitti di versione, ricerca, campi e traguardi eliminati/ripristinati, concorrenza su chiavi, importazioni atomiche, copie e modelli, operazioni multiple, carico con tempo registrato, migrazione da schema 4 e isolamento con osservatori e utenti senza accesso. La suite passa anche con AddressSanitizer e UndefinedBehaviorSanitizer.
+`tests/test_planning.py` covers all five types, Unicode/NUL and limits, merges and removal, version conflicts, search, deleted/restored fields and milestones, concurrent key creation, atomic imports, copies and templates, bulk operations, workload with logged time, migration from schema 4, and isolation for observers and users without access. The suite also passes with AddressSanitizer and UndefinedBehaviorSanitizer.

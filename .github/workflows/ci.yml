@@ -17,6 +17,34 @@ defaults:
     shell: bash
 
 jobs:
+  repository:
+    name: Documentation and secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - name: Verify local documentation links and code fences
+        run: make test-docs
+      - name: Install checksum-pinned local secret scanner
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/gitleaks.tar.gz"
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
+            --output "$archive"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $archive" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/gitleaks-bin"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/gitleaks-bin" gitleaks
+      - name: Scan repository history without external upload
+        run: |
+          "$RUNNER_TEMP/gitleaks-bin/gitleaks" git . --config .gitleaks.toml \
+            --log-opts=--all --redact=100 --ignore-gitleaks-allow --no-banner
   test:
     timeout-minutes: 15
     strategy:
@@ -53,12 +81,15 @@ jobs:
       - name: Frontend data formats
         if: ${{ !cancelled() }}
         run: make test-frontend
+      - name: Proxy authentication limits
+        if: ${{ !cancelled() }}
+        run: make test-security
       - name: Address and undefined behavior sanitizers
         if: ${{ !cancelled() }}
         run: make test-sanitize
   container:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     env:
       COMPOSE_PROJECT_NAME: openboard-ci-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
@@ -72,12 +103,25 @@ jobs:
         run: python3 scripts/init-env.py --http-port 8088 --https-port 8443 --admin-port 8181
       - name: Validate Compose
         run: docker compose config --quiet
-      - name: Build backend and frontend images
-        run: docker compose build app frontend
+      - name: Build all five hardened images
+        run: docker compose build app frontend postgres mongo npm
+      - name: Verify database image authentication and backup tools
+        env:
+          OPENBOARD_POSTGRES_IMAGE: openboard-postgres:0.6.1
+          OPENBOARD_MONGO_IMAGE: openboard-mongo:0.6.1
+        run: python3 -m unittest discover -s tests -p 'test_database_images.py' -v
       - name: Start all five services
         run: docker compose up --detach --wait --wait-timeout 180
       - name: Bootstrap private administrators and local proxy
         run: python3 scripts/bootstrap-local.py
+      - name: Verify private boundaries and proxy readiness
+        run: python3 scripts/check-deployment.py
+      - name: Verify spoofing resistance and proxy rate limits
+        env:
+          OPENBOARD_PROXY_IMAGE: openboard-proxy:0.6.1
+          OPENBOARD_APP_IMAGE: openboard:0.6.1
+          OPENBOARD_FRONTEND_IMAGE: openboard-frontend:0.6.1
+        run: python3 -m unittest discover -s tests -p 'test_proxy_security.py' -v
       - name: Verify public frontend and authenticated API routing
         shell: bash
         run: |
@@ -91,7 +135,7 @@ jobs:
             python3 -c 'import json,sys; version=json.load(sys.stdin); assert version["auth_enabled"] is True; assert version["storage"] == "postgresql+mongodb"'
       - name: Verify isolated static frontend container
         env:
-          OPENBOARD_FRONTEND_IMAGE: openboard-frontend:0.6.0
+          OPENBOARD_FRONTEND_IMAGE: openboard-frontend:0.6.1
         run: python3 -m unittest discover -s tests -p 'test_frontend_static.py' -v
       - name: Backend diagnostics on failure
         if: failure()

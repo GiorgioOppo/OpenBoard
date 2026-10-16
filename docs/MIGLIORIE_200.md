@@ -1,5 +1,7 @@
 # Secondo gruppo di 100 migliorie di OpenBoard
 
+> **Historical archive (Italian).** This document records an earlier analysis or implementation checklist. Its setup examples, security assumptions and roadmap may be superseded. For current guidance, use the [documentation index](README.md), [deployment guide](DEPLOYMENT.md) and [changelog](../CHANGELOG.md).
+
 OpenBoard 0.3 amplia il lavoro quotidiano dei team. Questo elenco prosegue dagli interventi 001–100 della versione 0.2: le nuove voci sono numerate 101–200. Le spunte indicano funzionalità implementate e verificate nel perimetro descritto in fondo.
 
 ## Installazione e gestione del servizio
