@@ -4,6 +4,8 @@
 #include "collaboration.h"
 #include "cloud.h"
 #include "openboard.h"
+#include "portfolio.h"
+#include "reviews.h"
 #include "teamwork.h"
 #include <ctype.h>
 #include <errno.h>
@@ -17,7 +19,7 @@
 #include <time.h>
 #include <unistd.h>
 #define COUNT_OF(a) (sizeof(a) / sizeof((a)[0]))
-#define SCHEMA_VERSION 5
+#define SCHEMA_VERSION 6
 _Thread_local sqlite3 *db;
 static _Thread_local jmp_buf request_recovery;
 static _Thread_local jmp_buf *failure_target;
@@ -791,8 +793,12 @@ int ob_initialize_database(void) {
             auth_schema(db);
             migration_four();
             collaboration_schema(db);
-        } else
+        } else if (next == 5)
             migration_five();
+        else {
+            reviews_schema(db);
+            portfolio_schema(db);
+        }
         char p[64];
         snprintf(p, sizeof p, "PRAGMA user_version=%d;COMMIT", next);
         sql_exec(p);
@@ -3471,11 +3477,27 @@ Response ob_route(Request *r) {
             "\"covers\":[\"\",\"sage\",\"peach\",\"lavender\",\"blue\"],"
             "\"custom_field_types\":[{\"value\":\"text\",\"label\":\"Testo\"},"
             "{\"value\":\"number\",\"label\":\"Numero\"},{\"value\":\"date\",\"label\":\"Data\"},"
-            "{\"value\":\"boolean\",\"label\":\"Sì/No\"},{\"value\":\"select\",\"label\":\"Scelta\"}]}"
+            "{\"value\":\"boolean\",\"label\":\"Sì/No\"},{\"value\":\"select\",\"label\":\"Scelta\"}],"
+            "\"review_statuses\":[{\"value\":\"pending\",\"label\":\"In attesa\"},"
+            "{\"value\":\"approved\",\"label\":\"Approvata\"},"
+            "{\"value\":\"changes_requested\",\"label\":\"Modifiche richieste\"},"
+            "{\"value\":\"cancelled\",\"label\":\"Annullata\"}],"
+            "\"review_policies\":[{\"value\":\"all\",\"label\":\"Tutti i revisori\"},"
+            "{\"value\":\"any\",\"label\":\"Almeno un revisore\"}],"
+            "\"review_decisions\":[{\"value\":\"approved\",\"label\":\"Approva\"},"
+            "{\"value\":\"changes_requested\",\"label\":\"Richiedi modifiche\"}],"
+            "\"portfolio_statuses\":[{\"value\":\"all\",\"label\":\"Tutte\"},"
+            "{\"value\":\"open\",\"label\":\"Aperte\"},"
+            "{\"value\":\"completed\",\"label\":\"Completate\"},"
+            "{\"value\":\"blocked\",\"label\":\"Bloccate\"},"
+            "{\"value\":\"overdue\",\"label\":\"Scadute\"},"
+            "{\"value\":\"due_soon\",\"label\":\"In scadenza\"},"
+            "{\"value\":\"unassigned\",\"label\":\"Non assegnate\"}]}"
         ) : error_response(405, "Metodo non consentito.");
     } else if (!strcmp(r->path, "/api/metrics")) {
         result = get ? ob_metrics(r) : error_response(405, "Metodo non consentito.");
-    } else if (!teamwork_handle(r, &result) && !collaboration_handle(r, &result)) {
+    } else if (!reviews_handle(r, &result) && !portfolio_handle(r, &result) &&
+               !teamwork_handle(r, &result) && !collaboration_handle(r, &result)) {
         if (!get && !strcmp(r->role, "observer") && !personal_view_route(r))
             result = error_response(403, "Il ruolo osservatore consente solo la lettura.");
         else

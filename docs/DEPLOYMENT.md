@@ -109,6 +109,23 @@ In modalità esterna sono accettati documenti JSON fino a 90 livelli di annidame
 
 Questa implementazione serializza le operazioni che accedono ai dati e salva uno snapshot delle righe ad ogni cambiamento, comprese le letture autenticate che aggiornano `last_seen` della sessione. È adatta a valutazioni e team piccoli: prima di un carico aziendale elevato servono misure sul dataset reale, salvataggi incrementali e una strategia di disponibilità dei due database. Aumentare i worker HTTP non rende parallele queste transazioni. Il `tmpfs` da 256 MiB deve contenere cache, WAL e temporanei: aumentarlo dopo aver misurato l'uso, senza trattarlo come archivio persistente.
 
+## Aggiornamento alla versione 0.5
+
+La versione 0.5 usa lo schema 6. SQLite crea un backup privato `*.pre-v5.bak` prima di migrare un database della 0.4; i dati già esistenti vengono conservati.
+
+Lo storage esterno supporta esplicitamente l'aggiornamento 5 → 6, composto solo dall'aggiunta delle tabelle delle revisioni e dei report. Prima creare e verificare un backup completo con la versione in uso; poi fermare tutte le repliche dell'app, costruire le immagini 0.5 e avviare la nuova app e il frontend:
+
+```sh
+python3 scripts/backup.py
+docker compose stop app
+docker compose build app frontend
+docker compose up -d --wait app frontend
+```
+
+La nuova app acquisisce il lock PostgreSQL, aggiunge le tabelle, ricostruisce e controlla la cache dai dati esistenti e aggiorna schema e revisione nella stessa transazione SQL. Un documento MongoDB mancante impedisce l'aggiornamento: le nuove tabelle e il cambio di versione vengono annullati. Le righe e i riferimenti JSON precedenti non vengono riscritti dalla migrazione. Un'eventuale vecchia replica rimasta attiva rifiuta le richieste dopo il cambio di schema, invece di sovrascrivere le nuove tabelle.
+
+Controllare `/api/version`, `/api/ready`, accesso con l'account esistente, portfolio e revisioni. Non tornare direttamente al binario 0.4 dopo la migrazione: per un rollback ripristinare il backup su una nuova coppia di database vuoti seguendo la procedura sotto. Gli altri salti di versione esterna non vengono dedotti automaticamente e gli schemi futuri sono rifiutati. I volumi di PostgreSQL, MongoDB e NPM rimangono persistenti.
+
 ## Backup completo
 
 Usare:

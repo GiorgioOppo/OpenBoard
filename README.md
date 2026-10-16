@@ -63,6 +63,8 @@ Puoi scegliere porta e database del backend:
 - Registrare il tempo con data e nota, leggere report personali/per utente ed esportare il registro in CSV.
 - Rispondere ai commenti, aggiungere reazioni, fissare aggiornamenti e conservare segnalibri personali.
 - Collaborare con account individuali, ruoli, commenti, cronologia e aggiornamenti tra sessioni.
+- Richiedere revisioni delle schede, assegnare revisori e raccogliere approvazioni o modifiche motivate.
+- Consultare un portfolio fra bacheche, salvare report personali e confrontare ritardi, carico e avanzamento.
 - Duplicare, archiviare e recuperare dal cestino; importare ed esportare bacheche in JSON.
 
 Le preferenze dell'interfaccia rimangono nel browser; bacheche e schede rimangono nel database. L’esportazione OpenBoard versione 2 è importabile dall’interfaccia su una nuova bacheca. Il backup SQLite conserva anche account, commenti, cronologia e cestino.
@@ -75,11 +77,14 @@ src/server.c        API di dominio, migrazioni e persistenza SQLite
 src/auth.c          Account, sessioni e autorizzazioni
 src/collaboration.c Notifiche, sottoscrizioni, allegati e strumenti personali
 src/teamwork.c      Registri del tempo, conversazioni, reazioni e segnalibri
+src/reviews.c       Richieste di revisione, voti, cronologia e inbox
+src/portfolio.c     Ricerca fra bacheche, indicatori e report personali
 src/cloud.c         PostgreSQL e MongoDB; cache SQLite ricostruibile
 web/index.html      Struttura dell'interfaccia
 web/styles.css      Stili e layout responsive
 web/app.js          Interazioni e comunicazione con le API
 web/planning.js     Campi, traguardi, report e collaborazione della 0.4
+web/enterprise.js   Interfaccia per revisioni, portfolio e report della 0.5
 compose.yaml        Backend C, frontend statico, PostgreSQL, MongoDB e proxy
 tests/              Test di regressione, dominio, autenticazione e HTTP
 Makefile            Compilazione e comandi di sviluppo
@@ -138,6 +143,16 @@ Le istruzioni per installazione, Docker Compose, systemd, nginx HTTPS, configura
 Terzo gruppo di 100 interventi: campi testo/numero/data/booleano/scelta, traguardi con avanzamento, priorità/etichette/traguardi multipli, linee guida e carico di lavoro. Registro del tempo recuperabile con totali e report CSV; commenti Markdown con risposte, reazioni ed evidenza, segnalibri personali, tabella e notifiche filtrate prima della paginazione.
 
 L'[elenco numerato 201–300 con evidenze](docs/MIGLIORIE_300.md) descrive tutte le funzioni implementate. I contratti sono in [pianificazione](docs/API_PIANIFICAZIONE.md) e [tempo e conversazioni](docs/API_TEAMWORK.md). Lo schema locale passa a 5; l'import/export JSON v2 comprende definizioni personalizzate e traguardi. Il backup completo conserva anche account e dati di collaborazione.
+
+## Funzioni della versione 0.5
+
+Quarto gruppo di 100 interventi: richieste di revisione con più revisori, regola tutti/almeno uno, approvazioni e modifiche motivate, inbox personale, scadenze, cestino, cronologia e CSV. La revoca dei permessi invalida i voti e un successivo reinvito richiede una nuova decisione. Il richiedente non può approvare la propria richiesta.
+
+Il portfolio raccoglie le bacheche accessibili, offre ricerca e filtri fra progetti, report personali fissabili ed esportazione CSV paginata. Gli indicatori mostrano attività giornaliera, ritardi, carico per persona, stima/tempo effettivo, limiti WIP, checklist, dipendenze e traguardi. Revisioni e report personali richiedono un account; i filtri salvati rispettano i permessi correnti.
+
+L'[elenco completo 301–400 con verifiche](docs/MIGLIORIE_400.md) distingue API e interfaccia. I contratti sono in [revisioni](docs/API_REVISIONI.md) e [portfolio](docs/API_PORTFOLIO.md). Lo schema 6 conserva i dati precedenti; l'aggiornamento PostgreSQL/MongoDB 5 → 6 aggiunge le nuove tabelle senza riscrivere i documenti esistenti. Prima dell'aggiornamento seguire la [procedura di backup e migrazione](docs/DEPLOYMENT.md).
+
+![Portfolio fra bacheche](docs/preview-portfolio.png)
 
 ## Dati e backup
 

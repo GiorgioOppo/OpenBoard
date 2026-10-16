@@ -56,7 +56,7 @@ class TransportTests(unittest.TestCase):
         self.assertEqual(status,200);self.assertEqual(json.loads(b)['status'],'ready')
         status,v,b=self.request('GET','/api/version')
         version=json.loads(b)
-        self.assertEqual(version['version'],'0.4.0');self.assertGreaterEqual(version['workers'],2)
+        self.assertEqual(version['version'],'0.5.0');self.assertGreaterEqual(version['workers'],2)
         self.assertNotEqual(h['X-Request-ID'],v['X-Request-ID'])
         status,h,b=self.request('HEAD','/api/health')
         self.assertEqual(status,200);self.assertEqual(b,b'');self.assertGreater(int(h['Content-Length']),0)

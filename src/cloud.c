@@ -228,6 +228,7 @@ static bool json_column(const char *table, const char *column) {
          (!strcmp(table, "custom_fields") && !strcmp(column, "options")) ||
          (!strcmp(table, "templates") && !strcmp(column, "payload")) ||
          (!strcmp(table, "saved_views") && !strcmp(column, "filters")) ||
+         (!strcmp(table, "saved_reports") && !strcmp(column, "filters")) ||
          (!strcmp(table, "idempotency") &&
           (!strcmp(column, "request_body") ||
            !strcmp(column, "response_body"))) ||
@@ -913,6 +914,34 @@ done:
     cache_epoch = -1;
   return rc;
 }
+/* Schema 6 only adds tables. Keep old rows and immutable document references
+ * intact, and publish the new layout under the same advisory lock used by
+ * requests. Older processes subsequently fail their version check instead of
+ * publishing a snapshot that omits the new tables. No arbitrary schema jump is
+ * inferred here: a future migration must explicitly describe its data changes.
+ */
+static int upgrade_five_to_six(sqlite3 *cache, int64_t epoch) {
+  if (pg_command("BEGIN"))
+    return -1;
+  if (create_layout() || hydrate_snapshot(cache, epoch))
+    goto failed;
+  PGresult *updated = PQexec(
+      postgres,
+      "UPDATE ob_store SET schema_version=6,epoch=epoch+1 WHERE id=1 AND "
+      "schema_version=5 RETURNING epoch");
+  bool ok = updated && PQresultStatus(updated) == PGRES_TUPLES_OK &&
+            PQntuples(updated) == 1;
+  int64_t next_epoch = ok ? strtoll(PQgetvalue(updated, 0, 0), NULL, 10) : -1;
+  PQclear(updated);
+  if (!ok || pg_command("COMMIT"))
+    goto failed;
+  cache_epoch = next_epoch;
+  return 0;
+failed:
+  pg_command("ROLLBACK");
+  cache_epoch = -1;
+  return -1;
+}
 int cloud_bootstrap(sqlite3 *cache) {
   if (!cloud_enabled())
     return 0;
@@ -941,6 +970,12 @@ int cloud_bootstrap(sqlite3 *cache) {
   if (state < 0)
     goto done;
   if (!state && version != local_schema) {
+    if (version == 5 && local_schema == 6) {
+      rc = upgrade_five_to_six(cache, epoch);
+      if (!rc)
+        bootstrapped = true;
+      goto done;
+    }
     fprintf(stderr,
             "Schema storage esterno %d incompatibile con schema locale %d.\n",
             version, local_schema);

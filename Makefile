@@ -41,6 +41,7 @@ test-sanitize: build/openboard-sanitize
 	OPENBOARD_BINARY="$(CURDIR)/build/openboard-sanitize" UBSAN_OPTIONS=halt_on_error=1 python3 -m unittest discover -s tests -p 'test_*.py' -v
 test-frontend:
 	$(NODE) tests/test_frontend.js
+	$(NODE) tests/test_enterprise.js
 test-cloud: build/openboard
 	OPENBOARD_CLOUD_TEST=1 python3 -m unittest discover -s tests -p 'test_cloud.py' -v
 install: build/openboard

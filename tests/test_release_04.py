@@ -53,7 +53,7 @@ class Release04Recovery(unittest.TestCase):
             self.assertEqual(connection.execute('SELECT actual_minutes FROM cards WHERE id=1').fetchone()[0],12)
             self.assertIsNone(connection.execute("SELECT name FROM sqlite_master WHERE name='worklogs'").fetchone())
         with closing(sqlite3.connect(self.db)) as connection:
-            self.assertEqual(connection.execute('PRAGMA user_version').fetchone()[0],5)
+            self.assertEqual(connection.execute('PRAGMA user_version').fetchone()[0],6)
         self.stop_server();self.start_server()
         self.assertEqual(self.api('GET','/api/cards/1')['title'],'Dati da conservare')
 

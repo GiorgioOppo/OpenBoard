@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define OB_VERSION "0.4.0"
+#define OB_VERSION "0.5.0"
 #define OB_HEADER_LIMIT 16384
 #define OB_BODY_LIMIT 2097152
 

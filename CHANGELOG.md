@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0
+
+Quarto gruppo di 100 interventi: revisioni delle schede con revisori nominativi, quorum tutti/almeno uno, decisioni motivate, ritiro del voto, annullamento, riapertura, duplicazione, cestino, cronologia e inbox filtrate. Nessuna autoapprovazione; autorizzazioni correnti e invalidazione permanente dei voti alla revoca dei permessi. Conflitti gestiti tramite versioni.
+
+Portfolio autorizzato fra bacheche, ricerca paginata, report personali modificabili e fissabili, attività giornaliera, fasce di ritardo, carico per persona, confronto stime/tempo, WIP, checklist, dipendenze e traguardi. CSV protetti dalle formule dei fogli di calcolo. Interfaccia responsive con bozze personali, gestione dei conflitti e protezione dalle risposte tardive. [Elenco 301–400 e verifiche](docs/MIGLIORIE_400.md).
+
+Schema SQLite 6 con backup precedente, migrazione esterna esplicita 5 → 6 sotto lock PostgreSQL e rollback se la ricostruzione fallisce. Dati strutturati delle revisioni in SQL, filtri JSON dei report in MongoDB. Immagini backend/frontend 0.5 separate; nuovi asset inclusi nelle whitelist di Nginx e del server di sviluppo.
+
 ## 0.4.0
 
 Terzo gruppo di 100 interventi: campi personalizzati tipizzati, traguardi, azioni multiple per priorità/etichette/traguardi, linee guida e carico di lavoro. Registrazioni del tempo con cestino, riepiloghi per scheda, bacheca e settimana personale, CSV dal server. Risposte ai commenti, reazioni, commenti in evidenza, segnalibri personali e notifiche filtrate prima della paginazione.

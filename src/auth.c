@@ -428,7 +428,7 @@ static Response update_user(Request *r, int64_t id) {
 }
 static Response list_members(int64_t board_id) {
     return query_json("SELECT json_object('members',json((SELECT json_group_array(json(item)) FROM ("
-        "SELECT json_object('user_id',u.id,'name',u.name,'username',u.username,'role',m.role,'active',json(CASE u.active WHEN 1 THEN 'true' ELSE 'false' END)) item "
+        "SELECT json_object('user_id',u.id,'name',u.name,'username',u.username,'role',m.role,'global_role',u.role,'active',json(CASE u.active WHEN 1 THEN 'true' ELSE 'false' END)) item "
         "FROM board_members m JOIN users u ON u.id=m.user_id WHERE m.board_id=?1 ORDER BY u.name,u.id))))", board_id);
 }
 static bool membership_event(const Request *r, int64_t board_id, int64_t user_id, const char *action) {

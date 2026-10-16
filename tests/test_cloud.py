@@ -346,6 +346,106 @@ class CloudPersistence(unittest.TestCase):
         self.api('POST','/api/boards',{'name':self.name},expected=201)
         self.assertEqual(self.request(self.first,'GET','/api/ready')[0],200)
 
+    def test_new_reviews_reports_and_json_filters_survive_cold_cache_and_backup(self):
+        authenticated = self.start('--auth')
+        credentials = {'username': 'cloud.admin', 'password': 'Cloud-test-password-1016!'}
+        setup = self.api('GET', '/api/auth/session', port=authenticated)['setup_required']
+        if setup:
+            credentials['name'] = 'Cloud test admin'
+        status, response_headers, session = self.request(authenticated, 'POST',
+            '/api/auth/setup' if setup else '/api/auth/login', credentials)
+        self.assertEqual(status, 201 if setup else 200)
+        headers = {'Cookie': response_headers['Set-Cookie'].split(';')[0], 'X-CSRF-Token': session['csrf']}
+        board_id = self.api('POST', '/api/boards', {'name': self.name}, port=authenticated,
+                            headers=headers, expected=201)['id']
+        board = self.api('GET', f'/api/boards/{board_id}', port=authenticated, headers=headers)
+        card_id = self.api('POST', f'/api/columns/{board["columns"][0]["id"]}/cards',
+            {'title': 'Caffè di revisione'}, port=authenticated, headers=headers, expected=201)['id']
+        username = 'reviewer.' + uuid.uuid4().hex[:12]
+        reviewer_id = self.api('POST', '/api/users', {'username': username, 'name': 'Revisore',
+            'password': credentials['password'], 'role': 'member'}, port=authenticated,
+            headers=headers, expected=201)['id']
+        self.api('POST', f'/api/boards/{board_id}/members', {'user_id': reviewer_id, 'role': 'member'},
+                 port=authenticated, headers=headers)
+        review = self.api('POST', f'/api/cards/{card_id}/reviews', {'title': self.name,
+            'reviewer_ids': [reviewer_id], 'policy': 'all'}, port=authenticated,
+            headers=headers, expected=201)
+        status, reviewer_headers, reviewer_session = self.request(authenticated, 'POST', '/api/auth/login',
+            {'username': username, 'password': credentials['password']})
+        self.assertEqual(status, 200)
+        reviewer_headers = {'Cookie': reviewer_headers['Set-Cookie'].split(';')[0],
+                            'X-CSRF-Token': reviewer_session['csrf']}
+        approved = self.api('POST', f'/api/reviews/{review["id"]}/vote',
+            {'decision': 'approved', 'note': 'Verificato ☕'}, port=authenticated, headers=reviewer_headers)
+        self.assertEqual(approved['status'], 'approved')
+        filters = {'q': 'Caffè', 'board_id': board_id, 'status': 'open', 'include_archived': False}
+        report = self.api('POST', '/api/me/reports', {'name': self.name, 'filters': filters, 'pinned': True},
+            port=authenticated, headers=headers, expected=201)
+        reference = self.stores.sql(f'SELECT filters__doc FROM ob_saved_reports WHERE id={report["id"]}')[0][0]
+        document = self.stores.command({'find': 'documents', 'filter': {'_id': reference},
+                                       'limit': 1})['cursor']['firstBatch'][0]
+        self.assertEqual(document['kind'], 'saved_reports.filters')
+        self.assertEqual(document['value'], filters)
+        self.assertEqual(json.loads(document['raw']), filters)
+        self.assertEqual(self.stores.sql(f'SELECT title FROM ob_reviews WHERE id={review["id"]}')[0][0], self.name)
+        for process, _, _, _ in self.processes:
+            process.terminate()
+            process.wait(timeout=15)
+        recovered = self.start('--auth')
+        restored = self.api('GET', f'/api/reviews/{review["id"]}', port=recovered, headers=headers)
+        self.assertEqual(restored['status'], 'approved')
+        self.assertEqual(restored['reviewers'][0]['note'], 'Verificato ☕')
+        self.assertEqual(self.api('GET', f'/api/reports/{report["id"]}', port=recovered, headers=headers), report)
+        history = self.api('GET', f'/api/reviews/{review["id"]}/history', port=recovered, headers=headers)
+        self.assertGreaterEqual(len(history['items']), 2)
+        backup = Path(self.temp.name) / 'enterprise-backup.db'
+        environment = clean_environment()
+        environment.update({k: os.environ[k] for k in ('OPENBOARD_POSTGRES_URL', 'OPENBOARD_MONGODB_URI')})
+        result = subprocess.run([str(BINARY), '--db', str(Path(self.temp.name) / 'backup-cache.db'),
+            '--no-demo', '--backup', str(backup)], env=environment, capture_output=True, timeout=25)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import sqlite3
+        with sqlite3.connect(backup) as connection:
+            self.assertEqual(connection.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+            self.assertEqual(connection.execute('SELECT decision,note FROM review_votes WHERE review_id=?',
+                (review['id'],)).fetchone(), ('approved', 'Verificato ☕'))
+            self.assertEqual(json.loads(connection.execute('SELECT filters FROM saved_reports WHERE id=?',
+                (report['id'],)).fetchone()[0]), filters)
+
+    def test_schema_five_upgrade_preserves_document_references_and_rolls_back_failed_hydration(self):
+        # These opt-in tests require disposable stores, as documented above.
+        board = self.new_board()
+        card_id = self.api('POST', f'/api/columns/{board["columns"][0]["id"]}/cards',
+            {'title': self.name, 'checklist': [{'id': 'preserve', 'text': 'Caffè ☕', 'done': False}]}, expected=201)['id']
+        original = self.api('GET', f'/api/cards/{card_id}')
+        reference = self.stores.sql(f'SELECT checklist__doc FROM ob_cards WHERE id={card_id}')[0][0]
+        for process, _, _, _ in self.processes:
+            process.terminate()
+            process.wait(timeout=15)
+        self.stores.sql("DROP TABLE ob_review_votes,ob_review_members,ob_review_events,ob_reviews,ob_saved_reports; "
+            "DELETE FROM ob_sqlite_sequence WHERE name IN('reviews','review_events','saved_reports'); "
+            "UPDATE ob_store SET schema_version=5; SELECT schema_version FROM ob_store")
+        epoch = self.stores.sql('SELECT epoch FROM ob_store')[0][0]
+        # A missing immutable document must abort both the new SQL layout and
+        # the version change. Restore the original reference before retrying.
+        self.stores.sql(f"UPDATE ob_cards SET checklist__doc='{'0' * 64}' WHERE id={card_id}; SELECT 1")
+        environment = clean_environment()
+        environment.update({k: os.environ[k] for k in ('OPENBOARD_POSTGRES_URL', 'OPENBOARD_MONGODB_URI')})
+        try:
+            result = subprocess.run([str(BINARY), '--db', str(Path(self.temp.name) / 'failed-upgrade.db'),
+                '--no-demo', '--quiet'], env=environment, capture_output=True, timeout=25)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(self.stores.sql('SELECT schema_version,epoch FROM ob_store'), [['5', epoch]])
+            self.assertEqual(self.stores.sql("SELECT table_name FROM information_schema.tables "
+                "WHERE table_schema='public' AND table_name IN('ob_reviews','ob_saved_reports')"), [])
+        finally:
+            self.stores.sql(f"UPDATE ob_cards SET checklist__doc='{reference}' WHERE id={card_id}; SELECT 1")
+        recovered = self.start()
+        self.assertEqual(self.api('GET', f'/api/cards/{card_id}', port=recovered), original)
+        self.assertEqual(self.stores.sql('SELECT schema_version FROM ob_store'), [['6']])
+        self.assertEqual(self.stores.sql(f'SELECT checklist__doc FROM ob_cards WHERE id={card_id}'), [[reference]])
+        self.assertEqual(self.stores.sql('SELECT epoch FROM ob_store'), [[str(int(epoch) + 1)]])
+
     @unittest.skipUnless(os.environ.get('OPENBOARD_CLOUD_MONGO_CONTAINER'),
                          'Set an explicitly disposable MongoDB container for outage testing')
     def test_mongo_outage_rejects_write_and_retry_creates_once(self):

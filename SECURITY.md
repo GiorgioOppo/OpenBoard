@@ -1,6 +1,6 @@
 # Sicurezza di OpenBoard
 
-Il backend OpenBoard 0.4 espone soltanto API, abilita gli account per impostazione predefinita e ascolta per impostazione predefinita su `127.0.0.1`. Il container imposta esplicitamente `OPENBOARD_BIND=0.0.0.0` sulla rete Docker privata; app, PostgreSQL e MongoDB non pubblicano porte sull'host. Nginx Proxy Manager espone HTTP/HTTPS e il pannello amministrativo è vincolato a `127.0.0.1:81`. Configurare prima l'amministratore OpenBoard e poi il Proxy Host. Per accesso remoto usare un dominio HTTPS come `OPENBOARD_PUBLIC_URL`.
+Il backend OpenBoard 0.5 espone soltanto API, abilita gli account per impostazione predefinita e ascolta per impostazione predefinita su `127.0.0.1`. Il container imposta esplicitamente `OPENBOARD_BIND=0.0.0.0` sulla rete Docker privata; app, PostgreSQL e MongoDB non pubblicano porte sull'host. Nginx Proxy Manager espone HTTP/HTTPS e il pannello amministrativo è vincolato a `127.0.0.1:81`. Configurare prima l'amministratore OpenBoard e poi il Proxy Host. Per accesso remoto usare un dominio HTTPS come `OPENBOARD_PUBLIC_URL`.
 
 Le credenziali dei database vengono generate in `.env` con permessi `0600`, escluso da Git e dal contesto di build. Le utenze dell'app sono separate dagli amministratori dei database. In modalità esterna i documenti JSON, gli allegati e i corpi dell'idempotenza sono in MongoDB; dati scalari, account e sessioni sono in PostgreSQL. Entrambi gli archivi e i backup contengono dati riservati. La cache SQLite ricostruibile usa un tmpfs nel container.
 
@@ -13,6 +13,8 @@ La modalità esplicita `--no-auth` serve soltanto per lo sviluppo locale ed è r
 Gli allegati vengono validati per formato, nome e dimensione, conservati nel database e scaricati come file: la pagina non ne esegue il contenuto. I limiti sono 1 MiB per file, 10 file attivi e 5 MiB attivi per scheda. Il cestino conserva i contenuti per il ripristino, quindi queste quote non limitano lo spazio fisico totale del database. Non è inclusa una scansione antivirus: controllare i file ricevuti prima di aprirli.
 
 Notifiche e sottoscrizioni rispettano l'accesso corrente alla bacheca. I template e i filtri salvati sono personali. Le metriche richiedono amministrazione globale con account attivi. CSV e Markdown applicano rispettivamente protezione dalle formule e escaping HTML; i link di riferimento ammettono solo HTTP/HTTPS.
+
+Revisioni e report personali richiedono un account. Il richiedente non può votare la propria revisione; i revisori devono essere membri attivi con permessi di scrittura. La revoca, il ruolo osservatore e la disattivazione invalidano permanentemente le loro decisioni, anche dopo un reinvito. Le richieste di revisione sono un supporto al coordinamento, senza firme elettroniche o blocco automatico delle schede. I report personali salvano filtri, non copie dei dati né autorizzazioni: ogni ricerca ricalcola la visibilità corrente.
 
 Per una segnalazione di sicurezza, contattare privatamente il maintainer attraverso il profilo GitHub del progetto prima di pubblicare dettagli riproducibili. Non includere password, token, database aziendali o informazioni personali nelle issue pubbliche.
 

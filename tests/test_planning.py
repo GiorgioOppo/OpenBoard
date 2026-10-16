@@ -154,8 +154,14 @@ class OpenBoardPlanning(unittest.TestCase):
         with sqlite3.connect(self.db) as connection:
             connection.executescript("""
                 DROP VIEW ob_board_objects; DROP VIEW ob_card_objects;
+                DROP VIEW review_resolved; DROP VIEW review_eligibility;
+                DROP TRIGGER review_membership_removed;
+                DROP TRIGGER review_membership_role;
+                DROP TRIGGER review_user_eligibility;
                 DROP TABLE custom_fields; DROP TABLE milestones; DROP TABLE worklogs;
                 DROP TABLE comment_reactions; DROP TABLE card_bookmarks;
+                DROP TABLE review_events; DROP TABLE review_votes;
+                DROP TABLE review_members; DROP TABLE reviews; DROP TABLE saved_reports;
                 DROP INDEX comments_parent;
                 ALTER TABLE comments DROP COLUMN parent_id;
                 ALTER TABLE comments DROP COLUMN pinned;
@@ -167,7 +173,7 @@ class OpenBoardPlanning(unittest.TestCase):
         self.start_server()
         detail=self.api("GET",f"/api/cards/{card}")
         self.assertEqual((detail["title"],detail["actual_minutes"],detail["custom_values"],detail["milestone_key"],detail["logged_minutes"]),("Before upgrade",7,{},"",0))
-        with sqlite3.connect(self.db) as connection:self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0],5)
+        with sqlite3.connect(self.db) as connection:self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0],6)
         backup=self.db.with_name(self.db.name+".pre-v4.bak")
         self.assertTrue(backup.exists())
         with sqlite3.connect(backup) as connection:

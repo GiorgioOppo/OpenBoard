@@ -91,7 +91,7 @@ jobs:
             python3 -c 'import json,sys; version=json.load(sys.stdin); assert version["auth_enabled"] is True; assert version["storage"] == "postgresql+mongodb"'
       - name: Verify isolated static frontend container
         env:
-          OPENBOARD_FRONTEND_IMAGE: openboard-frontend:0.4.0
+          OPENBOARD_FRONTEND_IMAGE: openboard-frontend:0.5.0
         run: python3 -m unittest discover -s tests -p 'test_frontend_static.py' -v
       - name: Backend diagnostics on failure
         if: failure()

@@ -24,6 +24,11 @@ class OpenBoardAuth(unittest.TestCase):
         self.assertEqual(set(catalog["priorities"]), {"low", "normal", "high", "urgent"})
         self.assertEqual({item["value"] for item in catalog["custom_field_types"]}, {"text", "number", "date", "boolean", "select"})
         self.assertEqual(catalog["covers"][0], "")
+        self.assertEqual({item['value'] for item in catalog['review_statuses']}, {'pending', 'approved', 'changes_requested', 'cancelled'})
+        self.assertEqual({item['value'] for item in catalog['review_policies']}, {'all', 'any'})
+        self.assertEqual({item['value'] for item in catalog['portfolio_statuses']}, {'all', 'open', 'completed', 'blocked', 'overdue', 'due_soon', 'unassigned'})
+        members, _ = self.api('GET', '/api/boards/1/members')
+        self.assertEqual(members['members'][0]['global_role'], 'admin')
 
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="openboard-auth-")
