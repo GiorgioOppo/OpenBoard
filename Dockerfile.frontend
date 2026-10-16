@@ -1,6 +1,6 @@
 # Official unprivileged NGINX image; frontend contains public static assets only.
 # https://github.com/nginx/docker-nginx-unprivileged
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine-slim
+FROM nginxinc/nginx-unprivileged:1.31.6-alpine-slim
 
 # Apply distribution security fixes that may postdate the upstream image.
 USER root
