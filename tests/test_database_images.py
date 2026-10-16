@@ -27,6 +27,35 @@ def docker(*args, environment=None, timeout=30):
 
 class DatabaseImage:
     @classmethod
+    def state(cls, timeout=5):
+        # Inspect only these fields: .State.Error, logs and expanded container
+        # configuration may include credentials from initialization failures.
+        template = ('{"Status":{{json .State.Status}},'
+                    '"ExitCode":{{json .State.ExitCode}},'
+                    '"OOMKilled":{{json .State.OOMKilled}}}')
+        try:
+            result = docker('inspect', '--format', template, cls.container,
+                            timeout=timeout)
+            state = json.loads(result.stdout) if result.returncode == 0 else {}
+        except (OSError, subprocess.TimeoutExpired, ValueError):
+            return {}
+        if not isinstance(state, dict):
+            return {}
+        statuses = {'created', 'running', 'paused', 'restarting',
+                    'removing', 'exited', 'dead'}
+        status = state.get('Status')
+        return {
+            'Status': status if isinstance(status, str) and status in statuses else 'unknown',
+            'ExitCode': state.get('ExitCode') if type(state.get('ExitCode')) is int else 'unknown',
+            'OOMKilled': state.get('OOMKilled') if type(state.get('OOMKilled')) is bool else 'unknown',
+        }
+
+    @staticmethod
+    def state_summary(state):
+        return ', '.join(f'{key}={state.get(key, "unknown")}'
+                         for key in ('Status', 'ExitCode', 'OOMKilled'))
+
+    @classmethod
     def start(cls, image, arguments, variables, ready, command=()):
         cls.container = 'openboard-security-' + uuid.uuid4().hex
         cls.addClassCleanup(lambda: docker('rm', '--force', '--volumes', cls.container))
@@ -35,16 +64,41 @@ class DatabaseImage:
         args = ['run', '--detach', '--network', 'none', '--name', cls.container]
         for name in variables:
             args += ['--env', name]
-        result = docker(*args, *arguments, image, *command, environment=environment)
+        try:
+            result = docker(*args, *arguments, image, *command, environment=environment)
+        except (OSError, subprocess.TimeoutExpired):
+            raise RuntimeError('Disposable database container could not start: ' +
+                               cls.state_summary(cls.state())) from None
         if result.returncode:
-            raise RuntimeError('Disposable database container could not start: ' + result.stderr)
-        deadline = time.monotonic() + 45
+            raise RuntimeError('Disposable database container could not start: ' +
+                               cls.state_summary(cls.state()))
+        deadline = time.monotonic() + 120
+        state = {}
         while time.monotonic() < deadline:
-            if cls.exec(*ready).returncode == 0:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            state = cls.state(timeout=min(5, remaining))
+            if state.get('Status') in {'exited', 'dead', 'removing'}:
+                raise RuntimeError('Disposable database container stopped before readiness: ' +
+                                   cls.state_summary(state))
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            try:
+                result = docker('exec', cls.container, *ready,
+                                timeout=min(10, remaining))
+            except subprocess.TimeoutExpired:
+                result = None
+            except OSError:
+                raise RuntimeError('Disposable database readiness check could not run: ' +
+                                   cls.state_summary(state)) from None
+            if result is not None and result.returncode == 0:
                 return
-            time.sleep(.15)
+            time.sleep(min(.15, max(0, deadline - time.monotonic())))
         # Do not print logs: database initialization output may contain secrets.
-        raise RuntimeError('Disposable database did not become ready')
+        raise RuntimeError('Disposable database did not become ready within 120 seconds: ' +
+                           cls.state_summary(state))
 
     @classmethod
     def exec(cls, *command):

@@ -15,6 +15,8 @@ make test-docs
 
 The Python suite covers API/domain behavior, authentication, permissions, concurrency, migrations, quotas and HTTP transport. The sanitizer target checks C behavior with AddressSanitizer and UndefinedBehaviorSanitizer. The frontend target checks generated translations, source coverage, escaping, data formats, account isolation and panel workflows. The security target checks the NPM authentication limiter independently of Docker.
 
+HTTP tests that fill a login quota use a separate test server with only the authentication limiter's clock frozen. This avoids crossing a legitimate five-minute window boundary on slower runners. The production backend, password-hashing cost and request deadlines are unchanged. Other HTTP checks use the normal backend, and the private limiter fixture explicitly tests expiration, collisions and concurrent reservations with controlled timestamps.
+
 `make test-docs` runs the repository's local Markdown link/fence checks without fetching remote pages. Node.js is required for JavaScript checks; CI uses Node 22 and Python 3.14. Native CI runs on Linux and macOS. These are tested environments, not a claim that every older tool version or platform is supported.
 
 ## Docker image checks
@@ -42,6 +44,8 @@ python3 -m unittest discover -s tests -p test_proxy_security.py -v
 ```
 
 Database fixtures check entrypoint initialization, least privilege, wrong-password rejection, native tools and backup/restore with typed JSON and Unicode. Frontend checks verify real HTTP assets and access restrictions. Proxy checks verify the loaded nginx configuration, authenticated API routing, forged IP headers, rate limits and independent clients using a separate Docker network.
+
+Disposable database startup has a bounded 120-second deadline and stops early if the container exits. Failure diagnostics expose only sanitized container state, exit code and OOM status; raw initialization logs and environment values are not printed.
 
 The CI container job additionally starts a fresh five-service stack, creates local administrators, runs `scripts/check-deployment.py` and checks the public frontend/API route. It removes its own stack and credentials afterward. `docker compose down --volumes` deletes data and belongs only in disposable test cleanup or an intentional reset.
 

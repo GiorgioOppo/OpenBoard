@@ -14,6 +14,8 @@ import threading
 import time
 import unittest
 
+from auth_clock import authentication_clock_binary
+
 ROOT = Path(__file__).resolve().parents[1]
 BINARY = Path(os.environ.get("OPENBOARD_BINARY", ROOT / "build" / "openboard"))
 PASSWORD = "correct-password-123"
@@ -46,8 +48,11 @@ class OpenBoardAuth(unittest.TestCase):
         with socket.socket() as reserve:
             reserve.bind(("127.0.0.1", 0))
             self.port = reserve.getsockname()[1]
+        binary = (authentication_clock_binary()
+                  if self._testMethodName == 'test_login_rate_limit_and_generic_credentials_error'
+                  else BINARY)
         self.process = subprocess.Popen(
-            [str(BINARY), "--port", str(self.port), "--db", str(self.db), "--auth", "--quiet"],
+            [str(binary), "--port", str(self.port), "--db", str(self.db), "--auth", "--quiet"],
             cwd=ROOT, stdout=self.log, stderr=subprocess.STDOUT,
         )
         self.addCleanup(self.stop)

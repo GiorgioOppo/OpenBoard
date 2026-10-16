@@ -9,6 +9,8 @@ import tempfile
 import time
 import unittest
 
+from auth_clock import authentication_clock_binary
+
 ROOT = Path(__file__).resolve().parents[1]
 BINARY = Path(os.environ.get('OPENBOARD_BINARY', ROOT / 'build/openboard'))
 
@@ -22,10 +24,10 @@ class TransportTests(unittest.TestCase):
         self.addCleanup(self.stop)
         self.start()
 
-    def start(self, *options, local=True, health_headers=None):
+    def start(self, *options, local=True, health_headers=None, binary=BINARY):
         with socket.socket() as s:
             s.bind(('127.0.0.1', 0)); self.port = s.getsockname()[1]
-        self.process = subprocess.Popen([str(BINARY), '--port', str(self.port), '--db', str(Path(self.temp.name)/'test.db'), '--quiet', *(['--no-auth'] if local else []), *options], stdout=self.log, stderr=self.log)
+        self.process = subprocess.Popen([str(binary), '--port', str(self.port), '--db', str(Path(self.temp.name)/'test.db'), '--quiet', *(['--no-auth'] if local else []), *options], stdout=self.log, stderr=self.log)
         deadline = time.monotonic()+5
         while time.monotonic()<deadline:
             if self.process.poll() is not None:
@@ -102,7 +104,7 @@ class TransportTests(unittest.TestCase):
                 finally: r.close()
 
     def test_login_quotas_use_real_peers_and_ignore_forwarded_headers(self):
-        self.stop(); self.start(local=False)
+        self.stop(); self.start(local=False,binary=authentication_clock_binary())
         password = 'correct-password-123'
         body = json.dumps({'name':'Administrator','username':'admin','password':password})
         status, _, response = self.request('POST','/api/auth/setup',body,{'Content-Type':'application/json'})
@@ -189,7 +191,8 @@ class TransportTests(unittest.TestCase):
 
     def start_proxy_auth(self):
         self.stop()
-        self.start('--trusted-proxy','127.0.0.1',local=False,health_headers={'X-Real-IP':'192.0.2.254'})
+        self.start('--trusted-proxy','127.0.0.1',local=False,health_headers={'X-Real-IP':'192.0.2.254'},
+                   binary=authentication_clock_binary())
         password='correct-password-123'
         status,_,response=self.request('POST','/api/auth/setup',json.dumps({
             'name':'Administrator','username':'admin','password':password}),
