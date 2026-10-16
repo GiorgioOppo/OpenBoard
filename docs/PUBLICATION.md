@@ -8,6 +8,7 @@ This checklist prepares the GitHub source repository for public access. Deployin
 - [ ] Verify a fresh clone can follow the README and development instructions.
 - [ ] Require the candidate's complete CI run, including docs, secrets, native/sanitizer tests and container checks.
 - [ ] Review Git history, screenshots and historical Actions logs for confidential information. Ignoring a file now does not remove an older committed copy.
+- [ ] Review author/committer identities separately from secret scanning. Verify all branch/tag and draft-release targets after any authorized history rewrite, and resolve retained old objects, PR views and cached metadata before public access; see the [privacy review](PUBLICATION_REVIEW_2026-10-16.md#commit-identity-privacy).
 - [ ] Confirm no environment files, local administrator credentials, database dumps, personal data or build artifacts are tracked.
 - [ ] Keep current documentation in English and clearly mark historical Italian material as archived.
 - [ ] Review third-party licenses/source notices and exact artifact identities before distributing binaries or images.
@@ -26,6 +27,7 @@ This checklist prepares the GitHub source repository for public access. Deployin
 
 - [ ] Review [GitHub's visibility-change consequences](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility), including exposure of Actions history/logs and any ruleset changes.
 - [ ] Explicitly choose public visibility in GitHub settings only after reviewing this checklist.
+- [ ] Confirm the recorded historical-email privacy issue is resolved with the owner; rewritten branch tips alone do not prove deletion of GitHub's retained objects.
 - [ ] Enable [Private Vulnerability Reporting](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository), the project's sole private security channel.
 - [ ] Confirm **Report a vulnerability** appears on the Security advisories page and the maintainer receives security notifications.
 - [ ] Recheck public README badges, documentation links, issue forms and repository rules from the public view.

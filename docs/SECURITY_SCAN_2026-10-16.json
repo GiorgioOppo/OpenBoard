@@ -1,6 +1,6 @@
 {
   "date": "2026-10-16",
-  "baseline_commit": "28626d2",
+  "baseline_commit": "793a8b3",
   "includes_uncommitted_i18n_and_audit_changes": true,
   "scanner": "Docker Scout 1.25.0",
   "scope": "Local Linux ARM64 images; counts are package/advisory findings, not confirmed exploits.",

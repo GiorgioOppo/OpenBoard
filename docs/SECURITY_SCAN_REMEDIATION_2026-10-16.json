@@ -1,6 +1,6 @@
 {
   "date": "2026-10-16",
-  "baseline_commit": "41e2b8297f4fbced71a19105d54d1d8d599f4ee3",
+  "baseline_commit": "96cd8551871df10823b306c167696bace163d6a3",
   "scope": "Local Linux ARM64 QA images. Counts are package/advisory findings, not proven exploits. No findings suppressed.",
   "scanner": "Docker Scout 1.25.0",
   "external_rescan_status": "The final proxy and release backend were not rescanned externally. The owner must authorize any new image metadata/SBOM upload. Measured predecessor results and local-only verification are recorded separately.",

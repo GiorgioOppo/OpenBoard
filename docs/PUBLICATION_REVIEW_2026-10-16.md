@@ -20,7 +20,17 @@ The only secret-scanner exception is the documented synthetic Idempotency-Key ex
 
 The five-service check used only temporary credentials, a unique project/network and new volumes. All test resources were removed. Existing deployment containers, data and credentials were not changed. The native backend and unchanged frontend/database/proxy artifacts were tagged locally for the 0.6.1 checks; these tags do not represent published registry images.
 
-Raw logs and scanner outputs were kept private; the repository records sanitized results and reproducible commands in [Testing](TESTING.md). A detector result does not establish the absence of every confidential value. Commit author metadata needs a separate owner privacy decision before public access; secret scanning does not remove or redact Git identities.
+Raw logs and scanner outputs were kept private; the repository records sanitized results and reproducible commands in [Testing](TESTING.md). A detector result does not establish the absence of every confidential value. Secret scanning does not remove or redact Git identities.
+
+## Commit identity privacy
+
+With the owner's explicit approval, the personal email in the author and committer metadata of nine historical commits was replaced with the owner's GitHub noreply address. The default branch and both existing Dependabot branches were updated atomically with exact `force-with-lease` conditions. All 13 examined commits retained identical file trees, messages, names and timestamps. Two bot signatures were removed because changing commit ancestry invalidates them; bot identities were preserved. A recovery bundle and the SHA mapping remain private, outside publishable files. The repository-local Git email now uses noreply for future commits.
+
+Current documentation, scan provenance and migration-fixture comments use the rewritten commit identifiers. Historical image digests and measured scan counts are unchanged. Prior Actions runs remain evidence for their original commits; the release candidate requires its own complete CI run.
+
+**Public visibility remains blocked on a privacy review.** After the force push, authenticated GitHub API checks still retrieved all nine original commit objects with their original email. Both pull requests' current head/base references and advertised pull-request refs used the rewritten ancestry, but that does not establish deletion of retained objects or historical views. No request to GitHub Support was sent, and no historical Actions runs were deleted.
+
+[GitHub's removal procedure](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository) explains retained commit objects, cached views and pull-request references. Support must determine whether further removal is available for this data; a force push cannot promise complete erasure. Resolve this with the owner before changing visibility. Do not publish the private recovery bundle, old-to-new mapping or support-request draft.
 
 ## Release and visibility follow-up
 

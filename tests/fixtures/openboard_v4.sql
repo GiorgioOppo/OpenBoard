@@ -1,4 +1,4 @@
--- Fixture generata dalla release OpenBoard 0.3 e7482fb, senza account o dati personali.
+-- Fixture generata dalla release OpenBoard 0.3 3ac92da, senza account o dati personali.
 BEGIN TRANSACTION;
 CREATE TABLE activity(id INTEGER PRIMARY KEY AUTOINCREMENT,board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,actor_id INTEGER NOT NULL DEFAULT 0,actor TEXT NOT NULL,action TEXT NOT NULL,entity_type TEXT NOT NULL,entity_id INTEGER NOT NULL,title TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT(strftime('%Y-%m-%dT%H:%M:%fZ','now')));
 INSERT INTO "activity" VALUES(1,1,0,'Locale','created','boards',1,'Migrazione da OpenBoard 0.3','2026-10-16T05:45:35.062Z');

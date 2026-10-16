@@ -10,7 +10,7 @@ At the time of this audit, changes and image builds were local. The existing Com
 
 ## Scope and method
 
-- Baseline: OpenBoard 0.6.0, Git commit `28626d2`, including the pending seven-language frontend and the fixes from this audit.
+- Baseline: OpenBoard 0.6.0, Git commit `793a8b3`, including the pending seven-language frontend and the fixes from this audit.
 - Reviewed C authentication, HTTP parsing, sessions, CSRF, permissions, object ancestry, idempotency, SQL/BSON boundaries, imports, attachments, reviews, sprints and internal requests.
 - Reviewed frontend rendering, Markdown, links, CSV, drafts, asynchronous responses, static routing, Docker Compose, bootstrap scripts and GitHub Actions.
 - Used disposable authenticated SQLite fixtures, frontend VM tests and isolated PostgreSQL/MongoDB instances. No tests used the running application databases.

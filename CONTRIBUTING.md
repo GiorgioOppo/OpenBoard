@@ -57,6 +57,8 @@ For translations edit `locales/*.json`, regenerate `web/locales.js`, and run `ma
 
 ## Issues and pull requests
 
+Git commits expose author and committer names and email addresses when the repository is public. Choose the identity you intend to publish before committing. To keep your personal email private, copy your GitHub noreply address from your account's email settings and configure it for this clone with `git config --local user.email YOUR_GITHUB_NOREPLY_ADDRESS`. Changing this setting does not change existing commits.
+
 Search existing issues before opening a new one. Use the bug or feature form and include the version, environment, expected behavior and a minimal reproduction. Remove private information from screenshots and logs. Security vulnerabilities must use [private reporting](SECURITY.md#report-a-vulnerability), not a public issue.
 
 Keep a pull request focused. Explain the problem, resulting behavior and checks actually performed. Mention API/schema compatibility, migration or deployment changes when applicable. Do not describe skipped checks as passing. For larger changes, discuss the design in an issue before investing in an implementation.
