@@ -90,7 +90,7 @@ Chi crea, duplica o importa una bacheca ne diventa amministratore. La configuraz
 | --- | --- | --- |
 | GET | `/api/boards` | `{"boards":[...]}` con soli metadati, senza colonne o schede; esclude bacheche archiviate |
 | GET | `/api/boards?include_archived=1` | Comprende anche le bacheche archiviate |
-| POST | `/api/boards` | Crea la bacheca e tre colonne: `Da fare`, `In corso`, `Completato` |
+| POST | `/api/boards` | Creates the board and three initial lists. Optional `language` selects their names; omitted language preserves the Italian defaults. |
 | GET | `/api/boards/:id` | Bacheca completa con colonne e schede; le schede archiviate sono escluse |
 | GET | `/api/boards/:id?summary=1` | Bacheca con schede in formato riepilogativo |
 | GET | `/api/boards/:id?summary=1&include_archived=1` | Riepilogo comprensivo delle schede archiviate |
@@ -111,6 +111,11 @@ Chi crea, duplica o importa una bacheca ne diventa amministratore. La configuraz
 | `color` | Stringa, `"sage"` | `sage`, `peach`, `lavender`, `blue` |
 | `starred` | Booleano, `false` | Con account viene anche salvato il preferito personale; per modificare soltanto il preferito usare `/star` |
 | `archived` | Booleano, `false` | `true` archivia; `false` riapre |
+| `language` | Optional string, creation only; default `"it"` | Exactly `it`, `en`, `fr`, `es`, `de`, `zh-CN`, or `ja`; unknown values and non-string values return `400` |
+
+`POST /api/boards` accepts `language` only as a creation hint for the three initial list names. For example, `{"name":"Release","language":"en"}` creates `To do`, `In progress`, and `Done`; the board name and other user content are preserved exactly. French defaults are `À faire`, `En cours`, `Terminé`; Spanish: `Por hacer`, `En curso`, `Completado`; German: `Zu erledigen`, `In Arbeit`, `Erledigt`; Simplified Chinese: `待办`, `进行中`, `已完成`; Japanese: `未着手`, `進行中`, `完了`. The legacy Italian defaults remain `Da fare`, `In corso`, `Completato`.
+
+This hint is not persisted as a board property or returned by reads. Existing boards and lists are never translated. Any `language` field on `PATCH /api/boards/:id`, including `null`, returns `400` and leaves the board unchanged. Renaming a list continues to use its normal API. Board creation permissions, transaction boundaries, and idempotency rules remain unchanged.
 
 La risposta contiene anche `id`, `created_at`, `updated_at`, `version`, `role`, `membership_role` e `readonly`. Le due proprietà di ruolo riportano il ruolo restituito per la bacheca; `readonly` tiene conto anche di un eventuale ruolo globale di sola lettura. Le risposte di dettaglio aggiungono `columns`.
 

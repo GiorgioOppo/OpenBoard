@@ -1057,15 +1057,35 @@ static Response mutation_success(int status, const char *kind, int64_t id) {
     return json_response(status, body);
 }
 static Response save_board(Request *r, int64_t id, bool create) {
-    char *name = NULL, *description = NULL, *color = NULL, *guidelines = NULL;
+    char *name = NULL, *description = NULL, *color = NULL, *guidelines = NULL, *language = NULL;
+    const char *const languages[] = {"it", "en", "fr", "es", "de", "zh-CN", "ja"};
+    const char *const initial_titles[][3] = {
+        {"Da fare", "In corso", "Completato"},
+        {"To do", "In progress", "Done"},
+        {"À faire", "En cours", "Terminé"},
+        {"Por hacer", "En curso", "Completado"},
+        {"Zu erledigen", "In Arbeit", "Erledigt"},
+        {"待办", "进行中", "已完成"},
+        {"未着手", "進行中", "完了"},
+    };
     int64_t starred = 0, archived = 0;
     int g = json_string(r->body, "guidelines", &guidelines, 10000),
         n = json_string(r->body, "name", &name, 200),
         d = json_string(r->body, "description", &description, 2000),
         c = json_string(r->body, "color", &color, 20),
+        l = json_string(r->body, "language", &language, 5),
         t = json_integer(r->body, "starred", &starred, 0, 1, true),
         a = json_integer(r->body, "archived", &archived, 0, 1, true);
     Response result;
+    if (!create && l != 0) {
+        result =
+            error_response(400, "Il campo language è consentito solo alla creazione della bacheca.");
+        goto done;
+    }
+    if (l < 0 || (language && !one_of(language, languages, COUNT_OF(languages)))) {
+        result = error_response(400, "Lingua della bacheca non valida.");
+        goto done;
+    }
     if (g < 0 || n < 0 || d < 0 || c < 0 || t < 0 || a < 0 || (create && n != 1) ||
         (name && !nonblank(name)) || (color && !one_of(color, colors, COUNT_OF(colors)))) {
         result = error_response(400, "Dati della bacheca non validi.");
@@ -1121,11 +1141,17 @@ static Response save_board(Request *r, int64_t id, bool create) {
         id = sqlite3_last_insert_rowid(db);
         if (!auth_add_board_owner(r, id))
             db_die("Assegnazione proprietario fallita");
-        const char *titles[] = {"Da fare", "In corso", "Completato"};
+        size_t locale = 0;
+        if (language)
+            for (size_t i = 0; i < COUNT_OF(languages); i++)
+                if (!strcmp(language, languages[i])) {
+                    locale = i;
+                    break;
+                }
         s = prepare("INSERT INTO columns(board_id,title,position)VALUES(?1,?2,?3)");
         for (size_t i = 0; i < 3; i++) {
             sqlite3_bind_int64(s, 1, id);
-            bind_text(s, 2, titles[i]);
+            bind_text(s, 2, initial_titles[locale][i]);
             sqlite3_bind_int(s, 3, (int)i);
             if (sqlite3_step(s) != SQLITE_DONE)
                 db_die("Creazione liste fallita");
@@ -1149,6 +1175,7 @@ done:
     ob_free(description);
     ob_free(color);
     ob_free(guidelines);
+    ob_free(language);
     return result;
 }
 static Response save_column(Request *r, int64_t id, bool create) {
@@ -3349,6 +3376,227 @@ static Response route_domain(Request *r) {
         return delete_resource(r, parts[1], id);
     return error_response(405, "Metodo non consentito.");
 }
+/* A cached POST confirms an earlier side effect; it never grants the caller
+ * permissions retained from that earlier request. Resolve current ancestry and
+ * capabilities while holding the same writer transaction as the replay. New
+ * POST families must opt in here before their cached replies can be returned. */
+static bool replay_owned(Request *r, const char *table, const char *owner, int64_t id) {
+    char sql[160];
+    snprintf(sql, sizeof sql, "SELECT 1 FROM %s WHERE id=?1 AND %s=?2", table, owner);
+    sqlite3_stmt *s = prepare(sql);
+    sqlite3_bind_int64(s, 1, id);
+    sqlite3_bind_int64(s, 2, r->user_id);
+    bool allowed = sqlite3_step(s) == SQLITE_ROW;
+    sqlite3_finalize(s);
+    return allowed;
+}
+static bool replay_manager(Request *r, int64_t board) {
+    if (!auth_board_allowed(r, board, true))
+        return false;
+    if (auth_is_admin(r))
+        return true;
+    sqlite3_stmt *s =
+        prepare("SELECT 1 FROM board_members WHERE board_id=?1 AND user_id=?2 AND role='admin'");
+    sqlite3_bind_int64(s, 1, board);
+    sqlite3_bind_int64(s, 2, r->user_id);
+    bool allowed = sqlite3_step(s) == SQLITE_ROW;
+    sqlite3_finalize(s);
+    return allowed;
+}
+static int64_t replay_resource_board(const char *kind, int64_t id, bool restore) {
+    if (!strcmp(kind, "boards"))
+        return resource_board(kind, id, restore);
+    if (!strcmp(kind, "columns") || !strcmp(kind, "cards")) {
+        int64_t board = resource_board(kind, id, restore);
+        if (!board || !resource_board("boards", board, false))
+            return 0;
+        if (!strcmp(kind, "cards") && restore &&
+            !resource_board("columns", scalar_id("SELECT column_id FROM cards WHERE id=?1", id),
+                            false))
+            return 0;
+        return board;
+    }
+    char sql[640];
+    if (!strcmp(kind, "comments") || !strcmp(kind, "worklogs") || !strcmp(kind, "attachments") ||
+        !strcmp(kind, "reviews")) {
+        snprintf(sql, sizeof sql,
+                 "SELECT c.board_id FROM %s x JOIN cards k ON k.id=x.card_id "
+                 "JOIN columns c ON c.id=k.column_id JOIN boards b ON b.id=c.board_id "
+                 "WHERE x.id=?1 AND k.deleted_at IS NULL AND c.deleted_at IS NULL "
+                 "AND b.deleted_at IS NULL %s",
+                 kind, restore || !strcmp(kind, "comments") ? "" : "AND x.deleted_at IS NULL");
+    } else if (!strcmp(kind, "sprints") || !strcmp(kind, "custom_fields") ||
+               !strcmp(kind, "milestones") || !strcmp(kind, "intake_forms")) {
+        snprintf(sql, sizeof sql,
+                 "SELECT x.board_id FROM %s x JOIN boards b ON b.id=x.board_id "
+                 "WHERE x.id=?1 AND b.deleted_at IS NULL %s",
+                 kind, restore ? "" : "AND x.deleted_at IS NULL");
+    } else if (!strcmp(kind, "intake_fields") || !strcmp(kind, "intake_requests")) {
+        snprintf(sql, sizeof sql,
+                 "SELECT f.board_id FROM %s x JOIN intake_forms f ON f.id=x.form_id "
+                 "JOIN boards b ON b.id=f.board_id WHERE x.id=?1 "
+                 "AND f.deleted_at IS NULL AND b.deleted_at IS NULL %s",
+                 kind, restore ? "" : "AND x.deleted_at IS NULL");
+    } else
+        return 0;
+    return scalar_id(sql, id);
+}
+static int replay_acl(Request *r, const char *original, const char *cached) {
+    if (!ob_config.auth_enabled)
+        return 0;
+    char path[sizeof r->path];
+    snprintf(path, sizeof path, "%s", r->path);
+    char *parts[8] = {0}, *cursor = NULL;
+    size_t count = 0;
+    for (char *p = strtok_r(path, "/", &cursor); p && count < COUNT_OF(parts);
+         p = strtok_r(NULL, "/", &cursor))
+        parts[count++] = p;
+    if (count < 2 || strcmp(parts[0], "api"))
+        return 404;
+    int64_t id = count > 2 ? parse_id(parts[2]) : 0, result_id = 0;
+    json_integer(cached, "id", &result_id, 0, INT64_MAX, false);
+    const char *kind = NULL;
+    bool write = true, manage = false, own_or_write = false, restore = false;
+    if (!strcmp(r->path, "/api/me/sessions/revoke-others") ||
+        !strcmp(r->path, "/api/notifications/read-all"))
+        return 0;
+    if (!strcmp(r->path, "/api/me/reports"))
+        return replay_owned(r, "saved_reports", "user_id", result_id) ? 0 : 404;
+    if (count == 4 && !strcmp(parts[1], "reports") && !strcmp(parts[3], "duplicate"))
+        return replay_owned(r, "saved_reports", "user_id", id) &&
+                       replay_owned(r, "saved_reports", "user_id", result_id)
+                   ? 0
+                   : 404;
+    if (!strcmp(parts[1], "templates") && count >= 3 &&
+        (!strcmp(parts[2], "cards") || !strcmp(parts[2], "boards"))) {
+        if (!strcmp(r->role, "observer"))
+            return 403;
+        if (count == 3)
+            return replay_owned(r, "templates", "owner_id", result_id) ? 0 : 404;
+        if (count != 5 || strcmp(parts[4], "instantiate") ||
+            !replay_owned(r, "templates", "owner_id", parse_id(parts[3])))
+            return 404;
+        if (!strcmp(parts[2], "cards")) {
+            json_integer(original, "column_id", &id, 1, INT64_MAX, false);
+            kind = "columns";
+        } else {
+            id = result_id;
+            kind = "boards";
+        }
+    } else if (!strcmp(r->path, "/api/boards") || !strcmp(r->path, "/api/import")) {
+        id = result_id;
+        kind = "boards";
+    } else if (count == 5 && !strcmp(parts[1], "trash") && !strcmp(parts[4], "restore") &&
+               (!strcmp(parts[2], "boards") || !strcmp(parts[2], "columns") ||
+                !strcmp(parts[2], "cards"))) {
+        id = parse_id(parts[3]);
+        kind = parts[2];
+        restore = true;
+    } else if (id && !strcmp(parts[1], "boards") && count == 4) {
+        kind = "boards";
+        if (!strcmp(parts[3], "views") || !strcmp(parts[3], "watch"))
+            write = false;
+        else if (!strcmp(parts[3], "duplicate")) {
+            if (!strcmp(r->role, "observer"))
+                return 403;
+            if (!accessible(r, "boards", result_id, false, false))
+                return 404;
+            write = false;
+        } else if (!strcmp(parts[3], "sprints"))
+            manage = true;
+        else if (!strcmp(parts[3], "restore"))
+            restore = true;
+        else if (strcmp(parts[3], "columns") && strcmp(parts[3], "fields") &&
+                 strcmp(parts[3], "milestones"))
+            return 404;
+    } else if (id && !strcmp(parts[1], "boards") && count == 5 && !strcmp(parts[3], "intake") &&
+               !strcmp(parts[4], "forms")) {
+        kind = "boards";
+        manage = true;
+    } else if (id && !strcmp(parts[1], "columns") && count == 4 &&
+               (!strcmp(parts[3], "cards") || !strcmp(parts[3], "restore"))) {
+        kind = "columns";
+        restore = !strcmp(parts[3], "restore");
+    } else if (id && !strcmp(parts[1], "cards") && count == 4) {
+        kind = "cards";
+        if (!strcmp(parts[3], "watch"))
+            write = false;
+        else if (!strcmp(parts[3], "restore"))
+            restore = true;
+        else if (strcmp(parts[3], "comments") && strcmp(parts[3], "dependencies") &&
+                 strcmp(parts[3], "duplicate") && strcmp(parts[3], "worklogs") &&
+                 strcmp(parts[3], "attachments") && strcmp(parts[3], "reviews"))
+            return 404;
+    } else if (id && !strcmp(parts[1], "comments") && count == 4 &&
+               (!strcmp(parts[3], "reactions") || !strcmp(parts[3], "replies"))) {
+        kind = "comments";
+        write = !strcmp(parts[3], "replies");
+    } else if (id &&
+               (!strcmp(parts[1], "worklogs") || !strcmp(parts[1], "attachments") ||
+                !strcmp(parts[1], "fields") || !strcmp(parts[1], "milestones")) &&
+               count == 4 && !strcmp(parts[3], "restore")) {
+        kind = !strcmp(parts[1], "fields") ? "custom_fields" : parts[1];
+        restore = true;
+        if (!strcmp(kind, "worklogs") && !auth_is_admin(r) && !replay_owned(r, kind, "user_id", id))
+            return 404;
+    } else if (id && !strcmp(parts[1], "reviews") && count == 4 &&
+               (!strcmp(parts[3], "vote") || !strcmp(parts[3], "duplicate") ||
+                !strcmp(parts[3], "cancel") || !strcmp(parts[3], "reopen") ||
+                !strcmp(parts[3], "restore"))) {
+        kind = "reviews";
+        restore = !strcmp(parts[3], "restore");
+        if (!strcmp(parts[3], "vote")) {
+            sqlite3_stmt *s = prepare("SELECT 1 FROM review_eligibility WHERE review_id=?1 AND "
+                                      "user_id=?2 AND eligible=1");
+            sqlite3_bind_int64(s, 1, id);
+            sqlite3_bind_int64(s, 2, r->user_id);
+            bool eligible = sqlite3_step(s) == SQLITE_ROW;
+            sqlite3_finalize(s);
+            if (!eligible)
+                return 403;
+        } else
+            manage = !replay_owned(r, "reviews", "requester_id", id);
+    } else if (id && !strcmp(parts[1], "sprints") &&
+               ((count == 4 && (!strcmp(parts[3], "activate") || !strcmp(parts[3], "close") ||
+                                !strcmp(parts[3], "reopen") || !strcmp(parts[3], "restore") ||
+                                !strcmp(parts[3], "cards") || !strcmp(parts[3], "snapshots"))) ||
+                (count == 5 && !strcmp(parts[3], "cards") && !strcmp(parts[4], "bulk")))) {
+        kind = "sprints";
+        restore = !strcmp(parts[3], "restore");
+        manage = strcmp(parts[3], "cards") != 0;
+    } else if (!strcmp(parts[1], "intake") && count >= 5 && (id = parse_id(parts[3]))) {
+        restore = !strcmp(parts[4], "restore");
+        if (!strcmp(parts[2], "forms") &&
+            ((count == 5 &&
+              (!strcmp(parts[4], "fields") || !strcmp(parts[4], "publish") ||
+               !strcmp(parts[4], "pause") || restore || !strcmp(parts[4], "requests"))) ||
+             (count == 6 && !strcmp(parts[4], "fields") && !strcmp(parts[5], "reorder")))) {
+            kind = "intake_forms";
+            manage = strcmp(parts[4], "requests") != 0;
+            write = manage;
+        } else if (!strcmp(parts[2], "fields") && count == 5 && restore) {
+            kind = "intake_fields";
+            manage = true;
+        } else if (!strcmp(parts[2], "requests") && count == 5 &&
+                   (!strcmp(parts[4], "notes") || !strcmp(parts[4], "state") ||
+                    !strcmp(parts[4], "convert") || restore)) {
+            kind = "intake_requests";
+            own_or_write = !strcmp(parts[4], "notes") || restore;
+            write = !own_or_write;
+        }
+    }
+    if (!kind || !id)
+        return 404;
+    int64_t board = replay_resource_board(kind, id, restore);
+    if (!board || !auth_board_allowed(r, board, false))
+        return 404;
+    if ((write && !auth_board_allowed(r, board, true)) || (manage && !replay_manager(r, board)) ||
+        (own_or_write && !replay_owned(r, "intake_requests", "author_id", id) &&
+         !auth_board_allowed(r, board, true)))
+        return 403;
+    return 0;
+}
+
 static bool replay_idempotency(Request *r, Response *out) {
     sqlite3_stmt *s = prepare("SELECT request_body,status,response_body FROM idempotency WHERE "
                               "user_id=?1 AND path=?2 AND key=?3");
@@ -3357,7 +3605,13 @@ static bool replay_idempotency(Request *r, Response *out) {
     bind_text(s, 3, r->idempotency_key);
     bool found = sqlite3_step(s) == SQLITE_ROW;
     if (found) {
-        if (strcmp((const char *)sqlite3_column_text(s, 0), r->body))
+        int denied = replay_acl(r, (const char *)sqlite3_column_text(s, 0),
+                                (const char *)sqlite3_column_text(s, 2));
+        if (denied)
+            *out = error_response(denied, denied == 403
+                                              ? "È richiesto accesso in scrittura alla bacheca."
+                                              : "Risorsa non trovata.");
+        else if (strcmp((const char *)sqlite3_column_text(s, 0), r->body))
             *out = error_response(409, "Idempotency-Key già usata con un corpo differente.");
         else {
             *out = json_response(sqlite3_column_int(s, 1), (const char *)sqlite3_column_text(s, 2));
@@ -3478,6 +3732,13 @@ Response ob_route(Request *r) {
             goto done;
         }
         outer_transaction = true;
+        /* Session and global role may have changed while this request waited
+         * for SQLite's writer lock. Recheck under the lock before any action. */
+        if (!auth_authorize(r, &result)) {
+            sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
+            outer_transaction = false;
+            goto done;
+        }
         if (post && r->idempotency_key[0] && replay_idempotency(r, &result)) {
             sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
             outer_transaction = false;

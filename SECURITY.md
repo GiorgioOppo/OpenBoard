@@ -1,6 +1,6 @@
 # Sicurezza di OpenBoard
 
-Il backend OpenBoard 0.6 espone soltanto API, abilita gli account per impostazione predefinita e ascolta per impostazione predefinita su `127.0.0.1`. Il container imposta esplicitamente `OPENBOARD_BIND=0.0.0.0` sulla rete Docker privata; app, PostgreSQL e MongoDB non pubblicano porte sull'host. Nginx Proxy Manager espone HTTP/HTTPS e il pannello amministrativo è vincolato a `127.0.0.1:81`. Configurare prima l'amministratore OpenBoard e poi il Proxy Host. Per accesso remoto usare un dominio HTTPS come `OPENBOARD_PUBLIC_URL`.
+Il backend OpenBoard 0.6 espone soltanto API, abilita gli account per impostazione predefinita e ascolta per impostazione predefinita su `127.0.0.1`. Il container imposta esplicitamente `OPENBOARD_BIND=0.0.0.0` sulla rete Docker privata; app, PostgreSQL e MongoDB non pubblicano porte sull'host. Nginx Proxy Manager espone HTTP/HTTPS su loopback per impostazione predefinita (`OPENBOARD_PUBLISH_IP=127.0.0.1`); il pannello amministrativo è sempre vincolato a `127.0.0.1:81`. L'esposizione alla rete richiede una scelta esplicita. Configurare prima l'amministratore OpenBoard e poi il Proxy Host. Per accesso remoto usare un dominio HTTPS come `OPENBOARD_PUBLIC_URL`.
 
 Le credenziali dei database vengono generate in `.env` con permessi `0600`, escluso da Git e dal contesto di build. Le utenze dell'app sono separate dagli amministratori dei database. In modalità esterna i documenti JSON, gli allegati e i corpi dell'idempotenza sono in MongoDB; dati scalari, account e sessioni sono in PostgreSQL. Entrambi gli archivi e i backup contengono dati riservati. La cache SQLite ricostruibile usa un tmpfs nel container.
 
@@ -21,3 +21,7 @@ Sprint e moduli interni richiedono account. Pubblicare un modulo lo rende compil
 Per una segnalazione di sicurezza, contattare privatamente il maintainer attraverso il profilo GitHub del progetto prima di pubblicare dettagli riproducibili. Non includere password, token, database aziendali o informazioni personali nelle issue pubbliche.
 
 I test descrivono il perimetro verificato della release; il progetto non dichiara certificazioni di sicurezza, SSO, isolamento SaaS multi-tenant o alta disponibilità.
+
+## Audit prima della pubblicazione
+
+[Audit del 16 ottobre 2026](docs/SECURITY_AUDIT_2026-10-16.md): perimetro, correzioni, regressioni e dipendenze da verificare prima dell’esposizione Internet. Il backend usa l’indirizzo TCP effettivo e ignora gli header IP inoltrati non attendibili. Dietro un unico reverse proxy la quota IP di login rimane aggregata: applicare limiti per client al perimetro prima di un servizio pubblico. Le risposte di idempotenza vengono restituite soltanto dopo la verifica dei permessi correnti; le scritture ricontrollano sessione e ruolo nella transazione.

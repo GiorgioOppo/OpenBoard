@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+Security review: isolate late frontend responses across account changes; recheck sessions and roles inside protected write transactions; verify current authorization before idempotency replay; use the real TCP peer for login quotas. Add regression tests, explicit loopback publication defaults, hardened container compilation and frontend distribution security updates. Record dependency findings and publication conditions in the security audit.
+
+Add English, French, Spanish, German, Simplified Chinese and Japanese alongside Italian. Localize interface text, accessible labels, API errors and date formats; detect browser language and provide a persistent selector before and after sign-in. Keep user content and API identifiers unchanged. New boards create their initial lists in the selected language. Add catalogue generation and source-coverage tests without runtime dependencies. Rewrite the README in English.
+
 ## 0.6.0
 
 Quinto gruppo di 100 interventi: sprint, backlog, assegnazione multipla atomica, capacità per persona, confronti dell'impegno residuo, osservazioni giornaliere esplicite, attività personali, cronologia e CSV. Una sola iterazione attiva per bacheca; le schede incomplete restano tali alla chiusura. Quote di stima e tempo ripartite fra gli assegnatari attuali del team.

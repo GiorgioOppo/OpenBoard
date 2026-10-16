@@ -56,7 +56,7 @@ class FrontendStatic(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn('text/html', headers['Content-Type'])
         self.assertEqual(body, (ROOT/'web/index.html').read_bytes())
-        for name, mime in [('app.js', 'javascript'), ('planning.js', 'javascript'),
+        for name, mime in [('app.js', 'javascript'), ('i18n.js', 'javascript'), ('locales.js', 'javascript'), ('planning.js', 'javascript'),
                            ('enterprise.js', 'javascript'), ('enterprise.css', 'text/css'),
                            ('workflows.js', 'javascript'), ('workflows.css', 'text/css'),
                            ('productivity.js', 'javascript'), ('styles.css', 'text/css'),

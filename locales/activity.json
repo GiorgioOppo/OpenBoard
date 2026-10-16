@@ -1,0 +1,250 @@
+{
+  "Allegato aggiunto": [
+    "Attachment added",
+    "Pièce jointe ajoutée",
+    "Adjunto añadido",
+    "Anhang hinzugefügt",
+    "附件已添加",
+    "添付ファイルを追加"
+  ],
+  "Allegato eliminato": [
+    "Attachment deleted",
+    "Pièce jointe supprimée",
+    "Adjunto eliminado",
+    "Anhang gelöscht",
+    "附件已删除",
+    "添付ファイルを削除"
+  ],
+  "Allegato ripristinato": [
+    "Attachment restored",
+    "Pièce jointe restaurée",
+    "Adjunto restaurado",
+    "Anhang wiederhergestellt",
+    "附件已恢复",
+    "添付ファイルを復元"
+  ],
+  "Campo aggiornato": [
+    "Field updated",
+    "Champ mis à jour",
+    "Campo actualizado",
+    "Feld aktualisiert",
+    "字段已更新",
+    "項目を更新"
+  ],
+  "Campo personalizzato": [
+    "Custom field",
+    "Champ personnalisé",
+    "Campo personalizado",
+    "Benutzerdefiniertes Feld",
+    "自定义字段",
+    "カスタム項目"
+  ],
+  "Commento eliminato": [
+    "Comment deleted",
+    "Commentaire supprimé",
+    "Comentario eliminado",
+    "Kommentar gelöscht",
+    "评论已删除",
+    "コメントを削除"
+  ],
+  "Commento in evidenza": [
+    "Comment pinned",
+    "Commentaire épinglé",
+    "Comentario fijado",
+    "Kommentar angeheftet",
+    "评论已置顶",
+    "コメントを固定"
+  ],
+  "Commento modificato": [
+    "Comment edited",
+    "Commentaire modifié",
+    "Comentario editado",
+    "Kommentar bearbeitet",
+    "评论已编辑",
+    "コメントを編集"
+  ],
+  "Dipendenza aggiunta": [
+    "Dependency added",
+    "Dépendance ajoutée",
+    "Dependencia añadida",
+    "Abhängigkeit hinzugefügt",
+    "依赖关系已添加",
+    "依存関係を追加"
+  ],
+  "Dipendenza rimossa": [
+    "Dependency removed",
+    "Dépendance retirée",
+    "Dependencia eliminada",
+    "Abhängigkeit entfernt",
+    "依赖关系已移除",
+    "依存関係を削除"
+  ],
+  "Elemento": [
+    "Item",
+    "Élément",
+    "Elemento",
+    "Element",
+    "项目",
+    "項目"
+  ],
+  "Evidenza del commento rimossa": [
+    "Comment unpinned",
+    "Commentaire désépinglé",
+    "Comentario desfijado",
+    "Kommentar gelöst",
+    "评论已取消置顶",
+    "コメントの固定を解除"
+  ],
+  "Membro rimosso": [
+    "Member removed",
+    "Membre retiré",
+    "Miembro eliminado",
+    "Mitglied entfernt",
+    "成员已移除",
+    "メンバーを削除"
+  ],
+  "Permessi del membro aggiornati": [
+    "Member permissions updated",
+    "Autorisations du membre mises à jour",
+    "Permisos del miembro actualizados",
+    "Mitgliedsberechtigungen aktualisiert",
+    "成员权限已更新",
+    "メンバーの権限を更新"
+  ],
+  "Pianificazione aggiornata": [
+    "Planning updated",
+    "Planification mise à jour",
+    "Planificación actualizada",
+    "Planung aktualisiert",
+    "规划已更新",
+    "計画を更新"
+  ],
+  "Reazione aggiunta": [
+    "Reaction added",
+    "Réaction ajoutée",
+    "Reacción añadida",
+    "Reaktion hinzugefügt",
+    "回应已添加",
+    "リアクションを追加"
+  ],
+  "Reazione rimossa": [
+    "Reaction removed",
+    "Réaction retirée",
+    "Reacción eliminada",
+    "Reaktion entfernt",
+    "回应已移除",
+    "リアクションを削除"
+  ],
+  "Registrazione del tempo eliminata": [
+    "Time entry deleted",
+    "Entrée de temps supprimée",
+    "Registro de tiempo eliminado",
+    "Zeiteintrag gelöscht",
+    "工时记录已删除",
+    "時間記録を削除"
+  ],
+  "Registrazione del tempo modificata": [
+    "Time entry edited",
+    "Entrée de temps modifiée",
+    "Registro de tiempo editado",
+    "Zeiteintrag bearbeitet",
+    "工时记录已编辑",
+    "時間記録を編集"
+  ],
+  "Registrazione del tempo ripristinata": [
+    "Time entry restored",
+    "Entrée de temps restaurée",
+    "Registro de tiempo restaurado",
+    "Zeiteintrag wiederhergestellt",
+    "工时记录已恢复",
+    "時間記録を復元"
+  ],
+  "Risposta pubblicata": [
+    "Reply posted",
+    "Réponse publiée",
+    "Respuesta publicada",
+    "Antwort veröffentlicht",
+    "回复已发布",
+    "返信を投稿"
+  ],
+  "Tempo registrato": [
+    "Time logged",
+    "Temps consigné",
+    "Tiempo registrado",
+    "Zeit erfasst",
+    "工时已记录",
+    "時間を記録"
+  ],
+  "Traguardo aggiornato": [
+    "Milestone updated",
+    "Jalon mis à jour",
+    "Hito actualizado",
+    "Meilenstein aktualisiert",
+    "里程碑已更新",
+    "マイルストーンを更新"
+  ],
+  "Traguardo creato": [
+    "Milestone created",
+    "Jalon créé",
+    "Hito creado",
+    "Meilenstein erstellt",
+    "里程碑已创建",
+    "マイルストーンを作成"
+  ],
+  "Valori dei campi aggiornati": [
+    "Field values updated",
+    "Valeurs des champs mises à jour",
+    "Valores de campos actualizados",
+    "Feldwerte aktualisiert",
+    "字段值已更新",
+    "項目の値を更新"
+  ],
+  "ha aggiornato gli assegnatari": [
+    "updated the assignees",
+    "a mis à jour les responsables",
+    "ha actualizado los responsables",
+    "hat die Zuständigen aktualisiert",
+    "更新了负责人",
+    "担当者を更新"
+  ],
+  "ha completato": [
+    "completed",
+    "a terminé",
+    "ha completado",
+    "hat abgeschlossen",
+    "完成了",
+    "完了"
+  ],
+  "ha duplicato": [
+    "duplicated",
+    "a dupliqué",
+    "ha duplicado",
+    "hat dupliziert",
+    "复制了",
+    "複製"
+  ],
+  "ha importato": [
+    "imported",
+    "a importé",
+    "ha importado",
+    "hat importiert",
+    "导入了",
+    "インポート"
+  ],
+  "ha riaperto": [
+    "reopened",
+    "a rouvert",
+    "ha reabierto",
+    "hat erneut geöffnet",
+    "重新打开了",
+    "再開"
+  ],
+  "ha ripristinato dall’archivio": [
+    "unarchived",
+    "a désarchivé",
+    "ha desarchivado",
+    "hat aus dem Archiv wiederhergestellt",
+    "从归档中恢复了",
+    "アーカイブから復元"
+  ]
+}

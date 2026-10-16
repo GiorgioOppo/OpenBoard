@@ -1,0 +1,2090 @@
+{
+  "Allegato non trovato.": [
+    "Attachment not found.",
+    "Pièce jointe introuvable.",
+    "No se encuentra: adjunto.",
+    "Nicht gefunden: Anhang.",
+    "未找到附件。",
+    "添付ファイルが見つかりません。"
+  ],
+  "Attività non disponibili.": [
+    "Activity unavailable.",
+    "Indisponible : activité.",
+    "No disponible: actividad.",
+    "Nicht verfügbar: Aktivität.",
+    "活动不可用。",
+    "アクティビティを利用できません。"
+  ],
+  "Bacheca non trovata.": [
+    "Board not found.",
+    "Tableau introuvable.",
+    "No se encuentra: tablero.",
+    "Nicht gefunden: Board.",
+    "未找到看板。",
+    "ボードが見つかりません。"
+  ],
+  "Campi non disponibili.": [
+    "Fields unavailable.",
+    "Indisponible : champs.",
+    "No disponible: campos.",
+    "Nicht verfügbar: Felder.",
+    "字段不可用。",
+    "項目を利用できません。"
+  ],
+  "Campo non trovato.": [
+    "Field not found.",
+    "Champ introuvable.",
+    "No se encuentra: campo.",
+    "Nicht gefunden: Feld.",
+    "未找到字段。",
+    "項目が見つかりません。"
+  ],
+  "Campo o bacheca non trovati.": [
+    "Field or board not found.",
+    "Champ ou tableau introuvable.",
+    "No se encuentra: campo o tablero.",
+    "Nicht gefunden: Feld oder Board.",
+    "未找到字段或看板。",
+    "項目またはボードが見つかりません。"
+  ],
+  "Campo o valore non valido.": [
+    "Invalid field or value.",
+    "Non valide : champ ou valeur.",
+    "No válido: campo o valor.",
+    "Ungültig: Feld oder Wert.",
+    "字段或值无效。",
+    "項目または値が無効です。"
+  ],
+  "Commento non trovato.": [
+    "Comment not found.",
+    "Commentaire introuvable.",
+    "No se encuentra: comentario.",
+    "Nicht gefunden: Kommentar.",
+    "未找到评论。",
+    "コメントが見つかりません。"
+  ],
+  "Dati della bacheca non validi.": [
+    "Invalid board data.",
+    "Non valide : données du tableau.",
+    "No válido: datos del tablero.",
+    "Ungültig: Board-Daten.",
+    "看板数据无效。",
+    "ボードのデータが無効です。"
+  ],
+  "Dati della lista non validi.": [
+    "Invalid list data.",
+    "Non valide : données de la liste.",
+    "No válido: datos de la lista.",
+    "Ungültig: Listendaten.",
+    "列表数据无效。",
+    "リストのデータが無効です。"
+  ],
+  "Dati della scheda non validi.": [
+    "Invalid card data.",
+    "Non valide : données de la carte.",
+    "No válido: datos de la tarjeta.",
+    "Ungültig: Kartendaten.",
+    "卡片数据无效。",
+    "カードのデータが無効です。"
+  ],
+  "Definizione importata non valida.": [
+    "Invalid imported definition.",
+    "Non valide : définition importée.",
+    "No válido: definición importada.",
+    "Ungültig: Importierte Definition.",
+    "导入的定义无效。",
+    "インポートした定義が無効です。"
+  ],
+  "Definizioni di pianificazione importate non valide.": [
+    "Invalid imported planning definitions.",
+    "Non valide : définitions de planification importées.",
+    "No válido: definiciones de planificación importadas.",
+    "Ungültig: Importierte Planungsdefinitionen.",
+    "导入的规划定义无效。",
+    "インポートした計画定義が無効です。"
+  ],
+  "Descrizione della conversione non valida.": [
+    "Invalid conversion description.",
+    "Non valide : description de conversion.",
+    "No válido: descripción de conversión.",
+    "Ungültig: Umwandlungsbeschreibung.",
+    "转换描述无效。",
+    "変換時の説明が無効です。"
+  ],
+  "Dettagli del campo non validi.": [
+    "Invalid field details.",
+    "Non valide : détails du champ.",
+    "No válido: detalles del campo.",
+    "Ungültig: Felddetails.",
+    "字段详情无效。",
+    "項目の詳細が無効です。"
+  ],
+  "Dettagli del modulo non validi.": [
+    "Invalid form details.",
+    "Non valide : détails du formulaire.",
+    "No válido: detalles del formulario.",
+    "Ungültig: Formulardetails.",
+    "表单详情无效。",
+    "フォームの詳細が無効です。"
+  ],
+  "Dettagli di revisione non validi.": [
+    "Invalid review details.",
+    "Non valide : détails de révision.",
+    "No válido: detalles de revisión.",
+    "Ungültig: Prüfungsdetails.",
+    "评审详情无效。",
+    "レビューの詳細が無効です。"
+  ],
+  "Dipendenza non trovata.": [
+    "Dependency not found.",
+    "Dépendance introuvable.",
+    "No se encuentra: dependencia.",
+    "Nicht gefunden: Abhängigkeit.",
+    "未找到依赖关系。",
+    "依存関係が見つかりません。"
+  ],
+  "Elemento o bacheca non trovati.": [
+    "Item or board not found.",
+    "Élément ou tableau introuvable.",
+    "No se encuentra: elemento o tablero.",
+    "Nicht gefunden: Element oder Board.",
+    "未找到项目或看板。",
+    "項目またはボードが見つかりません。"
+  ],
+  "Endpoint sprint non trovato.": [
+    "Sprint endpoint not found.",
+    "Point de terminaison de sprint introuvable.",
+    "No se encuentra: endpoint de sprint.",
+    "Nicht gefunden: Sprint-Endpunkt.",
+    "未找到冲刺端点。",
+    "スプリントのエンドポイントが見つかりません。"
+  ],
+  "Filtri CSV non validi.": [
+    "Invalid csv filters.",
+    "Non valide : filtres csv.",
+    "No válido: filtros csv.",
+    "Ungültig: CSV-Filter.",
+    "CSV 筛选条件无效。",
+    "CSV フィルターが無効です。"
+  ],
+  "Filtri delle schede non validi.": [
+    "Invalid card filters.",
+    "Non valide : filtres des cartes.",
+    "No válido: filtros de tarjetas.",
+    "Ungültig: Kartenfilter.",
+    "卡片筛选条件无效。",
+    "カードのフィルターが無効です。"
+  ],
+  "Filtri dello sprint non validi.": [
+    "Invalid sprint filters.",
+    "Non valide : filtres du sprint.",
+    "No válido: filtros del sprint.",
+    "Ungültig: Sprint-Filter.",
+    "冲刺筛选条件无效。",
+    "スプリントのフィルターが無効です。"
+  ],
+  "Filtri non validi.": [
+    "Invalid filters.",
+    "Non valide : filtres.",
+    "No válido: filtros.",
+    "Ungültig: Filter.",
+    "筛选条件无效。",
+    "フィルターが無効です。"
+  ],
+  "Filtri notifiche non validi.": [
+    "Invalid notification filters.",
+    "Non valide : filtres des notifications.",
+    "No válido: filtros de notificaciones.",
+    "Ungültig: Benachrichtigungsfilter.",
+    "通知筛选条件无效。",
+    "通知フィルターが無効です。"
+  ],
+  "Filtri o paginazione non validi.": [
+    "Invalid filters or pagination.",
+    "Non valide : filtres ou pagination.",
+    "No válido: filtros o paginación.",
+    "Ungültig: Filter oder Seiteneinteilung.",
+    "筛选条件或分页无效。",
+    "フィルターまたはページ指定が無効です。"
+  ],
+  "Filtri portfolio non validi.": [
+    "Invalid portfolio filters.",
+    "Non valide : filtres du portefeuille.",
+    "No válido: filtros del portafolio.",
+    "Ungültig: Portfolio-Filter.",
+    "项目组合筛选条件无效。",
+    "ポートフォリオのフィルターが無効です。"
+  ],
+  "Filtro include_deleted non valido.": [
+    "Invalid include_deleted filter.",
+    "Non valide : filtre include_deleted.",
+    "No válido: filtro include_deleted.",
+    "Ungültig: include_deleted-Filter.",
+    "include_deleted 筛选条件无效。",
+    "include_deleted フィルターが無効です。"
+  ],
+  "Filtro non valido.": [
+    "Invalid filter.",
+    "Non valide : filtre.",
+    "No válido: filtro.",
+    "Ungültig: Filter.",
+    "筛选条件无效。",
+    "フィルターが無効です。"
+  ],
+  "Fotografia non trovata.": [
+    "Snapshot not found.",
+    "Instantané introuvable.",
+    "No se encuentra: instantánea.",
+    "Nicht gefunden: Momentaufnahme.",
+    "未找到快照。",
+    "スナップショットが見つかりません。"
+  ],
+  "Intervallo di date non valido.": [
+    "Invalid date range.",
+    "Non valide : plage de dates.",
+    "No válido: intervalo de fechas.",
+    "Ungültig: Datumsbereich.",
+    "日期范围无效。",
+    "日付範囲が無効です。"
+  ],
+  "Intervallo o utente non valido.": [
+    "Invalid range or user.",
+    "Non valide : plage ou utilisateur.",
+    "No válido: intervalo o usuario.",
+    "Ungültig: Bereich oder Benutzer.",
+    "范围或用户无效。",
+    "範囲またはユーザーが無効です。"
+  ],
+  "Lista di destinazione non trovata.": [
+    "Destination list not found.",
+    "Liste de destination introuvable.",
+    "No se encuentra: lista de destino.",
+    "Nicht gefunden: Zielliste.",
+    "未找到目标列表。",
+    "追加先リストが見つかりません。"
+  ],
+  "Lista importata non valida.": [
+    "Invalid imported list.",
+    "Non valide : liste importée.",
+    "No válido: lista importada.",
+    "Ungültig: Importierte Liste.",
+    "导入的列表无效。",
+    "インポートしたリストが無効です。"
+  ],
+  "Lista non valida.": [
+    "Invalid list.",
+    "Non valide : liste.",
+    "No válido: lista.",
+    "Ungültig: Liste.",
+    "列表无效。",
+    "リストが無効です。"
+  ],
+  "Lista o bacheca non trovata.": [
+    "List or board not found.",
+    "Liste ou tableau introuvable.",
+    "No se encuentra: lista o tablero.",
+    "Nicht gefunden: Liste oder Board.",
+    "未找到列表或看板。",
+    "リストまたはボードが見つかりません。"
+  ],
+  "Memoria non disponibile.": [
+    "Memory unavailable.",
+    "Indisponible : mémoire.",
+    "No disponible: memoria.",
+    "Nicht verfügbar: Arbeitsspeicher.",
+    "内存不可用。",
+    "メモリを利用できません。"
+  ],
+  "Minuti, data o nota non validi.": [
+    "Invalid minutes, date or note.",
+    "Non valide : minutes, date ou note.",
+    "No válido: minutos, fecha o nota.",
+    "Ungültig: Minuten, Datum oder Notiz.",
+    "分钟数、日期或备注无效。",
+    "時間、日付またはメモが無効です。"
+  ],
+  "Modelli non disponibili.": [
+    "Templates unavailable.",
+    "Indisponible : modèles.",
+    "No disponible: plantillas.",
+    "Nicht verfügbar: Vorlagen.",
+    "模板不可用。",
+    "テンプレートを利用できません。"
+  ],
+  "Modello non trovato.": [
+    "Template not found.",
+    "Modèle introuvable.",
+    "No se encuentra: plantilla.",
+    "Nicht gefunden: Vorlage.",
+    "未找到模板。",
+    "テンプレートが見つかりません。"
+  ],
+  "Modulo non trovato.": [
+    "Form not found.",
+    "Formulaire introuvable.",
+    "No se encuentra: formulario.",
+    "Nicht gefunden: Formular.",
+    "未找到表单。",
+    "フォームが見つかりません。"
+  ],
+  "Nome non valido.": [
+    "Invalid name.",
+    "Non valide : nom.",
+    "No válido: nombre.",
+    "Ungültig: Name.",
+    "名称无效。",
+    "名前が無効です。"
+  ],
+  "Nome o filtri della vista non validi.": [
+    "Invalid view name or filters.",
+    "Non valide : nom ou filtres de la vue.",
+    "No válido: nombre o filtros de la vista.",
+    "Ungültig: Ansichtsname oder Filter.",
+    "视图名称或筛选条件无效。",
+    "ビュー名またはフィルターが無効です。"
+  ],
+  "Nome, descrizione o colonna del modulo non validi.": [
+    "Invalid form name, description or column.",
+    "Non valide : nom, description ou colonne du formulaire.",
+    "No válido: nombre, descripción o columna del formulario.",
+    "Ungültig: Name, Beschreibung oder Spalte des Formulars.",
+    "表单名称、描述或列无效。",
+    "フォーム名、説明または列が無効です。"
+  ],
+  "Nome, obiettivo o date dello sprint non validi.": [
+    "Invalid sprint name, goal or dates.",
+    "Non valide : nom, objectif ou dates du sprint.",
+    "No válido: nombre, objetivo o fechas del sprint.",
+    "Ungültig: Name, Ziel oder Daten des Sprints.",
+    "冲刺名称、目标或日期无效。",
+    "スプリント名、目標または日付が無効です。"
+  ],
+  "Notifica non trovata.": [
+    "Notification not found.",
+    "Notification introuvable.",
+    "No se encuentra: notificación.",
+    "Nicht gefunden: Benachrichtigung.",
+    "未找到通知。",
+    "通知が見つかりません。"
+  ],
+  "Opzioni campo non valide.": [
+    "Invalid field options.",
+    "Non valide : options du champ.",
+    "No válido: opciones del campo.",
+    "Ungültig: Feldoptionen.",
+    "字段选项无效。",
+    "項目の選択肢が無効です。"
+  ],
+  "Ordine campi non valido.": [
+    "Invalid field order.",
+    "Non valide : ordre des champs.",
+    "No válido: orden de campos.",
+    "Ungültig: Feldreihenfolge.",
+    "字段顺序无效。",
+    "項目の順序が無効です。"
+  ],
+  "Origine non trovata.": [
+    "Source not found.",
+    "Source introuvable.",
+    "No se encuentra: origen.",
+    "Nicht gefunden: Quelle.",
+    "未找到来源。",
+    "元データが見つかりません。"
+  ],
+  "Paginazione dello storico non valida.": [
+    "Invalid history pagination.",
+    "Non valide : pagination de l’historique.",
+    "No válido: paginación del historial.",
+    "Ungültig: Verlaufsseiteneinteilung.",
+    "历史记录分页无效。",
+    "履歴のページ指定が無効です。"
+  ],
+  "Paginazione non valida.": [
+    "Invalid pagination.",
+    "Non valide : pagination.",
+    "No válido: paginación.",
+    "Ungültig: Seiteneinteilung.",
+    "分页无效。",
+    "ページ指定が無効です。"
+  ],
+  "Paginazione o filtro non valido.": [
+    "Invalid pagination or filter.",
+    "Non valide : pagination ou filtre.",
+    "No válido: paginación o filtro.",
+    "Ungültig: Seiteneinteilung oder Filter.",
+    "分页或筛选条件无效。",
+    "ページ指定またはフィルターが無効です。"
+  ],
+  "Payload non valido.": [
+    "Invalid payload.",
+    "Non valide : charge utile.",
+    "No válido: carga útil.",
+    "Ungültig: Nutzdaten.",
+    "请求数据无效。",
+    "ペイロードが無効です。"
+  ],
+  "Percorso non trovato.": [
+    "Route not found.",
+    "Route introuvable.",
+    "No se encuentra: ruta.",
+    "Nicht gefunden: Route.",
+    "未找到路径。",
+    "パスが見つかりません。"
+  ],
+  "Posizione campo non valida.": [
+    "Invalid field position.",
+    "Non valide : position du champ.",
+    "No válido: posición del campo.",
+    "Ungültig: Feldposition.",
+    "字段位置无效。",
+    "項目の位置が無効です。"
+  ],
+  "Posizione della lista non valida.": [
+    "Invalid list position.",
+    "Non valide : position de la liste.",
+    "No válido: posición de la lista.",
+    "Ungültig: Listenposition.",
+    "列表位置无效。",
+    "リストの位置が無効です。"
+  ],
+  "Posizione della scheda non valida.": [
+    "Invalid card position.",
+    "Non valide : position de la carte.",
+    "No válido: posición de la tarjeta.",
+    "Ungültig: Kartenposition.",
+    "卡片位置无效。",
+    "カードの位置が無効です。"
+  ],
+  "Reazione non valida.": [
+    "Invalid reaction.",
+    "Non valide : réaction.",
+    "No válido: reacción.",
+    "Ungültig: Reaktion.",
+    "回应无效。",
+    "リアクションが無効です。"
+  ],
+  "Registrazione non trovata.": [
+    "Time entry not found.",
+    "Entrée de temps introuvable.",
+    "No se encuentra: registro de tiempo.",
+    "Nicht gefunden: Zeiteintrag.",
+    "未找到工时记录。",
+    "時間記録が見つかりません。"
+  ],
+  "Report non trovato.": [
+    "Report not found.",
+    "Rapport introuvable.",
+    "No se encuentra: informe.",
+    "Nicht gefunden: Bericht.",
+    "未找到报告。",
+    "レポートが見つかりません。"
+  ],
+  "Revisione non disponibile.": [
+    "Review unavailable.",
+    "Indisponible : révision.",
+    "No disponible: revisión.",
+    "Nicht verfügbar: Prüfung.",
+    "评审不可用。",
+    "レビューを利用できません。"
+  ],
+  "Revisione non trovata.": [
+    "Review not found.",
+    "Révision introuvable.",
+    "No se encuentra: revisión.",
+    "Nicht gefunden: Prüfung.",
+    "未找到评审。",
+    "レビューが見つかりません。"
+  ],
+  "Ricerca campi non disponibile.": [
+    "Field search unavailable.",
+    "Indisponible : recherche de champs.",
+    "No disponible: búsqueda de campos.",
+    "Nicht verfügbar: Feldsuche.",
+    "字段搜索不可用。",
+    "項目検索を利用できません。"
+  ],
+  "Richiesta non trovata.": [
+    "Request not found.",
+    "Demande introuvable.",
+    "No se encuentra: solicitud.",
+    "Nicht gefunden: Anfrage.",
+    "未找到请求。",
+    "リクエストが見つかりません。"
+  ],
+  "Richiesta o modulo non disponibile.": [
+    "Request or form unavailable.",
+    "Indisponible : demande ou formulaire.",
+    "No disponible: solicitud o formulario.",
+    "Nicht verfügbar: Anfrage oder Formular.",
+    "请求或表单不可用。",
+    "リクエストまたはフォームを利用できません。"
+  ],
+  "Risorsa non trovata.": [
+    "Resource not found.",
+    "Ressource introuvable.",
+    "No se encuentra: recurso.",
+    "Nicht gefunden: Ressource.",
+    "未找到资源。",
+    "リソースが見つかりません。"
+  ],
+  "Scheda importata non valida.": [
+    "Invalid imported card.",
+    "Non valide : carte importée.",
+    "No válido: tarjeta importada.",
+    "Ungültig: Importierte Karte.",
+    "导入的卡片无效。",
+    "インポートしたカードが無効です。"
+  ],
+  "Scheda non trovata.": [
+    "Card not found.",
+    "Carte introuvable.",
+    "No se encuentra: tarjeta.",
+    "Nicht gefunden: Karte.",
+    "未找到卡片。",
+    "カードが見つかりません。"
+  ],
+  "Scheda o lista non trovata.": [
+    "Card or list not found.",
+    "Carte ou liste introuvable.",
+    "No se encuentra: tarjeta o lista.",
+    "Nicht gefunden: Karte oder Liste.",
+    "未找到卡片或列表。",
+    "カードまたはリストが見つかりません。"
+  ],
+  "Schede o limite WIP importati non validi.": [
+    "Invalid imported cards or wip limit.",
+    "Non valide : cartes ou limite wip importées.",
+    "No válido: tarjetas o límite wip importados.",
+    "Ungültig: Importierte Karten oder WIP-Limit.",
+    "导入的卡片或 WIP 限制无效。",
+    "インポートしたカードまたは WIP 制限が無効です。"
+  ],
+  "Sessione non disponibile.": [
+    "Session unavailable.",
+    "Indisponible : session.",
+    "No disponible: sesión.",
+    "Nicht verfügbar: Sitzung.",
+    "会话不可用。",
+    "セッションを利用できません。"
+  ],
+  "Sessione non trovata.": [
+    "Session not found.",
+    "Session introuvable.",
+    "No se encuentra: sesión.",
+    "Nicht gefunden: Sitzung.",
+    "未找到会话。",
+    "セッションが見つかりません。"
+  ],
+  "Settimana non valida.": [
+    "Invalid week.",
+    "Non valide : semaine.",
+    "No válido: semana.",
+    "Ungültig: Woche.",
+    "周无效。",
+    "週が無効です。"
+  ],
+  "Sprint non disponibile.": [
+    "Sprint unavailable.",
+    "Indisponible : sprint.",
+    "No disponible: sprint.",
+    "Nicht verfügbar: Sprint.",
+    "冲刺不可用。",
+    "スプリントを利用できません。"
+  ],
+  "Sprint non trovato.": [
+    "Sprint not found.",
+    "Sprint introuvable.",
+    "No se encuentra: sprint.",
+    "Nicht gefunden: Sprint.",
+    "未找到冲刺。",
+    "スプリントが見つかりません。"
+  ],
+  "Stato eliminazione importato non valido.": [
+    "Invalid imported deletion status.",
+    "Non valide : état de suppression importé.",
+    "No válido: estado de eliminación importado.",
+    "Ungültig: Importierter Löschstatus.",
+    "导入的删除状态无效。",
+    "インポートした削除状態が無効です。"
+  ],
+  "Stato richiesta non valido.": [
+    "Invalid request status.",
+    "Non valide : état de la demande.",
+    "No válido: estado de la solicitud.",
+    "Ungültig: Anfragenstatus.",
+    "请求状态无效。",
+    "リクエストの状態が無効です。"
+  ],
+  "Testo della nota non valido.": [
+    "Invalid note text.",
+    "Non valide : texte de la note.",
+    "No válido: texto de la nota.",
+    "Ungültig: Notiztext.",
+    "备注文本无效。",
+    "メモの内容が無効です。"
+  ],
+  "Tipo campo non valido.": [
+    "Invalid field type.",
+    "Non valide : type du champ.",
+    "No válido: tipo de campo.",
+    "Ungültig: Feldtyp.",
+    "字段类型无效。",
+    "項目の種類が無効です。"
+  ],
+  "Traguardi non disponibili.": [
+    "Milestones unavailable.",
+    "Indisponible : jalons.",
+    "No disponible: hitos.",
+    "Nicht verfügbar: Meilensteine.",
+    "里程碑不可用。",
+    "マイルストーンを利用できません。"
+  ],
+  "Traguardo o bacheca non trovati.": [
+    "Milestone or board not found.",
+    "Jalon ou tableau introuvable.",
+    "No se encuentra: hito o tablero.",
+    "Nicht gefunden: Meilenstein oder Board.",
+    "未找到里程碑或看板。",
+    "マイルストーンまたはボードが見つかりません。"
+  ],
+  "Valore JSON non valido.": [
+    "Invalid json value.",
+    "Non valide : valeur json.",
+    "No válido: valor json.",
+    "Ungültig: JSON-Wert.",
+    "JSON 值无效。",
+    "JSON 値が無効です。"
+  ],
+  "Valori campo non validi.": [
+    "Invalid field values.",
+    "Non valide : valeurs du champ.",
+    "No válido: valores del campo.",
+    "Ungültig: Feldwerte.",
+    "字段值无效。",
+    "項目の値が無効です。"
+  ],
+  "Vista non trovata.": [
+    "View not found.",
+    "Vue introuvable.",
+    "No se encuentra: vista.",
+    "Nicht gefunden: Ansicht.",
+    "未找到视图。",
+    "ビューが見つかりません。"
+  ],
+  "Viste non disponibili.": [
+    "Views unavailable.",
+    "Indisponible : vues.",
+    "No disponible: vistas.",
+    "Nicht verfügbar: Ansichten.",
+    "视图不可用。",
+    "ビューを利用できません。"
+  ],
+  "card_id non valido.": [
+    "Invalid card_id.",
+    "Non valide : card_id.",
+    "No válido: card_id.",
+    "Ungültig: card_id.",
+    "card_id无效。",
+    "card_idが無効です。"
+  ],
+  "Accetta la richiesta prima della conversione.": [
+    "Accept the request before converting it.",
+    "Acceptez la demande avant de la convertir.",
+    "Acepta la solicitud antes de convertirla.",
+    "Nehmen Sie die Anfrage vor der Umwandlung an.",
+    "请先接受请求再进行转换。",
+    "変換する前にリクエストを承認してください。"
+  ],
+  "Archivio esterno temporaneamente non disponibile. Riprova.": [
+    "External storage temporarily unavailable. Try again.",
+    "Stockage externe temporairement indisponible. Réessayez.",
+    "El almacenamiento externo no está disponible temporalmente. Vuelve a intentarlo.",
+    "Externer Speicher vorübergehend nicht verfügbar. Versuchen Sie es erneut.",
+    "外部存储暂时不可用。请重试。",
+    "外部ストレージを一時的に利用できません。再試行してください。"
+  ],
+  "Archivio sprint temporaneamente non disponibile.": [
+    "Sprint storage temporarily unavailable.",
+    "Stockage des sprints temporairement indisponible.",
+    "El almacenamiento de sprints no está disponible temporalmente.",
+    "Sprint-Speicher vorübergehend nicht verfügbar.",
+    "冲刺存储暂时不可用。",
+    "スプリントのストレージを一時的に利用できません。"
+  ],
+  "Assegnatari non validi o non autorizzati alla bacheca.": [
+    "Assignees are invalid or lack access to the board.",
+    "Les responsables sont non valides ou n'ont pas accès au tableau.",
+    "Los responsables no son válidos o no tienen acceso al tablero.",
+    "Die Zuständigen sind ungültig oder haben keinen Zugriff auf das Board.",
+    "负责人无效或没有看板访问权限。",
+    "担当者が無効、またはボードへのアクセス権がありません。"
+  ],
+  "Azione collettiva non valida.": [
+    "Invalid bulk action.",
+    "Action groupée non valide.",
+    "Acción masiva no válida.",
+    "Ungültige Sammelaktion.",
+    "批量操作无效。",
+    "一括操作が無効です。"
+  ],
+  "Bacheca da importare non valida.": [
+    "Invalid board to import.",
+    "Tableau à importer non valide.",
+    "El tablero que se va a importar no es válido.",
+    "Zu importierendes Board ungültig.",
+    "要导入的看板无效。",
+    "インポートするボードが無効です。"
+  ],
+  "Bacheca modificata da un altro utente.": [
+    "Board modified by another user.",
+    "Tableau modifié par un autre utilisateur.",
+    "Otro usuario ha modificado el tablero.",
+    "Board von einem anderen Benutzer geändert.",
+    "看板已被其他用户修改。",
+    "他のユーザーがボードを変更しました。"
+  ],
+  "Campi personalizzati o traguardo non validi per la bacheca.": [
+    "Custom fields or milestone are invalid for this board.",
+    "Les champs personnalisés ou le jalon ne sont pas valides pour ce tableau.",
+    "Los campos personalizados o el hito no son válidos para este tablero.",
+    "Benutzerdefinierte Felder oder Meilenstein für dieses Board ungültig.",
+    "此看板的自定义字段或里程碑无效。",
+    "このボードのカスタム項目またはマイルストーンが無効です。"
+  ],
+  "Campo già attivo.": [
+    "Field already active.",
+    "Champ déjà actif.",
+    "El campo ya está activo.",
+    "Feld bereits aktiv.",
+    "字段已启用。",
+    "項目はすでに有効です。"
+  ],
+  "Campo, tipo, obbligatorietà o opzioni non validi.": [
+    "Invalid field, type, required setting or options.",
+    "Champ, type, caractère obligatoire ou options non valides.",
+    "Campo, tipo, obligatoriedad u opciones no válidos.",
+    "Feld, Typ, Pflichtangabe oder Optionen ungültig.",
+    "字段、类型、必填设置或选项无效。",
+    "項目、種類、必須設定または選択肢が無効です。"
+  ],
+  "Chiave campo già presente o salvataggio non disponibile.": [
+    "Field key already exists or saving is unavailable.",
+    "La clé du champ existe déjà ou l'enregistrement est indisponible.",
+    "La clave del campo ya existe o no se puede guardar.",
+    "Feldschlüssel bereits vorhanden oder Speichern nicht verfügbar.",
+    "字段键名已存在或无法保存。",
+    "項目キーはすでに存在するか、保存を利用できません。"
+  ],
+  "Chiave campo già presente, anche nel cestino.": [
+    "Field key already exists, including in trash.",
+    "La clé du champ existe déjà, y compris dans la corbeille.",
+    "La clave del campo ya existe, incluso en la papelera.",
+    "Feldschlüssel bereits vorhanden, auch im Papierkorb.",
+    "字段键名已存在，包括回收站中的字段。",
+    "項目キーはゴミ箱も含めてすでに存在します。"
+  ],
+  "Chiave e valore JSON richiesti.": [
+    "JSON key and value required.",
+    "Clé et valeur JSON requises.",
+    "Se requieren una clave y un valor JSON.",
+    "JSON-Schlüssel und -Wert erforderlich.",
+    "需要 JSON 键和值。",
+    "JSON のキーと値が必要です。"
+  ],
+  "Chiave traguardo già presente o salvataggio non disponibile.": [
+    "Milestone key already exists or saving is unavailable.",
+    "La clé du jalon existe déjà ou l'enregistrement est indisponible.",
+    "La clave del hito ya existe o no se puede guardar.",
+    "Meilensteinschlüssel bereits vorhanden oder Speichern nicht verfügbar.",
+    "里程碑键名已存在或无法保存。",
+    "マイルストーンのキーはすでに存在するか、保存を利用できません。"
+  ],
+  "Commento modificato da un'altra sessione. Ricarica prima di riprovare.": [
+    "Comment modified in another session. Reload before retrying.",
+    "Commentaire modifié dans une autre session. Rechargez avant de réessayer.",
+    "El comentario se ha modificado en otra sesión. Recarga antes de volver a intentarlo.",
+    "Kommentar in einer anderen Sitzung geändert. Laden Sie vor dem erneuten Versuch neu.",
+    "评论已在另一会话中修改。请重新加载后再试。",
+    "別のセッションでコメントが変更されました。再読み込みしてから再試行してください。"
+  ],
+  "Commento non eliminato.": [
+    "Comment was not deleted.",
+    "Le commentaire n'a pas été supprimé.",
+    "No se ha eliminado el comentario.",
+    "Kommentar wurde nicht gelöscht.",
+    "评论未能删除。",
+    "コメントを削除できませんでした。"
+  ],
+  "Commento non salvato.": [
+    "Comment was not saved.",
+    "Le commentaire n'a pas été enregistré.",
+    "No se ha guardado el comentario.",
+    "Kommentar wurde nicht gespeichert.",
+    "评论未能保存。",
+    "コメントを保存できませんでした。"
+  ],
+  "Completa prima tutte le dipendenze della scheda.": [
+    "Complete all card dependencies first.",
+    "Terminez d'abord toutes les dépendances de la carte.",
+    "Completa primero todas las dependencias de la tarjeta.",
+    "Schließen Sie zuerst alle Abhängigkeiten der Karte ab.",
+    "请先完成卡片的所有依赖项。",
+    "先にカードの依存先をすべて完了してください。"
+  ],
+  "Creazione della scheda fuori transazione.": [
+    "Card creation attempted outside a transaction.",
+    "Tentative de création de carte hors transaction.",
+    "Se ha intentado crear la tarjeta fuera de una transacción.",
+    "Kartenerstellung außerhalb einer Transaktion versucht.",
+    "尝试在事务外创建卡片。",
+    "トランザクション外でカードを作成しようとしました。"
+  ],
+  "Cursore positivo e limite da 1 a 100 richiesti.": [
+    "A positive cursor and a limit from 1 to 100 are required.",
+    "Un curseur positif et une limite de 1 à 100 sont requis.",
+    "Se requieren un cursor positivo y un límite de 1 a 100.",
+    "Positiver Cursor und Limit von 1 bis 100 erforderlich.",
+    "需要正数游标及 1 至 100 的数量限制。",
+    "正のカーソルと 1～100 の件数制限が必要です。"
+  ],
+  "Data della fotografia non valida.": [
+    "Invalid snapshot date.",
+    "Date de l'instantané non valide.",
+    "Fecha de instantánea no válida.",
+    "Ungültiges Datum der Momentaufnahme.",
+    "快照日期无效。",
+    "スナップショットの日付が無効です。"
+  ],
+  "Database occupato. Riprova.": [
+    "Database busy. Try again.",
+    "Base de données occupée. Réessayez.",
+    "La base de datos está ocupada. Vuelve a intentarlo.",
+    "Datenbank ausgelastet. Versuchen Sie es erneut.",
+    "数据库正忙。请重试。",
+    "データベースがビジー状態です。再試行してください。"
+  ],
+  "Database temporaneamente non disponibile. Riprova.": [
+    "Database temporarily unavailable. Try again.",
+    "Base de données temporairement indisponible. Réessayez.",
+    "La base de datos no está disponible temporalmente. Vuelve a intentarlo.",
+    "Datenbank vorübergehend nicht verfügbar. Versuchen Sie es erneut.",
+    "数据库暂时不可用。请重试。",
+    "データベースを一時的に利用できません。再試行してください。"
+  ],
+  "Definizione campo non valida; chiave e tipo sono immutabili.": [
+    "Invalid field definition; the key and type cannot be changed.",
+    "Définition du champ non valide ; la clé et le type sont immuables.",
+    "Definición de campo no válida; la clave y el tipo no se pueden cambiar.",
+    "Ungültige Felddefinition; Schlüssel und Typ sind unveränderlich.",
+    "字段定义无效；键名和类型不可更改。",
+    "項目の定義が無効です。キーと種類は変更できません。"
+  ],
+  "Duplicazione fallita.": [
+    "Duplication failed.",
+    "Échec de la duplication.",
+    "Error al duplicar.",
+    "Duplizieren fehlgeschlagen.",
+    "复制失败。",
+    "複製に失敗しました。"
+  ],
+  "Esportazione incompleta. Riduci l'intervallo.": [
+    "Incomplete export. Narrow the range.",
+    "Exportation incomplète. Réduisez la plage.",
+    "Exportación incompleta. Reduce el intervalo.",
+    "Export unvollständig. Begrenzen Sie den Bereich.",
+    "导出不完整。请缩小范围。",
+    "エクスポートが不完全です。範囲を絞ってください。"
+  ],
+  "Esportazione oltre 1000 righe o 2 MiB. Riduci i dati della bacheca.": [
+    "Export exceeds 1,000 rows or 2 MiB. Reduce the board data.",
+    "L'exportation dépasse 1 000 lignes ou 2 Mio. Réduisez les données du tableau.",
+    "La exportación supera las 1000 filas o los 2 MiB. Reduce los datos del tablero.",
+    "Export überschreitet 1.000 Zeilen oder 2 MiB. Reduzieren Sie die Board-Daten.",
+    "导出超过 1000 行或 2 MiB。请减少看板数据。",
+    "エクスポートが 1000 行または 2 MiB を超えています。ボードのデータを減らしてください。"
+  ],
+  "Esportazione troppo grande. Riduci i filtri.": [
+    "Export too large. Narrow the filters.",
+    "Exportation trop volumineuse. Affinez les filtres.",
+    "La exportación es demasiado grande. Restringe los filtros.",
+    "Export zu groß. Schränken Sie die Filter ein.",
+    "导出内容过大。请缩小筛选范围。",
+    "エクスポートが大きすぎます。フィルターを絞ってください。"
+  ],
+  "Esportazione troppo grande. Riduci l'intervallo.": [
+    "Export too large. Narrow the range.",
+    "Exportation trop volumineuse. Réduisez la plage.",
+    "La exportación es demasiado grande. Reduce el intervalo.",
+    "Export zu groß. Begrenzen Sie den Bereich.",
+    "导出内容过大。请缩小范围。",
+    "エクスポートが大きすぎます。範囲を絞ってください。"
+  ],
+  "Esportazione troppo grande: restringi i filtri (massimo 1000 schede e 2 MiB).": [
+    "Export too large: narrow the filters (up to 1,000 cards and 2 MiB).",
+    "Exportation trop volumineuse : affinez les filtres (1 000 cartes et 2 Mio maximum).",
+    "La exportación es demasiado grande: restringe los filtros (máximo 1000 tarjetas y 2 MiB).",
+    "Export zu groß: Schränken Sie die Filter ein (maximal 1.000 Karten und 2 MiB).",
+    "导出内容过大：请缩小筛选范围（最多 1000 张卡片及 2 MiB）。",
+    "エクスポートが大きすぎます。フィルターを絞ってください（最大 1000 枚、2 MiB）。"
+  ],
+  "Formato di importazione non valido: usa OpenBoard versione 2.": [
+    "Invalid import format: use OpenBoard version 2.",
+    "Format d'importation non valide : utilisez OpenBoard version 2.",
+    "Formato de importación no válido: usa OpenBoard versión 2.",
+    "Ungültiges Importformat: Verwenden Sie OpenBoard Version 2.",
+    "导入格式无效：请使用 OpenBoard 版本 2。",
+    "インポート形式が無効です。OpenBoard バージョン 2 を使用してください。"
+  ],
+  "Gli assegnatari devono essere utenti attivi della bacheca.": [
+    "Assignees must be active board users.",
+    "Les responsables doivent être des utilisateurs actifs du tableau.",
+    "Los responsables deben ser usuarios activos del tablero.",
+    "Zuständige müssen aktive Benutzer des Boards sein.",
+    "负责人必须是看板的活跃用户。",
+    "担当者はボードの有効なユーザーである必要があります。"
+  ],
+  "Gli sprint richiedono un account autenticato.": [
+    "Sprints require a signed-in account.",
+    "Les sprints nécessitent un compte authentifié.",
+    "Los sprints requieren una cuenta autenticada.",
+    "Sprints erfordern ein angemeldetes Konto.",
+    "冲刺功能需要已登录的账户。",
+    "スプリントにはログイン済みのアカウントが必要です。"
+  ],
+  "I report personali richiedono un account.": [
+    "Personal reports require an account.",
+    "Les rapports personnels nécessitent un compte.",
+    "Los informes personales requieren una cuenta.",
+    "Persönliche Berichte erfordern ein Konto.",
+    "个人报告需要账户。",
+    "個人レポートにはアカウントが必要です。"
+  ],
+  "Idempotency-Key già usata con un corpo differente.": [
+    "Idempotency-Key already used with a different body.",
+    "Idempotency-Key déjà utilisée avec un corps différent.",
+    "Idempotency-Key ya se ha usado con un cuerpo diferente.",
+    "Idempotency-Key bereits mit anderem Inhalt verwendet.",
+    "Idempotency-Key 已用于其他请求正文。",
+    "Idempotency-Key は異なるリクエスト本文ですでに使用されています。"
+  ],
+  "Il backend espone soltanto API.": [
+    "The backend serves APIs only.",
+    "Le backend expose uniquement des API.",
+    "El backend solo expone API.",
+    "Das Backend stellt ausschließlich APIs bereit.",
+    "后端仅提供 API。",
+    "バックエンドは API のみを提供します。"
+  ],
+  "Il campo bookmarked deve essere booleano.": [
+    "The bookmarked field must be a boolean.",
+    "Le champ bookmarked doit être un booléen.",
+    "El campo bookmarked debe ser booleano.",
+    "Das Feld bookmarked muss ein boolescher Wert sein.",
+    "bookmarked 字段必须为布尔值。",
+    "bookmarked 項目は真偽値である必要があります。"
+  ],
+  "Il campo pinned deve essere booleano.": [
+    "The pinned field must be a boolean.",
+    "Le champ pinned doit être un booléen.",
+    "El campo pinned debe ser booleano.",
+    "Das Feld pinned muss ein boolescher Wert sein.",
+    "pinned 字段必须为布尔值。",
+    "pinned 項目は真偽値である必要があります。"
+  ],
+  "Il campo read deve essere booleano.": [
+    "The read field must be a boolean.",
+    "Le champ read doit être un booléen.",
+    "El campo read debe ser booleano.",
+    "Das Feld read muss ein boolescher Wert sein.",
+    "read 字段必须为布尔值。",
+    "read 項目は真偽値である必要があります。"
+  ],
+  "Il campo watching deve essere booleano.": [
+    "The watching field must be a boolean.",
+    "Le champ watching doit être un booléen.",
+    "El campo watching debe ser booleano.",
+    "Das Feld watching muss ein boolescher Wert sein.",
+    "watching 字段必须为布尔值。",
+    "watching 項目は真偽値である必要があります。"
+  ],
+  "Il cestino dei moduli è riservato agli amministratori.": [
+    "Only administrators can access the form trash.",
+    "La corbeille des formulaires est réservée aux administrateurs.",
+    "La papelera de formularios está reservada a los administradores.",
+    "Der Formularpapierkorb ist Administratoren vorbehalten.",
+    "只有管理员可以访问表单回收站。",
+    "フォームのゴミ箱には管理者のみアクセスできます。"
+  ],
+  "Il cestino è riservato agli amministratori.": [
+    "Only administrators can access the trash.",
+    "La corbeille est réservée aux administrateurs.",
+    "La papelera está reservada a los administradores.",
+    "Der Papierkorb ist Administratoren vorbehalten.",
+    "只有管理员可以访问回收站。",
+    "ゴミ箱には管理者のみアクセスできます。"
+  ],
+  "Il commento deve contenere da 1 a 5000 caratteri.": [
+    "Comments must contain 1 to 5,000 characters.",
+    "Le commentaire doit contenir de 1 à 5 000 caractères.",
+    "El comentario debe tener entre 1 y 5000 caracteres.",
+    "Der Kommentar muss 1 bis 5.000 Zeichen enthalten.",
+    "评论长度必须为 1 至 5000 个字符。",
+    "コメントは 1～5000 文字で入力してください。"
+  ],
+  "Il commento non può essere vuoto.": [
+    "Comments cannot be empty.",
+    "Le commentaire ne peut pas être vide.",
+    "El comentario no puede estar vacío.",
+    "Der Kommentar darf nicht leer sein.",
+    "评论不能为空。",
+    "コメントを空にすることはできません。"
+  ],
+  "Il corpo deve essere un oggetto JSON valido.": [
+    "The body must be a valid JSON object.",
+    "Le corps doit être un objet JSON valide.",
+    "El cuerpo debe ser un objeto JSON válido.",
+    "Der Inhalt muss ein gültiges JSON-Objekt sein.",
+    "请求正文必须是有效的 JSON 对象。",
+    "本文は有効な JSON オブジェクトである必要があります。"
+  ],
+  "Il modulo non accetta nuove richieste.": [
+    "This form is not accepting new requests.",
+    "Ce formulaire n'accepte pas de nouvelles demandes.",
+    "Este formulario no acepta nuevas solicitudes.",
+    "Dieses Formular nimmt keine neuen Anfragen an.",
+    "此表单不接受新请求。",
+    "このフォームは新しいリクエストを受け付けていません。"
+  ],
+  "Il modulo è già nello stato richiesto.": [
+    "The form is already in the requested state.",
+    "Le formulaire est déjà dans l'état demandé.",
+    "El formulario ya está en el estado solicitado.",
+    "Das Formular befindet sich bereits im angeforderten Status.",
+    "表单已处于请求的状态。",
+    "フォームはすでに指定された状態です。"
+  ],
+  "Il nome non può essere vuoto.": [
+    "The name cannot be empty.",
+    "Le nom ne peut pas être vide.",
+    "El nombre no puede estar vacío.",
+    "Der Name darf nicht leer sein.",
+    "名称不能为空。",
+    "名前を空にすることはできません。"
+  ],
+  "Il ruolo osservatore consente solo la lettura.": [
+    "The observer role allows read-only access.",
+    "Le rôle d'observateur autorise uniquement la lecture.",
+    "El rol de observador solo permite lectura.",
+    "Die Beobachterrolle erlaubt nur Lesezugriff.",
+    "观察者角色只有读取权限。",
+    "閲覧者ロールは読み取りのみ可能です。"
+  ],
+  "Il testo di ricerca può contenere al massimo 200 caratteri.": [
+    "Search text can contain up to 200 characters.",
+    "Le texte de recherche peut contenir 200 caractères maximum.",
+    "El texto de búsqueda puede tener un máximo de 200 caracteres.",
+    "Der Suchtext darf höchstens 200 Zeichen enthalten.",
+    "搜索文本最多可包含 200 个字符。",
+    "検索テキストは最大 200 文字です。"
+  ],
+  "Impossibile salvare la bacheca.": [
+    "Unable to save the board.",
+    "Impossible d'enregistrer le tableau.",
+    "No se puede guardar el tablero.",
+    "Board kann nicht gespeichert werden.",
+    "无法保存看板。",
+    "ボードを保存できません。"
+  ],
+  "Impossibile salvare la lista.": [
+    "Unable to save the list.",
+    "Impossible d'enregistrer la liste.",
+    "No se puede guardar la lista.",
+    "Liste kann nicht gespeichert werden.",
+    "无法保存列表。",
+    "リストを保存できません。"
+  ],
+  "Impossibile salvare la scheda.": [
+    "Unable to save the card.",
+    "Impossible d'enregistrer la carte.",
+    "No se puede guardar la tarjeta.",
+    "Karte kann nicht gespeichert werden.",
+    "无法保存卡片。",
+    "カードを保存できません。"
+  ],
+  "Impossibile spostare nel cestino.": [
+    "Unable to move to trash.",
+    "Impossible de mettre à la corbeille.",
+    "No se puede mover a la papelera.",
+    "Verschieben in den Papierkorb nicht möglich.",
+    "无法移到回收站。",
+    "ゴミ箱に移動できません。"
+  ],
+  "Indica approved oppure changes_requested; per richiedere modifiche serve una nota.": [
+    "Specify approved or changes_requested; requesting changes requires a note.",
+    "Indiquez approved ou changes_requested ; une note est requise pour demander des modifications.",
+    "Indica approved o changes_requested; solicitar cambios requiere una nota.",
+    "Geben Sie approved oder changes_requested an; für Änderungswünsche ist eine Notiz erforderlich.",
+    "请指定 approved 或 changes_requested；要求修改时必须提供备注。",
+    "approved または changes_requested を指定してください。変更を要求する場合はメモが必要です。"
+  ],
+  "Indica da 1 a 500 schede con ID e versione univoci.": [
+    "Specify 1 to 500 cards with unique IDs and versions.",
+    "Indiquez de 1 à 500 cartes avec des identifiants et versions uniques.",
+    "Indica entre 1 y 500 tarjetas con ID y versiones únicos.",
+    "Geben Sie 1 bis 500 Karten mit eindeutigen IDs und Versionen an.",
+    "请指定 1 至 500 张卡片，并提供唯一的 ID 与版本。",
+    "一意の ID とバージョンを持つカードを 1～500 枚指定してください。"
+  ],
+  "Indica minuti da 1 a 1000000, una data valida e una nota fino a 2000 caratteri.": [
+    "Specify 1 to 1,000,000 minutes, a valid date and a note of up to 2,000 characters.",
+    "Indiquez de 1 à 1 000 000 de minutes, une date valide et une note de 2 000 caractères maximum.",
+    "Indica entre 1 y 1000000 minutos, una fecha válida y una nota de hasta 2000 caracteres.",
+    "Geben Sie 1 bis 1.000.000 Minuten, ein gültiges Datum und eine Notiz mit höchstens 2.000 Zeichen an.",
+    "请指定 1 至 1000000 分钟、有效日期及最多 2000 个字符的备注。",
+    "1～1000000 分、有効な日付、最大 2000 文字のメモを指定してください。"
+  ],
+  "Indica una scheda di destinazione.": [
+    "Specify a destination card.",
+    "Indiquez une carte de destination.",
+    "Indica una tarjeta de destino.",
+    "Geben Sie eine Zielkarte an.",
+    "请指定目标卡片。",
+    "追加先のカードを指定してください。"
+  ],
+  "Invia ogni campo attivo una sola volta.": [
+    "Submit each active field only once.",
+    "Envoyez chaque champ actif une seule fois.",
+    "Envía cada campo activo una sola vez.",
+    "Übermitteln Sie jedes aktive Feld nur einmal.",
+    "每个有效字段只能提交一次。",
+    "有効な各項目は 1 回のみ送信してください。"
+  ],
+  "JSON non supportato: massimo 90 livelli e nessun NUL nelle chiavi.": [
+    "Unsupported JSON: up to 90 levels and no NUL in keys.",
+    "JSON non pris en charge : 90 niveaux maximum et aucun NUL dans les clés.",
+    "JSON no admitido: máximo 90 niveles y ningún NUL en las claves.",
+    "JSON nicht unterstützt: maximal 90 Ebenen und kein NUL in Schlüsseln.",
+    "不支持的 JSON：最多 90 层，且键名中不能包含 NUL。",
+    "サポートされない JSON です。最大 90 階層で、キーに NUL を含めることはできません。"
+  ],
+  "L'importazione richiede un array di massimo 100 liste.": [
+    "Import requires an array of up to 100 lists.",
+    "L'importation nécessite un tableau de 100 listes maximum.",
+    "La importación requiere una matriz de hasta 100 listas.",
+    "Der Import erfordert ein Array mit höchstens 100 Listen.",
+    "导入需要一个最多包含 100 个列表的数组。",
+    "インポートには最大 100 個のリストを含む配列が必要です。"
+  ],
+  "L'intervallo deve essere ordinato e durare al massimo 366 giorni.": [
+    "The range must be in chronological order and span up to 366 days.",
+    "La plage doit être dans l'ordre chronologique et couvrir 366 jours maximum.",
+    "El intervalo debe estar en orden cronológico y abarcar un máximo de 366 días.",
+    "Der Bereich muss chronologisch geordnet sein und darf höchstens 366 Tage umfassen.",
+    "范围必须按时间先后排列，且最多跨越 366 天。",
+    "範囲は時系列順で、最大 366 日間である必要があります。"
+  ],
+  "La bacheca ha già uno sprint attivo.": [
+    "The board already has an active sprint.",
+    "Le tableau a déjà un sprint actif.",
+    "El tablero ya tiene un sprint activo.",
+    "Das Board hat bereits einen aktiven Sprint.",
+    "看板已有进行中的冲刺。",
+    "ボードにはすでに進行中のスプリントがあります。"
+  ],
+  "La capacità richiede un membro attivo con accesso in scrittura.": [
+    "Capacity requires an active member with write access.",
+    "La capacité nécessite un membre actif disposant d'un accès en écriture.",
+    "La capacidad requiere un miembro activo con acceso de escritura.",
+    "Kapazität erfordert ein aktives Mitglied mit Schreibzugriff.",
+    "容量设置需要具有写入权限的活跃成员。",
+    "稼働時間の設定には書き込み権限を持つ有効なメンバーが必要です。"
+  ],
+  "La colonna di destinazione non è attiva.": [
+    "The destination column is not active.",
+    "La colonne de destination n'est pas active.",
+    "La columna de destino no está activa.",
+    "Die Zielspalte ist nicht aktiv.",
+    "目标列未启用。",
+    "追加先の列は有効ではありません。"
+  ],
+  "La copia richiede almeno un revisore attivo diverso dal nuovo richiedente.": [
+    "Copying requires at least one active reviewer other than the new requester.",
+    "La copie nécessite au moins un réviseur actif autre que le nouveau demandeur.",
+    "La copia requiere al menos un revisor activo distinto del nuevo solicitante.",
+    "Zum Kopieren ist mindestens ein aktiver Prüfer erforderlich, der nicht der neue Antragsteller ist.",
+    "复制至少需要一位不同于新请求者的活跃评审人。",
+    "複製には新しい申請者以外に少なくとも 1 人の有効なレビュアーが必要です。"
+  ],
+  "La data di inizio deve precedere la scadenza.": [
+    "The start date must be before the due date.",
+    "La date de début doit précéder l'échéance.",
+    "La fecha de inicio debe ser anterior al vencimiento.",
+    "Das Startdatum muss vor der Fälligkeit liegen.",
+    "开始日期必须早于截止日期。",
+    "開始日は期限より前である必要があります。"
+  ],
+  "La data iniziale deve precedere la data finale.": [
+    "The start date must be before the end date.",
+    "La date de début doit précéder la date de fin.",
+    "La fecha de inicio debe ser anterior a la fecha de fin.",
+    "Das Startdatum muss vor dem Enddatum liegen.",
+    "开始日期必须早于结束日期。",
+    "開始日は終了日より前である必要があります。"
+  ],
+  "La descrizione supera il limite di 10000 byte della conversione.": [
+    "The description exceeds the conversion limit of 10,000 bytes.",
+    "La description dépasse la limite de conversion de 10 000 octets.",
+    "La descripción supera el límite de conversión de 10000 bytes.",
+    "Die Beschreibung überschreitet das Umwandlungslimit von 10.000 Bytes.",
+    "描述超过转换时的 10000 字节限制。",
+    "説明が変換時の上限 10000 バイトを超えています。"
+  ],
+  "La dipendenza creerebbe un ciclo.": [
+    "This dependency would create a cycle.",
+    "Cette dépendance créerait un cycle.",
+    "Esta dependencia crearía un ciclo.",
+    "Diese Abhängigkeit würde einen Zyklus erzeugen.",
+    "此依赖关系会形成循环。",
+    "この依存関係は循環を発生させます。"
+  ],
+  "La dipendenza deve indicare un'altra scheda.": [
+    "The dependency must reference another card.",
+    "La dépendance doit désigner une autre carte.",
+    "La dependencia debe apuntar a otra tarjeta.",
+    "Die Abhängigkeit muss auf eine andere Karte verweisen.",
+    "依赖关系必须指向另一张卡片。",
+    "依存先には別のカードを指定してください。"
+  ],
+  "La fotografia richiede uno sprint attivo.": [
+    "A snapshot requires an active sprint.",
+    "Un instantané nécessite un sprint actif.",
+    "Una instantánea requiere un sprint activo.",
+    "Eine Momentaufnahme erfordert einen aktiven Sprint.",
+    "快照需要进行中的冲刺。",
+    "スナップショットには進行中のスプリントが必要です。"
+  ],
+  "La fotografia usa la data UTC corrente e richiede un oggetto vuoto.": [
+    "Snapshots use the current UTC date and require an empty object.",
+    "L'instantané utilise la date UTC actuelle et nécessite un objet vide.",
+    "La instantánea usa la fecha UTC actual y requiere un objeto vacío.",
+    "Die Momentaufnahme verwendet das aktuelle UTC-Datum und erfordert ein leeres Objekt.",
+    "快照使用当前 UTC 日期，并需要空对象。",
+    "スナップショットは現在の UTC 日付を使用し、空のオブジェクトが必要です。"
+  ],
+  "La lista deve appartenere alla stessa bacheca.": [
+    "The list must belong to the same board.",
+    "La liste doit appartenir au même tableau.",
+    "La lista debe pertenecer al mismo tablero.",
+    "Die Liste muss zum selben Board gehören.",
+    "列表必须属于同一看板。",
+    "リストは同じボードに属している必要があります。"
+  ],
+  "La revisione è già annullata.": [
+    "The review is already canceled.",
+    "La révision est déjà annulée.",
+    "La revisión ya está cancelada.",
+    "Die Prüfung ist bereits abgebrochen.",
+    "评审已取消。",
+    "レビューはすでに取り消されています。"
+  ],
+  "La revisione è già attiva.": [
+    "The review is already active.",
+    "La révision est déjà active.",
+    "La revisión ya está activa.",
+    "Die Prüfung ist bereits aktiv.",
+    "评审已处于活动状态。",
+    "レビューはすでに有効です。"
+  ],
+  "La ricerca ammette al massimo 200 caratteri.": [
+    "Search allows up to 200 characters.",
+    "La recherche autorise 200 caractères maximum.",
+    "La búsqueda admite un máximo de 200 caracteres.",
+    "Die Suche erlaubt höchstens 200 Zeichen.",
+    "搜索内容最多 200 个字符。",
+    "検索は最大 200 文字です。"
+  ],
+  "La rimozione della fotografia non accetta campi aggiuntivi.": [
+    "Deleting a snapshot does not accept additional fields.",
+    "La suppression d'un instantané n'accepte pas de champs supplémentaires.",
+    "La eliminación de una instantánea no acepta campos adicionales.",
+    "Beim Löschen einer Momentaufnahme sind keine zusätzlichen Felder zulässig.",
+    "删除快照时不接受额外字段。",
+    "スナップショットの削除では追加項目を指定できません。"
+  ],
+  "La rimozione singola non accetta campi aggiuntivi.": [
+    "Single removal does not accept additional fields.",
+    "La suppression individuelle n'accepte pas de champs supplémentaires.",
+    "La eliminación individual no acepta campos adicionales.",
+    "Bei einer einzelnen Entfernung sind keine zusätzlichen Felder zulässig.",
+    "单项移除时不接受额外字段。",
+    "単一削除では追加項目を指定できません。"
+  ],
+  "La risposta deve contenere da 1 a 5000 caratteri.": [
+    "Replies must contain 1 to 5,000 characters.",
+    "La réponse doit contenir de 1 à 5 000 caractères.",
+    "La respuesta debe tener entre 1 y 5000 caracteres.",
+    "Die Antwort muss 1 bis 5.000 Zeichen enthalten.",
+    "回复长度必须为 1 至 5000 个字符。",
+    "返信は 1～5000 文字で入力してください。"
+  ],
+  "La risposta non può essere vuota.": [
+    "Replies cannot be empty.",
+    "La réponse ne peut pas être vide.",
+    "La respuesta no puede estar vacía.",
+    "Die Antwort darf nicht leer sein.",
+    "回复不能为空。",
+    "返信を空にすることはできません。"
+  ],
+  "Le dipendenze devono appartenere alla stessa bacheca.": [
+    "Dependencies must belong to the same board.",
+    "Les dépendances doivent appartenir au même tableau.",
+    "Las dependencias deben pertenecer al mismo tablero.",
+    "Abhängigkeiten müssen zum selben Board gehören.",
+    "依赖项必须属于同一看板。",
+    "依存先は同じボードに属している必要があります。"
+  ],
+  "Le revisioni richiedono account autenticati.": [
+    "Reviews require signed-in accounts.",
+    "Les révisions nécessitent des comptes authentifiés.",
+    "Las revisiones requieren cuentas autenticadas.",
+    "Prüfungen erfordern angemeldete Konten.",
+    "评审需要已登录的账户。",
+    "レビューにはログイン済みのアカウントが必要です。"
+  ],
+  "Le richieste interne richiedono un account autenticato.": [
+    "Internal requests require a signed-in account.",
+    "Les demandes internes nécessitent un compte authentifié.",
+    "Las solicitudes internas requieren una cuenta autenticada.",
+    "Interne Anfragen erfordern ein angemeldetes Konto.",
+    "内部请求需要已登录的账户。",
+    "内部リクエストにはログイン済みのアカウントが必要です。"
+  ],
+  "Limite WIP della lista raggiunto.": [
+    "The list's WIP limit has been reached.",
+    "La limite WIP de la liste est atteinte.",
+    "Se ha alcanzado el límite WIP de la lista.",
+    "Das WIP-Limit der Liste ist erreicht.",
+    "已达到列表的 WIP 限制。",
+    "リストの WIP 上限に達しました。"
+  ],
+  "Limite WIP superato: nessuna modifica applicata.": [
+    "WIP limit exceeded: no changes applied.",
+    "Limite WIP dépassée : aucune modification appliquée.",
+    "Límite WIP superado: no se ha aplicado ningún cambio.",
+    "WIP-Limit überschritten: Keine Änderungen angewendet.",
+    "超出 WIP 限制：未应用任何更改。",
+    "WIP 上限を超えました。変更は適用されていません。"
+  ],
+  "Limite campi della bacheca raggiunto.": [
+    "The board's field limit has been reached.",
+    "La limite de champs du tableau est atteinte.",
+    "Se ha alcanzado el límite de campos del tablero.",
+    "Das Feldlimit des Boards ist erreicht.",
+    "已达到看板的字段数量限制。",
+    "ボードの項目数上限に達しました。"
+  ],
+  "Limite della scheda: 10 file attivi e 5 MiB totali.": [
+    "Card limit: 10 active files and 5 MiB in total.",
+    "Limite par carte : 10 fichiers actifs et 5 Mio au total.",
+    "Límite por tarjeta: 10 archivos activos y 5 MiB en total.",
+    "Kartenlimit: 10 aktive Dateien und insgesamt 5 MiB.",
+    "卡片限制：10 个有效文件，总大小 5 MiB。",
+    "カードの上限は有効なファイル 10 個、合計 5 MiB です。"
+  ],
+  "Limite dello storico di revisione raggiunto.": [
+    "Review history limit reached.",
+    "Limite de l'historique de révision atteinte.",
+    "Se ha alcanzado el límite del historial de revisión.",
+    "Limit des Prüfungsverlaufs erreicht.",
+    "已达到评审历史记录上限。",
+    "レビュー履歴の上限に達しました。"
+  ],
+  "Limite dello storico raggiunto.": [
+    "History limit reached.",
+    "Limite de l'historique atteinte.",
+    "Se ha alcanzado el límite del historial.",
+    "Verlaufslimit erreicht.",
+    "已达到历史记录上限。",
+    "履歴の上限に達しました。"
+  ],
+  "Limite di 100 moduli per bacheca raggiunto.": [
+    "Limit of 100 forms per board reached.",
+    "Limite de 100 formulaires par tableau atteinte.",
+    "Se ha alcanzado el límite de 100 formularios por tablero.",
+    "Limit von 100 Formularen pro Board erreicht.",
+    "已达到每个看板 100 个表单的上限。",
+    "ボードあたりのフォーム数上限 100 件に達しました。"
+  ],
+  "Limite di 1000 note raggiunto.": [
+    "Limit of 1,000 notes reached.",
+    "Limite de 1 000 notes atteinte.",
+    "Se ha alcanzado el límite de 1000 notas.",
+    "Limit von 1.000 Notizen erreicht.",
+    "已达到 1000 条备注的上限。",
+    "メモ数上限 1000 件に達しました。"
+  ],
+  "Limite di 1000 schede per sprint raggiunto.": [
+    "Limit of 1,000 cards per sprint reached.",
+    "Limite de 1 000 cartes par sprint atteinte.",
+    "Se ha alcanzado el límite de 1000 tarjetas por sprint.",
+    "Limit von 1.000 Karten pro Sprint erreicht.",
+    "已达到每个冲刺 1000 张卡片的上限。",
+    "スプリントあたりのカード数上限 1000 枚に達しました。"
+  ],
+  "Limite di 10000 eventi dello sprint raggiunto.": [
+    "Limit of 10,000 sprint events reached.",
+    "Limite de 10 000 événements du sprint atteinte.",
+    "Se ha alcanzado el límite de 10000 eventos del sprint.",
+    "Limit von 10.000 Sprint-Ereignissen erreicht.",
+    "已达到冲刺 10000 条事件的上限。",
+    "スプリントのイベント数上限 10000 件に達しました。"
+  ],
+  "Limite di 10000 registrazioni per scheda raggiunto.": [
+    "Limit of 10,000 time entries per card reached.",
+    "Limite de 10 000 entrées de temps par carte atteinte.",
+    "Se ha alcanzado el límite de 10000 registros de tiempo por tarjeta.",
+    "Limit von 10.000 Zeiteinträgen pro Karte erreicht.",
+    "已达到每张卡片 10000 条工时记录的上限。",
+    "カードあたりの時間記録数上限 10000 件に達しました。"
+  ],
+  "Limite di 10000 richieste per bacheca raggiunto.": [
+    "Limit of 10,000 requests per board reached.",
+    "Limite de 10 000 demandes par tableau atteinte.",
+    "Se ha alcanzado el límite de 10000 solicitudes por tablero.",
+    "Limit von 10.000 Anfragen pro Board erreicht.",
+    "已达到每个看板 10000 个请求的上限。",
+    "ボードあたりのリクエスト数上限 10000 件に達しました。"
+  ],
+  "Limite di 20 campi attivi raggiunto.": [
+    "Limit of 20 active fields reached.",
+    "Limite de 20 champs actifs atteinte.",
+    "Se ha alcanzado el límite de 20 campos activos.",
+    "Limit von 20 aktiven Feldern erreicht.",
+    "已达到 20 个有效字段的上限。",
+    "有効な項目数上限 20 個に達しました。"
+  ],
+  "Limite di 200 revisioni per scheda raggiunto.": [
+    "Limit of 200 reviews per card reached.",
+    "Limite de 200 révisions par carte atteinte.",
+    "Se ha alcanzado el límite de 200 revisiones por tarjeta.",
+    "Limit von 200 Prüfungen pro Karte erreicht.",
+    "已达到每张卡片 200 次评审的上限。",
+    "カードあたりのレビュー数上限 200 件に達しました。"
+  ],
+  "Limite di 200 sprint per bacheca raggiunto.": [
+    "Limit of 200 sprints per board reached.",
+    "Limite de 200 sprints par tableau atteinte.",
+    "Se ha alcanzado el límite de 200 sprints por tablero.",
+    "Limit von 200 Sprints pro Board erreicht.",
+    "已达到每个看板 200 个冲刺的上限。",
+    "ボードあたりのスプリント数上限 200 件に達しました。"
+  ],
+  "Limite di 366 fotografie per sprint raggiunto.": [
+    "Limit of 366 snapshots per sprint reached.",
+    "Limite de 366 instantanés par sprint atteinte.",
+    "Se ha alcanzado el límite de 366 instantáneas por sprint.",
+    "Limit von 366 Momentaufnahmen pro Sprint erreicht.",
+    "已达到每个冲刺 366 个快照的上限。",
+    "スプリントあたりのスナップショット数上限 366 件に達しました。"
+  ],
+  "Limite di revisioni per scheda raggiunto.": [
+    "Review limit per card reached.",
+    "Limite de révisions par carte atteinte.",
+    "Se ha alcanzado el límite de revisiones por tarjeta.",
+    "Prüfungslimit pro Karte erreicht.",
+    "已达到每张卡片的评审数量上限。",
+    "カードあたりのレビュー数上限に達しました。"
+  ],
+  "Limite elementi attivi raggiunto.": [
+    "Active item limit reached.",
+    "Limite d'éléments actifs atteinte.",
+    "Se ha alcanzado el límite de elementos activos.",
+    "Limit aktiver Elemente erreicht.",
+    "已达到有效项目的数量上限。",
+    "有効な項目数の上限に達しました。"
+  ],
+  "Limite traguardi raggiunto.": [
+    "Milestone limit reached.",
+    "Limite de jalons atteinte.",
+    "Se ha alcanzado el límite de hitos.",
+    "Meilensteinlimit erreicht.",
+    "已达到里程碑数量上限。",
+    "マイルストーン数の上限に達しました。"
+  ],
+  "Lista di destinazione obbligatoria.": [
+    "Destination list required.",
+    "Liste de destination obligatoire.",
+    "Se requiere una lista de destino.",
+    "Zielliste erforderlich.",
+    "必须提供目标列表。",
+    "追加先のリストが必要です。"
+  ],
+  "Lista modificata da un altro utente.": [
+    "List modified by another user.",
+    "Liste modifiée par un autre utilisateur.",
+    "Otro usuario ha modificado la lista.",
+    "Liste von einem anderen Benutzer geändert.",
+    "列表已被其他用户修改。",
+    "他のユーザーがリストを変更しました。"
+  ],
+  "Lo sprint non è eliminato.": [
+    "The sprint is not deleted.",
+    "Le sprint n'est pas supprimé.",
+    "El sprint no está eliminado.",
+    "Der Sprint ist nicht gelöscht.",
+    "冲刺未被删除。",
+    "スプリントは削除されていません。"
+  ],
+  "Metodo non consentito.": [
+    "Method not allowed.",
+    "Méthode non autorisée.",
+    "Método no permitido.",
+    "Methode nicht erlaubt.",
+    "不允许此方法。",
+    "このメソッドは許可されていません。"
+  ],
+  "Metriche riservate agli amministratori.": [
+    "Metrics are restricted to administrators.",
+    "Les métriques sont réservées aux administrateurs.",
+    "Las métricas están reservadas a los administradores.",
+    "Metriken sind Administratoren vorbehalten.",
+    "指标仅限管理员访问。",
+    "メトリクスには管理者のみアクセスできます。"
+  ],
+  "Modulo già attivo.": [
+    "Form already active.",
+    "Formulaire déjà actif.",
+    "El formulario ya está activo.",
+    "Formular bereits aktiv.",
+    "表单已启用。",
+    "フォームはすでに有効です。"
+  ],
+  "Nessun voto da ritirare.": [
+    "No vote to withdraw.",
+    "Aucun vote à retirer.",
+    "No hay ningún voto que retirar.",
+    "Keine Stimme zum Zurückziehen vorhanden.",
+    "没有可撤回的投票。",
+    "取り消す投票はありません。"
+  ],
+  "Nome e origine del modello obbligatori.": [
+    "Template name and source required.",
+    "Nom et source du modèle obligatoires.",
+    "Se requieren el nombre y el origen de la plantilla.",
+    "Vorlagenname und Quelle erforderlich.",
+    "必须提供模板名称和来源。",
+    "テンプレート名と元データが必要です。"
+  ],
+  "Nome richiesto, massimo 100 caratteri.": [
+    "Name required, up to 100 characters.",
+    "Nom obligatoire, 100 caractères maximum.",
+    "Se requiere un nombre de hasta 100 caracteres.",
+    "Name erforderlich, höchstens 100 Zeichen.",
+    "必须提供名称，最多 100 个字符。",
+    "名前は必須です。最大 100 文字で入力してください。"
+  ],
+  "Nome, MIME o base64 non valido; massimo 1 MiB per file.": [
+    "Invalid name, MIME or base64; up to 1 MiB per file.",
+    "Nom, MIME ou base64 non valide ; 1 Mio maximum par fichier.",
+    "Nombre, MIME o base64 no válido; máximo 1 MiB por archivo.",
+    "Name, MIME oder base64 ungültig; maximal 1 MiB pro Datei.",
+    "名称、MIME 或 base64 无效；每个文件最多 1 MiB。",
+    "名前、MIME または base64 が無効です。ファイルあたり最大 1 MiB です。"
+  ],
+  "Per sostituire la fotografia di oggi invia If-Match con la versione corrente dello sprint.": [
+    "To replace today's snapshot, send If-Match with the sprint's current version.",
+    "Pour remplacer l'instantané du jour, envoyez If-Match avec la version actuelle du sprint.",
+    "Para sustituir la instantánea de hoy, envía If-Match con la versión actual del sprint.",
+    "Um die heutige Momentaufnahme zu ersetzen, senden Sie If-Match mit der aktuellen Sprint-Version.",
+    "要替换今天的快照，请发送包含冲刺当前版本的 If-Match。",
+    "今日のスナップショットを置き換えるには、スプリントの現在のバージョンを If-Match に指定してください。"
+  ],
+  "Puoi attivare soltanto uno sprint pianificato.": [
+    "Only a planned sprint can be activated.",
+    "Seul un sprint planifié peut être activé.",
+    "Solo se puede activar un sprint planificado.",
+    "Nur ein geplanter Sprint kann aktiviert werden.",
+    "只能启动已计划的冲刺。",
+    "計画済みのスプリントのみ開始できます。"
+  ],
+  "Puoi chiudere soltanto uno sprint attivo.": [
+    "Only an active sprint can be closed.",
+    "Seul un sprint actif peut être clos.",
+    "Solo se puede cerrar un sprint activo.",
+    "Nur ein aktiver Sprint kann abgeschlossen werden.",
+    "只能结束进行中的冲刺。",
+    "進行中のスプリントのみ終了できます。"
+  ],
+  "Puoi eliminare solo i tuoi commenti.": [
+    "You can only delete your own comments.",
+    "Vous ne pouvez supprimer que vos propres commentaires.",
+    "Solo puedes eliminar tus propios comentarios.",
+    "Sie können nur eigene Kommentare löschen.",
+    "你只能删除自己的评论。",
+    "削除できるのは自分のコメントのみです。"
+  ],
+  "Puoi modificare solo i tuoi commenti.": [
+    "You can only edit your own comments.",
+    "Vous ne pouvez modifier que vos propres commentaires.",
+    "Solo puedes editar tus propios comentarios.",
+    "Sie können nur eigene Kommentare bearbeiten.",
+    "你只能编辑自己的评论。",
+    "編集できるのは自分のコメントのみです。"
+  ],
+  "Puoi modificare solo le tue registrazioni.": [
+    "You can only edit your own time entries.",
+    "Vous ne pouvez modifier que vos propres entrées de temps.",
+    "Solo puedes editar tus propios registros de tiempo.",
+    "Sie können nur eigene Zeiteinträge bearbeiten.",
+    "你只能编辑自己的工时记录。",
+    "編集できるのは自分の時間記録のみです。"
+  ],
+  "Puoi riaprire soltanto uno sprint chiuso.": [
+    "Only a closed sprint can be reopened.",
+    "Seul un sprint clos peut être rouvert.",
+    "Solo se puede reabrir un sprint cerrado.",
+    "Nur ein abgeschlossener Sprint kann erneut geöffnet werden.",
+    "只能重新打开已结束的冲刺。",
+    "終了したスプリントのみ再開できます。"
+  ],
+  "Puoi spostare le schede solo nella stessa bacheca.": [
+    "Cards can only be moved within the same board.",
+    "Les cartes ne peuvent être déplacées qu'au sein du même tableau.",
+    "Solo puedes mover tarjetas dentro del mismo tablero.",
+    "Karten können nur innerhalb desselben Boards verschoben werden.",
+    "只能在同一看板内移动卡片。",
+    "カードは同じボード内でのみ移動できます。"
+  ],
+  "Puoi votare soltanto come revisore attivo della richiesta di un altro utente.": [
+    "You can vote only as an active reviewer on another user's request.",
+    "Vous ne pouvez voter qu'en tant que réviseur actif de la demande d'un autre utilisateur.",
+    "Solo puedes votar como revisor activo de la solicitud de otro usuario.",
+    "Sie können nur als aktiver Prüfer der Anfrage eines anderen Benutzers abstimmen.",
+    "只有作为其他用户请求的活跃评审人时才能投票。",
+    "他のユーザーの申請に対する有効なレビュアーとしてのみ投票できます。"
+  ],
+  "Questa funzione richiede account e avvio con --auth.": [
+    "This feature requires an account and startup with --auth.",
+    "Cette fonction nécessite un compte et un démarrage avec --auth.",
+    "Esta función requiere una cuenta y el inicio con --auth.",
+    "Diese Funktion erfordert ein Konto und den Start mit --auth.",
+    "此功能需要账户，并使用 --auth 启动。",
+    "この機能にはアカウントと --auth を指定した起動が必要です。"
+  ],
+  "Questa operazione richiede un oggetto vuoto.": [
+    "This operation requires an empty object.",
+    "Cette opération nécessite un objet vide.",
+    "Esta operación requiere un objeto vacío.",
+    "Dieser Vorgang erfordert ein leeres Objekt.",
+    "此操作需要空对象。",
+    "この操作には空のオブジェクトが必要です。"
+  ],
+  "Report non eliminato.": [
+    "Report was not deleted.",
+    "Le rapport n'a pas été supprimé.",
+    "No se ha eliminado el informe.",
+    "Bericht wurde nicht gelöscht.",
+    "报告未能删除。",
+    "レポートを削除できませんでした。"
+  ],
+  "Report non salvato.": [
+    "Report was not saved.",
+    "Le rapport n'a pas été enregistré.",
+    "No se ha guardado el informe.",
+    "Bericht wurde nicht gespeichert.",
+    "报告未能保存。",
+    "レポートを保存できませんでした。"
+  ],
+  "Riapri la revisione prima di votare.": [
+    "Reopen the review before voting.",
+    "Rouvrez la révision avant de voter.",
+    "Reabre la revisión antes de votar.",
+    "Öffnen Sie die Prüfung vor dem Abstimmen erneut.",
+    "请先重新打开评审再投票。",
+    "投票する前にレビューを再開してください。"
+  ],
+  "Riapri la scheda prima di aggiungere una dipendenza incompleta.": [
+    "Reopen the card before adding an incomplete dependency.",
+    "Rouvrez la carte avant d'ajouter une dépendance incomplète.",
+    "Reabre la tarjeta antes de añadir una dependencia incompleta.",
+    "Öffnen Sie die Karte erneut, bevor Sie eine unvollständige Abhängigkeit hinzufügen.",
+    "添加未完成的依赖项之前，请重新打开卡片。",
+    "未完了の依存先を追加する前にカードを再開してください。"
+  ],
+  "Riapri lo sprint prima di modificarlo.": [
+    "Reopen the sprint before editing it.",
+    "Rouvrez le sprint avant de le modifier.",
+    "Reabre el sprint antes de editarlo.",
+    "Öffnen Sie den Sprint vor der Bearbeitung erneut.",
+    "请先重新打开冲刺再进行编辑。",
+    "編集する前にスプリントを再開してください。"
+  ],
+  "Riapri lo sprint prima di modificarne la capacità.": [
+    "Reopen the sprint before editing its capacity.",
+    "Rouvrez le sprint avant de modifier sa capacité.",
+    "Reabre el sprint antes de editar su capacidad.",
+    "Öffnen Sie den Sprint erneut, bevor Sie dessen Kapazität bearbeiten.",
+    "请先重新打开冲刺再修改容量。",
+    "稼働時間を変更する前にスプリントを再開してください。"
+  ],
+  "Riapri lo sprint prima di modificarne le schede.": [
+    "Reopen the sprint before editing its cards.",
+    "Rouvrez le sprint avant de modifier ses cartes.",
+    "Reabre el sprint antes de editar sus tarjetas.",
+    "Öffnen Sie den Sprint erneut, bevor Sie dessen Karten bearbeiten.",
+    "请先重新打开冲刺再修改其卡片。",
+    "カードを変更する前にスプリントを再開してください。"
+  ],
+  "Ricerca non valida o oltre 200 caratteri.": [
+    "Invalid search or more than 200 characters.",
+    "Recherche non valide ou supérieure à 200 caractères.",
+    "Búsqueda no válida o de más de 200 caracteres.",
+    "Suche ungültig oder länger als 200 Zeichen.",
+    "搜索内容无效或超过 200 个字符。",
+    "検索内容が無効か、200 文字を超えています。"
+  ],
+  "Ricerca temporaneamente non disponibile.": [
+    "Search temporarily unavailable.",
+    "Recherche temporairement indisponible.",
+    "La búsqueda no está disponible temporalmente.",
+    "Suche vorübergehend nicht verfügbar.",
+    "搜索暂时不可用。",
+    "検索を一時的に利用できません。"
+  ],
+  "Richiesta già attiva.": [
+    "Request already active.",
+    "Demande déjà active.",
+    "La solicitud ya está activa.",
+    "Anfrage bereits aktiv.",
+    "请求已处于活动状态。",
+    "リクエストはすでに有効です。"
+  ],
+  "Richiesta già convertita o nello stato richiesto.": [
+    "Request already converted or in the requested state.",
+    "Demande déjà convertie ou dans l'état demandé.",
+    "La solicitud ya está convertida o en el estado solicitado.",
+    "Anfrage bereits umgewandelt oder im angeforderten Status.",
+    "请求已转换或已处于指定状态。",
+    "リクエストはすでに変換済み、または指定された状態です。"
+  ],
+  "Richiesta già convertita.": [
+    "Request already converted.",
+    "Demande déjà convertie.",
+    "La solicitud ya está convertida.",
+    "Anfrage bereits umgewandelt.",
+    "请求已转换。",
+    "リクエストはすでに変換済みです。"
+  ],
+  "Ripristina prima la bacheca.": [
+    "Restore the board first.",
+    "Restaurez d'abord le tableau.",
+    "Restaura primero el tablero.",
+    "Stellen Sie zuerst das Board wieder her.",
+    "请先恢复看板。",
+    "先にボードを復元してください。"
+  ],
+  "Ripristina prima la lista.": [
+    "Restore the list first.",
+    "Restaurez d'abord la liste.",
+    "Restaura primero la lista.",
+    "Stellen Sie zuerst die Liste wieder her.",
+    "请先恢复列表。",
+    "先にリストを復元してください。"
+  ],
+  "Ripristino fallito.": [
+    "Restore failed.",
+    "Échec de la restauration.",
+    "Error al restaurar.",
+    "Wiederherstellung fehlgeschlagen.",
+    "恢复失败。",
+    "復元に失敗しました。"
+  ],
+  "Risorsa già ripristinata.": [
+    "Resource already restored.",
+    "Ressource déjà restaurée.",
+    "El recurso ya está restaurado.",
+    "Ressource bereits wiederhergestellt.",
+    "资源已恢复。",
+    "リソースはすでに復元されています。"
+  ],
+  "Risorsa modificata da un altro utente.": [
+    "Resource modified by another user.",
+    "Ressource modifiée par un autre utilisateur.",
+    "Otro usuario ha modificado el recurso.",
+    "Ressource von einem anderen Benutzer geändert.",
+    "资源已被其他用户修改。",
+    "他のユーザーがリソースを変更しました。"
+  ],
+  "Risposte non valide per la struttura originale della richiesta.": [
+    "Answers do not match the request's original structure.",
+    "Les réponses ne correspondent pas à la structure originale de la demande.",
+    "Las respuestas no son válidas para la estructura original de la solicitud.",
+    "Die Antworten entsprechen nicht der ursprünglichen Struktur der Anfrage.",
+    "回答不符合请求的原始结构。",
+    "回答がリクエスト時の元の構成に一致しません。"
+  ],
+  "Salvataggio esterno temporaneamente non disponibile. Riprova.": [
+    "External saving temporarily unavailable. Try again.",
+    "Enregistrement externe temporairement indisponible. Réessayez.",
+    "El guardado externo no está disponible temporalmente. Vuelve a intentarlo.",
+    "Externes Speichern vorübergehend nicht verfügbar. Versuchen Sie es erneut.",
+    "外部保存暂时不可用。请重试。",
+    "外部への保存を一時的に利用できません。再試行してください。"
+  ],
+  "Salvataggio temporaneamente non disponibile.": [
+    "Saving temporarily unavailable.",
+    "Enregistrement temporairement indisponible.",
+    "El guardado no está disponible temporalmente.",
+    "Speichern vorübergehend nicht verfügbar.",
+    "保存功能暂时不可用。",
+    "保存を一時的に利用できません。"
+  ],
+  "Scheda di destinazione non trovata nella bacheca.": [
+    "Destination card not found in this board.",
+    "Carte de destination introuvable dans ce tableau.",
+    "No se encuentra la tarjeta de destino en el tablero.",
+    "Zielkarte in diesem Board nicht gefunden.",
+    "未在看板中找到目标卡片。",
+    "ボード内に追加先のカードが見つかりません。"
+  ],
+  "Scheda importata non valida o limite di 10000 schede superato.": [
+    "Invalid imported card or limit of 10,000 cards exceeded.",
+    "Carte importée non valide ou limite de 10 000 cartes dépassée.",
+    "Tarjeta importada no válida o límite de 10000 tarjetas superado.",
+    "Importierte Karte ungültig oder Limit von 10.000 Karten überschritten.",
+    "导入的卡片无效或超过 10000 张卡片的限制。",
+    "インポートしたカードが無効か、上限の 10000 枚を超えています。"
+  ],
+  "Scheda modificata da un altro utente.": [
+    "Card modified by another user.",
+    "Carte modifiée par un autre utilisateur.",
+    "Otro usuario ha modificado la tarjeta.",
+    "Karte von einem anderen Benutzer geändert.",
+    "卡片已被其他用户修改。",
+    "他のユーザーがカードを変更しました。"
+  ],
+  "Scheda modificata da un altro utente. Ricarica prima di salvare.": [
+    "Card modified by another user. Reload before saving.",
+    "Carte modifiée par un autre utilisateur. Rechargez avant d'enregistrer.",
+    "Otro usuario ha modificado la tarjeta. Recarga antes de guardar.",
+    "Karte von einem anderen Benutzer geändert. Laden Sie vor dem Speichern neu.",
+    "卡片已被其他用户修改。请重新加载后再保存。",
+    "他のユーザーがカードを変更しました。保存する前に再読み込みしてください。"
+  ],
+  "Scheda non trovata nella bacheca dello sprint.": [
+    "Card not found in the sprint's board.",
+    "Carte introuvable dans le tableau du sprint.",
+    "No se encuentra la tarjeta en el tablero del sprint.",
+    "Karte im Board des Sprints nicht gefunden.",
+    "未在冲刺所属看板中找到卡片。",
+    "スプリントのボードにカードが見つかりません。"
+  ],
+  "Seleziona da 1 a 20 revisori attivi scriventi diversi dal richiedente.": [
+    "Select 1 to 20 active reviewers with write access other than the requester.",
+    "Sélectionnez de 1 à 20 réviseurs actifs avec accès en écriture, autres que le demandeur.",
+    "Selecciona entre 1 y 20 revisores activos con acceso de escritura distintos del solicitante.",
+    "Wählen Sie 1 bis 20 aktive Prüfer mit Schreibzugriff, die nicht der Antragsteller sind.",
+    "请选择 1 至 20 位具有写入权限且不同于请求者的活跃评审人。",
+    "申請者以外の、書き込み権限を持つ有効なレビュアーを 1～20 人選択してください。"
+  ],
+  "Seleziona una colonna di destinazione attiva.": [
+    "Select an active destination column.",
+    "Sélectionnez une colonne de destination active.",
+    "Selecciona una columna de destino activa.",
+    "Wählen Sie eine aktive Zielspalte.",
+    "请选择有效的目标列。",
+    "有効な追加先の列を選択してください。"
+  ],
+  "Solo gli amministratori della bacheca gestiscono i moduli.": [
+    "Only board administrators can manage forms.",
+    "Seuls les administrateurs du tableau peuvent gérer les formulaires.",
+    "Solo los administradores del tablero pueden gestionar formularios.",
+    "Nur Board-Administratoren können Formulare verwalten.",
+    "只有看板管理员可以管理表单。",
+    "フォームを管理できるのはボードの管理者のみです。"
+  ],
+  "Solo gli amministratori gestiscono i campi.": [
+    "Only administrators can manage fields.",
+    "Seuls les administrateurs peuvent gérer les champs.",
+    "Solo los administradores pueden gestionar campos.",
+    "Nur Administratoren können Felder verwalten.",
+    "只有管理员可以管理字段。",
+    "項目を管理できるのは管理者のみです。"
+  ],
+  "Solo i membri scriventi gestiscono lo stato.": [
+    "Only members with write access can manage status.",
+    "Seuls les membres avec accès en écriture peuvent gérer l'état.",
+    "Solo los miembros con acceso de escritura pueden gestionar el estado.",
+    "Nur Mitglieder mit Schreibzugriff können den Status verwalten.",
+    "只有具有写入权限的成员可以管理状态。",
+    "状態を管理できるのは書き込み権限を持つメンバーのみです。"
+  ],
+  "Solo i membri scriventi possono convertire le richieste.": [
+    "Only members with write access can convert requests.",
+    "Seuls les membres avec accès en écriture peuvent convertir les demandes.",
+    "Solo los miembros con acceso de escritura pueden convertir solicitudes.",
+    "Nur Mitglieder mit Schreibzugriff können Anfragen umwandeln.",
+    "只有具有写入权限的成员可以转换请求。",
+    "リクエストを変換できるのは書き込み権限を持つメンバーのみです。"
+  ],
+  "Solo l'autore e i membri scriventi possono discutere la richiesta.": [
+    "Only the author and members with write access can discuss the request.",
+    "Seuls l'auteur et les membres avec accès en écriture peuvent discuter de la demande.",
+    "Solo el autor y los miembros con acceso de escritura pueden comentar la solicitud.",
+    "Nur der Autor und Mitglieder mit Schreibzugriff können die Anfrage diskutieren.",
+    "只有作者及具有写入权限的成员可以讨论此请求。",
+    "リクエストについてコメントできるのは作成者と書き込み権限を持つメンバーのみです。"
+  ],
+  "Solo l'autore e i membri scriventi possono gestire il cestino.": [
+    "Only the author and members with write access can manage trash.",
+    "Seuls l'auteur et les membres avec accès en écriture peuvent gérer la corbeille.",
+    "Solo el autor y los miembros con acceso de escritura pueden gestionar la papelera.",
+    "Nur der Autor und Mitglieder mit Schreibzugriff können den Papierkorb verwalten.",
+    "只有作者及具有写入权限的成员可以管理回收站。",
+    "ゴミ箱を管理できるのは作成者と書き込み権限を持つメンバーのみです。"
+  ],
+  "Solo l'autore può modificare le risposte.": [
+    "Only the author can edit answers.",
+    "Seul l'auteur peut modifier les réponses.",
+    "Solo el autor puede editar las respuestas.",
+    "Nur der Autor kann Antworten bearbeiten.",
+    "只有作者可以编辑回答。",
+    "回答を編集できるのは作成者のみです。"
+  ],
+  "Solo richiedente e amministratori possono duplicare la revisione.": [
+    "Only the requester and administrators can duplicate the review.",
+    "Seuls le demandeur et les administrateurs peuvent dupliquer la révision.",
+    "Solo el solicitante y los administradores pueden duplicar la revisión.",
+    "Nur der Antragsteller und Administratoren können die Prüfung duplizieren.",
+    "只有请求者和管理员可以复制评审。",
+    "レビューを複製できるのは申請者と管理者のみです。"
+  ],
+  "Solo richiedente e amministratori possono gestire la revisione.": [
+    "Only the requester and administrators can manage the review.",
+    "Seuls le demandeur et les administrateurs peuvent gérer la révision.",
+    "Solo el solicitante y los administradores pueden gestionar la revisión.",
+    "Nur der Antragsteller und Administratoren können die Prüfung verwalten.",
+    "只有请求者和管理员可以管理评审。",
+    "レビューを管理できるのは申請者と管理者のみです。"
+  ],
+  "Solo richieste nuove o in esame possono essere modificate.": [
+    "Only new requests or requests in review can be edited.",
+    "Seules les demandes nouvelles ou en cours d'examen peuvent être modifiées.",
+    "Solo se pueden editar solicitudes nuevas o en revisión.",
+    "Nur neue Anfragen oder Anfragen in Prüfung können bearbeitet werden.",
+    "只能编辑新建或审核中的请求。",
+    "編集できるのは新規または確認中のリクエストのみです。"
+  ],
+  "Specifica un testo di ricerca valido (max 200 caratteri).": [
+    "Enter valid search text (up to 200 characters).",
+    "Saisissez un texte de recherche valide (200 caractères maximum).",
+    "Introduce un texto de búsqueda válido (máximo 200 caracteres).",
+    "Geben Sie einen gültigen Suchtext ein (maximal 200 Zeichen).",
+    "请输入有效搜索文本（最多 200 个字符）。",
+    "有効な検索テキストを入力してください（最大 200 文字）。"
+  ],
+  "Titolo o risposte non validi per i campi del modulo.": [
+    "Title or answers are invalid for the form fields.",
+    "Le titre ou les réponses ne sont pas valides pour les champs du formulaire.",
+    "El título o las respuestas no son válidos para los campos del formulario.",
+    "Titel oder Antworten für die Formularfelder ungültig.",
+    "标题或回答不符合表单字段要求。",
+    "タイトルまたは回答がフォームの項目に対して無効です。"
+  ],
+  "Titolo, data, policy o revisori non validi. Seleziona da 1 a 20 membri scriventi diversi dal richiedente.": [
+    "Invalid title, date, policy or reviewers. Select 1 to 20 members with write access other than the requester.",
+    "Titre, date, politique ou réviseurs non valides. Sélectionnez de 1 à 20 membres avec accès en écriture, autres que le demandeur.",
+    "Título, fecha, política o revisores no válidos. Selecciona entre 1 y 20 miembros con acceso de escritura distintos del solicitante.",
+    "Titel, Datum, Richtlinie oder Prüfer ungültig. Wählen Sie 1 bis 20 Mitglieder mit Schreibzugriff, die nicht der Antragsteller sind.",
+    "标题、日期、策略或评审人无效。请选择 1 至 20 位具有写入权限且不同于请求者的成员。",
+    "タイトル、日付、方針またはレビュアーが無効です。申請者以外の書き込み権限を持つメンバーを 1～20 人選択してください。"
+  ],
+  "Traguardo non valido; la chiave è immutabile.": [
+    "Invalid milestone; the key cannot be changed.",
+    "Jalon non valide ; la clé est immuable.",
+    "Hito no válido; la clave no se puede cambiar.",
+    "Meilenstein ungültig; der Schlüssel ist unveränderlich.",
+    "里程碑无效；键名不可更改。",
+    "マイルストーンが無効です。キーは変更できません。"
+  ],
+  "Troppi elementi attivi nella pianificazione importata.": [
+    "Too many active items in the imported planning data.",
+    "Trop d'éléments actifs dans les données de planification importées.",
+    "Demasiados elementos activos en la planificación importada.",
+    "Zu viele aktive Elemente in den importierten Planungsdaten.",
+    "导入的规划中有效项目过多。",
+    "インポートした計画の有効な項目が多すぎます。"
+  ],
+  "Una dipendenza non è completata: nessuna modifica applicata.": [
+    "A dependency is incomplete: no changes applied.",
+    "Une dépendance n'est pas terminée : aucune modification appliquée.",
+    "Una dependencia está incompleta: no se ha aplicado ningún cambio.",
+    "Eine Abhängigkeit ist nicht abgeschlossen: Keine Änderungen angewendet.",
+    "某个依赖项尚未完成：未应用任何更改。",
+    "未完了の依存先があります。変更は適用されていません。"
+  ],
+  "Una scheda appartiene già a un altro sprint pianificato o attivo.": [
+    "A card already belongs to another planned or active sprint.",
+    "Une carte appartient déjà à un autre sprint planifié ou actif.",
+    "Una tarjeta ya pertenece a otro sprint planificado o activo.",
+    "Eine Karte gehört bereits zu einem anderen geplanten oder aktiven Sprint.",
+    "某张卡片已属于另一个已计划或进行中的冲刺。",
+    "カードはすでに別の計画済み、または進行中のスプリントに属しています。"
+  ],
+  "Una scheda non appartiene alla bacheca.": [
+    "A card does not belong to this board.",
+    "Une carte n'appartient pas à ce tableau.",
+    "Una tarjeta no pertenece a este tablero.",
+    "Eine Karte gehört nicht zu diesem Board.",
+    "某张卡片不属于此看板。",
+    "このボードに属していないカードがあります。"
+  ],
+  "Una scheda è stata modificata: nessuna modifica applicata.": [
+    "A card was modified: no changes applied.",
+    "Une carte a été modifiée : aucune modification appliquée.",
+    "Una tarjeta se ha modificado: no se ha aplicado ningún cambio.",
+    "Eine Karte wurde geändert: Keine Änderungen angewendet.",
+    "某张卡片已被修改：未应用任何更改。",
+    "カードが変更されています。変更は適用されていません。"
+  ],
+  "Usa il formato application/json.": [
+    "Use the application/json format.",
+    "Utilisez le format application/json.",
+    "Usa el formato application/json.",
+    "Verwenden Sie das Format application/json.",
+    "请使用 application/json 格式。",
+    "application/json 形式を使用してください。"
+  ],
+  "card_ids deve contenere da 1 a 100 ID interi positivi distinti.": [
+    "card_ids must contain 1 to 100 distinct positive integer IDs.",
+    "card_ids doit contenir de 1 à 100 identifiants entiers positifs distincts.",
+    "card_ids debe contener entre 1 y 100 ID enteros positivos distintos.",
+    "card_ids muss 1 bis 100 unterschiedliche positive ganzzahlige IDs enthalten.",
+    "card_ids 必须包含 1 至 100 个不同的正整数 ID。",
+    "card_ids には異なる正の整数 ID を 1～100 個指定してください。"
+  ],
+  "minutes deve essere un intero tra 0 e 1000000.": [
+    "minutes must be an integer from 0 to 1,000,000.",
+    "minutes doit être un entier de 0 à 1 000 000.",
+    "minutes debe ser un entero entre 0 y 1000000.",
+    "minutes muss eine ganze Zahl von 0 bis 1.000.000 sein.",
+    "minutes 必须为 0 至 1000000 的整数。",
+    "minutes は 0～1000000 の整数である必要があります。"
+  ],
+  "È richiesto accesso in scrittura alla bacheca.": [
+    "Write access to the board is required.",
+    "Un accès en écriture au tableau est requis.",
+    "Se requiere acceso de escritura al tablero.",
+    "Schreibzugriff auf das Board erforderlich.",
+    "需要看板写入权限。",
+    "ボードへの書き込み権限が必要です。"
+  ],
+  "È richiesto un amministratore della bacheca.": [
+    "A board administrator is required.",
+    "Un administrateur du tableau est requis.",
+    "Se requiere un administrador del tablero.",
+    "Board-Administrator erforderlich.",
+    "需要看板管理员权限。",
+    "ボード管理者の権限が必要です。"
+  ]
+}

@@ -1,0 +1,2138 @@
+{
+  "Accedi con un account per usare Sprint e Richieste.": [
+    "Sign in to use Sprints and Requests.",
+    "Connectez-vous pour utiliser les sprints et les demandes.",
+    "Inicia sesión para usar Sprints y Solicitudes.",
+    "Melden Sie sich an, um Sprints und Anfragen zu nutzen.",
+    "登录后即可使用冲刺和请求。",
+    "スプリントとリクエストを使うにはログインしてください。"
+  ],
+  "Catalogo Sprint/Richieste non disponibile. Aggiorna il server.": [
+    "Sprint/Request catalog unavailable. Update the server.",
+    "Catalogue des sprints et demandes indisponible. Mettez le serveur à jour.",
+    "El catálogo de sprints y solicitudes no está disponible. Actualiza el servidor.",
+    "Sprint-/Anfragenkatalog nicht verfügbar. Aktualisieren Sie den Server.",
+    "冲刺和请求目录不可用。请更新服务器。",
+    "スプリントとリクエストのカタログを取得できません。サーバーを更新してください。"
+  ],
+  "Tutti": [
+    "All",
+    "Tous",
+    "Todos",
+    "Alle",
+    "全部",
+    "すべて"
+  ],
+  "Sprint": [
+    "Sprints",
+    "Sprints",
+    "Sprints",
+    "Sprints",
+    "冲刺",
+    "スプリント"
+  ],
+  "Backlog": [
+    "Backlog",
+    "Backlog",
+    "Backlog",
+    "Backlog",
+    "待办事项",
+    "バックログ"
+  ],
+  "I miei task Sprint": [
+    "My sprint tasks",
+    "Mes tâches de sprint",
+    "Mis tareas de sprint",
+    "Meine Sprint-Aufgaben",
+    "我的冲刺任务",
+    "自分のスプリントタスク"
+  ],
+  "Moduli": [
+    "Forms",
+    "Formulaires",
+    "Formularios",
+    "Formulare",
+    "表单",
+    "フォーム"
+  ],
+  "Richieste della bacheca": [
+    "Board requests",
+    "Demandes du tableau",
+    "Solicitudes del tablero",
+    "Anfragen des Boards",
+    "看板请求",
+    "ボードのリクエスト"
+  ],
+  "Le mie richieste": [
+    "My requests",
+    "Mes demandes",
+    "Mis solicitudes",
+    "Meine Anfragen",
+    "我的请求",
+    "自分のリクエスト"
+  ],
+  "Schede": [
+    "Cards",
+    "Cartes",
+    "Tarjetas",
+    "Karten",
+    "卡片",
+    "カード"
+  ],
+  "Completate": [
+    "Completed",
+    "Terminées",
+    "Completadas",
+    "Abgeschlossen",
+    "已完成",
+    "完了"
+  ],
+  "Aperte": [
+    "Open",
+    "Ouvertes",
+    "Abiertas",
+    "Offen",
+    "未完成",
+    "未完了"
+  ],
+  "Stima (min)": [
+    "Estimate (min)",
+    "Estimation (min)",
+    "Estimación (min)",
+    "Schätzung (Min.)",
+    "估算（分钟）",
+    "見積もり（分）"
+  ],
+  "Stima completata (min)": [
+    "Completed estimate (min)",
+    "Estimation terminée (min)",
+    "Estimación completada (min)",
+    "Abgeschlossene Schätzung (Min.)",
+    "已完成估算（分钟）",
+    "完了分の見積もり（分）"
+  ],
+  "Stima residua (min)": [
+    "Remaining estimate (min)",
+    "Estimation restante (min)",
+    "Estimación restante (min)",
+    "Verbleibende Schätzung (Min.)",
+    "剩余估算（分钟）",
+    "残りの見積もり（分）"
+  ],
+  "Registrati (min)": [
+    "Logged (min)",
+    "Temps consigné (min)",
+    "Registrados (min)",
+    "Erfasst (Min.)",
+    "已记录（分钟）",
+    "記録済み（分）"
+  ],
+  "Completamento (%)": [
+    "Completion (%)",
+    "Achèvement (%)",
+    "Completado (%)",
+    "Fortschritt (%)",
+    "完成率（%）",
+    "完了率（%）"
+  ],
+  "Assegnati (min)": [
+    "Assigned (min)",
+    "Temps affecté (min)",
+    "Asignados (min)",
+    "Zugewiesen (Min.)",
+    "已分配（分钟）",
+    "割り当て済み（分）"
+  ],
+  "Stime senza assegnatario (min)": [
+    "Unassigned estimates (min)",
+    "Estimations sans responsable (min)",
+    "Estimaciones sin responsable (min)",
+    "Nicht zugewiesene Schätzungen (Min.)",
+    "未分配估算（分钟）",
+    "担当者未割り当ての見積もり（分）"
+  ],
+  "Capacità (min)": [
+    "Capacity (min)",
+    "Capacité (min)",
+    "Capacidad (min)",
+    "Kapazität (Min.)",
+    "容量（分钟）",
+    "稼働時間（分）"
+  ],
+  "Capacità mancante (min)": [
+    "Capacity shortfall (min)",
+    "Capacité manquante (min)",
+    "Déficit de capacidad (min)",
+    "Fehlende Kapazität (Min.)",
+    "容量缺口（分钟）",
+    "不足する稼働時間（分）"
+  ],
+  "Schede senza stima": [
+    "Cards without estimates",
+    "Cartes sans estimation",
+    "Tarjetas sin estimación",
+    "Karten ohne Schätzung",
+    "未估算的卡片",
+    "見積もりのないカード"
+  ],
+  "Nuove": [
+    "New",
+    "Nouvelles",
+    "Nuevas",
+    "Neu",
+    "新建",
+    "新規"
+  ],
+  "In valutazione": [
+    "In review",
+    "En cours d'examen",
+    "En revisión",
+    "In Prüfung",
+    "审核中",
+    "確認中"
+  ],
+  "Accettate": [
+    "Accepted",
+    "Acceptées",
+    "Aceptadas",
+    "Angenommen",
+    "已接受",
+    "承認済み"
+  ],
+  "Rifiutate": [
+    "Rejected",
+    "Refusées",
+    "Rechazadas",
+    "Abgelehnt",
+    "已拒绝",
+    "却下済み"
+  ],
+  "Convertite": [
+    "Converted",
+    "Converties",
+    "Convertidas",
+    "Umgewandelt",
+    "已转换",
+    "変換済み"
+  ],
+  "Nel cestino": [
+    "In trash",
+    "Dans la corbeille",
+    "En la papelera",
+    "Im Papierkorb",
+    "在回收站中",
+    "ゴミ箱内"
+  ],
+  "Salva": [
+    "Save",
+    "Enregistrer",
+    "Guardar",
+    "Speichern",
+    "保存",
+    "保存"
+  ],
+  "Scarta bozza e ricarica": [
+    "Discard draft and reload",
+    "Abandonner le brouillon et recharger",
+    "Descartar borrador y recargar",
+    "Entwurf verwerfen und neu laden",
+    "丢弃草稿并重新加载",
+    "下書きを破棄して再読み込み"
+  ],
+  "Modifica salvata.": [
+    "Change saved.",
+    "Modification enregistrée.",
+    "Cambio guardado.",
+    "Änderung gespeichert.",
+    "更改已保存。",
+    "変更を保存しました。"
+  ],
+  "L’account è cambiato. Riapri la vista prima di salvare.": [
+    "The account has changed. Reopen this view before saving.",
+    "Le compte a changé. Rouvrez cette vue avant d'enregistrer.",
+    "La cuenta ha cambiado. Vuelve a abrir esta vista antes de guardar.",
+    "Das Konto hat sich geändert. Öffnen Sie diese Ansicht vor dem Speichern erneut.",
+    "账户已更改。请重新打开此视图后再保存。",
+    "アカウントが変更されました。保存する前にこの画面を開き直してください。"
+  ],
+  "Apri una bacheca per vedere gli Sprint.": [
+    "Open a board to view its sprints.",
+    "Ouvrez un tableau pour voir ses sprints.",
+    "Abre un tablero para ver sus sprints.",
+    "Öffnen Sie ein Board, um dessen Sprints anzuzeigen.",
+    "打开看板以查看冲刺。",
+    "スプリントを表示するにはボードを開いてください。"
+  ],
+  "Sprint della bacheca": [
+    "Board sprints",
+    "Sprints du tableau",
+    "Sprints del tablero",
+    "Sprints des Boards",
+    "看板冲刺",
+    "ボードのスプリント"
+  ],
+  "Crea Sprint": [
+    "Create sprint",
+    "Créer un sprint",
+    "Crear sprint",
+    "Sprint erstellen",
+    "创建冲刺",
+    "スプリントを作成"
+  ],
+  "· Nel cestino": [
+    " · In trash",
+    " · Dans la corbeille",
+    " · En la papelera",
+    " · Im Papierkorb",
+    " · 在回收站中",
+    " · ゴミ箱内"
+  ],
+  "Nessun obiettivo aggiunto.": [
+    "No goal added.",
+    "Aucun objectif ajouté.",
+    "No se ha añadido ningún objetivo.",
+    "Kein Ziel hinzugefügt.",
+    "尚未添加目标。",
+    "目標はまだありません。"
+  ],
+  "Nessuno Sprint corrisponde ai filtri.": [
+    "No sprints match these filters.",
+    "Aucun sprint ne correspond aux filtres.",
+    "Ningún sprint coincide con los filtros.",
+    "Keine Sprints entsprechen den Filtern.",
+    "没有符合筛选条件的冲刺。",
+    "条件に一致するスプリントはありません。"
+  ],
+  "Carica altri Sprint": [
+    "Load more sprints",
+    "Charger plus de sprints",
+    "Cargar más sprints",
+    "Weitere Sprints laden",
+    "加载更多冲刺",
+    "スプリントをさらに読み込む"
+  ],
+  "Modifica Sprint": [
+    "Edit sprint",
+    "Modifier le sprint",
+    "Editar sprint",
+    "Sprint bearbeiten",
+    "编辑冲刺",
+    "スプリントを編集"
+  ],
+  "Non puoi modificare questo Sprint.": [
+    "You cannot edit this sprint.",
+    "Vous ne pouvez pas modifier ce sprint.",
+    "No puedes editar este sprint.",
+    "Sie können diesen Sprint nicht bearbeiten.",
+    "你无权编辑此冲刺。",
+    "このスプリントを編集する権限がありません。"
+  ],
+  "Torna agli Sprint": [
+    "Back to sprints",
+    "Retour aux sprints",
+    "Volver a los sprints",
+    "Zurück zu Sprints",
+    "返回冲刺",
+    "スプリントに戻る"
+  ],
+  "Dettagli Sprint": [
+    "Sprint details",
+    "Détails du sprint",
+    "Detalles del sprint",
+    "Sprint-Details",
+    "冲刺详情",
+    "スプリントの詳細"
+  ],
+  "Ripristina Sprint": [
+    "Restore sprint",
+    "Restaurer le sprint",
+    "Restaurar sprint",
+    "Sprint wiederherstellen",
+    "恢复冲刺",
+    "スプリントを復元"
+  ],
+  "Modifica": [
+    "Edit",
+    "Modifier",
+    "Editar",
+    "Bearbeiten",
+    "编辑",
+    "編集"
+  ],
+  "Attiva Sprint": [
+    "Activate sprint",
+    "Activer le sprint",
+    "Activar sprint",
+    "Sprint aktivieren",
+    "启动冲刺",
+    "スプリントを開始"
+  ],
+  "Chiudi Sprint": [
+    "Close sprint",
+    "Clore le sprint",
+    "Cerrar sprint",
+    "Sprint abschließen",
+    "结束冲刺",
+    "スプリントを終了"
+  ],
+  "Riapri Sprint": [
+    "Reopen sprint",
+    "Rouvrir le sprint",
+    "Reabrir sprint",
+    "Sprint erneut öffnen",
+    "重新打开冲刺",
+    "スプリントを再開"
+  ],
+  "Sposta nel cestino": [
+    "Move to trash",
+    "Mettre à la corbeille",
+    "Mover a la papelera",
+    "In den Papierkorb verschieben",
+    "移到回收站",
+    "ゴミ箱に移動"
+  ],
+  "Avanzamento Sprint": [
+    "Sprint progress",
+    "Avancement du sprint",
+    "Progreso del sprint",
+    "Sprint-Fortschritt",
+    "冲刺进度",
+    "スプリントの進捗"
+  ],
+  "Schede Sprint": [
+    "Sprint cards",
+    "Cartes du sprint",
+    "Tarjetas del sprint",
+    "Sprint-Karten",
+    "冲刺卡片",
+    "スプリントのカード"
+  ],
+  "Capacità del team": [
+    "Team capacity",
+    "Capacité de l'équipe",
+    "Capacidad del equipo",
+    "Teamkapazität",
+    "团队容量",
+    "チームの稼働時間"
+  ],
+  "Previsione": [
+    "Forecast",
+    "Prévision",
+    "Previsión",
+    "Prognose",
+    "预测",
+    "予測"
+  ],
+  "Burndown osservato": [
+    "Observed burndown",
+    "Burndown observé",
+    "Burndown observado",
+    "Erfasster Burndown",
+    "实际燃尽情况",
+    "記録済みバーンダウン"
+  ],
+  "Esporta CSV": [
+    "Export CSV",
+    "Exporter en CSV",
+    "Exportar CSV",
+    "CSV exportieren",
+    "导出 CSV",
+    "CSV をエクスポート"
+  ],
+  "Cronologia": [
+    "History",
+    "Historique",
+    "Historial",
+    "Verlauf",
+    "历史记录",
+    "履歴"
+  ],
+  "Completata": [
+    "Completed",
+    "Terminée",
+    "Completada",
+    "Abgeschlossen",
+    "已完成",
+    "完了"
+  ],
+  "Aperta": [
+    "Open",
+    "Ouverte",
+    "Abierta",
+    "Offen",
+    "未完成",
+    "未完了"
+  ],
+  "Nessuna scheda corrisponde ai filtri.": [
+    "No cards match these filters.",
+    "Aucune carte ne correspond aux filtres.",
+    "Ninguna tarjeta coincide con los filtros.",
+    "Keine Karten entsprechen den Filtern.",
+    "没有符合筛选条件的卡片。",
+    "条件に一致するカードはありません。"
+  ],
+  "Apri una bacheca.": [
+    "Open a board.",
+    "Ouvrez un tableau.",
+    "Abre un tablero.",
+    "Öffnen Sie ein Board.",
+    "请打开一个看板。",
+    "ボードを開いてください。"
+  ],
+  "Schede dello Sprint": [
+    "Sprint cards",
+    "Cartes du sprint",
+    "Tarjetas del sprint",
+    "Karten des Sprints",
+    "冲刺卡片",
+    "スプリントのカード"
+  ],
+  "I miei task negli Sprint attivi": [
+    "My tasks in active sprints",
+    "Mes tâches dans les sprints actifs",
+    "Mis tareas en sprints activos",
+    "Meine Aufgaben in aktiven Sprints",
+    "我在进行中冲刺的任务",
+    "進行中のスプリントの自分のタスク"
+  ],
+  "Backlog della bacheca": [
+    "Board backlog",
+    "Backlog du tableau",
+    "Backlog del tablero",
+    "Backlog des Boards",
+    "看板待办事项",
+    "ボードのバックログ"
+  ],
+  "Seleziona Sprint": [
+    "Select a sprint",
+    "Sélectionner un sprint",
+    "Selecciona un sprint",
+    "Sprint auswählen",
+    "选择冲刺",
+    "スプリントを選択"
+  ],
+  "Torna allo Sprint": [
+    "Back to sprint",
+    "Retour au sprint",
+    "Volver al sprint",
+    "Zurück zum Sprint",
+    "返回冲刺",
+    "スプリントに戻る"
+  ],
+  "Carica altre schede": [
+    "Load more cards",
+    "Charger plus de cartes",
+    "Cargar más tarjetas",
+    "Weitere Karten laden",
+    "加载更多卡片",
+    "カードをさらに読み込む"
+  ],
+  "Salva la scheda prima di assegnare uno Sprint.": [
+    "Save the card before assigning a sprint.",
+    "Enregistrez la carte avant de l'affecter à un sprint.",
+    "Guarda la tarjeta antes de asignarle un sprint.",
+    "Speichern Sie die Karte, bevor Sie einen Sprint zuweisen.",
+    "请先保存卡片，再分配冲刺。",
+    "スプリントに割り当てる前にカードを保存してください。"
+  ],
+  "Sprint della scheda": [
+    "Card sprint",
+    "Sprint de la carte",
+    "Sprint de la tarjeta",
+    "Sprint der Karte",
+    "卡片冲刺",
+    "カードのスプリント"
+  ],
+  "Previsione Sprint": [
+    "Sprint forecast",
+    "Prévision du sprint",
+    "Previsión del sprint",
+    "Sprint-Prognose",
+    "冲刺预测",
+    "スプリントの予測"
+  ],
+  "Capacità e carico": [
+    "Capacity and workload",
+    "Capacité et charge",
+    "Capacidad y carga de trabajo",
+    "Kapazität und Auslastung",
+    "容量与工作量",
+    "稼働時間と作業量"
+  ],
+  "Persona": [
+    "Person",
+    "Personne",
+    "Persona",
+    "Person",
+    "人员",
+    "メンバー"
+  ],
+  "Residui (min)": [
+    "Remaining (min)",
+    "Temps restant (min)",
+    "Restantes (min)",
+    "Verbleibend (Min.)",
+    "剩余（分钟）",
+    "残り（分）"
+  ],
+  "Totali capacità": [
+    "Capacity totals",
+    "Totaux de capacité",
+    "Totales de capacidad",
+    "Gesamtkapazität",
+    "容量总计",
+    "稼働時間の合計"
+  ],
+  "Previsione rispetto alla capacità": [
+    "Forecast against capacity",
+    "Prévision par rapport à la capacité",
+    "Previsión frente a la capacidad",
+    "Prognose im Verhältnis zur Kapazität",
+    "相对于容量的预测",
+    "稼働時間に対する予測"
+  ],
+  "Salva osservazione di oggi (UTC)": [
+    "Save today's observation (UTC)",
+    "Enregistrer l'observation du jour (UTC)",
+    "Guardar la observación de hoy (UTC)",
+    "Heutige Beobachtung speichern (UTC)",
+    "保存今天的记录（UTC）",
+    "今日の記録を保存（UTC）"
+  ],
+  "Osservazioni del lavoro residuo": [
+    "Remaining work observations",
+    "Observations du travail restant",
+    "Observaciones del trabajo restante",
+    "Erfasster Restaufwand",
+    "剩余工作记录",
+    "残作業の記録"
+  ],
+  "Giorno UTC": [
+    "UTC day",
+    "Jour UTC",
+    "Día UTC",
+    "UTC-Tag",
+    "UTC 日期",
+    "UTC 日付"
+  ],
+  "Acquisizione": [
+    "Captured",
+    "Enregistrement",
+    "Captura",
+    "Erfassung",
+    "采集时间",
+    "記録日時"
+  ],
+  "Azioni": [
+    "Actions",
+    "Actions",
+    "Acciones",
+    "Aktionen",
+    "操作",
+    "操作"
+  ],
+  "Elimina osservazione": [
+    "Delete observation",
+    "Supprimer l'observation",
+    "Eliminar observación",
+    "Beobachtung löschen",
+    "删除记录",
+    "記録を削除"
+  ],
+  "Seleziona lista": [
+    "Select a list",
+    "Sélectionner une liste",
+    "Selecciona una lista",
+    "Liste auswählen",
+    "选择列表",
+    "リストを選択"
+  ],
+  "Apri una bacheca per vedere i moduli.": [
+    "Open a board to view its forms.",
+    "Ouvrez un tableau pour voir ses formulaires.",
+    "Abre un tablero para ver sus formularios.",
+    "Öffnen Sie ein Board, um dessen Formulare anzuzeigen.",
+    "打开看板以查看表单。",
+    "フォームを表示するにはボードを開いてください。"
+  ],
+  "Moduli di richiesta": [
+    "Request forms",
+    "Formulaires de demande",
+    "Formularios de solicitud",
+    "Anfrageformulare",
+    "请求表单",
+    "リクエストフォーム"
+  ],
+  "Crea modulo": [
+    "Create form",
+    "Créer un formulaire",
+    "Crear formulario",
+    "Formular erstellen",
+    "创建表单",
+    "フォームを作成"
+  ],
+  "Pubblicato": [
+    "Published",
+    "Publié",
+    "Publicado",
+    "Veröffentlicht",
+    "已发布",
+    "公開中"
+  ],
+  "In pausa": [
+    "Paused",
+    "En pause",
+    "En pausa",
+    "Pausiert",
+    "已暂停",
+    "一時停止中"
+  ],
+  "Nessun modulo disponibile.": [
+    "No forms available.",
+    "Aucun formulaire disponible.",
+    "No hay formularios disponibles.",
+    "Keine Formulare verfügbar.",
+    "没有可用的表单。",
+    "利用できるフォームはありません。"
+  ],
+  "Carica altri moduli": [
+    "Load more forms",
+    "Charger plus de formulaires",
+    "Cargar más formularios",
+    "Weitere Formulare laden",
+    "加载更多表单",
+    "フォームをさらに読み込む"
+  ],
+  "Modifica modulo": [
+    "Edit form",
+    "Modifier le formulaire",
+    "Editar formulario",
+    "Formular bearbeiten",
+    "编辑表单",
+    "フォームを編集"
+  ],
+  "Non puoi modificare questo modulo.": [
+    "You cannot edit this form.",
+    "Vous ne pouvez pas modifier ce formulaire.",
+    "No puedes editar este formulario.",
+    "Sie können dieses Formular nicht bearbeiten.",
+    "你无权编辑此表单。",
+    "このフォームを編集する権限がありません。"
+  ],
+  "Torna ai moduli": [
+    "Back to forms",
+    "Retour aux formulaires",
+    "Volver a los formularios",
+    "Zurück zu Formularen",
+    "返回表单",
+    "フォームに戻る"
+  ],
+  "Ripristina campo": [
+    "Restore field",
+    "Restaurer le champ",
+    "Restaurar campo",
+    "Feld wiederherstellen",
+    "恢复字段",
+    "項目を復元"
+  ],
+  "Modifica campo": [
+    "Edit field",
+    "Modifier le champ",
+    "Editar campo",
+    "Feld bearbeiten",
+    "编辑字段",
+    "項目を編集"
+  ],
+  "Elimina campo": [
+    "Delete field",
+    "Supprimer le champ",
+    "Eliminar campo",
+    "Feld löschen",
+    "删除字段",
+    "項目を削除"
+  ],
+  "Sposta su": [
+    "Move up",
+    "Monter",
+    "Subir",
+    "Nach oben",
+    "上移",
+    "上へ移動"
+  ],
+  "Sposta giù": [
+    "Move down",
+    "Descendre",
+    "Bajar",
+    "Nach unten",
+    "下移",
+    "下へ移動"
+  ],
+  "Il modulo non ha ancora campi personalizzati.": [
+    "This form has no custom fields yet.",
+    "Ce formulaire n'a pas encore de champs personnalisés.",
+    "Este formulario aún no tiene campos personalizados.",
+    "Dieses Formular hat noch keine benutzerdefinierten Felder.",
+    "此表单尚未添加自定义字段。",
+    "このフォームにはカスタム項目がまだありません。"
+  ],
+  "Dettagli modulo": [
+    "Form details",
+    "Détails du formulaire",
+    "Detalles del formulario",
+    "Formulardetails",
+    "表单详情",
+    "フォームの詳細"
+  ],
+  "Compila richiesta": [
+    "Fill in request",
+    "Remplir une demande",
+    "Completar solicitud",
+    "Anfrage ausfüllen",
+    "填写请求",
+    "リクエストを入力"
+  ],
+  "Ripristina modulo": [
+    "Restore form",
+    "Restaurer le formulaire",
+    "Restaurar formulario",
+    "Formular wiederherstellen",
+    "恢复表单",
+    "フォームを復元"
+  ],
+  "Metti in pausa": [
+    "Pause",
+    "Mettre en pause",
+    "Pausar",
+    "Pausieren",
+    "暂停",
+    "一時停止"
+  ],
+  "Pubblica modulo": [
+    "Publish form",
+    "Publier le formulaire",
+    "Publicar formulario",
+    "Formular veröffentlichen",
+    "发布表单",
+    "フォームを公開"
+  ],
+  "Aggiungi campo": [
+    "Add field",
+    "Ajouter un champ",
+    "Añadir campo",
+    "Feld hinzufügen",
+    "添加字段",
+    "項目を追加"
+  ],
+  "Torna al modulo": [
+    "Back to form",
+    "Retour au formulaire",
+    "Volver al formulario",
+    "Zurück zum Formular",
+    "返回表单",
+    "フォームに戻る"
+  ],
+  "Sì": [
+    "Yes",
+    "Oui",
+    "Sí",
+    "Ja",
+    "是",
+    "はい"
+  ],
+  "No": [
+    "No",
+    "Non",
+    "No",
+    "Nein",
+    "否",
+    "いいえ"
+  ],
+  "Non specificato": [
+    "Not specified",
+    "Non précisé",
+    "Sin especificar",
+    "Nicht angegeben",
+    "未指定",
+    "未指定"
+  ],
+  "Seleziona": [
+    "Select",
+    "Sélectionner",
+    "Seleccionar",
+    "Auswählen",
+    "选择",
+    "選択"
+  ],
+  "· Obbligatorio": [
+    " · Required",
+    " · Obligatoire",
+    " · Obligatorio",
+    " · Erforderlich",
+    " · 必填",
+    " · 必須"
+  ],
+  "Seleziona Sì o No.": [
+    "Select Yes or No.",
+    "Sélectionnez Oui ou Non.",
+    "Selecciona Sí o No.",
+    "Wählen Sie Ja oder Nein.",
+    "请选择“是”或“否”。",
+    "「はい」または「いいえ」を選択してください。"
+  ],
+  "Inserisci un numero valido.": [
+    "Enter a valid number.",
+    "Saisissez un nombre valide.",
+    "Introduce un número válido.",
+    "Geben Sie eine gültige Zahl ein.",
+    "请输入有效数字。",
+    "有効な数値を入力してください。"
+  ],
+  "Modifica la tua richiesta": [
+    "Edit your request",
+    "Modifier votre demande",
+    "Editar tu solicitud",
+    "Eigene Anfrage bearbeiten",
+    "编辑你的请求",
+    "自分のリクエストを編集"
+  ],
+  "Compila una richiesta": [
+    "Fill in a request",
+    "Remplir une demande",
+    "Completar una solicitud",
+    "Anfrage ausfüllen",
+    "填写请求",
+    "リクエストを入力"
+  ],
+  "Questa richiesta non è modificabile.": [
+    "This request cannot be edited.",
+    "Cette demande ne peut pas être modifiée.",
+    "Esta solicitud no se puede editar.",
+    "Diese Anfrage kann nicht bearbeitet werden.",
+    "此请求无法编辑。",
+    "このリクエストは編集できません。"
+  ],
+  "Torna alla richiesta": [
+    "Back to request",
+    "Retour à la demande",
+    "Volver a la solicitud",
+    "Zurück zur Anfrage",
+    "返回请求",
+    "リクエストに戻る"
+  ],
+  "· Convertita in scheda": [
+    " · Converted to card",
+    " · Convertie en carte",
+    " · Convertida en tarjeta",
+    " · In Karte umgewandelt",
+    " · 已转换为卡片",
+    " · カードに変換済み"
+  ],
+  "Nessuna richiesta corrisponde ai filtri.": [
+    "No requests match these filters.",
+    "Aucune demande ne correspond aux filtres.",
+    "Ninguna solicitud coincide con los filtros.",
+    "Keine Anfragen entsprechen den Filtern.",
+    "没有符合筛选条件的请求。",
+    "条件に一致するリクエストはありません。"
+  ],
+  "Apri una bacheca per vedere le richieste.": [
+    "Open a board to view its requests.",
+    "Ouvrez un tableau pour voir ses demandes.",
+    "Abre un tablero para ver sus solicitudes.",
+    "Öffnen Sie ein Board, um dessen Anfragen anzuzeigen.",
+    "打开看板以查看请求。",
+    "リクエストを表示するにはボードを開いてください。"
+  ],
+  "Stato delle richieste": [
+    "Request status",
+    "État des demandes",
+    "Estado de las solicitudes",
+    "Anfragenstatus",
+    "请求状态",
+    "リクエストの状態"
+  ],
+  "Richieste": [
+    "Requests",
+    "Demandes",
+    "Solicitudes",
+    "Anfragen",
+    "请求",
+    "リクエスト"
+  ],
+  "Carica altre richieste": [
+    "Load more requests",
+    "Charger plus de demandes",
+    "Cargar más solicitudes",
+    "Weitere Anfragen laden",
+    "加载更多请求",
+    "リクエストをさらに読み込む"
+  ],
+  "Dettagli richiesta": [
+    "Request details",
+    "Détails de la demande",
+    "Detalles de la solicitud",
+    "Anfragedetails",
+    "请求详情",
+    "リクエストの詳細"
+  ],
+  "Cronologia richiesta": [
+    "Request history",
+    "Historique de la demande",
+    "Historial de la solicitud",
+    "Anfragenverlauf",
+    "请求历史记录",
+    "リクエストの履歴"
+  ],
+  "Apri scheda creata": [
+    "Open created card",
+    "Ouvrir la carte créée",
+    "Abrir tarjeta creada",
+    "Erstellte Karte öffnen",
+    "打开已创建的卡片",
+    "作成したカードを開く"
+  ],
+  "Ripristina richiesta": [
+    "Restore request",
+    "Restaurer la demande",
+    "Restaurar solicitud",
+    "Anfrage wiederherstellen",
+    "恢复请求",
+    "リクエストを復元"
+  ],
+  "Modifica risposte": [
+    "Edit answers",
+    "Modifier les réponses",
+    "Editar respuestas",
+    "Antworten bearbeiten",
+    "编辑回答",
+    "回答を編集"
+  ],
+  "Aggiorna stato": [
+    "Update status",
+    "Mettre à jour l'état",
+    "Actualizar estado",
+    "Status aktualisieren",
+    "更新状态",
+    "状態を更新"
+  ],
+  "Converti in scheda": [
+    "Convert to card",
+    "Convertir en carte",
+    "Convertir en tarjeta",
+    "In Karte umwandeln",
+    "转换为卡片",
+    "カードに変換"
+  ],
+  "Nessuna nota.": [
+    "No notes.",
+    "Aucune note.",
+    "No hay notas.",
+    "Keine Notizen.",
+    "暂无备注。",
+    "メモはありません。"
+  ],
+  "Pubblica nota": [
+    "Post note",
+    "Publier une note",
+    "Publicar nota",
+    "Notiz veröffentlichen",
+    "发布备注",
+    "メモを投稿"
+  ],
+  "Torna al dettaglio": [
+    "Back to details",
+    "Retour aux détails",
+    "Volver a los detalles",
+    "Zurück zu Details",
+    "返回详情",
+    "詳細に戻る"
+  ],
+  "Carica eventi precedenti": [
+    "Load earlier events",
+    "Charger les événements précédents",
+    "Cargar eventos anteriores",
+    "Frühere Ereignisse laden",
+    "加载更早的事件",
+    "過去のイベントを読み込む"
+  ],
+  "Il CSV restituito è incompleto. Restringi l’esportazione.": [
+    "The returned CSV is incomplete. Narrow the export.",
+    "Le CSV reçu est incomplet. Réduisez la portée de l'exportation.",
+    "El CSV recibido está incompleto. Reduce el alcance de la exportación.",
+    "Die CSV-Datei ist unvollständig. Begrenzen Sie den Export.",
+    "返回的 CSV 不完整。请缩小导出范围。",
+    "返された CSV は不完全です。エクスポートの範囲を絞ってください。"
+  ],
+  "Esportazione non riuscita.": [
+    "Export failed.",
+    "Échec de l'exportation.",
+    "Error de exportación.",
+    "Export fehlgeschlagen.",
+    "导出失败。",
+    "エクスポートに失敗しました。"
+  ],
+  "Il server non ha restituito un CSV valido.": [
+    "The server did not return a valid CSV.",
+    "Le serveur n'a pas renvoyé de CSV valide.",
+    "El servidor no ha devuelto un CSV válido.",
+    "Der Server hat keine gültige CSV-Datei zurückgegeben.",
+    "服务器未返回有效的 CSV。",
+    "サーバーから有効な CSV が返されませんでした。"
+  ],
+  "Esportazione CSV non valida.": [
+    "Invalid CSV export.",
+    "Exportation CSV non valide.",
+    "Exportación CSV no válida.",
+    "Ungültiger CSV-Export.",
+    "CSV 导出无效。",
+    "CSV エクスポートが無効です。"
+  ],
+  "CSV completo scaricato (massimo 1000 righe).": [
+    "Complete CSV downloaded (up to 1,000 rows).",
+    "CSV complet téléchargé (1 000 lignes maximum).",
+    "CSV completo descargado (máximo 1000 filas).",
+    "Vollständige CSV heruntergeladen (maximal 1.000 Zeilen).",
+    "完整 CSV 已下载（最多 1000 行）。",
+    "CSV 全体をダウンロードしました（最大 1000 行）。"
+  ],
+  "Scartare questa bozza e ricaricare i dati del server?": [
+    "Discard this draft and reload server data?",
+    "Abandonner ce brouillon et recharger les données du serveur ?",
+    "¿Descartar este borrador y recargar los datos del servidor?",
+    "Diesen Entwurf verwerfen und die Serverdaten neu laden?",
+    "丢弃此草稿并重新加载服务器数据？",
+    "この下書きを破棄してサーバーのデータを再読み込みしますか？"
+  ],
+  "Spostare questo Sprint nel cestino?": [
+    "Move this sprint to trash?",
+    "Mettre ce sprint à la corbeille ?",
+    "¿Mover este sprint a la papelera?",
+    "Diesen Sprint in den Papierkorb verschieben?",
+    "将此冲刺移到回收站？",
+    "このスプリントをゴミ箱に移動しますか？"
+  ],
+  "Eliminare questa osservazione?": [
+    "Delete this observation?",
+    "Supprimer cette observation ?",
+    "¿Eliminar esta observación?",
+    "Diese Beobachtung löschen?",
+    "删除此记录？",
+    "この記録を削除しますか？"
+  ],
+  "Spostare il modulo nel cestino?": [
+    "Move this form to trash?",
+    "Mettre ce formulaire à la corbeille ?",
+    "¿Mover este formulario a la papelera?",
+    "Dieses Formular in den Papierkorb verschieben?",
+    "将此表单移到回收站？",
+    "このフォームをゴミ箱に移動しますか？"
+  ],
+  "Eliminare il campo dalle nuove richieste?": [
+    "Remove this field from new requests?",
+    "Supprimer ce champ des nouvelles demandes ?",
+    "¿Eliminar este campo de las nuevas solicitudes?",
+    "Dieses Feld aus neuen Anfragen entfernen?",
+    "从新请求中删除此字段？",
+    "新しいリクエストからこの項目を削除しますか？"
+  ],
+  "Creare una scheda da questa richiesta accettata?": [
+    "Create a card from this accepted request?",
+    "Créer une carte à partir de cette demande acceptée ?",
+    "¿Crear una tarjeta a partir de esta solicitud aceptada?",
+    "Aus dieser angenommenen Anfrage eine Karte erstellen?",
+    "从此已接受的请求创建卡片？",
+    "この承認済みリクエストからカードを作成しますか？"
+  ],
+  "Spostare la richiesta nel cestino?": [
+    "Move this request to trash?",
+    "Mettre cette demande à la corbeille ?",
+    "¿Mover esta solicitud a la papelera?",
+    "Diese Anfrage in den Papierkorb verschieben?",
+    "将此请求移到回收站？",
+    "このリクエストをゴミ箱に移動しますか？"
+  ],
+  "L’account è cambiato. Riapri questa vista.": [
+    "The account has changed. Reopen this view.",
+    "Le compte a changé. Rouvrez cette vue.",
+    "La cuenta ha cambiado. Vuelve a abrir esta vista.",
+    "Das Konto hat sich geändert. Öffnen Sie diese Ansicht erneut.",
+    "账户已更改。请重新打开此视图。",
+    "アカウントが変更されました。この画面を開き直してください。"
+  ],
+  "Sprint salvato.": [
+    "Sprint saved.",
+    "Sprint enregistré.",
+    "Sprint guardado.",
+    "Sprint gespeichert.",
+    "冲刺已保存。",
+    "スプリントを保存しました。"
+  ],
+  "Scegli uno Sprint e da 1 a 100 schede.": [
+    "Choose a sprint and 1 to 100 cards.",
+    "Choisissez un sprint et de 1 à 100 cartes.",
+    "Elige un sprint y entre 1 y 100 tarjetas.",
+    "Wählen Sie einen Sprint und 1 bis 100 Karten.",
+    "请选择一个冲刺及 1 至 100 张卡片。",
+    "スプリントと 1～100 枚のカードを選択してください。"
+  ],
+  "Riapri gli Sprint della scheda prima di salvare.": [
+    "Reopen the card's sprint view before saving.",
+    "Rouvrez la vue des sprints de la carte avant d'enregistrer.",
+    "Vuelve a abrir la vista de sprints de la tarjeta antes de guardar.",
+    "Öffnen Sie die Sprint-Ansicht der Karte vor dem Speichern erneut.",
+    "请重新打开卡片的冲刺视图后再保存。",
+    "保存する前にカードのスプリント画面を開き直してください。"
+  ],
+  "Assegnazione Sprint aggiornata.": [
+    "Sprint assignment updated.",
+    "Affectation au sprint mise à jour.",
+    "Asignación de sprint actualizada.",
+    "Sprint-Zuweisung aktualisiert.",
+    "冲刺分配已更新。",
+    "スプリントへの割り当てを更新しました。"
+  ],
+  "Modulo salvato.": [
+    "Form saved.",
+    "Formulaire enregistré.",
+    "Formulario guardado.",
+    "Formular gespeichert.",
+    "表单已保存。",
+    "フォームを保存しました。"
+  ],
+  "Campo salvato.": [
+    "Field saved.",
+    "Champ enregistré.",
+    "Campo guardado.",
+    "Feld gespeichert.",
+    "字段已保存。",
+    "項目を保存しました。"
+  ],
+  "Il modulo è cambiato. Scarta la bozza per compilare i campi aggiornati.": [
+    "The form has changed. Discard the draft to fill in the updated fields.",
+    "Le formulaire a changé. Abandonnez le brouillon pour remplir les champs mis à jour.",
+    "El formulario ha cambiado. Descarta el borrador para completar los campos actualizados.",
+    "Das Formular hat sich geändert. Verwerfen Sie den Entwurf, um die aktualisierten Felder auszufüllen.",
+    "表单已更改。请丢弃草稿以填写更新后的字段。",
+    "フォームが変更されました。下書きを破棄して更新後の項目を入力してください。"
+  ],
+  "Richiesta salvata.": [
+    "Request saved.",
+    "Demande enregistrée.",
+    "Solicitud guardada.",
+    "Anfrage gespeichert.",
+    "请求已保存。",
+    "リクエストを保存しました。"
+  ],
+  "Richiesta convertita in scheda.": [
+    "Request converted to card.",
+    "Demande convertie en carte.",
+    "Solicitud convertida en tarjeta.",
+    "Anfrage in Karte umgewandelt.",
+    "请求已转换为卡片。",
+    "リクエストをカードに変換しました。"
+  ],
+  "Nota aggiunta.": [
+    "Note added.",
+    "Note ajoutée.",
+    "Nota añadida.",
+    "Notiz hinzugefügt.",
+    "备注已添加。",
+    "メモを追加しました。"
+  ],
+  "Confronto tra lavoro residuo stimato e capacità dichiarata; non è una previsione di data.": [
+    "Comparison of estimated remaining work and declared capacity; this does not predict a date.",
+    "Comparaison du travail restant estimé et de la capacité déclarée ; ce n'est pas une prévision de date.",
+    "Comparación entre el trabajo restante estimado y la capacidad declarada; no predice una fecha.",
+    "Vergleich von geschätztem Restaufwand und angegebener Kapazität; keine Terminprognose.",
+    "比较估算的剩余工作与声明的容量；这并不预测日期。",
+    "残作業の見積もりと設定された稼働時間を比較します。完了日の予測ではありません。"
+  ],
+  "Pianificato": [
+    "Planned",
+    "Planifié",
+    "Planificado",
+    "Geplant",
+    "已计划",
+    "計画済み"
+  ],
+  "In corso": [
+    "Active",
+    "En cours",
+    "En curso",
+    "Aktiv",
+    "进行中",
+    "進行中"
+  ],
+  "Chiuso": [
+    "Closed",
+    "Clos",
+    "Cerrado",
+    "Abgeschlossen",
+    "已结束",
+    "終了"
+  ],
+  "Tutte": [
+    "All",
+    "Toutes",
+    "Todas",
+    "Alle",
+    "全部",
+    "すべて"
+  ],
+  "Bloccate": [
+    "Blocked",
+    "Bloquées",
+    "Bloqueadas",
+    "Blockiert",
+    "受阻",
+    "ブロック中"
+  ],
+  "Testo": [
+    "Text",
+    "Texte",
+    "Texto",
+    "Text",
+    "文本",
+    "テキスト"
+  ],
+  "Numero": [
+    "Number",
+    "Nombre",
+    "Número",
+    "Zahl",
+    "数字",
+    "数値"
+  ],
+  "Data": [
+    "Date",
+    "Date",
+    "Fecha",
+    "Datum",
+    "日期",
+    "日付"
+  ],
+  "Sì / No": [
+    "Yes / No",
+    "Oui / Non",
+    "Sí / No",
+    "Ja / Nein",
+    "是 / 否",
+    "はい / いいえ"
+  ],
+  "Scelta": [
+    "Choice",
+    "Choix",
+    "Selección",
+    "Auswahl",
+    "选项",
+    "選択肢"
+  ],
+  "Nuova": [
+    "New",
+    "Nouvelle",
+    "Nueva",
+    "Neu",
+    "新建",
+    "新規"
+  ],
+  "Accettata": [
+    "Accepted",
+    "Acceptée",
+    "Aceptada",
+    "Angenommen",
+    "已接受",
+    "承認済み"
+  ],
+  "Respinta": [
+    "Rejected",
+    "Refusée",
+    "Rechazada",
+    "Abgelehnt",
+    "已拒绝",
+    "却下済み"
+  ],
+  "Aggiungi una nota": [
+    "Add a note",
+    "Ajouter une note",
+    "Añadir una nota",
+    "Notiz hinzufügen",
+    "添加备注",
+    "メモを追加"
+  ],
+  "Annulla": [
+    "Cancel",
+    "Annuler",
+    "Cancelar",
+    "Abbrechen",
+    "取消",
+    "キャンセル"
+  ],
+  "Applica": [
+    "Apply",
+    "Appliquer",
+    "Aplicar",
+    "Anwenden",
+    "应用",
+    "適用"
+  ],
+  "Applica filtri": [
+    "Apply filters",
+    "Appliquer les filtres",
+    "Aplicar filtros",
+    "Filter anwenden",
+    "应用筛选",
+    "フィルターを適用"
+  ],
+  "Assegna allo Sprint": [
+    "Assign to sprint",
+    "Affecter au sprint",
+    "Asignar al sprint",
+    "Sprint zuweisen",
+    "分配到冲刺",
+    "スプリントに割り当て"
+  ],
+  "Assegna selezionate": [
+    "Assign selected cards",
+    "Affecter les cartes sélectionnées",
+    "Asignar seleccionadas",
+    "Ausgewählte Karten zuweisen",
+    "分配所选卡片",
+    "選択したカードを割り当て"
+  ],
+  "Assegnatario": [
+    "Assignee",
+    "Responsable",
+    "Responsable",
+    "Zuständige Person",
+    "负责人",
+    "担当者"
+  ],
+  "Capacità in minuti di {4}": [
+    "Capacity in minutes for {4}",
+    "Capacité en minutes de {4}",
+    "Capacidad en minutos de {4}",
+    "Kapazität in Minuten für {4}",
+    "{4} 的容量（分钟）",
+    "{4} の稼働時間（分）"
+  ],
+  "Capacità non configurata. Inserisci i minuti disponibili del team prima di valutare il carico.": [
+    "Capacity is not configured. Enter the team's available minutes before assessing workload.",
+    "La capacité n'est pas configurée. Indiquez les minutes disponibles de l'équipe avant d'évaluer la charge.",
+    "La capacidad no está configurada. Introduce los minutos disponibles del equipo antes de evaluar la carga.",
+    "Die Kapazität ist nicht festgelegt. Geben Sie die verfügbaren Minuten des Teams ein, bevor Sie die Auslastung bewerten.",
+    "尚未配置容量。请先输入团队的可用分钟数，再评估工作量。",
+    "稼働時間が設定されていません。作業量を確認する前にチームの稼働可能な時間を分単位で入力してください。"
+  ],
+  "Cerca Sprint": [
+    "Search sprints",
+    "Rechercher des sprints",
+    "Buscar sprints",
+    "Sprints suchen",
+    "搜索冲刺",
+    "スプリントを検索"
+  ],
+  "Cerca richieste": [
+    "Search requests",
+    "Rechercher des demandes",
+    "Buscar solicitudes",
+    "Anfragen suchen",
+    "搜索请求",
+    "リクエストを検索"
+  ],
+  "Cerca schede": [
+    "Search cards",
+    "Rechercher des cartes",
+    "Buscar tarjetas",
+    "Karten suchen",
+    "搜索卡片",
+    "カードを検索"
+  ],
+  "Chiave delle risposte": [
+    "Answer key",
+    "Clé des réponses",
+    "Clave de respuestas",
+    "Antwortschlüssel",
+    "回答键名",
+    "回答キー"
+  ],
+  "Conferma": [
+    "Confirm",
+    "Confirmer",
+    "Confirmar",
+    "Bestätigen",
+    "确认",
+    "確認"
+  ],
+  "Conferma operazione": [
+    "Confirm action",
+    "Confirmer l'action",
+    "Confirmar operación",
+    "Aktion bestätigen",
+    "确认操作",
+    "操作の確認"
+  ],
+  "Conferma per convertire la richiesta in una scheda. Puoi sintetizzare risposte molto lunghe; la richiesta originale resta disponibile.": [
+    "Confirm to convert the request into a card. You can summarize long answers; the original request remains available.",
+    "Confirmez pour convertir la demande en carte. Vous pouvez résumer les réponses longues ; la demande originale reste disponible.",
+    "Confirma para convertir la solicitud en una tarjeta. Puedes resumir respuestas largas; la solicitud original sigue disponible.",
+    "Bestätigen Sie, um die Anfrage in eine Karte umzuwandeln. Lange Antworten können zusammengefasst werden; die ursprüngliche Anfrage bleibt verfügbar.",
+    "确认以将请求转换为卡片。你可以概括较长的回答；原始请求仍会保留。",
+    "確認するとリクエストをカードに変換します。長い回答は要約できます。元のリクエストは引き続き参照できます。"
+  ],
+  "Descrizione": [
+    "Description",
+    "Description",
+    "Descripción",
+    "Beschreibung",
+    "描述",
+    "説明"
+  ],
+  "Descrizione della scheda (facoltativa)": [
+    "Card description (optional)",
+    "Description de la carte (facultative)",
+    "Descripción de la tarjeta (opcional)",
+    "Kartenbeschreibung (optional)",
+    "卡片描述（可选）",
+    "カードの説明（任意）"
+  ],
+  "Discussione": [
+    "Discussion",
+    "Discussion",
+    "Discusión",
+    "Diskussion",
+    "讨论",
+    "ディスカッション"
+  ],
+  "Etichetta del campo": [
+    "Field label",
+    "Libellé du champ",
+    "Etiqueta del campo",
+    "Feldbezeichnung",
+    "字段标签",
+    "項目名"
+  ],
+  "Fine": [
+    "End",
+    "Fin",
+    "Fin",
+    "Ende",
+    "结束",
+    "終了"
+  ],
+  "I moduli eliminati sono visibili solo agli amministratori.": [
+    "Deleted forms are visible only to administrators.",
+    "Les formulaires supprimés sont visibles uniquement par les administrateurs.",
+    "Solo los administradores pueden ver los formularios eliminados.",
+    "Gelöschte Formulare sind nur für Administratoren sichtbar.",
+    "只有管理员可以查看已删除的表单。",
+    "削除済みフォームは管理者のみ表示できます。"
+  ],
+  "Il modulo attuale è cambiato. Le risposte qui sotto usano lo schema originale della richiesta.": [
+    "The current form has changed. The answers below use the request's original schema.",
+    "Le formulaire actuel a changé. Les réponses ci-dessous utilisent le schéma original de la demande.",
+    "El formulario actual ha cambiado. Las respuestas siguientes usan el esquema original de la solicitud.",
+    "Das aktuelle Formular hat sich geändert. Die folgenden Antworten verwenden das ursprüngliche Schema der Anfrage.",
+    "当前表单已更改。下方回答使用请求的原始结构。",
+    "現在のフォームは変更されています。以下の回答はリクエスト時の元の構成で表示されます。"
+  ],
+  "Il modulo è cambiato dalla bozza. La bozza precedente resta conservata: scartala per compilare i campi aggiornati.": [
+    "The form has changed since this draft. The previous draft is retained: discard it to fill in the updated fields.",
+    "Le formulaire a changé depuis ce brouillon. Le brouillon précédent est conservé : abandonnez-le pour remplir les champs mis à jour.",
+    "El formulario ha cambiado desde este borrador. El borrador anterior se conserva: descártalo para completar los campos actualizados.",
+    "Das Formular hat sich seit diesem Entwurf geändert. Der bisherige Entwurf bleibt gespeichert: Verwerfen Sie ihn, um die aktualisierten Felder auszufüllen.",
+    "表单在草稿保存后已更改。旧草稿仍被保留：请丢弃草稿以填写更新后的字段。",
+    "下書きの保存後にフォームが変更されました。以前の下書きは保持されています。更新後の項目を入力するには破棄してください。"
+  ],
+  "Il modulo è cambiato: questa richiesta usa i campi e le opzioni originali.": [
+    "The form has changed: this request uses the original fields and options.",
+    "Le formulaire a changé : cette demande utilise les champs et options d'origine.",
+    "El formulario ha cambiado: esta solicitud usa los campos y las opciones originales.",
+    "Das Formular hat sich geändert: Diese Anfrage verwendet die ursprünglichen Felder und Optionen.",
+    "表单已更改：此请求使用原始字段与选项。",
+    "フォームは変更されています。このリクエストは元の項目と選択肢を使用します。"
+  ],
+  "Includi cestino": [
+    "Include trash",
+    "Inclure la corbeille",
+    "Incluir papelera",
+    "Papierkorb einschließen",
+    "包含回收站",
+    "ゴミ箱を含める"
+  ],
+  "Inizio": [
+    "Start",
+    "Début",
+    "Inicio",
+    "Beginn",
+    "开始",
+    "開始"
+  ],
+  "La bozza della scheda resta nell’editor. L’assegnazione riguarda la scheda già salvata.": [
+    "The card draft stays in the editor. The assignment applies to the saved card.",
+    "Le brouillon de la carte reste dans l'éditeur. L'affectation concerne la carte déjà enregistrée.",
+    "El borrador de la tarjeta permanece en el editor. La asignación se aplica a la tarjeta guardada.",
+    "Der Kartenentwurf bleibt im Editor. Die Zuweisung betrifft die bereits gespeicherte Karte.",
+    "卡片草稿仍保留在编辑器中。此分配适用于已保存的卡片。",
+    "カードの下書きはエディターに残ります。割り当ては保存済みのカードに適用されます。"
+  ],
+  "La bozza riguarda una versione precedente. Scarta la bozza e rileggi i dati del server prima di salvare.": [
+    "The draft belongs to an older version. Discard it and reload server data before saving.",
+    "Le brouillon concerne une version antérieure. Abandonnez-le et rechargez les données du serveur avant d'enregistrer.",
+    "El borrador corresponde a una versión anterior. Descártalo y vuelve a cargar los datos del servidor antes de guardar.",
+    "Der Entwurf basiert auf einer älteren Version. Verwerfen Sie ihn und laden Sie vor dem Speichern die Serverdaten neu.",
+    "此草稿基于旧版本。请先丢弃草稿并重新加载服务器数据，再保存。",
+    "下書きは以前のバージョンに基づいています。保存する前に破棄してサーバーのデータを再読み込みしてください。"
+  ],
+  "La capacità e tutte le stime sono espresse in minuti per l’intero Sprint. Le stime delle schede assegnate a più persone vengono ripartite dal server.": [
+    "Capacity and all estimates are expressed in minutes for the entire sprint. The server divides estimates for cards with multiple assignees.",
+    "La capacité et toutes les estimations sont exprimées en minutes pour l'ensemble du sprint. Le serveur répartit les estimations des cartes affectées à plusieurs personnes.",
+    "La capacidad y todas las estimaciones se expresan en minutos para todo el sprint. El servidor reparte las estimaciones de las tarjetas con varias personas asignadas.",
+    "Kapazität und alle Schätzungen werden in Minuten für den gesamten Sprint angegeben. Der Server verteilt Schätzungen von Karten mit mehreren Zuständigen.",
+    "容量和所有估算均以整个冲刺的分钟数表示。分配给多人的卡片，其估算由服务器分摊。",
+    "稼働時間と見積もりはスプリント全体の分単位で表示されます。担当者が複数いるカードの見積もりはサーバーが分配します。"
+  ],
+  "La scheda creata è stata rimossa.": [
+    "The created card has been removed.",
+    "La carte créée a été supprimée.",
+    "La tarjeta creada se ha eliminado.",
+    "Die erstellte Karte wurde entfernt.",
+    "已创建的卡片已被删除。",
+    "作成したカードは削除されました。"
+  ],
+  "Lascia vuoto per usare le risposte originali": [
+    "Leave blank to use the original answers",
+    "Laisser vide pour utiliser les réponses originales",
+    "Deja en blanco para usar las respuestas originales",
+    "Leer lassen, um die ursprünglichen Antworten zu verwenden",
+    "留空以使用原始回答",
+    "元の回答を使う場合は空欄にしてください"
+  ],
+  "Lista delle schede convertite": [
+    "List for converted cards",
+    "Liste des cartes converties",
+    "Lista de tarjetas convertidas",
+    "Liste für umgewandelte Karten",
+    "转换后卡片所在列表",
+    "変換したカードの追加先リスト"
+  ],
+  "Lista rimossa: scegli una nuova destinazione nelle impostazioni del modulo.": [
+    "List removed: choose a new destination in the form settings.",
+    "Liste supprimée : choisissez une nouvelle destination dans les paramètres du formulaire.",
+    "Lista eliminada: elige un nuevo destino en los ajustes del formulario.",
+    "Liste entfernt: Wählen Sie in den Formulareinstellungen ein neues Ziel.",
+    "列表已删除：请在表单设置中选择新的目标列表。",
+    "リストは削除されました。フォーム設定で新しい追加先を選択してください。"
+  ],
+  "Massimo 20 campi attivi. I campi a scelta usano solo le opzioni definite qui. Le richieste precedenti mantengono il proprio schema originale.": [
+    "Up to 20 active fields. Choice fields use only the options defined here. Earlier requests keep their original schema.",
+    "20 champs actifs maximum. Les champs de sélection utilisent uniquement les options définies ici. Les demandes précédentes conservent leur schéma original.",
+    "Máximo 20 campos activos. Los campos de selección solo usan las opciones definidas aquí. Las solicitudes anteriores conservan su esquema original.",
+    "Maximal 20 aktive Felder. Auswahlfelder verwenden nur die hier festgelegten Optionen. Frühere Anfragen behalten ihr ursprüngliches Schema.",
+    "最多 20 个有效字段。选择字段只能使用此处定义的选项。较早的请求保留原始结构。",
+    "有効な項目は最大 20 個です。選択項目にはここで設定した選択肢のみ使えます。以前のリクエストは元の構成を保持します。"
+  ],
+  "Minuti stimati e capacità dichiarata, senza proiezioni automatiche da dati storici. Le schede senza stima non contribuiscono al totale dei minuti.": [
+    "Estimated minutes and declared capacity, without automatic projections from historical data. Cards without estimates are excluded from the total minutes.",
+    "Minutes estimées et capacité déclarée, sans projection automatique à partir des données historiques. Les cartes sans estimation ne contribuent pas au total des minutes.",
+    "Minutos estimados y capacidad declarada, sin proyecciones automáticas a partir de datos históricos. Las tarjetas sin estimación no contribuyen al total de minutos.",
+    "Geschätzte Minuten und angegebene Kapazität, ohne automatische Hochrechnung aus historischen Daten. Karten ohne Schätzung werden nicht in die Gesamtminuten einbezogen.",
+    "显示估算分钟数与声明的容量，不根据历史数据自动推算。未估算的卡片不计入分钟总数。",
+    "見積もり時間と設定された稼働時間を表示します。過去のデータから自動予測はしません。見積もりのないカードは合計時間に含まれません。"
+  ],
+  "Nessun dato disponibile.": [
+    "No data available.",
+    "Aucune donnée disponible.",
+    "No hay datos disponibles.",
+    "Keine Daten verfügbar.",
+    "暂无数据。",
+    "データはありません。"
+  ],
+  "Nessun evento registrato.": [
+    "No events recorded.",
+    "Aucun événement enregistré.",
+    "No hay eventos registrados.",
+    "Keine Ereignisse erfasst.",
+    "暂无事件记录。",
+    "記録されたイベントはありません。"
+  ],
+  "Nome Sprint": [
+    "Sprint name",
+    "Nom du sprint",
+    "Nombre del sprint",
+    "Sprint-Name",
+    "冲刺名称",
+    "スプリント名"
+  ],
+  "Nome modulo": [
+    "Form name",
+    "Nom du formulaire",
+    "Nombre del formulario",
+    "Formularname",
+    "表单名称",
+    "フォーム名"
+  ],
+  "Obbligatorio": [
+    "Required",
+    "Obligatoire",
+    "Obligatorio",
+    "Erforderlich",
+    "必填",
+    "必須"
+  ],
+  "Obiettivo": [
+    "Goal",
+    "Objectif",
+    "Objetivo",
+    "Ziel",
+    "目标",
+    "目標"
+  ],
+  "Ogni riga è un’osservazione salvata nel giorno UTC indicato. Non vengono ricostruiti dati per i giorni senza osservazioni. Un nuovo salvataggio aggiorna l’osservazione di oggi.": [
+    "Each row is an observation saved on the specified UTC day. Days without observations are not reconstructed. Saving again updates today's observation.",
+    "Chaque ligne est une observation enregistrée le jour UTC indiqué. Les jours sans observations ne sont pas reconstitués. Un nouvel enregistrement met à jour l'observation du jour.",
+    "Cada fila es una observación guardada en el día UTC indicado. No se reconstruyen datos de los días sin observaciones. Un nuevo guardado actualiza la observación de hoy.",
+    "Jede Zeile ist eine Beobachtung für den angegebenen UTC-Tag. Tage ohne Beobachtungen werden nicht rekonstruiert. Erneutes Speichern aktualisiert die heutige Beobachtung.",
+    "每一行是指定 UTC 日期保存的记录。没有记录的日期不会重建数据。再次保存会更新今天的记录。",
+    "各行は表示された UTC 日付に保存した記録です。記録のない日のデータは補完しません。再度保存すると今日の記録を更新します。"
+  ],
+  "Operazione": [
+    "Operation",
+    "Opération",
+    "Operación",
+    "Vorgang",
+    "操作",
+    "操作"
+  ],
+  "Opzioni per i campi a scelta (una per riga)": [
+    "Choice field options (one per line)",
+    "Options des champs de sélection (une par ligne)",
+    "Opciones de los campos de selección (una por línea)",
+    "Optionen für Auswahlfelder (eine pro Zeile)",
+    "选择字段的选项（每行一个）",
+    "選択項目の選択肢（1 行に 1 つ）"
+  ],
+  "Priorità": [
+    "Priority",
+    "Priorité",
+    "Prioridad",
+    "Priorität",
+    "优先级",
+    "優先度"
+  ],
+  "Rimuovi dallo Sprint": [
+    "Remove from sprint",
+    "Retirer du sprint",
+    "Quitar del sprint",
+    "Aus Sprint entfernen",
+    "从冲刺中移除",
+    "スプリントから削除"
+  ],
+  "Rimuovi selezionate dallo Sprint": [
+    "Remove selected cards from sprint",
+    "Retirer les cartes sélectionnées du sprint",
+    "Quitar seleccionadas del sprint",
+    "Ausgewählte Karten aus Sprint entfernen",
+    "从冲刺中移除所选卡片",
+    "選択したカードをスプリントから削除"
+  ],
+  "Scarta la bozza prima di inviare.": [
+    "Discard the draft before submitting.",
+    "Abandonnez le brouillon avant d'envoyer.",
+    "Descarta el borrador antes de enviar.",
+    "Verwerfen Sie den Entwurf vor dem Absenden.",
+    "请先丢弃草稿再提交。",
+    "送信する前に下書きを破棄してください。"
+  ],
+  "Seleziona fino a 100 schede della pagina caricata. I filtri e i permessi vengono verificati dal server.": [
+    "Select up to 100 cards from the loaded page. The server verifies filters and permissions.",
+    "Sélectionnez jusqu'à 100 cartes de la page chargée. Le serveur vérifie les filtres et les autorisations.",
+    "Selecciona hasta 100 tarjetas de la página cargada. El servidor comprueba los filtros y los permisos.",
+    "Wählen Sie bis zu 100 Karten auf der geladenen Seite. Der Server prüft Filter und Berechtigungen.",
+    "最多选择当前已加载页面中的 100 张卡片。筛选条件和权限由服务器验证。",
+    "読み込み済みのページから最大 100 枚のカードを選択できます。フィルターと権限はサーバーが確認します。"
+  ],
+  "Seleziona {1}": [
+    "Select {1}",
+    "Sélectionner {1}",
+    "Seleccionar {1}",
+    "{1} auswählen",
+    "选择 {1}",
+    "{1} を選択"
+  ],
+  "Sono mostrati i primi 100 Sprint.": [
+    "The first 100 sprints are shown.",
+    "Les 100 premiers sprints sont affichés.",
+    "Se muestran los primeros 100 sprints.",
+    "Die ersten 100 Sprints werden angezeigt.",
+    "显示前 100 个冲刺。",
+    "最初の 100 件のスプリントを表示しています。"
+  ],
+  "Sono mostrati i primi 100 Sprint. Apri il dettaglio desiderato per le altre assegnazioni.": [
+    "The first 100 sprints are shown. Open the desired sprint's details for other assignments.",
+    "Les 100 premiers sprints sont affichés. Ouvrez les détails du sprint souhaité pour les autres affectations.",
+    "Se muestran los primeros 100 sprints. Abre los detalles del sprint deseado para otras asignaciones.",
+    "Die ersten 100 Sprints werden angezeigt. Öffnen Sie für weitere Zuweisungen die Details des gewünschten Sprints.",
+    "显示前 100 个冲刺。要进行其他分配，请打开所需冲刺的详情。",
+    "最初の 100 件のスプリントを表示しています。他の割り当ては目的のスプリントの詳細から行ってください。"
+  ],
+  "Sprint destinatario": [
+    "Target sprint",
+    "Sprint de destination",
+    "Sprint de destino",
+    "Ziel-Sprint",
+    "目标冲刺",
+    "割り当て先スプリント"
+  ],
+  "Sprint e Richieste": [
+    "Sprints and Requests",
+    "Sprints et demandes",
+    "Sprints y solicitudes",
+    "Sprints und Anfragen",
+    "冲刺与请求",
+    "スプリントとリクエスト"
+  ],
+  "Stato": [
+    "Status",
+    "État",
+    "Estado",
+    "Status",
+    "状态",
+    "状態"
+  ],
+  "Stato della richiesta": [
+    "Request status",
+    "État de la demande",
+    "Estado de la solicitud",
+    "Anfragenstatus",
+    "请求状态",
+    "リクエストの状態"
+  ],
+  "Tipo": [
+    "Type",
+    "Type",
+    "Tipo",
+    "Typ",
+    "类型",
+    "種類"
+  ],
+  "Titolo della richiesta": [
+    "Request title",
+    "Titre de la demande",
+    "Título de la solicitud",
+    "Titel der Anfrage",
+    "请求标题",
+    "リクエストのタイトル"
+  ],
+  "Versione": [
+    "Version",
+    "Version",
+    "Versión",
+    "Version",
+    "版本",
+    "バージョン"
+  ],
+  "{3} · {4} min stimati{5}": [
+    "{3} · {4} min estimated{5}",
+    "{3} · {4} min estimées{5}",
+    "{3} · {4} min estimados{5}",
+    "{3} · {4} Min. geschätzt{5}",
+    "{3} · 预计 {4} 分钟{5}",
+    "{3} · 見積もり {4} 分{5}"
+  ],
+  "Convertita in scheda": [
+    "Converted to card",
+    "Convertie en carte",
+    "Convertida en tarjeta",
+    "In Karte umgewandelt",
+    "已转换为卡片",
+    "カードに変換済み"
+  ],
+  "Sprint creato": [
+    "Sprint created",
+    "Sprint créé",
+    "Sprint creado",
+    "Sprint erstellt",
+    "冲刺已创建",
+    "スプリントを作成"
+  ],
+  "Sprint modificato": [
+    "Sprint edited",
+    "Sprint modifié",
+    "Sprint editado",
+    "Sprint bearbeitet",
+    "冲刺已编辑",
+    "スプリントを編集"
+  ],
+  "Sprint attivato": [
+    "Sprint activated",
+    "Sprint activé",
+    "Sprint activado",
+    "Sprint aktiviert",
+    "冲刺已启动",
+    "スプリントを開始"
+  ],
+  "Sprint chiuso": [
+    "Sprint closed",
+    "Sprint clos",
+    "Sprint cerrado",
+    "Sprint abgeschlossen",
+    "冲刺已结束",
+    "スプリントを終了"
+  ],
+  "Sprint riaperto": [
+    "Sprint reopened",
+    "Sprint rouvert",
+    "Sprint reabierto",
+    "Sprint erneut geöffnet",
+    "冲刺已重新打开",
+    "スプリントを再開"
+  ],
+  "Sprint nel cestino": [
+    "Sprint moved to trash",
+    "Sprint mis à la corbeille",
+    "Sprint movido a la papelera",
+    "Sprint in den Papierkorb verschoben",
+    "冲刺已移到回收站",
+    "スプリントをゴミ箱に移動"
+  ],
+  "Sprint ripristinato": [
+    "Sprint restored",
+    "Sprint restauré",
+    "Sprint restaurado",
+    "Sprint wiederhergestellt",
+    "冲刺已恢复",
+    "スプリントを復元"
+  ],
+  "Schede aggiunte allo Sprint": [
+    "Cards added to sprint",
+    "Cartes ajoutées au sprint",
+    "Tarjetas añadidas al sprint",
+    "Karten zum Sprint hinzugefügt",
+    "卡片已添加到冲刺",
+    "カードをスプリントに追加"
+  ],
+  "Schede rimosse dallo Sprint": [
+    "Cards removed from sprint",
+    "Cartes retirées du sprint",
+    "Tarjetas retiradas del sprint",
+    "Karten aus Sprint entfernt",
+    "卡片已从冲刺中移除",
+    "カードをスプリントから削除"
+  ],
+  "Capacità aggiornata": [
+    "Capacity updated",
+    "Capacité mise à jour",
+    "Capacidad actualizada",
+    "Kapazität aktualisiert",
+    "容量已更新",
+    "稼働時間を更新"
+  ],
+  "Osservazione salvata": [
+    "Observation saved",
+    "Observation enregistrée",
+    "Observación guardada",
+    "Beobachtung gespeichert",
+    "记录已保存",
+    "記録を保存"
+  ],
+  "Osservazione eliminata": [
+    "Observation deleted",
+    "Observation supprimée",
+    "Observación eliminada",
+    "Beobachtung gelöscht",
+    "记录已删除",
+    "記録を削除"
+  ],
+  "Modulo creato": [
+    "Form created",
+    "Formulaire créé",
+    "Formulario creado",
+    "Formular erstellt",
+    "表单已创建",
+    "フォームを作成"
+  ],
+  "Modulo modificato": [
+    "Form edited",
+    "Formulaire modifié",
+    "Formulario editado",
+    "Formular bearbeitet",
+    "表单已编辑",
+    "フォームを編集"
+  ],
+  "Modulo pubblicato": [
+    "Form published",
+    "Formulaire publié",
+    "Formulario publicado",
+    "Formular veröffentlicht",
+    "表单已发布",
+    "フォームを公開"
+  ],
+  "Modulo in pausa": [
+    "Form paused",
+    "Formulaire mis en pause",
+    "Formulario pausado",
+    "Formular pausiert",
+    "表单已暂停",
+    "フォームを一時停止"
+  ],
+  "Modulo nel cestino": [
+    "Form moved to trash",
+    "Formulaire mis à la corbeille",
+    "Formulario movido a la papelera",
+    "Formular in den Papierkorb verschoben",
+    "表单已移到回收站",
+    "フォームをゴミ箱に移動"
+  ],
+  "Modulo ripristinato": [
+    "Form restored",
+    "Formulaire restauré",
+    "Formulario restaurado",
+    "Formular wiederhergestellt",
+    "表单已恢复",
+    "フォームを復元"
+  ],
+  "Campo creato": [
+    "Field created",
+    "Champ créé",
+    "Campo creado",
+    "Feld erstellt",
+    "字段已创建",
+    "項目を作成"
+  ],
+  "Campo modificato": [
+    "Field edited",
+    "Champ modifié",
+    "Campo editado",
+    "Feld bearbeitet",
+    "字段已编辑",
+    "項目を編集"
+  ],
+  "Campo nel cestino": [
+    "Field moved to trash",
+    "Champ mis à la corbeille",
+    "Campo movido a la papelera",
+    "Feld in den Papierkorb verschoben",
+    "字段已移到回收站",
+    "項目をゴミ箱に移動"
+  ],
+  "Campo ripristinato": [
+    "Field restored",
+    "Champ restauré",
+    "Campo restaurado",
+    "Feld wiederhergestellt",
+    "字段已恢复",
+    "項目を復元"
+  ],
+  "Ordine dei campi aggiornato": [
+    "Field order updated",
+    "Ordre des champs mis à jour",
+    "Orden de campos actualizado",
+    "Feldreihenfolge aktualisiert",
+    "字段顺序已更新",
+    "項目の順序を更新"
+  ],
+  "Lista di destinazione rimossa": [
+    "Destination list removed",
+    "Liste de destination supprimée",
+    "Lista de destino eliminada",
+    "Zielliste entfernt",
+    "目标列表已删除",
+    "追加先リストを削除"
+  ],
+  "Richiesta inviata": [
+    "Request submitted",
+    "Demande envoyée",
+    "Solicitud enviada",
+    "Anfrage eingereicht",
+    "请求已提交",
+    "リクエストを送信"
+  ],
+  "Richiesta modificata": [
+    "Request edited",
+    "Demande modifiée",
+    "Solicitud editada",
+    "Anfrage bearbeitet",
+    "请求已编辑",
+    "リクエストを編集"
+  ],
+  "Nota aggiunta": [
+    "Note added",
+    "Note ajoutée",
+    "Nota añadida",
+    "Notiz hinzugefügt",
+    "备注已添加",
+    "メモを追加"
+  ],
+  "Stato della richiesta aggiornato": [
+    "Request status updated",
+    "État de la demande mis à jour",
+    "Estado de la solicitud actualizado",
+    "Anfragenstatus aktualisiert",
+    "请求状态已更新",
+    "リクエストの状態を更新"
+  ],
+  "Richiesta convertita in scheda": [
+    "Request converted to card",
+    "Demande convertie en carte",
+    "Solicitud convertida en tarjeta",
+    "Anfrage in Karte umgewandelt",
+    "请求已转换为卡片",
+    "リクエストをカードに変換"
+  ],
+  "Richiesta nel cestino": [
+    "Request moved to trash",
+    "Demande mise à la corbeille",
+    "Solicitud movida a la papelera",
+    "Anfrage in den Papierkorb verschoben",
+    "请求已移到回收站",
+    "リクエストをゴミ箱に移動"
+  ],
+  "Richiesta ripristinata": [
+    "Request restored",
+    "Demande restaurée",
+    "Solicitud restaurada",
+    "Anfrage wiederhergestellt",
+    "请求已恢复",
+    "リクエストを復元"
+  ],
+  "Aggiornamento": [
+    "Update",
+    "Mise à jour",
+    "Actualización",
+    "Aktualisierung",
+    "更新",
+    "更新"
+  ],
+  "{0} schede": [
+    "{0} cards",
+    "{0} cartes",
+    "{0} tarjetas",
+    "{0} Karten",
+    "{0} 张卡片",
+    "{0} 枚のカード"
+  ],
+  "{0} minuti": [
+    "{0} minutes",
+    "{0} minutes",
+    "{0} minutos",
+    "{0} Minuten",
+    "{0} 分钟",
+    "{0} 分"
+  ],
+  "UTC corrente": [
+    "Current UTC day",
+    "Jour UTC actuel",
+    "Día UTC actual",
+    "Aktueller UTC-Tag",
+    "当前 UTC 日期",
+    "現在の UTC 日付"
+  ],
+  "Colonna di destinazione rimossa definitivamente.": [
+    "Destination column permanently removed.",
+    "Colonne de destination supprimée définitivement.",
+    "Columna de destino eliminada permanentemente.",
+    "Zielspalte dauerhaft entfernt.",
+    "目标列已永久删除。",
+    "追加先の列は完全に削除されました。"
+  ]
+}

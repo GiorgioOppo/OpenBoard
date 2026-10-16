@@ -17,6 +17,8 @@ BODY_LIMIT = 2 * 1024 * 1024
 UPSTREAM_TIMEOUT = 10
 ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
           '/index.html': ('index.html', 'text/html; charset=utf-8'),
+          '/i18n.js': ('i18n.js', 'application/javascript; charset=utf-8'),
+          '/locales.js': ('locales.js', 'application/javascript; charset=utf-8'),
           '/app.js': ('app.js', 'application/javascript; charset=utf-8'),
           '/planning.js': ('planning.js', 'application/javascript; charset=utf-8'),
           '/enterprise.js': ('enterprise.js', 'application/javascript; charset=utf-8'),

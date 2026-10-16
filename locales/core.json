@@ -1,0 +1,4266 @@
+{
+  "(ID numerico)": [
+    "(numeric ID)",
+    "(ID numérique)",
+    "(ID numérico)",
+    "(numerische ID)",
+    "（数字 ID）",
+    "（数値 ID）"
+  ],
+  "(copia)": [
+    "(copy)",
+    "(copie)",
+    "(copia)",
+    "(Kopie)",
+    "（副本）",
+    "（コピー）"
+  ],
+  "0 selezionate": [
+    "0 selected",
+    "0 sélectionnée",
+    "0 seleccionadas",
+    "0 ausgewählt",
+    "已选择 0 项",
+    "0 件を選択"
+  ],
+  "@{1} · ID {2}": [
+    "@{1} · ID {2}",
+    "@{1} · ID {2}",
+    "@{1} · ID {2}",
+    "@{1} · ID {2}",
+    "@{1} · ID {2}",
+    "@{1} · ID {2}"
+  ],
+  "@{2} · ID {3}": [
+    "@{2} · ID {3}",
+    "@{2} · ID {3}",
+    "@{2} · ID {3}",
+    "@{2} · ID {3}",
+    "@{2} · ID {3}",
+    "@{2} · ID {3}"
+  ],
+  "A cosa lavoriamo?": [
+    "What are we working on?",
+    "Sur quoi travaillons-nous ?",
+    "¿En qué trabajamos?",
+    "Woran arbeiten wir?",
+    "我们要做什么？",
+    "何に取り組みますか？"
+  ],
+  "Accedi": [
+    "Sign in",
+    "Se connecter",
+    "Iniciar sesión",
+    "Anmelden",
+    "登录",
+    "ログイン"
+  ],
+  "Accedi a OpenBoard": [
+    "Sign in to OpenBoard",
+    "Se connecter à OpenBoard",
+    "Iniciar sesión en OpenBoard",
+    "Bei OpenBoard anmelden",
+    "登录 OpenBoard",
+    "OpenBoard にログイン"
+  ],
+  "Accedi al workspace con le tue credenziali.": [
+    "Sign in to the workspace with your credentials.",
+    "Connectez-vous à l’espace de travail avec vos identifiants.",
+    "Accede al espacio de trabajo con tus credenciales.",
+    "Melde dich mit deinen Zugangsdaten im Arbeitsbereich an.",
+    "使用你的凭据登录工作区。",
+    "認証情報を入力してワークスペースにログインしてください。"
+  ],
+  "Accedi con un account per vedere le schede assegnate a te attraverso i membri della bacheca.": [
+    "Sign in with an account to see cards assigned to you through board membership.",
+    "Connectez-vous avec un compte pour voir les cartes qui vous sont attribuées en tant que membre des tableaux.",
+    "Inicia sesión con una cuenta para ver las tarjetas que tienes asignadas como miembro de los tableros.",
+    "Melde dich mit einem Konto an, um die dir als Board-Mitglied zugewiesenen Karten zu sehen.",
+    "登录账户后可查看通过看板成员身份分配给你的卡片。",
+    "アカウントでログインすると、ボードのメンバーとして自分に割り当てられたカードを確認できます。"
+  ],
+  "Accesso: {1}": [
+    "Signed in: {1}",
+    "Connexion : {1}",
+    "Inicio de sesión: {1}",
+    "Angemeldet: {1}",
+    "登录时间：{1}",
+    "ログイン：{1}"
+  ],
+  "Account e preferenze": [
+    "Account and preferences",
+    "Compte et préférences",
+    "Cuenta y preferencias",
+    "Konto und Einstellungen",
+    "账户与偏好设置",
+    "アカウントと設定"
+  ],
+  "Account e preferenze{0}": [
+    "Account and preferences{0}",
+    "Compte et préférences{0}",
+    "Cuenta y preferencias{0}",
+    "Konto und Einstellungen{0}",
+    "账户与偏好设置{0}",
+    "アカウントと設定{0}"
+  ],
+  "Ad esempio: Da esplorare": [
+    "For example: To explore",
+    "Par exemple : À explorer",
+    "Por ejemplo: Por explorar",
+    "Zum Beispiel: Zu erkunden",
+    "例如：待探索",
+    "例：調査すること"
+  ],
+  "Aggiorna": [
+    "Refresh",
+    "Actualiser",
+    "Actualizar",
+    "Aktualisieren",
+    "刷新",
+    "更新"
+  ],
+  "Aggiorna bacheca": [
+    "Refresh board",
+    "Actualiser le tableau",
+    "Actualizar tablero",
+    "Board aktualisieren",
+    "刷新看板",
+    "ボードを更新"
+  ],
+  "Aggiorna dati dal server": [
+    "Refresh data from server",
+    "Actualiser les données du serveur",
+    "Actualizar datos del servidor",
+    "Daten vom Server aktualisieren",
+    "从服务器刷新数据",
+    "サーバーのデータを更新"
+  ],
+  "Aggiorna password": [
+    "Update password",
+    "Mettre à jour le mot de passe",
+    "Actualizar contraseña",
+    "Passwort aktualisieren",
+    "更新密码",
+    "パスワードを更新"
+  ],
+  "Aggiungi ai preferiti": [
+    "Add to favorites",
+    "Ajouter aux favoris",
+    "Añadir a favoritos",
+    "Zu Favoriten hinzufügen",
+    "添加到收藏",
+    "お気に入りに追加"
+  ],
+  "Aggiungi attività": [
+    "Add task",
+    "Ajouter une tâche",
+    "Añadir tarea",
+    "Aufgabe hinzufügen",
+    "添加任务",
+    "タスクを追加"
+  ],
+  "Aggiungi contesto, dettagli o un po’ di ispirazione…": [
+    "Add context, details, or a little inspiration…",
+    "Ajoutez du contexte, des détails ou un peu d’inspiration…",
+    "Añade contexto, detalles o un poco de inspiración…",
+    "Füge Kontext, Details oder etwas Inspiration hinzu…",
+    "添加背景、详细说明或一点灵感…",
+    "背景や詳細、インスピレーションを追加…"
+  ],
+  "Aggiungi dipendenza": [
+    "Add dependency",
+    "Ajouter une dépendance",
+    "Añadir dependencia",
+    "Abhängigkeit hinzufügen",
+    "添加依赖关系",
+    "依存関係を追加"
+  ],
+  "Aggiungi l’attività alla checklist oppure cancella il testo prima di salvare la scheda. La bozza è conservata.": [
+    "Add the task to the checklist or clear the text before saving the card. Your draft is preserved.",
+    "Ajoutez la tâche à la checklist ou effacez le texte avant d’enregistrer la carte. Votre brouillon est conservé.",
+    "Añade la tarea a la lista de verificación o borra el texto antes de guardar la tarjeta. El borrador está guardado.",
+    "Füge die Aufgabe zur Checkliste hinzu oder entferne den Text, bevor du die Karte speicherst. Dein Entwurf bleibt erhalten.",
+    "保存卡片前请将任务加入检查清单或清空文本。草稿已保留。",
+    "カードを保存する前にタスクをチェックリストに追加するかテキストを消去してください。下書きは保持されます。"
+  ],
+  "Aggiungi membri alla bacheca per assegnare account reali.": [
+    "Add board members to assign individual accounts.",
+    "Ajoutez des membres au tableau pour attribuer des comptes individuels.",
+    "Añade miembros al tablero para asignar cuentas individuales.",
+    "Füge Board-Mitglieder hinzu, um einzelne Konten zuzuweisen.",
+    "添加看板成员后即可分配实际账户。",
+    "実際のアカウントを割り当てるには、ボードにメンバーを追加してください。"
+  ],
+  "Aggiungi o aggiorna un membro": [
+    "Add or update a member",
+    "Ajouter ou modifier un membre",
+    "Añadir o actualizar un miembro",
+    "Mitglied hinzufügen oder aktualisieren",
+    "添加或更新成员",
+    "メンバーを追加または更新"
+  ],
+  "Aggiungi scheda": [
+    "Add card",
+    "Ajouter une carte",
+    "Añadir tarjeta",
+    "Karte hinzufügen",
+    "添加卡片",
+    "カードを追加"
+  ],
+  "Aggiungi scheda in {3}": [
+    "Add a card to {3}",
+    "Ajouter une carte à {3}",
+    "Añadir tarjeta a {3}",
+    "Karte zu {3} hinzufügen",
+    "向 {3} 添加卡片",
+    "{3} にカードを追加"
+  ],
+  "Aggiungi un utente": [
+    "Add a user",
+    "Ajouter un utilisateur",
+    "Añadir un usuario",
+    "Benutzer hinzufügen",
+    "添加用户",
+    "ユーザーを追加"
+  ],
+  "Aggiungi una stella alle bacheche che usi più spesso.": [
+    "Star the boards you use most often.",
+    "Ajoutez aux favoris les tableaux que vous utilisez le plus souvent.",
+    "Añade a favoritos los tableros que usas más.",
+    "Markiere häufig verwendete Boards als Favoriten.",
+    "为常用看板加星收藏。",
+    "よく使うボードをお気に入りに追加しましょう。"
+  ],
+  "Aggiungi un’attività…": [
+    "Add a task…",
+    "Ajouter une tâche…",
+    "Añadir una tarea…",
+    "Aufgabe hinzufügen…",
+    "添加任务…",
+    "タスクを追加…"
+  ],
+  "Allegati": [
+    "Attachments",
+    "Pièces jointes",
+    "Adjuntos",
+    "Anhänge",
+    "附件",
+    "添付ファイル"
+  ],
+  "Allegato caricato.": [
+    "Attachment uploaded.",
+    "Pièce jointe téléversée.",
+    "Adjunto subido.",
+    "Anhang hochgeladen.",
+    "附件已上传。",
+    "添付ファイルをアップロードしました。"
+  ],
+  "Allegato eliminato.": [
+    "Attachment deleted.",
+    "Pièce jointe supprimée.",
+    "Adjunto eliminado.",
+    "Anhang gelöscht.",
+    "附件已删除。",
+    "添付ファイルを削除しました。"
+  ],
+  "Allegato ripristinato.": [
+    "Attachment restored.",
+    "Pièce jointe restaurée.",
+    "Adjunto restaurado.",
+    "Anhang wiederhergestellt.",
+    "附件已恢复。",
+    "添付ファイルを復元しました。"
+  ],
+  "Allegato scaricato.": [
+    "Attachment downloaded.",
+    "Pièce jointe téléchargée.",
+    "Adjunto descargado.",
+    "Anhang heruntergeladen.",
+    "附件已下载。",
+    "添付ファイルをダウンロードしました。"
+  ],
+  "Alta": [
+    "High",
+    "Haute",
+    "Alta",
+    "Hoch",
+    "高",
+    "高"
+  ],
+  "Altra sessione": [
+    "Other session",
+    "Autre session",
+    "Otra sesión",
+    "Andere Sitzung",
+    "其他会话",
+    "別のセッション"
+  ],
+  "Altre sessioni revocate.": [
+    "Other sessions revoked.",
+    "Autres sessions révoquées.",
+    "Otras sesiones revocadas.",
+    "Andere Sitzungen widerrufen.",
+    "其他会话已撤销。",
+    "他のセッションを取り消しました。"
+  ],
+  "Amministratore": [
+    "Administrator",
+    "Administrateur",
+    "Administrador",
+    "Administrator",
+    "管理员",
+    "管理者"
+  ],
+  "Annulla": [
+    "Cancel",
+    "Annuler",
+    "Cancelar",
+    "Abbrechen",
+    "取消",
+    "キャンセル"
+  ],
+  "Annulla selezione": [
+    "Clear selection",
+    "Annuler la sélection",
+    "Borrar selección",
+    "Auswahl aufheben",
+    "取消选择",
+    "選択を解除"
+  ],
+  "Anteprima Markdown della descrizione": [
+    "Markdown preview of the description",
+    "Aperçu Markdown de la description",
+    "Vista previa Markdown de la descripción",
+    "Markdown-Vorschau der Beschreibung",
+    "描述的 Markdown 预览",
+    "説明の Markdown プレビュー"
+  ],
+  "Aperte": [
+    "Open",
+    "Ouvertes",
+    "Abiertas",
+    "Offen",
+    "未完成",
+    "未完了"
+  ],
+  "Applica": [
+    "Apply",
+    "Appliquer",
+    "Aplicar",
+    "Anwenden",
+    "应用",
+    "適用"
+  ],
+  "Apri e sposta scheda": [
+    "Open and move card",
+    "Ouvrir et déplacer la carte",
+    "Abrir y mover tarjeta",
+    "Karte öffnen und verschieben",
+    "打开并移动卡片",
+    "カードを開いて移動"
+  ],
+  "Apri riferimento in una nuova scheda": [
+    "Open reference in a new tab",
+    "Ouvrir la référence dans un nouvel onglet",
+    "Abrir referencia en una nueva pestaña",
+    "Referenz in neuem Tab öffnen",
+    "在新标签页中打开参考链接",
+    "参照先を新しいタブで開く"
+  ],
+  "Apri scheda": [
+    "Open card",
+    "Ouvrir la carte",
+    "Abrir tarjeta",
+    "Karte öffnen",
+    "打开卡片",
+    "カードを開く"
+  ],
+  "Archivia": [
+    "Archive",
+    "Archiver",
+    "Archivar",
+    "Archivieren",
+    "归档",
+    "アーカイブ"
+  ],
+  "Archivia bacheca": [
+    "Archive board",
+    "Archiver le tableau",
+    "Archivar tablero",
+    "Board archivieren",
+    "归档看板",
+    "ボードをアーカイブ"
+  ],
+  "Archivia selezionate": [
+    "Archive selected",
+    "Archiver la sélection",
+    "Archivar seleccionadas",
+    "Ausgewählte archivieren",
+    "归档所选项",
+    "選択項目をアーカイブ"
+  ],
+  "Archiviare la versione salvata sul server? La bozza locale verrà conservata.": [
+    "Archive the version saved on the server? Your local draft will be preserved.",
+    "Archiver la version enregistrée sur le serveur ? Votre brouillon local sera conservé.",
+    "¿Archivar la versión guardada en el servidor? Se conservará el borrador local.",
+    "Die auf dem Server gespeicherte Version archivieren? Dein lokaler Entwurf bleibt erhalten.",
+    "归档服务器上保存的版本吗？本地草稿将保留。",
+    "サーバーに保存されたバージョンをアーカイブしますか？ローカルの下書きは保持されます。"
+  ],
+  "Archiviare {0} schede selezionate? Potrai recuperarle mostrando le schede archiviate.": [
+    "Archive {0} selected cards? You can recover them by showing archived cards.",
+    "Archiver les {0} cartes sélectionnées ? Vous pourrez les récupérer en affichant les cartes archivées.",
+    "¿Archivar {0} tarjetas seleccionadas? Podrás recuperarlas mostrando las tarjetas archivadas.",
+    "{0} ausgewählte Karten archivieren? Du kannst sie durch Einblenden archivierter Karten wiederherstellen.",
+    "归档所选的 {0} 张卡片吗？显示已归档卡片后即可恢复。",
+    "選択した {0} 枚のカードをアーカイブしますか？アーカイブ済みカードを表示して復元できます。"
+  ],
+  "Archiviata": [
+    "Archived",
+    "Archivée",
+    "Archivada",
+    "Archiviert",
+    "已归档",
+    "アーカイブ済み"
+  ],
+  "Assegnatari": [
+    "Assignees",
+    "Responsables",
+    "Responsables",
+    "Zuständige",
+    "负责人",
+    "担当者"
+  ],
+  "Attività": [
+    "Task",
+    "Tâche",
+    "Tarea",
+    "Aufgabe",
+    "任务",
+    "タスク"
+  ],
+  "Attivo": [
+    "Active",
+    "Actif",
+    "Activo",
+    "Aktiv",
+    "启用",
+    "有効"
+  ],
+  "Autore": [
+    "Author",
+    "Auteur",
+    "Autor",
+    "Autor",
+    "作者",
+    "作成者"
+  ],
+  "Avvia timer": [
+    "Start timer",
+    "Démarrer le minuteur",
+    "Iniciar temporizador",
+    "Timer starten",
+    "启动计时器",
+    "タイマーを開始"
+  ],
+  "Azzurro": [
+    "Light blue",
+    "Bleu ciel",
+    "Azul claro",
+    "Hellblau",
+    "浅蓝色",
+    "ライトブルー"
+  ],
+  "Bacheca": [
+    "Board",
+    "Tableau",
+    "Tablero",
+    "Board",
+    "看板",
+    "ボード"
+  ],
+  "Bacheca aggiunta ai preferiti.": [
+    "Board added to favorites.",
+    "Tableau ajouté aux favoris.",
+    "Tablero añadido a favoritos.",
+    "Board zu Favoriten hinzugefügt.",
+    "看板已添加到收藏。",
+    "ボードをお気に入りに追加しました。"
+  ],
+  "Bacheca archiviata.": [
+    "Board archived.",
+    "Tableau archivé.",
+    "Tablero archivado.",
+    "Board archiviert.",
+    "看板已归档。",
+    "ボードをアーカイブしました。"
+  ],
+  "Bacheca creata dal modello.": [
+    "Board created from template.",
+    "Tableau créé à partir du modèle.",
+    "Tablero creado a partir de la plantilla.",
+    "Board aus Vorlage erstellt.",
+    "已通过模板创建看板。",
+    "テンプレートからボードを作成しました。"
+  ],
+  "Bacheca duplicata.": [
+    "Board duplicated.",
+    "Tableau dupliqué.",
+    "Tablero duplicado.",
+    "Board dupliziert.",
+    "看板已复制。",
+    "ボードを複製しました。"
+  ],
+  "Bacheca importata": [
+    "Imported board",
+    "Tableau importé",
+    "Tablero importado",
+    "Importiertes Board",
+    "已导入的看板",
+    "インポートしたボード"
+  ],
+  "Bacheca importata.": [
+    "Board imported.",
+    "Tableau importé.",
+    "Tablero importado.",
+    "Board importiert.",
+    "看板已导入。",
+    "ボードをインポートしました。"
+  ],
+  "Bacheca rimossa dai preferiti.": [
+    "Board removed from favorites.",
+    "Tableau retiré des favoris.",
+    "Tablero quitado de favoritos.",
+    "Board aus Favoriten entfernt.",
+    "看板已从收藏中移除。",
+    "ボードをお気に入りから削除しました。"
+  ],
+  "Bacheca ripristinata dall’archivio.": [
+    "Board restored from archive.",
+    "Tableau restauré depuis les archives.",
+    "Tablero restaurado del archivo.",
+    "Board aus dem Archiv wiederhergestellt.",
+    "看板已从归档中恢复。",
+    "ボードをアーカイブから復元しました。"
+  ],
+  "Bacheca salvata sul server.": [
+    "Board saved on the server.",
+    "Tableau enregistré sur le serveur.",
+    "Tablero guardado en el servidor.",
+    "Board auf dem Server gespeichert.",
+    "看板已保存到服务器。",
+    "ボードをサーバーに保存しました。"
+  ],
+  "Bacheca spostata nel cestino.": [
+    "Board moved to trash.",
+    "Tableau déplacé dans la corbeille.",
+    "Tablero movido a la papelera.",
+    "Board in den Papierkorb verschoben.",
+    "看板已移至回收站。",
+    "ボードをゴミ箱に移動しました。"
+  ],
+  "Bacheche": [
+    "Boards",
+    "Tableaux",
+    "Tableros",
+    "Boards",
+    "看板",
+    "ボード"
+  ],
+  "Bacheche archiviate": [
+    "Archived boards",
+    "Tableaux archivés",
+    "Tableros archivados",
+    "Archivierte Boards",
+    "已归档看板",
+    "アーカイブ済みボード"
+  ],
+  "Bassa": [
+    "Low",
+    "Basse",
+    "Baja",
+    "Niedrig",
+    "低",
+    "低"
+  ],
+  "Bloccata": [
+    "Blocked",
+    "Bloquée",
+    "Bloqueada",
+    "Blockiert",
+    "已阻塞",
+    "ブロック中"
+  ],
+  "Bloccate": [
+    "Blocked",
+    "Bloquées",
+    "Bloqueadas",
+    "Blockiert",
+    "已阻塞",
+    "ブロック中"
+  ],
+  "Blu": [
+    "Blue",
+    "Bleu",
+    "Azul",
+    "Blau",
+    "蓝色",
+    "ブルー"
+  ],
+  "Bozza recuperata. Verifica e salva quando pronta.": [
+    "Draft recovered. Review and save when ready.",
+    "Brouillon récupéré. Vérifiez-le, puis enregistrez-le lorsque vous êtes prêt.",
+    "Borrador recuperado. Revísalo y guárdalo cuando esté listo.",
+    "Entwurf wiederhergestellt. Prüfe ihn und speichere ihn, wenn er fertig ist.",
+    "草稿已恢复。检查完成后即可保存。",
+    "下書きを復元しました。確認して、準備ができたら保存してください。"
+  ],
+  "CSV completo scaricato con celle protette per i fogli di calcolo.": [
+    "Complete CSV downloaded with spreadsheet-safe cells.",
+    "CSV complet téléchargé avec des cellules protégées pour les tableurs.",
+    "CSV completo descargado con celdas protegidas para hojas de cálculo.",
+    "Vollständige CSV-Datei mit für Tabellenkalkulationen geschützten Zellen heruntergeladen.",
+    "已下载完整 CSV，单元格已做电子表格安全处理。",
+    "表計算ソフト向けにセルを保護した完全な CSV をダウンロードしました。"
+  ],
+  "Calcolo statistiche…": [
+    "Calculating statistics…",
+    "Calcul des statistiques…",
+    "Calculando estadísticas…",
+    "Statistiken werden berechnet…",
+    "正在计算统计数据…",
+    "統計を計算中…"
+  ],
+  "Calendario": [
+    "Calendar",
+    "Calendrier",
+    "Calendario",
+    "Kalender",
+    "日历",
+    "カレンダー"
+  ],
+  "Calendario scaricato con scadenze e date di inizio.": [
+    "Calendar downloaded with due dates and start dates.",
+    "Calendrier téléchargé avec les échéances et les dates de début.",
+    "Calendario descargado con fechas límite y de inicio.",
+    "Kalender mit Fälligkeits- und Startdaten heruntergeladen.",
+    "已下载包含截止日期和开始日期的日历。",
+    "期限と開始日を含むカレンダーをダウンロードしました。"
+  ],
+  "Cambia password": [
+    "Change password",
+    "Changer le mot de passe",
+    "Cambiar contraseña",
+    "Passwort ändern",
+    "更改密码",
+    "パスワードを変更"
+  ],
+  "Campi personalizzati e traguardo": [
+    "Custom fields and milestone",
+    "Champs personnalisés et jalon",
+    "Campos personalizados e hito",
+    "Benutzerdefinierte Felder und Meilenstein",
+    "自定义字段与里程碑",
+    "カスタムフィールドとマイルストーン"
+  ],
+  "Campo": [
+    "Field",
+    "Champ",
+    "Campo",
+    "Feld",
+    "字段",
+    "フィールド"
+  ],
+  "Carica allegato": [
+    "Upload attachment",
+    "Téléverser une pièce jointe",
+    "Subir adjunto",
+    "Anhang hochladen",
+    "上传附件",
+    "添付ファイルをアップロード"
+  ],
+  "Caricamento membri…": [
+    "Loading members…",
+    "Chargement des membres…",
+    "Cargando miembros…",
+    "Mitglieder werden geladen…",
+    "正在加载成员…",
+    "メンバーを読み込み中…"
+  ],
+  "Caricamento…": [
+    "Loading…",
+    "Chargement…",
+    "Cargando…",
+    "Wird geladen…",
+    "正在加载…",
+    "読み込み中…"
+  ],
+  "Cerca in questa bacheca…": [
+    "Search this board…",
+    "Rechercher dans ce tableau…",
+    "Buscar en este tablero…",
+    "Dieses Board durchsuchen…",
+    "搜索此看板…",
+    "このボードを検索…"
+  ],
+  "Cerca nei commenti": [
+    "Search comments",
+    "Rechercher dans les commentaires",
+    "Buscar en los comentarios",
+    "Kommentare durchsuchen",
+    "搜索评论",
+    "コメントを検索"
+  ],
+  "Cerca nel workspace…": [
+    "Search the workspace…",
+    "Rechercher dans l’espace de travail…",
+    "Buscar en el espacio de trabajo…",
+    "Arbeitsbereich durchsuchen…",
+    "搜索工作区…",
+    "ワークスペースを検索…"
+  ],
+  "Cerca schede in questa bacheca": [
+    "Search cards on this board",
+    "Rechercher des cartes dans ce tableau",
+    "Buscar tarjetas en este tablero",
+    "Karten auf diesem Board suchen",
+    "搜索此看板中的卡片",
+    "このボードのカードを検索"
+  ],
+  "Cestino": [
+    "Trash",
+    "Corbeille",
+    "Papelera",
+    "Papierkorb",
+    "回收站",
+    "ゴミ箱"
+  ],
+  "Checklist": [
+    "Checklist",
+    "Checklist",
+    "Lista de verificación",
+    "Checkliste",
+    "检查清单",
+    "チェックリスト"
+  ],
+  "Chiaro": [
+    "Light",
+    "Clair",
+    "Claro",
+    "Hell",
+    "浅色",
+    "ライト"
+  ],
+  "Chiudi editor bacheca": [
+    "Close board editor",
+    "Fermer l’éditeur de tableau",
+    "Cerrar editor de tablero",
+    "Board-Editor schließen",
+    "关闭看板编辑器",
+    "ボードのエディターを閉じる"
+  ],
+  "Chiudi editor lista": [
+    "Close list editor",
+    "Fermer l’éditeur de liste",
+    "Cerrar editor de lista",
+    "Listen-Editor schließen",
+    "关闭列表编辑器",
+    "リストのエディターを閉じる"
+  ],
+  "Chiudi editor scheda": [
+    "Close card editor",
+    "Fermer l’éditeur de carte",
+    "Cerrar editor de tarjeta",
+    "Karteneditor schließen",
+    "关闭卡片编辑器",
+    "カードのエディターを閉じる"
+  ],
+  "Chiudi elenco bacheche": [
+    "Close board list",
+    "Fermer la liste des tableaux",
+    "Cerrar lista de tableros",
+    "Board-Liste schließen",
+    "关闭看板列表",
+    "ボード一覧を閉じる"
+  ],
+  "Chiudi il pannello o editor (con conferma per bozze)": [
+    "Close the panel or editor (with confirmation for unsaved drafts)",
+    "Fermer le panneau ou l’éditeur (avec confirmation pour les brouillons)",
+    "Cerrar el panel o editor (con confirmación para borradores)",
+    "Bereich oder Editor schließen (mit Bestätigung bei Entwürfen)",
+    "关闭面板或编辑器（有草稿时需确认）",
+    "パネルまたはエディターを閉じる（下書きがある場合は確認）"
+  ],
+  "Chiudi pannello": [
+    "Close panel",
+    "Fermer le panneau",
+    "Cerrar panel",
+    "Bereich schließen",
+    "关闭面板",
+    "パネルを閉じる"
+  ],
+  "Chiudi spostamento": [
+    "Close move dialog",
+    "Fermer la fenêtre de déplacement",
+    "Cerrar diálogo de movimiento",
+    "Verschiebedialog schließen",
+    "关闭移动对话框",
+    "移動ダイアログを閉じる"
+  ],
+  "Colore copertina": [
+    "Cover color",
+    "Couleur de couverture",
+    "Color de portada",
+    "Titelbildfarbe",
+    "封面颜色",
+    "カバーの色"
+  ],
+  "Colore della bacheca": [
+    "Board color",
+    "Couleur du tableau",
+    "Color del tablero",
+    "Board-Farbe",
+    "看板颜色",
+    "ボードの色"
+  ],
+  "Commenti": [
+    "Comments",
+    "Commentaires",
+    "Comentarios",
+    "Kommentare",
+    "评论",
+    "コメント"
+  ],
+  "Commento": [
+    "Comment",
+    "Commentaire",
+    "Comentario",
+    "Kommentar",
+    "评论",
+    "コメント"
+  ],
+  "Commento aggiornato.": [
+    "Comment updated.",
+    "Commentaire mis à jour.",
+    "Comentario actualizado.",
+    "Kommentar aktualisiert.",
+    "评论已更新。",
+    "コメントを更新しました。"
+  ],
+  "Commento eliminato.": [
+    "Comment deleted.",
+    "Commentaire supprimé.",
+    "Comentario eliminado.",
+    "Kommentar gelöscht.",
+    "评论已删除。",
+    "コメントを削除しました。"
+  ],
+  "Commento pubblicato.": [
+    "Comment posted.",
+    "Commentaire publié.",
+    "Comentario publicado.",
+    "Kommentar veröffentlicht.",
+    "评论已发布。",
+    "コメントを投稿しました。"
+  ],
+  "Comoda": [
+    "Comfortable",
+    "Confortable",
+    "Cómoda",
+    "Komfortabel",
+    "宽松",
+    "標準"
+  ],
+  "Compatta": [
+    "Compact",
+    "Compacte",
+    "Compacta",
+    "Kompakt",
+    "紧凑",
+    "コンパクト"
+  ],
+  "Completa": [
+    "Complete",
+    "Terminer",
+    "Completar",
+    "Abschließen",
+    "完成",
+    "完了"
+  ],
+  "Completa scheda: {0}": [
+    "Complete card: {0}",
+    "Terminer la carte : {0}",
+    "Completar tarjeta: {0}",
+    "Karte abschließen: {0}",
+    "完成卡片：{0}",
+    "カードを完了：{0}"
+  ],
+  "Completa selezionate": [
+    "Complete selected",
+    "Terminer la sélection",
+    "Completar seleccionadas",
+    "Ausgewählte abschließen",
+    "完成所选项",
+    "選択項目を完了"
+  ],
+  "Completa: {3}": [
+    "Complete: {3}",
+    "Terminer : {3}",
+    "Completar: {3}",
+    "Abschließen: {3}",
+    "完成：{3}",
+    "完了：{3}"
+  ],
+  "Completamento": [
+    "Completion",
+    "Avancement",
+    "Progreso",
+    "Fortschritt",
+    "完成进度",
+    "進捗"
+  ],
+  "Completate": [
+    "Completed",
+    "Terminées",
+    "Completadas",
+    "Abgeschlossen",
+    "已完成",
+    "完了"
+  ],
+  "Condividi un aggiornamento…": [
+    "Share an update…",
+    "Partagez une mise à jour…",
+    "Comparte una actualización…",
+    "Teile eine Neuigkeit…",
+    "分享进展…",
+    "更新情報を共有…"
+  ],
+  "Configura l’account che gestirà utenti e permessi.": [
+    "Set up the account that will manage users and permissions.",
+    "Configurez le compte qui gérera les utilisateurs et les autorisations.",
+    "Configura la cuenta que gestionará usuarios y permisos.",
+    "Richte das Konto ein, das Benutzer und Berechtigungen verwaltet.",
+    "设置用于管理用户和权限的账户。",
+    "ユーザーと権限を管理するアカウントを設定してください。"
+  ],
+  "Configura workspace": [
+    "Set up workspace",
+    "Configurer l’espace de travail",
+    "Configurar espacio de trabajo",
+    "Arbeitsbereich einrichten",
+    "设置工作区",
+    "ワークスペースを設定"
+  ],
+  "Conflitto: un’altra sessione ha aggiornato questa scheda. La tua bozza è conservata.": [
+    "Conflict: another session updated this card. Your draft is preserved.",
+    "Conflit : une autre session a modifié cette carte. Votre brouillon est conservé.",
+    "Conflicto: otra sesión ha actualizado esta tarjeta. El borrador está guardado.",
+    "Konflikt: Eine andere Sitzung hat diese Karte aktualisiert. Dein Entwurf bleibt erhalten.",
+    "发生冲突：另一会话更新了此卡片。草稿已保留。",
+    "競合：別のセッションでこのカードが更新されました。下書きは保持されます。"
+  ],
+  "Confronta con la versione sul server": [
+    "Compare with the server version",
+    "Comparer avec la version du serveur",
+    "Comparar con la versión del servidor",
+    "Mit der Serverversion vergleichen",
+    "与服务器版本比较",
+    "サーバーのバージョンと比較"
+  ],
+  "Connessione da verificare · bozza locale conservata": [
+    "Check connection · local draft saved",
+    "Connexion à vérifier · brouillon local conservé",
+    "Comprueba la conexión · borrador local guardado",
+    "Verbindung prüfen · lokaler Entwurf gespeichert",
+    "请检查连接 · 本地草稿已保留",
+    "接続を確認 · ローカルの下書きを保存済み"
+  ],
+  "Contiene…": [
+    "Contains…",
+    "Contient…",
+    "Contiene…",
+    "Enthält…",
+    "包含…",
+    "次を含む…"
+  ],
+  "Copertina": [
+    "Cover",
+    "Couverture",
+    "Portada",
+    "Titelbild",
+    "封面",
+    "カバー"
+  ],
+  "Copertina {0}": [
+    "{0} cover",
+    "Couverture {0}",
+    "Portada {0}",
+    "Titelbild {0}",
+    "{0}封面",
+    "{0}のカバー"
+  ],
+  "Crea bacheca": [
+    "Create board",
+    "Créer un tableau",
+    "Crear tablero",
+    "Board erstellen",
+    "创建看板",
+    "ボードを作成"
+  ],
+  "Crea il primo amministratore": [
+    "Create the first administrator",
+    "Créer le premier administrateur",
+    "Crear el primer administrador",
+    "Ersten Administrator erstellen",
+    "创建首位管理员",
+    "最初の管理者を作成"
+  ],
+  "Crea lista": [
+    "Create list",
+    "Créer une liste",
+    "Crear lista",
+    "Liste erstellen",
+    "创建列表",
+    "リストを作成"
+  ],
+  "Crea scheda": [
+    "Create card",
+    "Créer une carte",
+    "Crear tarjeta",
+    "Karte erstellen",
+    "创建卡片",
+    "カードを作成"
+  ],
+  "Crea una bacheca": [
+    "Create a board",
+    "Créer un tableau",
+    "Crear un tablero",
+    "Board erstellen",
+    "创建看板",
+    "ボードを作成"
+  ],
+  "Crea una bacheca per organizzare il lavoro del team.": [
+    "Create a board to organize your team's work.",
+    "Créez un tableau pour organiser le travail de votre équipe.",
+    "Crea un tablero para organizar el trabajo del equipo.",
+    "Erstelle ein Board, um die Arbeit deines Teams zu organisieren.",
+    "创建看板以组织团队工作。",
+    "ボードを作成してチームの仕事を整理しましょう。"
+  ],
+  "Crea utente": [
+    "Create user",
+    "Créer l’utilisateur",
+    "Crear usuario",
+    "Benutzer erstellen",
+    "创建用户",
+    "ユーザーを作成"
+  ],
+  "DETTAGLI DELLA SCHEDA": [
+    "CARD DETAILS",
+    "DÉTAILS DE LA CARTE",
+    "DETALLES DE LA TARJETA",
+    "KARTENDETAILS",
+    "卡片详情",
+    "カードの詳細"
+  ],
+  "Dai un titolo alla tua scheda.": [
+    "Give your card a title.",
+    "Donnez un titre à votre carte.",
+    "Dale un título a la tarjeta.",
+    "Gib deiner Karte einen Titel.",
+    "请为卡片填写标题。",
+    "カードのタイトルを入力してください。"
+  ],
+  "Data": [
+    "Date",
+    "Date",
+    "Fecha",
+    "Datum",
+    "日期",
+    "日付"
+  ],
+  "Data di inizio": [
+    "Start date",
+    "Date de début",
+    "Fecha de inicio",
+    "Startdatum",
+    "开始日期",
+    "開始日"
+  ],
+  "Dati salvati sul tuo server": [
+    "Data saved on your server",
+    "Données enregistrées sur votre serveur",
+    "Datos guardados en tu servidor",
+    "Daten auf deinem Server gespeichert",
+    "数据保存在你的服务器上",
+    "データは自分のサーバーに保存"
+  ],
+  "Densità delle schede": [
+    "Card density",
+    "Densité des cartes",
+    "Densidad de las tarjetas",
+    "Kartendichte",
+    "卡片密度",
+    "カードの表示密度"
+  ],
+  "Descrizione": [
+    "Description",
+    "Description",
+    "Descripción",
+    "Beschreibung",
+    "描述",
+    "説明"
+  ],
+  "Design": [
+    "Design",
+    "Design",
+    "Diseño",
+    "Design",
+    "设计",
+    "デザイン"
+  ],
+  "Dettagli della bacheca": [
+    "Board details",
+    "Détails du tableau",
+    "Detalles del tablero",
+    "Board-Details",
+    "看板详情",
+    "ボードの詳細"
+  ],
+  "Diamo forma al tuo progetto.": [
+    "Give your project a home.",
+    "Donnez forme à votre projet.",
+    "Dale forma a tu proyecto.",
+    "Gib deinem Projekt Gestalt.",
+    "让项目初具形态。",
+    "プロジェクトを形にしよう。"
+  ],
+  "Dipendenza aggiunta.": [
+    "Dependency added.",
+    "Dépendance ajoutée.",
+    "Dependencia añadida.",
+    "Abhängigkeit hinzugefügt.",
+    "依赖关系已添加。",
+    "依存関係を追加しました。"
+  ],
+  "Dipendenza rimossa.": [
+    "Dependency removed.",
+    "Dépendance retirée.",
+    "Dependencia eliminada.",
+    "Abhängigkeit entfernt.",
+    "依赖关系已移除。",
+    "依存関係を削除しました。"
+  ],
+  "Dipendenze": [
+    "Dependencies",
+    "Dépendances",
+    "Dependencias",
+    "Abhängigkeiten",
+    "依赖关系",
+    "依存関係"
+  ],
+  "Domani": [
+    "Tomorrow",
+    "Demain",
+    "Mañana",
+    "Morgen",
+    "明天",
+    "明日"
+  ],
+  "Duplica": [
+    "Duplicate",
+    "Dupliquer",
+    "Duplicar",
+    "Duplizieren",
+    "复制",
+    "複製"
+  ],
+  "Duplica bacheca": [
+    "Duplicate board",
+    "Dupliquer le tableau",
+    "Duplicar tablero",
+    "Board duplizieren",
+    "复制看板",
+    "ボードを複製"
+  ],
+  "Elemento ripristinato.": [
+    "Item restored.",
+    "Élément restauré.",
+    "Elemento restaurado.",
+    "Element wiederhergestellt.",
+    "项目已恢复。",
+    "項目を復元しました。"
+  ],
+  "Elimina": [
+    "Delete",
+    "Supprimer",
+    "Eliminar",
+    "Löschen",
+    "删除",
+    "削除"
+  ],
+  "Elimina attività {8}": [
+    "Delete task {8}",
+    "Supprimer la tâche {8}",
+    "Eliminar tarea {8}",
+    "Aufgabe {8} löschen",
+    "删除任务 {8}",
+    "タスク {8} を削除"
+  ],
+  "Elimina lista": [
+    "Delete list",
+    "Supprimer la liste",
+    "Eliminar lista",
+    "Liste löschen",
+    "删除列表",
+    "リストを削除"
+  ],
+  "Elimina modello": [
+    "Delete template",
+    "Supprimer le modèle",
+    "Eliminar plantilla",
+    "Vorlage löschen",
+    "删除模板",
+    "テンプレートを削除"
+  ],
+  "Eliminare questo commento?": [
+    "Delete this comment?",
+    "Supprimer ce commentaire ?",
+    "¿Eliminar este comentario?",
+    "Diesen Kommentar löschen?",
+    "删除此评论吗？",
+    "このコメントを削除しますか？"
+  ],
+  "Eliminare questo modello? Gli elementi già creati restano disponibili.": [
+    "Delete this template? Existing items will remain available.",
+    "Supprimer ce modèle ? Les éléments déjà créés restent disponibles.",
+    "¿Eliminar esta plantilla? Los elementos ya creados seguirán disponibles.",
+    "Diese Vorlage löschen? Bereits erstellte Elemente bleiben verfügbar.",
+    "删除此模板吗？已创建的项目仍会保留。",
+    "このテンプレートを削除しますか？作成済みの項目は引き続き利用できます。"
+  ],
+  "Esc": [
+    "Esc",
+    "Échap",
+    "Esc",
+    "Esc",
+    "Esc",
+    "Esc"
+  ],
+  "Esci dall’account": [
+    "Sign out",
+    "Se déconnecter",
+    "Cerrar sesión",
+    "Abmelden",
+    "退出账户",
+    "ログアウト"
+  ],
+  "Esporta CSV": [
+    "Export CSV",
+    "Exporter en CSV",
+    "Exportar CSV",
+    "CSV exportieren",
+    "导出 CSV",
+    "CSV をエクスポート"
+  ],
+  "Esporta calendario iCalendar": [
+    "Export iCalendar",
+    "Exporter le calendrier iCalendar",
+    "Exportar calendario iCalendar",
+    "iCalendar exportieren",
+    "导出 iCalendar 日历",
+    "iCalendar をエクスポート"
+  ],
+  "Esporta in JSON": [
+    "Export as JSON",
+    "Exporter en JSON",
+    "Exportar en JSON",
+    "Als JSON exportieren",
+    "导出为 JSON",
+    "JSON でエクスポート"
+  ],
+  "Esportazione completa versione 2 scaricata dal server.": [
+    "Complete version 2 export downloaded from the server.",
+    "Exportation complète version 2 téléchargée depuis le serveur.",
+    "Exportación completa de versión 2 descargada del servidor.",
+    "Vollständiger Export der Version 2 vom Server heruntergeladen.",
+    "已从服务器下载完整的版本 2 导出文件。",
+    "バージョン 2 の完全なエクスポートをサーバーからダウンロードしました。"
+  ],
+  "Etichetta": [
+    "Label",
+    "Étiquette",
+    "Etiqueta",
+    "Label",
+    "标签",
+    "ラベル"
+  ],
+  "Etichette": [
+    "Labels",
+    "Étiquettes",
+    "Etiquetas",
+    "Labels",
+    "标签",
+    "ラベル"
+  ],
+  "Etichette aggiuntive": [
+    "Additional labels",
+    "Étiquettes supplémentaires",
+    "Etiquetas adicionales",
+    "Weitere Labels",
+    "附加标签",
+    "追加のラベル"
+  ],
+  "Etichette e priorità": [
+    "Labels and priority",
+    "Étiquettes et priorité",
+    "Etiquetas y prioridad",
+    "Labels und Priorität",
+    "标签与优先级",
+    "ラベルと優先度"
+  ],
+  "Etichette…": [
+    "Labels…",
+    "Étiquettes…",
+    "Etiquetas…",
+    "Labels…",
+    "标签…",
+    "ラベル…"
+  ],
+  "F": [
+    "F",
+    "F",
+    "F",
+    "F",
+    "F",
+    "F"
+  ],
+  "Facoltativa": [
+    "Optional",
+    "Facultative",
+    "Opcional",
+    "Optional",
+    "可选",
+    "任意"
+  ],
+  "Ferma e aggiungi minuti": [
+    "Stop and add minutes",
+    "Arrêter et ajouter les minutes",
+    "Detener y añadir minutos",
+    "Stoppen und Minuten hinzufügen",
+    "停止并添加分钟数",
+    "停止して分数を追加"
+  ],
+  "Fermo": [
+    "Stopped",
+    "Arrêté",
+    "Detenido",
+    "Gestoppt",
+    "已停止",
+    "停止中"
+  ],
+  "File JSON (massimo 2 MB)": [
+    "JSON file (up to 2 MB)",
+    "Fichier JSON (2 Mo maximum)",
+    "Archivo JSON (máximo 2 MB)",
+    "JSON-Datei (maximal 2 MB)",
+    "JSON 文件（最大 2 MB）",
+    "JSON ファイル（最大 2 MB）"
+  ],
+  "Filtra per etichetta": [
+    "Filter by label",
+    "Filtrer par étiquette",
+    "Filtrar por etiqueta",
+    "Nach Label filtern",
+    "按标签筛选",
+    "ラベルで絞り込み"
+  ],
+  "Filtra per responsabile": [
+    "Filter by assignee",
+    "Filtrer par responsable",
+    "Filtrar por responsable",
+    "Nach Zuständigem filtern",
+    "按负责人筛选",
+    "担当者で絞り込み"
+  ],
+  "Filtri salvati": [
+    "Saved filters",
+    "Filtres enregistrés",
+    "Filtros guardados",
+    "Gespeicherte Filter",
+    "已保存的筛选条件",
+    "保存済みフィルター"
+  ],
+  "Filtri salvati.": [
+    "Filters saved.",
+    "Filtres enregistrés.",
+    "Filtros guardados.",
+    "Filter gespeichert.",
+    "筛选条件已保存。",
+    "フィルターを保存しました。"
+  ],
+  "Filtro eliminato.": [
+    "Filter deleted.",
+    "Filtre supprimé.",
+    "Filtro eliminado.",
+    "Filter gelöscht.",
+    "筛选条件已删除。",
+    "フィルターを削除しました。"
+  ],
+  "Filtro rinominato.": [
+    "Filter renamed.",
+    "Filtre renommé.",
+    "Filtro renombrado.",
+    "Filter umbenannt.",
+    "筛选条件已重命名。",
+    "フィルターの名前を変更しました。"
+  ],
+  "Filtro “{0}” applicato.": [
+    "Filter “{0}” applied.",
+    "Filtre « {0} » appliqué.",
+    "Filtro «{0}» aplicado.",
+    "Filter „{0}“ angewendet.",
+    "已应用筛选条件“{0}”。",
+    "フィルター「{0}」を適用しました。"
+  ],
+  "G": [
+    "G",
+    "G",
+    "G",
+    "G",
+    "G",
+    "G"
+  ],
+  "Gestisci utenti": [
+    "Manage users",
+    "Gérer les utilisateurs",
+    "Gestionar usuarios",
+    "Benutzer verwalten",
+    "管理用户",
+    "ユーザーを管理"
+  ],
+  "Giorno lavorato": [
+    "Work date",
+    "Date du travail",
+    "Día trabajado",
+    "Arbeitstag",
+    "工作日期",
+    "作業日"
+  ],
+  "Gli osservatori possono leggere; i membri modificano le schede; gli amministratori gestiscono i permessi.": [
+    "Observers can read, members can edit cards, and administrators manage permissions.",
+    "Les observateurs peuvent lire, les membres modifient les cartes et les administrateurs gèrent les autorisations.",
+    "Los observadores pueden leer, los miembros editan tarjetas y los administradores gestionan los permisos.",
+    "Beobachter können lesen, Mitglieder Karten bearbeiten und Administratoren Berechtigungen verwalten.",
+    "观察者可以查看，成员可以编辑卡片，管理员可以管理权限。",
+    "閲覧者は閲覧、メンバーはカードの編集、管理者は権限の管理ができます。"
+  ],
+  "Hai modifiche non salvate. Chiudere l’editor? La bozza della scheda resta disponibile su questo dispositivo.": [
+    "You have unsaved changes. Close the editor? The card draft remains available on this device.",
+    "Vous avez des modifications non enregistrées. Fermer l’éditeur ? Le brouillon de la carte reste disponible sur cet appareil.",
+    "Tienes cambios sin guardar. ¿Cerrar el editor? El borrador de la tarjeta seguirá disponible en este dispositivo.",
+    "Du hast ungespeicherte Änderungen. Editor schließen? Der Kartenentwurf bleibt auf diesem Gerät verfügbar.",
+    "有未保存的更改。关闭编辑器吗？卡片草稿仍会保留在此设备上。",
+    "未保存の変更があります。エディターを閉じますか？カードの下書きはこの端末に保存されます。"
+  ],
+  "Ho confrontato: continua a modificare la bozza": [
+    "Compared: continue editing the draft",
+    "Comparaison effectuée : continuer à modifier le brouillon",
+    "He comparado: continuar editando el borrador",
+    "Verglichen: Entwurf weiter bearbeiten",
+    "比较完成：继续编辑草稿",
+    "比較済み：下書きの編集を続ける"
+  ],
+  "IN EVIDENZA": [
+    "PINNED",
+    "À LA UNE",
+    "DESTACADO",
+    "ANGEPINNT",
+    "置顶",
+    "ピン留め"
+  ],
+  "Il cestino è vuoto.": [
+    "Trash is empty.",
+    "La corbeille est vide.",
+    "La papelera está vacía.",
+    "Der Papierkorb ist leer.",
+    "回收站为空。",
+    "ゴミ箱は空です。"
+  ],
+  "Il file deve contenere da 1 byte a 1 MiB.": [
+    "The file must be between 1 byte and 1 MiB.",
+    "Le fichier doit contenir entre 1 octet et 1 Mio.",
+    "El archivo debe tener entre 1 byte y 1 MiB.",
+    "Die Datei muss zwischen 1 Byte und 1 MiB groß sein.",
+    "文件大小必须介于 1 字节与 1 MiB 之间。",
+    "ファイルサイズは 1 バイトから 1 MiB までです。"
+  ],
+  "Il file non contiene JSON valido.": [
+    "The file does not contain valid JSON.",
+    "Le fichier ne contient pas de JSON valide.",
+    "El archivo no contiene JSON válido.",
+    "Die Datei enthält kein gültiges JSON.",
+    "文件不包含有效的 JSON。",
+    "ファイルに有効な JSON が含まれていません。"
+  ],
+  "Il file supera il limite di 2 MB.": [
+    "The file exceeds the 2 MB limit.",
+    "Le fichier dépasse la limite de 2 Mo.",
+    "El archivo supera el límite de 2 MB.",
+    "Die Datei überschreitet das Limit von 2 MB.",
+    "文件超过 2 MB 限制。",
+    "ファイルが 2 MB の上限を超えています。"
+  ],
+  "Il modello conserva i contenuti salvati. Commenti, allegati e account restano esclusi.": [
+    "The template keeps saved content. Comments, attachments, and accounts are excluded.",
+    "Le modèle conserve les contenus enregistrés. Les commentaires, pièces jointes et comptes sont exclus.",
+    "La plantilla conserva el contenido guardado. Los comentarios, adjuntos y cuentas quedan excluidos.",
+    "Die Vorlage behält gespeicherte Inhalte. Kommentare, Anhänge und Konten sind ausgeschlossen.",
+    "模板保留已保存的内容，不包括评论、附件和账户。",
+    "テンプレートには保存済みの内容が含まれます。コメント、添付ファイル、アカウントは含まれません。"
+  ],
+  "Il prossimo grande progetto inizia da una piccola scheda.": [
+    "Your next great project starts with a single card.",
+    "Votre prochain grand projet commence par une simple carte.",
+    "Tu próximo gran proyecto empieza con una tarjeta.",
+    "Dein nächstes großes Projekt beginnt mit einer Karte.",
+    "下一个伟大项目，从一张卡片开始。",
+    "次の大きなプロジェクトは、1枚のカードから。"
+  ],
+  "Il prossimo progetto inizia da una piccola scheda.": [
+    "Your next project starts with a single card.",
+    "Votre prochain projet commence par une simple carte.",
+    "Tu próximo proyecto empieza con una tarjeta.",
+    "Dein nächstes Projekt beginnt mit einer Karte.",
+    "下一个项目，从一张卡片开始。",
+    "次のプロジェクトは、1枚のカードから。"
+  ],
+  "Il server è in modalità locale. Abilita l’autenticazione nella configurazione del server per usare account, ruoli e membri delle bacheche.": [
+    "The server is in local mode. Enable authentication in the server configuration to use accounts, roles, and board members.",
+    "Le serveur est en mode local. Activez l’authentification dans sa configuration pour utiliser les comptes, les rôles et les membres des tableaux.",
+    "El servidor está en modo local. Activa la autenticación en su configuración para usar cuentas, roles y miembros de los tableros.",
+    "Der Server läuft im lokalen Modus. Aktiviere die Authentifizierung in der Serverkonfiguration, um Konten, Rollen und Board-Mitglieder zu verwenden.",
+    "服务器处于本地模式。请在服务器配置中启用身份验证，以使用账户、角色和看板成员功能。",
+    "サーバーはローカルモードです。アカウント、役割、ボードメンバーを利用するには、サーバー設定で認証を有効にしてください。"
+  ],
+  "Il tuo lavoro, condiviso in sicurezza.": [
+    "Your work, shared securely.",
+    "Votre travail, partagé en toute sécurité.",
+    "Tu trabajo, compartido de forma segura.",
+    "Deine Arbeit, sicher geteilt.",
+    "安全共享你的工作。",
+    "仕事を、安全に共有。"
+  ],
+  "Il tuo profilo": [
+    "Your profile",
+    "Votre profil",
+    "Tu perfil",
+    "Dein Profil",
+    "你的个人资料",
+    "プロフィール"
+  ],
+  "Il tuo spazio di lavoro": [
+    "Your workspace",
+    "Votre espace de travail",
+    "Tu espacio de trabajo",
+    "Dein Arbeitsbereich",
+    "你的工作区",
+    "ワークスペース"
+  ],
+  "Il tuo workspace": [
+    "Your workspace",
+    "Votre espace de travail",
+    "Tu espacio de trabajo",
+    "Dein Arbeitsbereich",
+    "你的工作区",
+    "ワークスペース"
+  ],
+  "Importa bacheca JSON": [
+    "Import JSON board",
+    "Importer un tableau JSON",
+    "Importar tablero JSON",
+    "JSON-Board importieren",
+    "导入 JSON 看板",
+    "JSON ボードをインポート"
+  ],
+  "Importa come nuova bacheca": [
+    "Import as a new board",
+    "Importer comme nouveau tableau",
+    "Importar como nuevo tablero",
+    "Als neues Board importieren",
+    "导入为新看板",
+    "新しいボードとしてインポート"
+  ],
+  "Importa una bacheca JSON": [
+    "Import a JSON board",
+    "Importer un tableau JSON",
+    "Importar un tablero JSON",
+    "JSON-Board importieren",
+    "导入 JSON 看板",
+    "JSON ボードをインポート"
+  ],
+  "Imposta rapidamente la scadenza": [
+    "Quickly set the due date",
+    "Définir rapidement l’échéance",
+    "Establecer rápidamente la fecha límite",
+    "Fälligkeit schnell festlegen",
+    "快速设置截止日期",
+    "期限を簡単に設定"
+  ],
+  "Infinite possibilità.": [
+    "Endless possibilities.",
+    "Des possibilités infinies.",
+    "Posibilidades infinitas.",
+    "Unendliche Möglichkeiten.",
+    "无限可能。",
+    "可能性は無限大。"
+  ],
+  "Invio / Spazio su una scheda": [
+    "Enter / Space on a card",
+    "Entrée / Espace sur une carte",
+    "Intro / Espacio en una tarjeta",
+    "Eingabe / Leertaste auf einer Karte",
+    "在卡片上按 Enter / 空格",
+    "カード上で Enter / スペース"
+  ],
+  "LA TUA BACHECA": [
+    "YOUR BOARD",
+    "VOTRE TABLEAU",
+    "TU TABLERO",
+    "DEIN BOARD",
+    "你的看板",
+    "あなたのボード"
+  ],
+  "LE TUE BACHECHE": [
+    "YOUR BOARDS",
+    "VOS TABLEAUX",
+    "TUS TABLEROS",
+    "DEINE BOARDS",
+    "你的看板",
+    "自分のボード"
+  ],
+  "La bacheca non è disponibile.": [
+    "This board is unavailable.",
+    "Ce tableau n’est pas disponible.",
+    "Este tablero no está disponible.",
+    "Dieses Board ist nicht verfügbar.",
+    "此看板不可用。",
+    "このボードを利用できません。"
+  ],
+  "La bacheca è stata aggiornata da un’altra sessione. La tua bozza è al sicuro.": [
+    "Another session updated this board. Your draft is safe.",
+    "Une autre session a mis à jour ce tableau. Votre brouillon est en sécurité.",
+    "Otra sesión ha actualizado este tablero. Tu borrador está a salvo.",
+    "Eine andere Sitzung hat dieses Board aktualisiert. Dein Entwurf bleibt sicher.",
+    "另一会话更新了此看板。你的草稿安全保留。",
+    "別のセッションでこのボードが更新されました。下書きは安全に保存されています。"
+  ],
+  "La tua bozza resta aperta nell’editor. Confronta i contenuti, poi correggi la bozza prima di salvare.": [
+    "Your draft stays open in the editor. Compare the content, then revise your draft before saving.",
+    "Votre brouillon reste ouvert dans l’éditeur. Comparez les contenus, puis corrigez le brouillon avant d’enregistrer.",
+    "El borrador sigue abierto en el editor. Compara el contenido y corrige el borrador antes de guardar.",
+    "Dein Entwurf bleibt im Editor geöffnet. Vergleiche die Inhalte und korrigiere den Entwurf vor dem Speichern.",
+    "草稿仍在编辑器中打开。请比较内容，修改草稿后再保存。",
+    "下書きはエディターで開いたままです。内容を比較し、保存する前に下書きを修正してください。"
+  ],
+  "Lavanda": [
+    "Lavender",
+    "Lavande",
+    "Lavanda",
+    "Lavendel",
+    "薰衣草紫",
+    "ラベンダー"
+  ],
+  "Le grandi idee iniziano qui.": [
+    "Great ideas start here.",
+    "Les grandes idées commencent ici.",
+    "Las grandes ideas empiezan aquí.",
+    "Große Ideen beginnen hier.",
+    "伟大创意，从这里开始。",
+    "大きなアイデアはここから。"
+  ],
+  "Le mie schede salvate": [
+    "My saved cards",
+    "Mes cartes enregistrées",
+    "Mis tarjetas guardadas",
+    "Meine gespeicherten Karten",
+    "我保存的卡片",
+    "保存したカード"
+  ],
+  "Le scorciatoie N, F, G e ? funzionano quando non stai scrivendo e non ci sono finestre aperte.": [
+    "The N, F, G, and ? shortcuts work when you are not typing and no dialogs are open.",
+    "Les raccourcis N, F, G et ? fonctionnent lorsque vous ne saisissez pas de texte et qu’aucune fenêtre n’est ouverte.",
+    "Los atajos N, F, G y ? funcionan cuando no estás escribiendo y no hay ventanas abiertas.",
+    "Die Kürzel N, F, G und ? funktionieren, wenn du nicht schreibst und kein Dialog geöffnet ist.",
+    "未输入文本且没有打开对话框时，可使用 N、F、G 和 ? 快捷键。",
+    "N、F、G、? のショートカットは、入力中でなくダイアログが開いていないときに使えます。"
+  ],
+  "Le tue bacheche": [
+    "Your boards",
+    "Vos tableaux",
+    "Tus tableros",
+    "Deine Boards",
+    "你的看板",
+    "自分のボード"
+  ],
+  "Le tue idee, in ordine.": [
+    "Your ideas, organized.",
+    "Vos idées, bien organisées.",
+    "Tus ideas, organizadas.",
+    "Deine Ideen, gut organisiert.",
+    "让创意井然有序。",
+    "アイデアを、整理しよう。"
+  ],
+  "Limite WIP (0 = nessun limite)": [
+    "WIP limit (0 = unlimited)",
+    "Limite WIP (0 = illimité)",
+    "Límite WIP (0 = sin límite)",
+    "WIP-Limit (0 = unbegrenzt)",
+    "WIP 限制（0 = 无限制）",
+    "WIP 上限（0 = 無制限）"
+  ],
+  "Lista": [
+    "List",
+    "Liste",
+    "Lista",
+    "Liste",
+    "列表",
+    "リスト"
+  ],
+  "Lista di destinazione": [
+    "Destination list",
+    "Liste de destination",
+    "Lista de destino",
+    "Zielliste",
+    "目标列表",
+    "移動先のリスト"
+  ],
+  "Lista riordinata.": [
+    "List reordered.",
+    "Liste réordonnée.",
+    "Lista reordenada.",
+    "Liste neu angeordnet.",
+    "列表已重新排序。",
+    "リストの順序を変更しました。"
+  ],
+  "Lista salvata sul server.": [
+    "List saved on the server.",
+    "Liste enregistrée sur le serveur.",
+    "Lista guardada en el servidor.",
+    "Liste auf dem Server gespeichert.",
+    "列表已保存到服务器。",
+    "リストをサーバーに保存しました。"
+  ],
+  "Lista spostata nel cestino.": [
+    "List moved to trash.",
+    "Liste déplacée dans la corbeille.",
+    "Lista movida a la papelera.",
+    "Liste in den Papierkorb verschoben.",
+    "列表已移至回收站。",
+    "リストをゴミ箱に移動しました。"
+  ],
+  "Lista {0}": [
+    "List {0}",
+    "Liste {0}",
+    "Lista {0}",
+    "Liste {0}",
+    "列表 {0}",
+    "リスト {0}"
+  ],
+  "M su una scheda": [
+    "M on a card",
+    "M sur une carte",
+    "M en una tarjeta",
+    "M auf einer Karte",
+    "在卡片上按 M",
+    "カード上で M"
+  ],
+  "MODIFICA LISTA": [
+    "EDIT LIST",
+    "MODIFIER LA LISTE",
+    "EDITAR LISTA",
+    "LISTE BEARBEITEN",
+    "编辑列表",
+    "リストを編集"
+  ],
+  "Marketing": [
+    "Marketing",
+    "Marketing",
+    "Marketing",
+    "Marketing",
+    "市场营销",
+    "マーケティング"
+  ],
+  "Massimo 1 MiB per file, 10 file attivi e 5 MiB per scheda. Scarica i file prima di aprirli.": [
+    "Up to 1 MiB per file, 10 active files, and 5 MiB per card. Download files before opening them.",
+    "Maximum 1 Mio par fichier, 10 fichiers actifs et 5 Mio par carte. Téléchargez les fichiers avant de les ouvrir.",
+    "Máximo 1 MiB por archivo, 10 archivos activos y 5 MiB por tarjeta. Descarga los archivos antes de abrirlos.",
+    "Maximal 1 MiB pro Datei, 10 aktive Dateien und 5 MiB pro Karte. Lade Dateien vor dem Öffnen herunter.",
+    "每个文件最大 1 MiB，最多 10 个有效文件，每张卡片总计 5 MiB。打开文件前请先下载。",
+    "ファイルは各 1 MiB まで、有効なファイルは 10 件まで、カード全体で 5 MiB までです。開く前にダウンロードしてください。"
+  ],
+  "Membri assegnati": [
+    "Assigned members",
+    "Membres attribués",
+    "Miembros asignados",
+    "Zugewiesene Mitglieder",
+    "已分配成员",
+    "割り当てられたメンバー"
+  ],
+  "Membri della bacheca": [
+    "Board members",
+    "Membres du tableau",
+    "Miembros del tablero",
+    "Board-Mitglieder",
+    "看板成员",
+    "ボードのメンバー"
+  ],
+  "Membri e permessi": [
+    "Members and permissions",
+    "Membres et autorisations",
+    "Miembros y permisos",
+    "Mitglieder und Berechtigungen",
+    "成员与权限",
+    "メンバーと権限"
+  ],
+  "Membro": [
+    "Member",
+    "Membre",
+    "Miembro",
+    "Mitglied",
+    "成员",
+    "メンバー"
+  ],
+  "Membro aggiornato.": [
+    "Member updated.",
+    "Membre mis à jour.",
+    "Miembro actualizado.",
+    "Mitglied aktualisiert.",
+    "成员已更新。",
+    "メンバーを更新しました。"
+  ],
+  "Membro rimosso.": [
+    "Member removed.",
+    "Membre retiré.",
+    "Miembro eliminado.",
+    "Mitglied entfernt.",
+    "成员已移除。",
+    "メンバーを削除しました。"
+  ],
+  "Mie attività": [
+    "My tasks",
+    "Mes tâches",
+    "Mis tareas",
+    "Meine Aufgaben",
+    "我的任务",
+    "自分のタスク"
+  ],
+  "Minuti aggiunti alla bozza. Salva la scheda per registrarli sul server.": [
+    "Minutes added to the draft. Save the card to record them on the server.",
+    "Minutes ajoutées au brouillon. Enregistrez la carte pour les conserver sur le serveur.",
+    "Minutos añadidos al borrador. Guarda la tarjeta para registrarlos en el servidor.",
+    "Minuten zum Entwurf hinzugefügt. Speichere die Karte, um sie auf dem Server zu erfassen.",
+    "分钟数已加入草稿。保存卡片后即可记录到服务器。",
+    "下書きに分数を追加しました。サーバーに記録するにはカードを保存してください。"
+  ],
+  "Minuti effettivi": [
+    "Actual minutes",
+    "Minutes réelles",
+    "Minutos reales",
+    "Tatsächliche Minuten",
+    "实际分钟数",
+    "実績時間（分）"
+  ],
+  "Minuti lavorati": [
+    "Minutes worked",
+    "Minutes travaillées",
+    "Minutos trabajados",
+    "Geleistete Minuten",
+    "工作分钟数",
+    "作業時間（分）"
+  ],
+  "Modalità locale: autenticazione disattivata sul server.": [
+    "Local mode: server authentication is disabled.",
+    "Mode local : l’authentification du serveur est désactivée.",
+    "Modo local: la autenticación del servidor está desactivada.",
+    "Lokaler Modus: Serverauthentifizierung ist deaktiviert.",
+    "本地模式：服务器身份验证已关闭。",
+    "ローカルモード：サーバーの認証は無効です。"
+  ],
+  "Modelli di bacheca": [
+    "Board templates",
+    "Modèles de tableau",
+    "Plantillas de tablero",
+    "Board-Vorlagen",
+    "看板模板",
+    "ボードのテンプレート"
+  ],
+  "Modelli di scheda": [
+    "Card templates",
+    "Modèles de carte",
+    "Plantillas de tarjeta",
+    "Kartenvorlagen",
+    "卡片模板",
+    "カードのテンプレート"
+  ],
+  "Modelli di scheda e bacheca": [
+    "Card and board templates",
+    "Modèles de carte et de tableau",
+    "Plantillas de tarjeta y tablero",
+    "Karten- und Board-Vorlagen",
+    "卡片与看板模板",
+    "カードとボードのテンプレート"
+  ],
+  "Modelli riutilizzabili": [
+    "Reusable templates",
+    "Modèles réutilisables",
+    "Plantillas reutilizables",
+    "Wiederverwendbare Vorlagen",
+    "可复用模板",
+    "再利用できるテンプレート"
+  ],
+  "Modello eliminato.": [
+    "Template deleted.",
+    "Modèle supprimé.",
+    "Plantilla eliminada.",
+    "Vorlage gelöscht.",
+    "模板已删除。",
+    "テンプレートを削除しました。"
+  ],
+  "Modello salvato.": [
+    "Template saved.",
+    "Modèle enregistré.",
+    "Plantilla guardada.",
+    "Vorlage gespeichert.",
+    "模板已保存。",
+    "テンプレートを保存しました。"
+  ],
+  "Modifica bacheca": [
+    "Edit board",
+    "Modifier le tableau",
+    "Editar tablero",
+    "Board bearbeiten",
+    "编辑看板",
+    "ボードを編集"
+  ],
+  "Modifica il tuo commento": [
+    "Edit your comment",
+    "Modifier votre commentaire",
+    "Editar tu comentario",
+    "Deinen Kommentar bearbeiten",
+    "编辑你的评论",
+    "自分のコメントを編集"
+  ],
+  "Modifica salvata sul server.": [
+    "Change saved on the server.",
+    "Modification enregistrée sur le serveur.",
+    "Cambio guardado en el servidor.",
+    "Änderung auf dem Server gespeichert.",
+    "更改已保存到服务器。",
+    "変更をサーバーに保存しました。"
+  ],
+  "Modifica salvata sul server. L’aggiornamento della vista è fallito: premi Aggiorna, senza ripetere il salvataggio.": [
+    "Change saved on the server. The view could not refresh: select Refresh without saving again.",
+    "Modification enregistrée sur le serveur. L’affichage n’a pas pu être actualisé : cliquez sur Actualiser sans enregistrer à nouveau.",
+    "Cambio guardado en el servidor. No se pudo actualizar la vista: pulsa Actualizar sin volver a guardar.",
+    "Änderung auf dem Server gespeichert. Die Ansicht konnte nicht aktualisiert werden: Wähle Aktualisieren, ohne erneut zu speichern.",
+    "更改已保存到服务器。视图刷新失败：请点击“刷新”，无需再次保存。",
+    "変更をサーバーに保存しました。表示の更新に失敗しました。再保存せず「更新」を選択してください。"
+  ],
+  "Moduli e richieste": [
+    "Forms and requests",
+    "Formulaires et demandes",
+    "Formularios y solicitudes",
+    "Formulare und Anfragen",
+    "表单与请求",
+    "フォームとリクエスト"
+  ],
+  "Mostra questa guida": [
+    "Show this guide",
+    "Afficher ce guide",
+    "Mostrar esta guía",
+    "Diese Hilfe anzeigen",
+    "显示此指南",
+    "このガイドを表示"
+  ],
+  "Mostra registrazioni eliminate": [
+    "Show deleted entries",
+    "Afficher les entrées supprimées",
+    "Mostrar registros eliminados",
+    "Gelöschte Einträge anzeigen",
+    "显示已删除的记录",
+    "削除済みの記録を表示"
+  ],
+  "Mostra versione attuale": [
+    "Show current version",
+    "Afficher la version actuelle",
+    "Mostrar versión actual",
+    "Aktuelle Version anzeigen",
+    "显示当前版本",
+    "最新バージョンを表示"
+  ],
+  "Motivo del blocco": [
+    "Blocker reason",
+    "Motif du blocage",
+    "Motivo del bloqueo",
+    "Grund der Blockierung",
+    "阻塞原因",
+    "ブロックの理由"
+  ],
+  "N": [
+    "N",
+    "N",
+    "N",
+    "N",
+    "N",
+    "N"
+  ],
+  "NUOVA BACHECA": [
+    "NEW BOARD",
+    "NOUVEAU TABLEAU",
+    "NUEVO TABLERO",
+    "NEUES BOARD",
+    "新看板",
+    "新しいボード"
+  ],
+  "NUOVA LISTA": [
+    "NEW LIST",
+    "NOUVELLE LISTE",
+    "NUEVA LISTA",
+    "NEUE LISTE",
+    "新列表",
+    "新しいリスト"
+  ],
+  "NUOVA SCHEDA": [
+    "NEW CARD",
+    "NOUVELLE CARTE",
+    "NUEVA TARJETA",
+    "NEUE KARTE",
+    "新卡片",
+    "新しいカード"
+  ],
+  "Nascondi bacheche archiviate": [
+    "Hide archived boards",
+    "Masquer les tableaux archivés",
+    "Ocultar tableros archivados",
+    "Archivierte Boards ausblenden",
+    "隐藏已归档看板",
+    "アーカイブ済みボードを非表示"
+  ],
+  "Navigazione principale": [
+    "Main navigation",
+    "Navigation principale",
+    "Navegación principal",
+    "Hauptnavigation",
+    "主导航",
+    "メインナビゲーション"
+  ],
+  "Nel cestino": [
+    "In trash",
+    "Dans la corbeille",
+    "En la papelera",
+    "Im Papierkorb",
+    "在回收站中",
+    "ゴミ箱内"
+  ],
+  "Nessun allegato.": [
+    "No attachments.",
+    "Aucune pièce jointe.",
+    "No hay adjuntos.",
+    "Keine Anhänge.",
+    "暂无附件。",
+    "添付ファイルはありません。"
+  ],
+  "Nessun dato disponibile.": [
+    "No data available.",
+    "Aucune donnée disponible.",
+    "No hay datos disponibles.",
+    "Keine Daten verfügbar.",
+    "暂无数据。",
+    "データがありません。"
+  ],
+  "Nessun filtro salvato.": [
+    "No saved filters.",
+    "Aucun filtre enregistré.",
+    "No hay filtros guardados.",
+    "Keine gespeicherten Filter.",
+    "暂无已保存的筛选条件。",
+    "保存済みのフィルターはありません。"
+  ],
+  "Nessun membro esplicito.": [
+    "No explicit members.",
+    "Aucun membre explicite.",
+    "No hay miembros explícitos.",
+    "Keine ausdrücklich zugewiesenen Mitglieder.",
+    "暂无明确指定的成员。",
+    "明示的に追加されたメンバーはいません。"
+  ],
+  "Nessun modello di bacheca. Usa Salva come modello nelle opzioni della bacheca.": [
+    "No board templates. Use Save as template in the board options.",
+    "Aucun modèle de tableau. Utilisez Enregistrer comme modèle dans les options du tableau.",
+    "No hay plantillas de tablero. Usa Guardar como plantilla en las opciones del tablero.",
+    "Keine Board-Vorlagen. Nutze Als Vorlage speichern in den Board-Optionen.",
+    "暂无看板模板。请在看板选项中使用“保存为模板”。",
+    "ボードのテンプレートはありません。ボードのオプションで「テンプレートとして保存」を選択してください。"
+  ],
+  "Nessun modello di scheda. Usa Salva modello nell’editor.": [
+    "No card templates. Use Save template in the editor.",
+    "Aucun modèle de carte. Utilisez Enregistrer le modèle dans l’éditeur.",
+    "No hay plantillas de tarjeta. Usa Guardar plantilla en el editor.",
+    "Keine Kartenvorlagen. Nutze Vorlage speichern im Editor.",
+    "暂无卡片模板。请在编辑器中使用“保存模板”。",
+    "カードのテンプレートはありません。エディターで「テンプレートを保存」を選択してください。"
+  ],
+  "Nessuna": [
+    "None",
+    "Aucune",
+    "Ninguna",
+    "Keine",
+    "无",
+    "なし"
+  ],
+  "Nessuna copertina": [
+    "No cover",
+    "Aucune couverture",
+    "Sin portada",
+    "Kein Titelbild",
+    "无封面",
+    "カバーなし"
+  ],
+  "Nessuna dipendenza.": [
+    "No dependencies.",
+    "Aucune dépendance.",
+    "No hay dependencias.",
+    "Keine Abhängigkeiten.",
+    "暂无依赖关系。",
+    "依存関係はありません。"
+  ],
+  "Nessuna etichetta": [
+    "No label",
+    "Aucune étiquette",
+    "Sin etiqueta",
+    "Kein Label",
+    "无标签",
+    "ラベルなし"
+  ],
+  "Nessuna scheda con questi filtri.": [
+    "No cards match these filters.",
+    "Aucune carte ne correspond à ces filtres.",
+    "No hay tarjetas que coincidan con estos filtros.",
+    "Keine Karten entsprechen diesen Filtern.",
+    "没有符合这些筛选条件的卡片。",
+    "このフィルターに一致するカードはありません。"
+  ],
+  "Nessuna scheda da mostrare.": [
+    "No cards to show.",
+    "Aucune carte à afficher.",
+    "No hay tarjetas que mostrar.",
+    "Keine Karten anzuzeigen.",
+    "没有可显示的卡片。",
+    "表示するカードはありません。"
+  ],
+  "Nessuna scheda trovata.": [
+    "No cards found.",
+    "Aucune carte trouvée.",
+    "No se encontraron tarjetas.",
+    "Keine Karten gefunden.",
+    "未找到卡片。",
+    "カードが見つかりませんでした。"
+  ],
+  "Nessuno": [
+    "None",
+    "Aucun",
+    "Ninguno",
+    "Keine",
+    "无",
+    "なし"
+  ],
+  "Nome": [
+    "Name",
+    "Nom",
+    "Nombre",
+    "Name",
+    "名称",
+    "名前"
+  ],
+  "Nome aggiornato.": [
+    "Name updated.",
+    "Nom mis à jour.",
+    "Nombre actualizado.",
+    "Name aktualisiert.",
+    "名称已更新。",
+    "名前を更新しました。"
+  ],
+  "Nome del filtro": [
+    "Filter name",
+    "Nom du filtre",
+    "Nombre del filtro",
+    "Filtername",
+    "筛选条件名称",
+    "フィルター名"
+  ],
+  "Nome del modello": [
+    "Template name",
+    "Nom du modèle",
+    "Nombre de la plantilla",
+    "Vorlagenname",
+    "模板名称",
+    "テンプレート名"
+  ],
+  "Nome della bacheca": [
+    "Board name",
+    "Nom du tableau",
+    "Nombre del tablero",
+    "Board-Name",
+    "看板名称",
+    "ボード名"
+  ],
+  "Nome della lista": [
+    "List name",
+    "Nom de la liste",
+    "Nombre de la lista",
+    "Listenname",
+    "列表名称",
+    "リスト名"
+  ],
+  "Nome filtro salvato": [
+    "Saved filter name",
+    "Nom du filtre enregistré",
+    "Nombre del filtro guardado",
+    "Name des gespeicherten Filters",
+    "已保存筛选条件名称",
+    "保存済みフィルター名"
+  ],
+  "Nome utente": [
+    "Username",
+    "Nom d’utilisateur",
+    "Nombre de usuario",
+    "Benutzername",
+    "用户名",
+    "ユーザー名"
+  ],
+  "Nome visualizzato": [
+    "Display name",
+    "Nom affiché",
+    "Nombre para mostrar",
+    "Anzeigename",
+    "显示名称",
+    "表示名"
+  ],
+  "Non assegnata": [
+    "Unassigned",
+    "Non attribuée",
+    "Sin asignar",
+    "Nicht zugewiesen",
+    "未分配",
+    "未割り当て"
+  ],
+  "Non assegnate": [
+    "Unassigned",
+    "Non attribuées",
+    "Sin asignar",
+    "Nicht zugewiesen",
+    "未分配",
+    "未割り当て"
+  ],
+  "Non hai schede assegnate. Apri una scheda e seleziona il tuo account in Membri assegnati.": [
+    "You have no assigned cards. Open a card and select your account under Assigned members.",
+    "Aucune carte ne vous est attribuée. Ouvrez une carte et sélectionnez votre compte dans Membres attribués.",
+    "No tienes tarjetas asignadas. Abre una tarjeta y selecciona tu cuenta en Miembros asignados.",
+    "Dir sind keine Karten zugewiesen. Öffne eine Karte und wähle dein Konto unter Zugewiesene Mitglieder.",
+    "你没有被分配的卡片。请打开一张卡片，在“已分配成员”中选择你的账户。",
+    "割り当てられたカードはありません。カードを開き、「割り当てられたメンバー」で自分のアカウントを選択してください。"
+  ],
+  "Non seguire": [
+    "Unfollow",
+    "Ne plus suivre",
+    "Dejar de seguir",
+    "Nicht mehr folgen",
+    "取消关注",
+    "フォローを解除"
+  ],
+  "Non seguire più la bacheca": [
+    "Unfollow board",
+    "Ne plus suivre le tableau",
+    "Dejar de seguir el tablero",
+    "Board nicht mehr folgen",
+    "取消关注看板",
+    "ボードのフォローを解除"
+  ],
+  "Normale": [
+    "Normal",
+    "Normale",
+    "Normal",
+    "Normal",
+    "普通",
+    "通常"
+  ],
+  "Nota del lavoro": [
+    "Work note",
+    "Note de travail",
+    "Nota del trabajo",
+    "Arbeitsnotiz",
+    "工作备注",
+    "作業メモ"
+  ],
+  "Notifica letta.": [
+    "Notification marked as read.",
+    "Notification marquée comme lue.",
+    "Notificación marcada como leída.",
+    "Benachrichtigung als gelesen markiert.",
+    "通知已标记为已读。",
+    "通知を既読にしました。"
+  ],
+  "Notifiche": [
+    "Notifications",
+    "Notifications",
+    "Notificaciones",
+    "Benachrichtigungen",
+    "通知",
+    "通知"
+  ],
+  "Notifiche disattivate per questo elemento.": [
+    "Notifications disabled for this item.",
+    "Notifications désactivées pour cet élément.",
+    "Notificaciones desactivadas para este elemento.",
+    "Benachrichtigungen für dieses Element deaktiviert.",
+    "已关闭此项目的通知。",
+    "この項目の通知を無効にしました。"
+  ],
+  "Notifiche: {0} non lette": [
+    "Notifications: {0} unread",
+    "Notifications : {0} non lues",
+    "Notificaciones: {0} sin leer",
+    "Benachrichtigungen: {0} ungelesen",
+    "通知：{0} 条未读",
+    "通知：未読 {0} 件"
+  ],
+  "Numero": [
+    "Number",
+    "Nombre",
+    "Número",
+    "Zahl",
+    "数字",
+    "数値"
+  ],
+  "Nuova attività della checklist": [
+    "New checklist task",
+    "Nouvelle tâche de checklist",
+    "Nueva tarea de la lista de verificación",
+    "Neue Checklistenaufgabe",
+    "新的检查清单任务",
+    "チェックリストの新しいタスク"
+  ],
+  "Nuova bacheca": [
+    "New board",
+    "Nouveau tableau",
+    "Nuevo tablero",
+    "Neues Board",
+    "新建看板",
+    "新しいボード"
+  ],
+  "Nuova password (almeno 12 caratteri)": [
+    "New password (at least 12 characters)",
+    "Nouveau mot de passe (au moins 12 caractères)",
+    "Nueva contraseña (al menos 12 caracteres)",
+    "Neues Passwort (mindestens 12 Zeichen)",
+    "新密码（至少 12 个字符）",
+    "新しいパスワード（12 文字以上）"
+  ],
+  "Nuova scheda": [
+    "New card",
+    "Nouvelle carte",
+    "Nueva tarjeta",
+    "Neue Karte",
+    "新建卡片",
+    "新しいカード"
+  ],
+  "Nuovo commento": [
+    "New comment",
+    "Nouveau commentaire",
+    "Nuevo comentario",
+    "Neuer Kommentar",
+    "新评论",
+    "新しいコメント"
+  ],
+  "OSS": [
+    "OSS",
+    "OSS",
+    "OSS",
+    "OSS",
+    "OSS",
+    "OSS"
+  ],
+  "Oggi": [
+    "Today",
+    "Aujourd’hui",
+    "Hoy",
+    "Heute",
+    "今天",
+    "今日"
+  ],
+  "Ogni fase ha il suo nome.": [
+    "Give every stage a name.",
+    "Donnez un nom à chaque étape.",
+    "Dale un nombre a cada etapa.",
+    "Gib jeder Phase einen Namen.",
+    "为每个阶段命名。",
+    "それぞれの段階に名前を。"
+  ],
+  "Open source. Fatto per te.": [
+    "Open source. Made for you.",
+    "Open source. Conçu pour vous.",
+    "Código abierto. Hecho para ti.",
+    "Open Source. Für dich gemacht.",
+    "开源，为你而造。",
+    "オープンソース。あなたのために。"
+  ],
+  "OpenBoard": [
+    "OpenBoard",
+    "OpenBoard",
+    "OpenBoard",
+    "OpenBoard",
+    "OpenBoard",
+    "OpenBoard"
+  ],
+  "OpenBoard · Il tuo lavoro, in ordine": [
+    "OpenBoard · Your work, organized",
+    "OpenBoard · Votre travail, bien organisé",
+    "OpenBoard · Tu trabajo, organizado",
+    "OpenBoard · Deine Arbeit, gut organisiert",
+    "OpenBoard · 让工作井然有序",
+    "OpenBoard · 仕事を、整理しよう"
+  ],
+  "OpenBoard — uno spazio semplice e open source per dare forma alle tue idee.": [
+    "OpenBoard — a simple, open source space to shape your ideas.",
+    "OpenBoard — un espace simple et open source pour donner forme à vos idées.",
+    "OpenBoard — un espacio sencillo y de código abierto para dar forma a tus ideas.",
+    "OpenBoard — ein einfacher Open-Source-Arbeitsbereich, um deinen Ideen Gestalt zu geben.",
+    "OpenBoard — 简洁开源的空间，让创意成形。",
+    "OpenBoard — アイデアを形にする、シンプルなオープンソースのワークスペース。"
+  ],
+  "OpenBoard, home": [
+    "OpenBoard, home",
+    "OpenBoard, accueil",
+    "OpenBoard, inicio",
+    "OpenBoard, Startseite",
+    "OpenBoard，首页",
+    "OpenBoard、ホーム"
+  ],
+  "Operazione non riuscita.": [
+    "Operation failed.",
+    "Échec de l’opération.",
+    "La operación ha fallado.",
+    "Aktion fehlgeschlagen.",
+    "操作失败。",
+    "操作に失敗しました。"
+  ],
+  "Opzioni della bacheca": [
+    "Board options",
+    "Options du tableau",
+    "Opciones del tablero",
+    "Board-Optionen",
+    "看板选项",
+    "ボードのオプション"
+  ],
+  "Opzioni lista {6}": [
+    "Options for list {6}",
+    "Options de la liste {6}",
+    "Opciones de la lista {6}",
+    "Optionen für Liste {6}",
+    "列表 {6} 的选项",
+    "リスト {6} のオプション"
+  ],
+  "Ordina": [
+    "Sort",
+    "Trier",
+    "Ordenar",
+    "Sortieren",
+    "排序",
+    "並び替え"
+  ],
+  "Ordine manuale": [
+    "Manual order",
+    "Ordre manuel",
+    "Orden manual",
+    "Manuelle Reihenfolge",
+    "手动排序",
+    "手動の並び順"
+  ],
+  "Osservatore": [
+    "Observer",
+    "Observateur",
+    "Observador",
+    "Beobachter",
+    "观察者",
+    "閲覧者"
+  ],
+  "Password": [
+    "Password",
+    "Mot de passe",
+    "Contraseña",
+    "Passwort",
+    "密码",
+    "パスワード"
+  ],
+  "Password aggiornata.": [
+    "Password updated.",
+    "Mot de passe mis à jour.",
+    "Contraseña actualizada.",
+    "Passwort aktualisiert.",
+    "密码已更新。",
+    "パスワードを更新しました。"
+  ],
+  "Password attuale": [
+    "Current password",
+    "Mot de passe actuel",
+    "Contraseña actual",
+    "Aktuelles Passwort",
+    "当前密码",
+    "現在のパスワード"
+  ],
+  "Password iniziale (almeno 12 caratteri)": [
+    "Initial password (at least 12 characters)",
+    "Mot de passe initial (au moins 12 caractères)",
+    "Contraseña inicial (al menos 12 caracteres)",
+    "Initiales Passwort (mindestens 12 Zeichen)",
+    "初始密码（至少 12 个字符）",
+    "初期パスワード（12 文字以上）"
+  ],
+  "Pesca": [
+    "Peach",
+    "Pêche",
+    "Melocotón",
+    "Pfirsich",
+    "蜜桃色",
+    "ピーチ"
+  ],
+  "Pianificazione e campi": [
+    "Planning and fields",
+    "Planification et champs",
+    "Planificación y campos",
+    "Planung und Felder",
+    "规划与字段",
+    "計画とフィールド"
+  ],
+  "Pianificazione, tempo e riferimenti": [
+    "Planning, time, and references",
+    "Planification, temps et références",
+    "Planificación, tiempo y referencias",
+    "Planung, Zeit und Referenzen",
+    "规划、工时与参考链接",
+    "計画、時間、参照先"
+  ],
+  "Piccoli passi. Grandi idee.": [
+    "Small steps. Big ideas.",
+    "Petits pas. Grandes idées.",
+    "Pequeños pasos. Grandes ideas.",
+    "Kleine Schritte. Große Ideen.",
+    "小小步伐，伟大创意。",
+    "小さな一歩。大きなアイデア。"
+  ],
+  "Portfolio": [
+    "Portfolio",
+    "Portfolio",
+    "Portafolio",
+    "Portfolio",
+    "项目组合",
+    "ポートフォリオ"
+  ],
+  "Portfolio e report": [
+    "Portfolio and reports",
+    "Portfolio et rapports",
+    "Portafolio e informes",
+    "Portfolio und Berichte",
+    "项目组合与报表",
+    "ポートフォリオとレポート"
+  ],
+  "Posizione (1 = inizio)": [
+    "Position (1 = beginning)",
+    "Position (1 = début)",
+    "Posición (1 = inicio)",
+    "Position (1 = Anfang)",
+    "位置（1 = 开头）",
+    "位置（1 = 先頭）"
+  ],
+  "Posizione della lista": [
+    "List position",
+    "Position de la liste",
+    "Posición de la lista",
+    "Listenposition",
+    "列表位置",
+    "リストの位置"
+  ],
+  "Prepariamo il tuo spazio…": [
+    "Preparing your workspace…",
+    "Préparation de votre espace…",
+    "Preparando tu espacio…",
+    "Dein Arbeitsbereich wird vorbereitet…",
+    "正在准备你的工作区…",
+    "ワークスペースを準備中…"
+  ],
+  "Priorità": [
+    "Priority",
+    "Priorité",
+    "Prioridad",
+    "Priorität",
+    "优先级",
+    "優先度"
+  ],
+  "Priorità…": [
+    "Priority…",
+    "Priorité…",
+    "Prioridad…",
+    "Priorität…",
+    "优先级…",
+    "優先度…"
+  ],
+  "Pubblica commento": [
+    "Post comment",
+    "Publier le commentaire",
+    "Publicar comentario",
+    "Kommentar veröffentlichen",
+    "发布评论",
+    "コメントを投稿"
+  ],
+  "Pubblica o cancella il commento prima di salvare la scheda. La bozza è conservata.": [
+    "Post or clear the comment before saving the card. Your draft is preserved.",
+    "Publiez ou effacez le commentaire avant d’enregistrer la carte. Votre brouillon est conservé.",
+    "Publica o borra el comentario antes de guardar la tarjeta. El borrador está guardado.",
+    "Veröffentliche oder entferne den Kommentar, bevor du die Karte speicherst. Dein Entwurf bleibt erhalten.",
+    "保存卡片前请先发布或清空评论。草稿已保留。",
+    "カードを保存する前にコメントを投稿するか消去してください。下書きは保持されます。"
+  ],
+  "Qual è il prossimo traguardo?": [
+    "What is the next milestone?",
+    "Quel est le prochain jalon ?",
+    "¿Cuál es el próximo hito?",
+    "Was ist der nächste Meilenstein?",
+    "下一个里程碑是什么？",
+    "次のマイルストーンは？"
+  ],
+  "Questa scheda appartiene a un’altra bacheca. Aprila dalla ricerca globale.": [
+    "This card belongs to another board. Open it from global search.",
+    "Cette carte appartient à un autre tableau. Ouvrez-la depuis la recherche globale.",
+    "Esta tarjeta pertenece a otro tablero. Ábrela desde la búsqueda global.",
+    "Diese Karte gehört zu einem anderen Board. Öffne sie über die globale Suche.",
+    "此卡片属于其他看板。请通过全局搜索打开。",
+    "このカードは別のボードに属しています。全体検索から開いてください。"
+  ],
+  "Questa scheda richiede": [
+    "This card requires",
+    "Cette carte nécessite",
+    "Esta tarjeta requiere",
+    "Diese Karte benötigt",
+    "此卡片需要",
+    "このカードに必要なもの"
+  ],
+  "Questa scheda è stata modificata. La tua bozza è conservata. Rileggi la versione attuale prima di salvare.": [
+    "This card has changed. Your draft is preserved. Review the current version before saving.",
+    "Cette carte a été modifiée. Votre brouillon est conservé. Relisez la version actuelle avant d’enregistrer.",
+    "Esta tarjeta se ha modificado. El borrador está guardado. Revisa la versión actual antes de guardar.",
+    "Diese Karte wurde geändert. Dein Entwurf bleibt erhalten. Prüfe die aktuelle Version vor dem Speichern.",
+    "此卡片已被修改。草稿已保留。保存前请查看当前版本。",
+    "このカードは変更されています。下書きは保持されます。保存する前に最新バージョンを確認してください。"
+  ],
+  "Questa sessione": [
+    "This session",
+    "Cette session",
+    "Esta sesión",
+    "Diese Sitzung",
+    "此会话",
+    "このセッション"
+  ],
+  "Recupera": [
+    "Recover",
+    "Récupérer",
+    "Recuperar",
+    "Wiederherstellen",
+    "恢复",
+    "復元"
+  ],
+  "Registra o cancella il tempo inserito prima di salvare la scheda. La bozza è conservata.": [
+    "Log or clear the entered time before saving the card. Your draft is preserved.",
+    "Enregistrez ou effacez le temps saisi avant d’enregistrer la carte. Votre brouillon est conservé.",
+    "Registra o borra el tiempo introducido antes de guardar la tarjeta. El borrador está guardado.",
+    "Erfasse oder entferne die eingegebene Zeit, bevor du die Karte speicherst. Dein Entwurf bleibt erhalten.",
+    "保存卡片前请先记录或清空输入的工时。草稿已保留。",
+    "カードを保存する前に入力した時間を記録するか消去してください。下書きは保持されます。"
+  ],
+  "Registra tempo": [
+    "Log time",
+    "Enregistrer du temps",
+    "Registrar tiempo",
+    "Zeit erfassen",
+    "记录工时",
+    "時間を記録"
+  ],
+  "Registro attività": [
+    "Activity log",
+    "Journal d’activité",
+    "Registro de actividad",
+    "Aktivitätsprotokoll",
+    "活动日志",
+    "アクティビティログ"
+  ],
+  "Registro del tempo": [
+    "Work log",
+    "Journal du temps",
+    "Registro de tiempo",
+    "Zeiterfassung",
+    "工时记录",
+    "作業時間の記録"
+  ],
+  "Responsabile": [
+    "Assignee",
+    "Responsable",
+    "Responsable",
+    "Zuständig",
+    "负责人",
+    "担当者"
+  ],
+  "Responsabile: {2} · Scadenza: {3} · Priorità: {4}": [
+    "Assignee: {2} · Due: {3} · Priority: {4}",
+    "Responsable : {2} · Échéance : {3} · Priorité : {4}",
+    "Responsable: {2} · Fecha límite: {3} · Prioridad: {4}",
+    "Zuständig: {2} · Fällig: {3} · Priorität: {4}",
+    "负责人：{2} · 截止日期：{3} · 优先级：{4}",
+    "担当者：{2} · 期限：{3} · 優先度：{4}"
+  ],
+  "Responsabili": [
+    "Assignees",
+    "Responsables",
+    "Responsables",
+    "Zuständige",
+    "负责人",
+    "担当者"
+  ],
+  "Revisioni": [
+    "Reviews",
+    "Révisions",
+    "Revisiones",
+    "Prüfungen",
+    "审核",
+    "レビュー"
+  ],
+  "Revisioni della bacheca": [
+    "Board reviews",
+    "Révisions du tableau",
+    "Revisiones del tablero",
+    "Board-Prüfungen",
+    "看板审核",
+    "ボードのレビュー"
+  ],
+  "Revoca": [
+    "Revoke",
+    "Révoquer",
+    "Revocar",
+    "Widerrufen",
+    "撤销",
+    "取り消す"
+  ],
+  "Revoca l’accesso da altri dispositivi. Questa sessione resta aperta.": [
+    "Revoke access from other devices. This session stays open.",
+    "Révoquez l’accès depuis les autres appareils. Cette session reste ouverte.",
+    "Revoca el acceso de otros dispositivos. Esta sesión seguirá abierta.",
+    "Widerrufe den Zugriff von anderen Geräten. Diese Sitzung bleibt geöffnet.",
+    "撤销其他设备的访问权限。此会话将保持登录。",
+    "他の端末からのアクセスを取り消します。このセッションは開いたままです。"
+  ],
+  "Revoca tutte le altre sessioni": [
+    "Revoke all other sessions",
+    "Révoquer toutes les autres sessions",
+    "Revocar todas las demás sesiones",
+    "Alle anderen Sitzungen widerrufen",
+    "撤销所有其他会话",
+    "他のすべてのセッションを取り消す"
+  ],
+  "Riapri": [
+    "Reopen",
+    "Rouvrir",
+    "Reabrir",
+    "Wieder öffnen",
+    "重新打开",
+    "再開"
+  ],
+  "Riapri i filtri salvati per la bacheca corrente.": [
+    "Reopen saved filters for the current board.",
+    "Rouvrez les filtres enregistrés du tableau actuel.",
+    "Vuelve a abrir los filtros guardados del tablero actual.",
+    "Öffne die gespeicherten Filter für das aktuelle Board erneut.",
+    "请重新打开当前看板的已保存筛选条件。",
+    "現在のボードの保存済みフィルターを開き直してください。"
+  ],
+  "Riapri scheda: {0}": [
+    "Reopen card: {0}",
+    "Rouvrir la carte : {0}",
+    "Reabrir tarjeta: {0}",
+    "Karte wieder öffnen: {0}",
+    "重新打开卡片：{0}",
+    "カードを再開：{0}"
+  ],
+  "Ricerca": [
+    "Research",
+    "Recherche",
+    "Investigación",
+    "Recherche",
+    "研究",
+    "調査"
+  ],
+  "Ricerca globale": [
+    "Global search",
+    "Recherche globale",
+    "Búsqueda global",
+    "Globale Suche",
+    "全局搜索",
+    "全体検索"
+  ],
+  "Ricerca in tutte le bacheche": [
+    "Search all boards",
+    "Rechercher dans tous les tableaux",
+    "Buscar en todos los tableros",
+    "Alle Boards durchsuchen",
+    "搜索所有看板",
+    "すべてのボードを検索"
+  ],
+  "Ricerca nella bacheca": [
+    "Search board",
+    "Rechercher dans le tableau",
+    "Buscar en el tablero",
+    "Board durchsuchen",
+    "搜索看板",
+    "ボード内検索"
+  ],
+  "Riceverai le notifiche degli aggiornamenti.": [
+    "You will receive update notifications.",
+    "Vous recevrez des notifications de mise à jour.",
+    "Recibirás notificaciones de las actualizaciones.",
+    "Du erhältst Benachrichtigungen zu Aktualisierungen.",
+    "你将收到更新通知。",
+    "更新の通知を受け取ります。"
+  ],
+  "Richieste": [
+    "Requests",
+    "Demandes",
+    "Solicitudes",
+    "Anfragen",
+    "请求",
+    "リクエスト"
+  ],
+  "Rimuovere questo membro dalla bacheca?": [
+    "Remove this member from the board?",
+    "Retirer ce membre du tableau ?",
+    "¿Quitar este miembro del tablero?",
+    "Dieses Mitglied aus dem Board entfernen?",
+    "将此成员从看板中移除吗？",
+    "このメンバーをボードから削除しますか？"
+  ],
+  "Rimuovi": [
+    "Remove",
+    "Retirer",
+    "Quitar",
+    "Entfernen",
+    "移除",
+    "削除"
+  ],
+  "Rimuovi dai preferiti": [
+    "Remove from favorites",
+    "Retirer des favoris",
+    "Quitar de favoritos",
+    "Aus Favoriten entfernen",
+    "从收藏中移除",
+    "お気に入りから削除"
+  ],
+  "Rinomina": [
+    "Rename",
+    "Renommer",
+    "Renombrar",
+    "Umbenennen",
+    "重命名",
+    "名前を変更"
+  ],
+  "Ripristina": [
+    "Restore",
+    "Restaurer",
+    "Restaurar",
+    "Wiederherstellen",
+    "恢复",
+    "復元"
+  ],
+  "Ripristina dall’archivio": [
+    "Restore from archive",
+    "Restaurer depuis les archives",
+    "Restaurar del archivo",
+    "Aus Archiv wiederherstellen",
+    "从归档中恢复",
+    "アーカイブから復元"
+  ],
+  "Ripristina gli elementi eliminati. Liste e schede tornano nella loro bacheca.": [
+    "Restore deleted items. Lists and cards return to their board.",
+    "Restaurez les éléments supprimés. Les listes et les cartes retrouvent leur tableau.",
+    "Restaura elementos eliminados. Las listas y tarjetas vuelven a su tablero.",
+    "Stelle gelöschte Elemente wieder her. Listen und Karten kehren in ihr Board zurück.",
+    "恢复已删除的项目。列表和卡片将返回其原属看板。",
+    "削除した項目を復元します。リストとカードは元のボードに戻ります。"
+  ],
+  "Ripristina ordine manuale e rimuovi i filtri per trascinare le schede.": [
+    "Switch to manual order and clear filters to drag cards.",
+    "Rétablissez l’ordre manuel et retirez les filtres pour déplacer les cartes par glisser-déposer.",
+    "Restablece el orden manual y elimina los filtros para arrastrar tarjetas.",
+    "Stelle die manuelle Reihenfolge wieder her und entferne Filter, um Karten zu ziehen.",
+    "切换为手动排序并清除筛选条件后，即可拖动卡片。",
+    "カードをドラッグするには手動の並び順に戻し、フィルターを解除してください。"
+  ],
+  "Risposta del server non valida. Verifica l’esito prima di riprovare.": [
+    "Invalid server response. Check the result before retrying.",
+    "Réponse du serveur invalide. Vérifiez le résultat avant de réessayer.",
+    "Respuesta del servidor no válida. Comprueba el resultado antes de reintentar.",
+    "Ungültige Serverantwort. Prüfe das Ergebnis, bevor du es erneut versuchst.",
+    "服务器响应无效。重试前请检查操作结果。",
+    "サーバーの応答が無効です。再試行する前に結果を確認してください。"
+  ],
+  "Ruolo di {4}": [
+    "Role of {4}",
+    "Rôle de {4}",
+    "Rol de {4}",
+    "Rolle von {4}",
+    "{4} 的角色",
+    "{4} の役割"
+  ],
+  "Ruolo globale": [
+    "Global role",
+    "Rôle global",
+    "Rol global",
+    "Globale Rolle",
+    "全局角色",
+    "全体の役割"
+  ],
+  "Ruolo nella bacheca": [
+    "Board role",
+    "Rôle dans le tableau",
+    "Rol en el tablero",
+    "Board-Rolle",
+    "看板角色",
+    "ボードでの役割"
+  ],
+  "S": [
+    "S",
+    "S",
+    "S",
+    "S",
+    "S",
+    "S"
+  ],
+  "Salva": [
+    "Save",
+    "Enregistrer",
+    "Guardar",
+    "Speichern",
+    "保存",
+    "保存"
+  ],
+  "Salva come modello": [
+    "Save as template",
+    "Enregistrer comme modèle",
+    "Guardar como plantilla",
+    "Als Vorlage speichern",
+    "保存为模板",
+    "テンプレートとして保存"
+  ],
+  "Salva commento": [
+    "Save comment",
+    "Enregistrer le commentaire",
+    "Guardar comentario",
+    "Kommentar speichern",
+    "保存评论",
+    "コメントを保存"
+  ],
+  "Salva filtri attuali": [
+    "Save current filters",
+    "Enregistrer les filtres actuels",
+    "Guardar filtros actuales",
+    "Aktuelle Filter speichern",
+    "保存当前筛选条件",
+    "現在のフィルターを保存"
+  ],
+  "Salva la bozza prima di cambiare le dipendenze.": [
+    "Save your draft before changing dependencies.",
+    "Enregistrez le brouillon avant de modifier les dépendances.",
+    "Guarda el borrador antes de cambiar las dependencias.",
+    "Speichere deinen Entwurf, bevor du Abhängigkeiten änderst.",
+    "更改依赖关系前请先保存草稿。",
+    "依存関係を変更する前に下書きを保存してください。"
+  ],
+  "Salva la bozza prima di creare un modello.": [
+    "Save your draft before creating a template.",
+    "Enregistrez le brouillon avant de créer un modèle.",
+    "Guarda el borrador antes de crear una plantilla.",
+    "Speichere deinen Entwurf, bevor du eine Vorlage erstellst.",
+    "创建模板前请先保存草稿。",
+    "テンプレートを作成する前に下書きを保存してください。"
+  ],
+  "Salva la bozza prima di duplicare la scheda.": [
+    "Save your draft before duplicating the card.",
+    "Enregistrez le brouillon avant de dupliquer la carte.",
+    "Guarda el borrador antes de duplicar la tarjeta.",
+    "Speichere deinen Entwurf, bevor du die Karte duplizierst.",
+    "复制卡片前请先保存草稿。",
+    "カードを複製する前に下書きを保存してください。"
+  ],
+  "Salva la ricerca, i filtri e l’ordinamento attuali per questa bacheca.": [
+    "Save the current search, filters, and sort order for this board.",
+    "Enregistrez la recherche, les filtres et l’ordre de tri actuels pour ce tableau.",
+    "Guarda la búsqueda, los filtros y el orden actuales de este tablero.",
+    "Speichere die aktuelle Suche, Filter und Sortierung für dieses Board.",
+    "保存此看板当前的搜索、筛选条件和排序方式。",
+    "このボードの現在の検索、フィルター、並び順を保存します。"
+  ],
+  "Salva la scheda per usare il timer": [
+    "Save the card to use the timer",
+    "Enregistrez la carte pour utiliser le minuteur",
+    "Guarda la tarjeta para usar el temporizador",
+    "Speichere die Karte, um den Timer zu verwenden",
+    "保存卡片后即可使用计时器",
+    "タイマーを使うにはカードを保存してください"
+  ],
+  "Salva le modifiche prima di spostare la scheda.": [
+    "Save your changes before moving the card.",
+    "Enregistrez les modifications avant de déplacer la carte.",
+    "Guarda los cambios antes de mover la tarjeta.",
+    "Speichere deine Änderungen, bevor du die Karte verschiebst.",
+    "移动卡片前请先保存更改。",
+    "カードを移動する前に変更を保存してください。"
+  ],
+  "Salva membro": [
+    "Save member",
+    "Enregistrer le membre",
+    "Guardar miembro",
+    "Mitglied speichern",
+    "保存成员",
+    "メンバーを保存"
+  ],
+  "Salva modello": [
+    "Save template",
+    "Enregistrer le modèle",
+    "Guardar plantilla",
+    "Vorlage speichern",
+    "保存模板",
+    "テンプレートを保存"
+  ],
+  "Salva modello di bacheca": [
+    "Save board template",
+    "Enregistrer un modèle de tableau",
+    "Guardar plantilla de tablero",
+    "Board-Vorlage speichern",
+    "保存看板模板",
+    "ボードのテンプレートを保存"
+  ],
+  "Salva modello di scheda": [
+    "Save card template",
+    "Enregistrer un modèle de carte",
+    "Guardar plantilla de tarjeta",
+    "Kartenvorlage speichern",
+    "保存卡片模板",
+    "カードのテンプレートを保存"
+  ],
+  "Salva modifiche": [
+    "Save changes",
+    "Enregistrer les modifications",
+    "Guardar cambios",
+    "Änderungen speichern",
+    "保存更改",
+    "変更を保存"
+  ],
+  "Salva nome": [
+    "Save name",
+    "Enregistrer le nom",
+    "Guardar nombre",
+    "Name speichern",
+    "保存名称",
+    "名前を保存"
+  ],
+  "Salva scheda": [
+    "Save card",
+    "Enregistrer la carte",
+    "Guardar tarjeta",
+    "Karte speichern",
+    "保存卡片",
+    "カードを保存"
+  ],
+  "Salvataggio in corso…": [
+    "Saving…",
+    "Enregistrement…",
+    "Guardando…",
+    "Wird gespeichert…",
+    "正在保存…",
+    "保存中…"
+  ],
+  "Salvataggio sul server": [
+    "Saved on the server",
+    "Enregistré sur le serveur",
+    "Guardado en el servidor",
+    "Auf dem Server gespeichert",
+    "已保存到服务器",
+    "サーバーに保存"
+  ],
+  "Salvataggio sul server{0}": [
+    "Saved on the server{0}",
+    "Enregistré sur le serveur{0}",
+    "Guardado en el servidor{0}",
+    "Auf dem Server gespeichert{0}",
+    "已保存到服务器{0}",
+    "サーバーに保存{0}"
+  ],
+  "Salvia": [
+    "Sage",
+    "Sauge",
+    "Salvia",
+    "Salbei",
+    "鼠尾草绿",
+    "セージ"
+  ],
+  "Scade: {3}": [
+    "Expires: {3}",
+    "Expire le : {3}",
+    "Caduca: {3}",
+    "Läuft ab: {3}",
+    "到期时间：{3}",
+    "有効期限：{3}"
+  ],
+  "Scadenza": [
+    "Due date",
+    "Échéance",
+    "Fecha límite",
+    "Fälligkeitsdatum",
+    "截止日期",
+    "期限"
+  ],
+  "Scadenza:": [
+    "Due:",
+    "Échéance :",
+    "Fecha límite:",
+    "Fällig:",
+    "截止日期：",
+    "期限："
+  ],
+  "Scadenza: {1}{2}": [
+    "Due: {1}{2}",
+    "Échéance : {1}{2}",
+    "Fecha límite: {1}{2}",
+    "Fällig: {1}{2}",
+    "截止日期：{1}{2}",
+    "期限：{1}{2}"
+  ],
+  "Scadute": [
+    "Overdue",
+    "En retard",
+    "Vencidas",
+    "Überfällig",
+    "已逾期",
+    "期限超過"
+  ],
+  "Scarica": [
+    "Download",
+    "Télécharger",
+    "Descargar",
+    "Herunterladen",
+    "下载",
+    "ダウンロード"
+  ],
+  "Scarta": [
+    "Discard",
+    "Ignorer",
+    "Descartar",
+    "Verwerfen",
+    "丢弃",
+    "破棄"
+  ],
+  "Scegli bacheca": [
+    "Choose board",
+    "Choisir un tableau",
+    "Elegir tablero",
+    "Board auswählen",
+    "选择看板",
+    "ボードを選択"
+  ],
+  "Scegli un file": [
+    "Choose a file",
+    "Choisir un fichier",
+    "Elegir un archivo",
+    "Datei auswählen",
+    "选择文件",
+    "ファイルを選択"
+  ],
+  "Scegli un file da caricare.": [
+    "Choose a file to upload.",
+    "Choisissez un fichier à téléverser.",
+    "Elige un archivo para subir.",
+    "Wähle eine Datei zum Hochladen.",
+    "请选择要上传的文件。",
+    "アップロードするファイルを選択してください。"
+  ],
+  "Scegli un nome per la bacheca.": [
+    "Choose a name for the board.",
+    "Choisissez un nom pour le tableau.",
+    "Elige un nombre para el tablero.",
+    "Wähle einen Namen für das Board.",
+    "请为看板命名。",
+    "ボードの名前を入力してください。"
+  ],
+  "Scegli un nome per la lista.": [
+    "Choose a name for the list.",
+    "Choisissez un nom pour la liste.",
+    "Elige un nombre para la lista.",
+    "Wähle einen Namen für die Liste.",
+    "请为列表命名。",
+    "リストの名前を入力してください。"
+  ],
+  "Scelta": [
+    "Choice",
+    "Choix",
+    "Opción",
+    "Auswahl",
+    "选项",
+    "選択肢"
+  ],
+  "Scheda": [
+    "Card",
+    "Carte",
+    "Tarjeta",
+    "Karte",
+    "卡片",
+    "カード"
+  ],
+  "Scheda aggiornata sul server.": [
+    "Card updated on the server.",
+    "Carte mise à jour sur le serveur.",
+    "Tarjeta actualizada en el servidor.",
+    "Karte auf dem Server aktualisiert.",
+    "卡片已在服务器上更新。",
+    "カードをサーバーで更新しました。"
+  ],
+  "Scheda archiviata.": [
+    "Card archived.",
+    "Carte archivée.",
+    "Tarjeta archivada.",
+    "Karte archiviert.",
+    "卡片已归档。",
+    "カードをアーカイブしました。"
+  ],
+  "Scheda completata.": [
+    "Card completed.",
+    "Carte terminée.",
+    "Tarjeta completada.",
+    "Karte abgeschlossen.",
+    "卡片已完成。",
+    "カードを完了しました。"
+  ],
+  "Scheda creata dal modello.": [
+    "Card created from template.",
+    "Carte créée à partir du modèle.",
+    "Tarjeta creada a partir de la plantilla.",
+    "Karte aus Vorlage erstellt.",
+    "已通过模板创建卡片。",
+    "テンプレートからカードを作成しました。"
+  ],
+  "Scheda creata sul server.": [
+    "Card created on the server.",
+    "Carte créée sur le serveur.",
+    "Tarjeta creada en el servidor.",
+    "Karte auf dem Server erstellt.",
+    "卡片已在服务器上创建。",
+    "カードをサーバーに作成しました。"
+  ],
+  "Scheda duplicata.": [
+    "Card duplicated.",
+    "Carte dupliquée.",
+    "Tarjeta duplicada.",
+    "Karte dupliziert.",
+    "卡片已复制。",
+    "カードを複製しました。"
+  ],
+  "Scheda riaperta.": [
+    "Card reopened.",
+    "Carte rouverte.",
+    "Tarjeta reabierta.",
+    "Karte wieder geöffnet.",
+    "卡片已重新打开。",
+    "カードを再開しました。"
+  ],
+  "Scheda ripristinata dall’archivio.": [
+    "Card restored from archive.",
+    "Carte restaurée depuis les archives.",
+    "Tarjeta restaurada del archivo.",
+    "Karte aus dem Archiv wiederhergestellt.",
+    "卡片已从归档中恢复。",
+    "カードをアーカイブから復元しました。"
+  ],
+  "Scheda spostata nel cestino.": [
+    "Card moved to trash.",
+    "Carte déplacée dans la corbeille.",
+    "Tarjeta movida a la papelera.",
+    "Karte in den Papierkorb verschoben.",
+    "卡片已移至回收站。",
+    "カードをゴミ箱に移動しました。"
+  ],
+  "Scheda spostata.": [
+    "Card moved.",
+    "Carte déplacée.",
+    "Tarjeta movida.",
+    "Karte verschoben.",
+    "卡片已移动。",
+    "カードを移動しました。"
+  ],
+  "Schede archiviate": [
+    "Archived cards",
+    "Cartes archivées",
+    "Tarjetas archivadas",
+    "Archivierte Karten",
+    "已归档卡片",
+    "アーカイブ済みカード"
+  ],
+  "Schede della bacheca": [
+    "Board cards",
+    "Cartes du tableau",
+    "Tarjetas del tablero",
+    "Board-Karten",
+    "看板卡片",
+    "ボードのカード"
+  ],
+  "Schede nella lista": [
+    "Cards in this list",
+    "Cartes de cette liste",
+    "Tarjetas de esta lista",
+    "Karten in dieser Liste",
+    "此列表中的卡片",
+    "このリストのカード"
+  ],
+  "Schede totali": [
+    "Total cards",
+    "Total des cartes",
+    "Total de tarjetas",
+    "Karten insgesamt",
+    "卡片总数",
+    "カード合計"
+  ],
+  "Scorciatoie da tastiera": [
+    "Keyboard shortcuts",
+    "Raccourcis clavier",
+    "Atajos de teclado",
+    "Tastenkürzel",
+    "键盘快捷键",
+    "キーボードショートカット"
+  ],
+  "Scrivi per cercare le schede a cui hai accesso.": [
+    "Type to search the cards you can access.",
+    "Saisissez du texte pour rechercher les cartes auxquelles vous avez accès.",
+    "Escribe para buscar las tarjetas a las que tienes acceso.",
+    "Tippe, um nach Karten zu suchen, auf die du Zugriff hast.",
+    "输入内容以搜索你有权访问的卡片。",
+    "アクセスできるカードを検索するには入力してください。"
+  ],
+  "Scuro": [
+    "Dark",
+    "Sombre",
+    "Oscuro",
+    "Dunkel",
+    "深色",
+    "ダーク"
+  ],
+  "Segna come completata": [
+    "Mark as complete",
+    "Marquer comme terminée",
+    "Marcar como completada",
+    "Als abgeschlossen markieren",
+    "标记为已完成",
+    "完了にする"
+  ],
+  "Segui": [
+    "Follow",
+    "Suivre",
+    "Seguir",
+    "Folgen",
+    "关注",
+    "フォロー"
+  ],
+  "Segui bacheca": [
+    "Follow board",
+    "Suivre le tableau",
+    "Seguir tablero",
+    "Board folgen",
+    "关注看板",
+    "ボードをフォロー"
+  ],
+  "Segui scheda": [
+    "Follow card",
+    "Suivre la carte",
+    "Seguir tarjeta",
+    "Karte folgen",
+    "关注卡片",
+    "カードをフォロー"
+  ],
+  "Seleziona": [
+    "Select",
+    "Sélectionner",
+    "Seleccionar",
+    "Auswählen",
+    "选择",
+    "選択"
+  ],
+  "Seleziona scheda: {2}": [
+    "Select card: {2}",
+    "Sélectionner la carte : {2}",
+    "Seleccionar tarjeta: {2}",
+    "Karte auswählen: {2}",
+    "选择卡片：{2}",
+    "カードを選択：{2}"
+  ],
+  "Seleziona schede": [
+    "Select cards",
+    "Sélectionner des cartes",
+    "Seleccionar tarjetas",
+    "Karten auswählen",
+    "选择卡片",
+    "カードを選択"
+  ],
+  "Seleziona un’esportazione OpenBoard versione 2. L’importazione crea una nuova bacheca.": [
+    "Select an OpenBoard version 2 export. Importing creates a new board.",
+    "Sélectionnez une exportation OpenBoard version 2. L’importation crée un nouveau tableau.",
+    "Selecciona una exportación OpenBoard versión 2. La importación crea un tablero nuevo.",
+    "Wähle einen OpenBoard-Export der Version 2. Beim Import wird ein neues Board erstellt.",
+    "选择 OpenBoard 版本 2 导出文件。导入时会创建新看板。",
+    "OpenBoard バージョン 2 のエクスポートを選択してください。新しいボードとしてインポートされます。"
+  ],
+  "Seleziona visibili": [
+    "Select visible",
+    "Sélectionner les éléments visibles",
+    "Seleccionar visibles",
+    "Sichtbare auswählen",
+    "选择可见项",
+    "表示中の項目を選択"
+  ],
+  "Senza scadenza": [
+    "No due date",
+    "Sans échéance",
+    "Sin fecha límite",
+    "Ohne Fälligkeitsdatum",
+    "无截止日期",
+    "期限なし"
+  ],
+  "Serve un’esportazione OpenBoard in formato versione 2.": [
+    "An OpenBoard version 2 export is required.",
+    "Une exportation OpenBoard au format version 2 est requise.",
+    "Se requiere una exportación OpenBoard en formato versión 2.",
+    "Ein OpenBoard-Export im Format Version 2 ist erforderlich.",
+    "需要 OpenBoard 版本 2 格式的导出文件。",
+    "OpenBoard のバージョン 2 形式のエクスポートが必要です。"
+  ],
+  "Server non raggiungibile. La bozza è conservata; controlla la connessione.": [
+    "Server unreachable. Your draft is saved; check your connection.",
+    "Serveur inaccessible. Votre brouillon est conservé ; vérifiez votre connexion.",
+    "No se puede conectar con el servidor. El borrador está guardado; comprueba la conexión.",
+    "Server nicht erreichbar. Dein Entwurf bleibt gespeichert; prüfe deine Verbindung.",
+    "无法连接服务器。草稿已保留；请检查网络连接。",
+    "サーバーに接続できません。下書きは保存されています。接続を確認してください。"
+  ],
+  "Sessione revocata.": [
+    "Session revoked.",
+    "Session révoquée.",
+    "Sesión revocada.",
+    "Sitzung widerrufen.",
+    "会话已撤销。",
+    "セッションを取り消しました。"
+  ],
+  "Sessioni attive": [
+    "Active sessions",
+    "Sessions actives",
+    "Sesiones activas",
+    "Aktive Sitzungen",
+    "活跃会话",
+    "有効なセッション"
+  ],
+  "Sessioni del tuo account": [
+    "Your account sessions",
+    "Sessions de votre compte",
+    "Sesiones de tu cuenta",
+    "Sitzungen deines Kontos",
+    "你的账户会话",
+    "アカウントのセッション"
+  ],
+  "Spazio a un nuovo progetto.": [
+    "Make room for a new project.",
+    "Place à un nouveau projet.",
+    "Haz sitio a un nuevo proyecto.",
+    "Platz für ein neues Projekt.",
+    "为新项目留出空间。",
+    "新しいプロジェクトを始めよう。"
+  ],
+  "Sposta": [
+    "Move",
+    "Déplacer",
+    "Mover",
+    "Verschieben",
+    "移动",
+    "移動"
+  ],
+  "Sposta a destra →": [
+    "Move right →",
+    "Déplacer à droite →",
+    "Mover a la derecha →",
+    "Nach rechts verschieben →",
+    "向右移动 →",
+    "右へ移動 →"
+  ],
+  "Sposta scheda": [
+    "Move card",
+    "Déplacer la carte",
+    "Mover tarjeta",
+    "Karte verschieben",
+    "移动卡片",
+    "カードを移動"
+  ],
+  "Spostare la lista “{0}” e le sue schede nel cestino? Potrai ripristinarle.": [
+    "Move list “{0}” and its cards to trash? You can restore them later.",
+    "Déplacer la liste « {0} » et ses cartes dans la corbeille ? Vous pourrez les restaurer.",
+    "¿Mover la lista «{0}» y sus tarjetas a la papelera? Podrás restaurarlas.",
+    "Liste „{0}“ und ihre Karten in den Papierkorb verschieben? Du kannst sie später wiederherstellen.",
+    "将列表“{0}”及其卡片移至回收站吗？之后可以恢复。",
+    "リスト「{0}」とそのカードをゴミ箱に移動しますか？後で復元できます。"
+  ],
+  "Spostare questa scheda nel cestino? Potrai ripristinarla.": [
+    "Move this card to trash? You can restore it later.",
+    "Déplacer cette carte dans la corbeille ? Vous pourrez la restaurer.",
+    "¿Mover esta tarjeta a la papelera? Podrás restaurarla.",
+    "Diese Karte in den Papierkorb verschieben? Du kannst sie später wiederherstellen.",
+    "将此卡片移至回收站吗？之后可以恢复。",
+    "このカードをゴミ箱に移動しますか？後で復元できます。"
+  ],
+  "Spostare questo allegato nel cestino?": [
+    "Move this attachment to trash?",
+    "Déplacer cette pièce jointe dans la corbeille ?",
+    "¿Mover este adjunto a la papelera?",
+    "Diesen Anhang in den Papierkorb verschieben?",
+    "将此附件移至回收站吗？",
+    "この添付ファイルをゴミ箱に移動しますか？"
+  ],
+  "Spostare “{0}”, le liste e le schede nel cestino? Potrai ripristinarle.": [
+    "Move “{0}”, its lists, and its cards to trash? You can restore them later.",
+    "Déplacer « {0} », ses listes et ses cartes dans la corbeille ? Vous pourrez les restaurer.",
+    "¿Mover «{0}», sus listas y sus tarjetas a la papelera? Podrás restaurarlas.",
+    "„{0}“, seine Listen und Karten in den Papierkorb verschieben? Du kannst sie später wiederherstellen.",
+    "将“{0}”及其列表和卡片移至回收站吗？之后可以恢复。",
+    "「{0}」とそのリスト、カードをゴミ箱に移動しますか？後で復元できます。"
+  ],
+  "Sprint": [
+    "Sprints",
+    "Sprints",
+    "Sprints",
+    "Sprints",
+    "冲刺",
+    "スプリント"
+  ],
+  "Sprint e backlog": [
+    "Sprints and backlog",
+    "Sprints et backlog",
+    "Sprints y backlog",
+    "Sprints und Backlog",
+    "冲刺与待办池",
+    "スプリントとバックログ"
+  ],
+  "Statistiche": [
+    "Statistics",
+    "Statistiques",
+    "Estadísticas",
+    "Statistiken",
+    "统计",
+    "統計"
+  ],
+  "Statistiche non disponibili": [
+    "Statistics unavailable",
+    "Statistiques indisponibles",
+    "Estadísticas no disponibles",
+    "Statistiken nicht verfügbar",
+    "统计数据不可用",
+    "統計を利用できません"
+  ],
+  "Stato": [
+    "Status",
+    "Statut",
+    "Estado",
+    "Status",
+    "状态",
+    "状態"
+  ],
+  "Stima in minuti": [
+    "Estimate in minutes",
+    "Estimation en minutes",
+    "Estimación en minutos",
+    "Schätzung in Minuten",
+    "预计分钟数",
+    "見積時間（分）"
+  ],
+  "Studio": [
+    "Studio",
+    "Studio",
+    "Estudio",
+    "Studio",
+    "工作室",
+    "スタジオ"
+  ],
+  "Sviluppo": [
+    "Development",
+    "Développement",
+    "Desarrollo",
+    "Entwicklung",
+    "开发",
+    "開発"
+  ],
+  "Sì/No": [
+    "Yes/No",
+    "Oui/Non",
+    "Sí/No",
+    "Ja/Nein",
+    "是/否",
+    "はい/いいえ"
+  ],
+  "TU": [
+    "YOU",
+    "VOUS",
+    "TÚ",
+    "DU",
+    "你",
+    "自分"
+  ],
+  "Tabella": [
+    "Table",
+    "Tableau",
+    "Tabla",
+    "Tabelle",
+    "表格",
+    "テーブル"
+  ],
+  "Team · {0}": [
+    "Team · {0}",
+    "Équipe · {0}",
+    "Equipo · {0}",
+    "Team · {0}",
+    "团队 · {0}",
+    "チーム · {0}"
+  ],
+  "Tema": [
+    "Theme",
+    "Thème",
+    "Tema",
+    "Design",
+    "主题",
+    "テーマ"
+  ],
+  "Tempo del team": [
+    "Team time",
+    "Temps de l’équipe",
+    "Tiempo del equipo",
+    "Team-Zeit",
+    "团队工时",
+    "チームの作業時間"
+  ],
+  "Tempo di attesa esaurito. La bozza è conservata; riprova per verificare l’esito.": [
+    "Request timed out. Your draft is saved; retry to check the result.",
+    "Délai dépassé. Votre brouillon est conservé ; réessayez pour vérifier le résultat.",
+    "Se agotó el tiempo de espera. El borrador está guardado; reintenta para comprobar el resultado.",
+    "Zeitüberschreitung. Dein Entwurf bleibt gespeichert; versuche es erneut, um das Ergebnis zu prüfen.",
+    "请求超时。草稿已保留；请重试以确认结果。",
+    "応答がタイムアウトしました。下書きは保存されています。再試行して結果を確認してください。"
+  ],
+  "Testo": [
+    "Text",
+    "Texte",
+    "Texto",
+    "Text",
+    "文本",
+    "テキスト"
+  ],
+  "Testo attività {6}": [
+    "Task text {6}",
+    "Texte de la tâche {6}",
+    "Texto de la tarea {6}",
+    "Aufgabentext {6}",
+    "任务 {6} 的文本",
+    "タスク {6} のテキスト"
+  ],
+  "Timer avviato. Resta disponibile su questo dispositivo anche dopo un ricaricamento.": [
+    "Timer started. It remains available on this device after a reload.",
+    "Minuteur démarré. Il reste disponible sur cet appareil même après un rechargement.",
+    "Temporizador iniciado. Seguirá disponible en este dispositivo después de recargar.",
+    "Timer gestartet. Er bleibt auf diesem Gerät auch nach dem Neuladen verfügbar.",
+    "计时器已启动。重新加载后仍可在此设备上使用。",
+    "タイマーを開始しました。再読み込み後もこの端末で引き続き利用できます。"
+  ],
+  "Timer manuale su questo dispositivo. Ferma il timer e salva i minuti.": [
+    "Manual timer on this device. Stop the timer and save the minutes.",
+    "Minuteur manuel sur cet appareil. Arrêtez-le et enregistrez les minutes.",
+    "Temporizador manual en este dispositivo. Detén el temporizador y guarda los minutos.",
+    "Manueller Timer auf diesem Gerät. Stoppe den Timer und speichere die Minuten.",
+    "此设备上的手动计时器。请停止计时器并保存分钟数。",
+    "この端末の手動タイマーです。タイマーを停止して分数を保存してください。"
+  ],
+  "Titolo della scheda": [
+    "Card title",
+    "Titre de la carte",
+    "Título de la tarjeta",
+    "Kartentitel",
+    "卡片标题",
+    "カードのタイトル"
+  ],
+  "Titolo o descrizione della scheda": [
+    "Card title or description",
+    "Titre ou description de la carte",
+    "Título o descripción de la tarjeta",
+    "Kartentitel oder Beschreibung",
+    "卡片标题或描述",
+    "カードのタイトルまたは説明"
+  ],
+  "Tra una settimana": [
+    "In one week",
+    "Dans une semaine",
+    "Dentro de una semana",
+    "In einer Woche",
+    "一周后",
+    "1 週間後"
+  ],
+  "Traguardo": [
+    "Milestone",
+    "Jalon",
+    "Hito",
+    "Meilenstein",
+    "里程碑",
+    "マイルストーン"
+  ],
+  "Traguardo…": [
+    "Milestone…",
+    "Jalon…",
+    "Hito…",
+    "Meilenstein…",
+    "里程碑…",
+    "マイルストーン…"
+  ],
+  "Tutte": [
+    "All",
+    "Toutes",
+    "Todas",
+    "Alle",
+    "全部",
+    "すべて"
+  ],
+  "Tutte le notifiche segnate come lette.": [
+    "All notifications marked as read.",
+    "Toutes les notifications sont marquées comme lues.",
+    "Todas las notificaciones marcadas como leídas.",
+    "Alle Benachrichtigungen als gelesen markiert.",
+    "所有通知已标记为已读。",
+    "すべての通知を既読にしました。"
+  ],
+  "Tutte le schede": [
+    "All cards",
+    "Toutes les cartes",
+    "Todas las tarjetas",
+    "Alle Karten",
+    "所有卡片",
+    "すべてのカード"
+  ],
+  "Tutti": [
+    "All",
+    "Tous",
+    "Todos",
+    "Alle",
+    "全部",
+    "すべて"
+  ],
+  "UNA NUOVA IDEA": [
+    "A NEW IDEA",
+    "UNE NOUVELLE IDÉE",
+    "UNA NUEVA IDEA",
+    "EINE NEUE IDEE",
+    "新想法",
+    "新しいアイデア"
+  ],
+  "UNO SPAZIO PER FARE BENE": [
+    "A SPACE TO DO GREAT WORK",
+    "UN ESPACE POUR BIEN TRAVAILLER",
+    "UN ESPACIO PARA TRABAJAR BIEN",
+    "EIN ORT FÜR GUTE ARBEIT",
+    "高效工作的空间",
+    "よい仕事のための場所"
+  ],
+  "URL di riferimento": [
+    "Reference URL",
+    "URL de référence",
+    "URL de referencia",
+    "Referenz-URL",
+    "参考 URL",
+    "参照 URL"
+  ],
+  "Ultima attività: {2}": [
+    "Last activity: {2}",
+    "Dernière activité : {2}",
+    "Última actividad: {2}",
+    "Letzte Aktivität: {2}",
+    "最近活动：{2}",
+    "最終アクティビティ：{2}"
+  ],
+  "Un posto per il prossimo passo.": [
+    "A place for the next step.",
+    "Une place pour la prochaine étape.",
+    "Un lugar para el siguiente paso.",
+    "Ein Platz für den nächsten Schritt.",
+    "为下一步做好准备。",
+    "次のステップのための場所。"
+  ],
+  "Un po’ di ordine.": [
+    "A little order.",
+    "Un peu d’ordre.",
+    "Un poco de orden.",
+    "Ein wenig Ordnung.",
+    "一点条理。",
+    "少しの整理。"
+  ],
+  "Un’idea che merita spazio": [
+    "An idea worth making room for",
+    "Une idée qui mérite sa place",
+    "Una idea que merece espacio",
+    "Eine Idee, die Raum verdient",
+    "值得留出空间的想法",
+    "場所を用意したくなるアイデア"
+  ],
+  "Urgente": [
+    "Urgent",
+    "Urgente",
+    "Urgente",
+    "Dringend",
+    "紧急",
+    "緊急"
+  ],
+  "Usa un modello per creare nuovi elementi. La bacheca di partenza conserva i propri dati.": [
+    "Use a template to create new items. The source board keeps its data.",
+    "Utilisez un modèle pour créer de nouveaux éléments. Le tableau d’origine conserve ses données.",
+    "Usa una plantilla para crear nuevos elementos. El tablero de origen conserva sus datos.",
+    "Nutze eine Vorlage, um neue Elemente zu erstellen. Das ursprüngliche Board behält seine Daten.",
+    "使用模板创建新项目。原始看板的数据会保留。",
+    "テンプレートを使って新しい項目を作成します。元のボードのデータは保持されます。"
+  ],
+  "Utente aggiornato.": [
+    "User updated.",
+    "Utilisateur mis à jour.",
+    "Usuario actualizado.",
+    "Benutzer aktualisiert.",
+    "用户已更新。",
+    "ユーザーを更新しました。"
+  ],
+  "Utente creato.": [
+    "User created.",
+    "Utilisateur créé.",
+    "Usuario creado.",
+    "Benutzer erstellt.",
+    "用户已创建。",
+    "ユーザーを作成しました。"
+  ],
+  "Utente {0}": [
+    "User {0}",
+    "Utilisateur {0}",
+    "Usuario {0}",
+    "Benutzer {0}",
+    "用户 {0}",
+    "ユーザー {0}"
+  ],
+  "Utenti del workspace": [
+    "Workspace users",
+    "Utilisateurs de l’espace de travail",
+    "Usuarios del espacio de trabajo",
+    "Benutzer des Arbeitsbereichs",
+    "工作区用户",
+    "ワークスペースのユーザー"
+  ],
+  "Vai alla bacheca": [
+    "Go to board",
+    "Aller au tableau",
+    "Ir al tablero",
+    "Zum Board",
+    "转到看板",
+    "ボードへ移動"
+  ],
+  "Vai alla ricerca della bacheca": [
+    "Go to board search",
+    "Aller à la recherche du tableau",
+    "Ir a la búsqueda del tablero",
+    "Zur Board-Suche",
+    "转到看板搜索",
+    "ボード内検索へ移動"
+  ],
+  "Valore": [
+    "Value",
+    "Valeur",
+    "Valor",
+    "Wert",
+    "值",
+    "値"
+  ],
+  "Versione corrente acquisita. Completa la tua bozza e salva.": [
+    "Current version loaded. Finish your draft and save.",
+    "Version actuelle récupérée. Terminez votre brouillon et enregistrez.",
+    "Versión actual cargada. Completa el borrador y guarda.",
+    "Aktuelle Version geladen. Vervollständige deinen Entwurf und speichere ihn.",
+    "已载入当前版本。请完成草稿并保存。",
+    "最新バージョンを取得しました。下書きを完成させて保存してください。"
+  ],
+  "Versione sul server: {6}. Confermando manterrai il testo della tua bozza per completare l’unione manualmente.": [
+    "Server version: {6}. Confirming keeps your draft text so you can merge it manually.",
+    "Version du serveur : {6}. La confirmation conserve le texte de votre brouillon pour terminer la fusion manuellement.",
+    "Versión del servidor: {6}. Al confirmar conservarás el texto del borrador para completar la combinación manualmente.",
+    "Serverversion: {6}. Durch Bestätigen bleibt dein Entwurfstext erhalten, damit du ihn manuell zusammenführen kannst.",
+    "服务器版本：{6}。确认后将保留草稿文本，以便手动完成合并。",
+    "サーバーのバージョン：{6}。確認すると下書きのテキストが保持され、手動で統合を完成できます。"
+  ],
+  "Vista a colonne": [
+    "Column view",
+    "Vue en colonnes",
+    "Vista de columnas",
+    "Spaltenansicht",
+    "分列视图",
+    "カラム表示"
+  ],
+  "Vista bacheca": [
+    "Board view",
+    "Vue du tableau",
+    "Vista de tablero",
+    "Board-Ansicht",
+    "看板视图",
+    "ボード表示"
+  ],
+  "Vista elenco": [
+    "List view",
+    "Vue en liste",
+    "Vista de lista",
+    "Listenansicht",
+    "列表视图",
+    "リスト表示"
+  ],
+  "Vuoto se il lavoro può procedere": [
+    "Leave empty if work can proceed",
+    "Laissez vide si le travail peut avancer",
+    "Déjalo vacío si el trabajo puede continuar",
+    "Leer lassen, wenn die Arbeit fortgesetzt werden kann",
+    "工作可以继续时留空",
+    "作業を進められる場合は空欄"
+  ],
+  "Workspace": [
+    "Workspace",
+    "Espace de travail",
+    "Espacio de trabajo",
+    "Arbeitsbereich",
+    "工作区",
+    "ワークスペース"
+  ],
+  "Workspace locale": [
+    "Local workspace",
+    "Espace de travail local",
+    "Espacio de trabajo local",
+    "Lokaler Arbeitsbereich",
+    "本地工作区",
+    "ローカルワークスペース"
+  ],
+  "ha allegato un file": [
+    "attached a file",
+    "a joint un fichier",
+    "ha adjuntado un archivo",
+    "hat eine Datei angehängt",
+    "添加了附件",
+    "ファイルを添付しました"
+  ],
+  "ha archiviato": [
+    "archived",
+    "a archivé",
+    "ha archivado",
+    "hat archiviert",
+    "归档了",
+    "アーカイブしました"
+  ],
+  "ha commentato": [
+    "commented",
+    "a commenté",
+    "ha comentado",
+    "hat kommentiert",
+    "评论了",
+    "コメントしました"
+  ],
+  "ha creato": [
+    "created",
+    "a créé",
+    "ha creado",
+    "hat erstellt",
+    "创建了",
+    "作成しました"
+  ],
+  "ha eliminato": [
+    "deleted",
+    "a supprimé",
+    "ha eliminado",
+    "hat gelöscht",
+    "删除了",
+    "削除しました"
+  ],
+  "ha modificato": [
+    "updated",
+    "a modifié",
+    "ha modificado",
+    "hat aktualisiert",
+    "修改了",
+    "更新しました"
+  ],
+  "ha ripristinato": [
+    "restored",
+    "a restauré",
+    "ha restaurado",
+    "hat wiederhergestellt",
+    "恢复了",
+    "復元しました"
+  ],
+  "ha spostato": [
+    "moved",
+    "a déplacé",
+    "ha movido",
+    "hat verschoben",
+    "移动了",
+    "移動しました"
+  ],
+  "https://…": [
+    "https://…",
+    "https://…",
+    "https://…",
+    "https://…",
+    "https://…",
+    "https://…"
+  ],
+  "{0} di {1} completate": [
+    "{0} of {1} completed",
+    "{0} sur {1} terminées",
+    "{0} de {1} completadas",
+    "{0} von {1} abgeschlossen",
+    "已完成 {0} / {1}",
+    "{1} 件中 {0} 件完了"
+  ],
+  "{0} di {1} schede": [
+    "{0} of {1} cards",
+    "{0} cartes sur {1}",
+    "{0} de {1} tarjetas",
+    "{0} von {1} Karten",
+    "{1} 张卡片中的 {0} 张",
+    "{1} 枚中 {0} 枚のカード"
+  ],
+  "{0} schede archiviate.": [
+    "{0} cards archived.",
+    "{0} cartes archivées.",
+    "{0} tarjetas archivadas.",
+    "{0} Karten archiviert.",
+    "已归档 {0} 张卡片。",
+    "{0} 枚のカードをアーカイブしました。"
+  ],
+  "{0} schede assegnate a {1} · {2} scadute": [
+    "{0} cards assigned to {1} · {2} overdue",
+    "{0} cartes attribuées à {1} · {2} en retard",
+    "{0} tarjetas asignadas a {1} · {2} vencidas",
+    "{0} Karten zugewiesen an {1} · {2} überfällig",
+    "分配给 {1} 的卡片 {0} 张 · 逾期 {2} 张",
+    "{1} に割り当てられたカード {0} 枚 · 期限超過 {2} 枚"
+  ],
+  "{0} schede completate.": [
+    "{0} cards completed.",
+    "{0} cartes terminées.",
+    "{0} tarjetas completadas.",
+    "{0} Karten abgeschlossen.",
+    "已完成 {0} 张卡片。",
+    "{0} 枚のカードを完了しました。"
+  ],
+  "{0} schede · {1} completate": [
+    "{0} cards · {1} completed",
+    "{0} cartes · {1} terminées",
+    "{0} tarjetas · {1} completadas",
+    "{0} Karten · {1} abgeschlossen",
+    "{0} 张卡片 · 已完成 {1} 张",
+    "カード {0} 枚 · 完了 {1} 枚"
+  ],
+  "{0} selezionate": [
+    "{0} selected",
+    "{0} sélectionnées",
+    "{0} seleccionadas",
+    "{0} ausgewählt",
+    "已选择 {0} 项",
+    "{0} 件を選択"
+  ],
+  "{0}:{1}:{2} · in corso": [
+    "{0}:{1}:{2} · running",
+    "{0}:{1}:{2} · en cours",
+    "{0}:{1}:{2} · en marcha",
+    "{0}:{1}:{2} · läuft",
+    "{0}:{1}:{2} · 计时中",
+    "{0}:{1}:{2} · 計測中"
+  ],
+  "{0}Nuova bacheca": [
+    "{0}New board",
+    "{0}Nouveau tableau",
+    "{0}Nuevo tablero",
+    "{0}Neues Board",
+    "{0}新建看板",
+    "{0}新しいボード"
+  ],
+  "{13}Sposta nel cestino": [
+    "{13}Move to trash",
+    "{13}Déplacer dans la corbeille",
+    "{13}Mover a la papelera",
+    "{13}In den Papierkorb verschieben",
+    "{13}移至回收站",
+    "{13}ゴミ箱に移動"
+  ],
+  "{17}Aggiungi una scheda": [
+    "{17}Add a card",
+    "{17}Ajouter une carte",
+    "{17}Añadir una tarjeta",
+    "{17}Karte hinzufügen",
+    "{17}添加卡片",
+    "{17}カードを追加"
+  ],
+  "{1} KiB · {2}": [
+    "{1} KiB · {2}",
+    "{1} Kio · {2}",
+    "{1} KiB · {2}",
+    "{1} KiB · {2}",
+    "{1} KiB · {2}",
+    "{1} KiB · {2}"
+  ],
+  "{1} di {2} attività completate": [
+    "{1} of {2} tasks completed",
+    "{1} tâches sur {2} terminées",
+    "{1} de {2} tareas completadas",
+    "{1} von {2} Aufgaben abgeschlossen",
+    "已完成 {1} / {2} 个任务",
+    "{2} 件中 {1} 件のタスクが完了"
+  ],
+  "{1} liste · {2} schede · {3} campi personalizzati · {4} traguardi": [
+    "{1} lists · {2} cards · {3} custom fields · {4} milestones",
+    "{1} listes · {2} cartes · {3} champs personnalisés · {4} jalons",
+    "{1} listas · {2} tarjetas · {3} campos personalizados · {4} hitos",
+    "{1} Listen · {2} Karten · {3} benutzerdefinierte Felder · {4} Meilensteine",
+    "{1} 个列表 · {2} 张卡片 · {3} 个自定义字段 · {4} 个里程碑",
+    "リスト {1} 件 · カード {2} 枚 · カスタムフィールド {3} 件 · マイルストーン {4} 件"
+  ],
+  "{1}Aggiungi una lista": [
+    "{1}Add a list",
+    "{1}Ajouter une liste",
+    "{1}Añadir una lista",
+    "{1}Liste hinzufügen",
+    "{1}添加列表",
+    "{1}リストを追加"
+  ],
+  "{1}Crea una bacheca": [
+    "{1}Create a board",
+    "{1}Créer un tableau",
+    "{1}Crear un tablero",
+    "{1}Board erstellen",
+    "{1}创建看板",
+    "{1}ボードを作成"
+  ],
+  "{2} scheda: {3}": [
+    "{2} card: {3}",
+    "{2} la carte : {3}",
+    "{2} tarjeta: {3}",
+    "Karte {2}: {3}",
+    "{2}卡片：{3}",
+    "カードを{2}：{3}"
+  ],
+  "{2}Riprova": [
+    "{2}Retry",
+    "{2}Réessayer",
+    "{2}Reintentar",
+    "{2}Erneut versuchen",
+    "{2}重试",
+    "{2}再試行"
+  ],
+  "{9}Modifica, WIP e ordine": [
+    "{9}Edit, WIP, and order",
+    "{9}Modifier, WIP et ordre",
+    "{9}Editar, WIP y orden",
+    "{9}Bearbeiten, WIP und Reihenfolge",
+    "{9}编辑、WIP 与排序",
+    "{9}編集、WIP、並び順"
+  ],
+  "· Archivio": [
+    "· Archive",
+    "· Archives",
+    "· Archivo",
+    "· Archiv",
+    "· 归档",
+    "· アーカイブ"
+  ],
+  "· Bloccata": [
+    "· Blocked",
+    "· Bloquée",
+    "· Bloqueada",
+    "· Blockiert",
+    "· 已阻塞",
+    "· ブロック中"
+  ],
+  "· Scaduta": [
+    "· Overdue",
+    "· En retard",
+    "· Vencida",
+    "· Überfällig",
+    "· 已逾期",
+    "· 期限超過"
+  ],
+  "È disponibile una bozza locale non salvata.": [
+    "An unsaved local draft is available.",
+    "Un brouillon local non enregistré est disponible.",
+    "Hay un borrador local sin guardar disponible.",
+    "Ein ungespeicherter lokaler Entwurf ist verfügbar.",
+    "有一个尚未保存到服务器的本地草稿。",
+    "未保存のローカル下書きがあります。"
+  ],
+  "← Sposta a sinistra": [
+    "← Move left",
+    "← Déplacer à gauche",
+    "← Mover a la izquierda",
+    "← Nach links verschieben",
+    "← 向左移动",
+    "← 左へ移動"
+  ],
+  "⌘ / Ctrl + K": [
+    "⌘ / Ctrl + K",
+    "⌘ / Ctrl + K",
+    "⌘ / Ctrl + K",
+    "⌘ / Strg + K",
+    "⌘ / Ctrl + K",
+    "⌘ / Ctrl + K"
+  ],
+  "⌘ K": [
+    "⌘ K",
+    "⌘ K",
+    "⌘ K",
+    "⌘ K",
+    "⌘ K",
+    "⌘ K"
+  ],
+  "○ Da completare": [
+    "○ Incomplete",
+    "○ À terminer",
+    "○ Pendiente",
+    "○ Offen",
+    "○ 未完成",
+    "○ 未完了"
+  ],
+  "✓ Completata": [
+    "✓ Completed",
+    "✓ Terminée",
+    "✓ Completada",
+    "✓ Abgeschlossen",
+    "✓ 已完成",
+    "✓ 完了"
+  ]
+}

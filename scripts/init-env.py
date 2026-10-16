@@ -39,6 +39,8 @@ def main():
     parser.add_argument("--http-port", type=port, default=80)
     parser.add_argument("--https-port", type=port, default=443)
     parser.add_argument("--admin-port", type=port, default=81)
+    parser.add_argument("--publish-ip", choices=("127.0.0.1", "0.0.0.0"), default="127.0.0.1",
+                        help="Bind proxy ports to loopback by default; use 0.0.0.0 for explicit network exposure.")
     args = parser.parse_args()
     if len({args.http_port, args.https_port, args.admin_port}) != 3:
         parser.error("Le tre porte pubblicate devono essere distinte.")
@@ -47,7 +49,7 @@ def main():
         args.public_url = f"http://openboard.localhost{suffix}"
     values = {name: secrets.token_hex(32) for name in (
         "POSTGRES_PASSWORD", "POSTGRES_APP_PASSWORD", "MONGO_ROOT_PASSWORD", "MONGO_APP_PASSWORD")}
-    values.update(OPENBOARD_PUBLIC_URL=args.public_url, OPENBOARD_HTTP_PORT=str(args.http_port),
+    values.update(OPENBOARD_PUBLIC_URL=args.public_url, OPENBOARD_PUBLISH_IP=args.publish_ip, OPENBOARD_HTTP_PORT=str(args.http_port),
                   OPENBOARD_HTTPS_PORT=str(args.https_port), OPENBOARD_NPM_ADMIN_PORT=str(args.admin_port), TZ="Europe/Rome")
     contents = "# Private deployment credentials. Do not commit or print this file.\n" + "".join(f"{key}={value}\n" for key, value in values.items())
     try:

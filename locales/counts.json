@@ -1,0 +1,10 @@
+{
+  "{count} scheda": ["{count} card", "{count} carte", "{count} tarjeta", "{count} Karte", "{count} 张卡片", "{count} 枚のカード"],
+  "{count} schede": ["{count} cards", "{count} cartes", "{count} tarjetas", "{count} Karten", "{count} 张卡片", "{count} 枚のカード"],
+  "{count} completata": ["{count} completed", "{count} terminée", "{count} completada", "{count} abgeschlossen", "已完成 {count} 张", "完了 {count} 枚"],
+  "{count} completate": ["{count} completed", "{count} terminées", "{count} completadas", "{count} abgeschlossen", "已完成 {count} 张", "完了 {count} 枚"],
+  "{shown} di {count} scheda": ["{shown} of {count} card", "{shown} carte sur {count}", "{shown} de {count} tarjeta", "{shown} von {count} Karte", "{count} 张卡片中的 {shown} 张", "{count} 枚中 {shown} 枚のカード"],
+  "{shown} di {count} schede": ["{shown} of {count} cards", "{shown} cartes sur {count}", "{shown} de {count} tarjetas", "{shown} von {count} Karten", "{count} 张卡片中的 {shown} 张", "{count} 枚中 {shown} 枚のカード"],
+  "{count} scheda selezionata": ["{count} card selected", "{count} carte sélectionnée", "{count} tarjeta seleccionada", "{count} Karte ausgewählt", "已选择 {count} 张卡片", "{count} 枚のカードを選択"],
+  "{count} schede selezionate": ["{count} cards selected", "{count} cartes sélectionnées", "{count} tarjetas seleccionadas", "{count} Karten ausgewählt", "已选择 {count} 张卡片", "{count} 枚のカードを選択"]
+}

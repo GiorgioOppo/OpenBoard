@@ -6,7 +6,9 @@ RUN apt-get update \
 WORKDIR /src
 COPY Makefile ./
 COPY src/ src/
-RUN make EXTERNAL_STORAGE=1
+RUN make EXTERNAL_STORAGE=1 \
+    CFLAGS="-O2 -g -std=c11 -Wall -Wextra -Wpedantic -Wformat -Werror=format-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=3" \
+    LDFLAGS="-pie -Wl,-z,relro,-z,now,-z,noexecstack"
 
 FROM debian:trixie-slim
 RUN apt-get update \

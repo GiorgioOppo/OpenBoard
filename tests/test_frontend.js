@@ -37,7 +37,7 @@ const vm = require('node:vm'), fs = require('node:fs');
 const dynamicInputs = [{dataset:{customKey:'score',customType:'number'},value:'0'},{dataset:{customKey:'ready',customType:'boolean'},value:'false'}];
 const context = {OpenBoardProductivity:p,productivity:p,state:{board:{name:'<script>board</script>',custom_fields:[{id:1,key:'score',name:'<img src=x>',type:'number',position:0}],milestones:[],columns:[{id:1,title:'<b>List</b>',cards:[{id:5,title:'<img onerror=attack()>',priority:'normal',custom_values:{score:0},total_minutes:17}]}]},cardEditor:{customValues:{retired:'preserved',score:2}}},
  document:{addEventListener(){},querySelectorAll(){return dynamicInputs;}},escapeHTML:(value) => String(value ?? '').replace(/[&<>"']/g,(char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])),sorted:(cards) => cards,selectionCheckbox:()=>'',priorities:{normal:'Normale'}};
-vm.createContext(context); vm.runInContext(fs.readFileSync(require.resolve('../web/planning.js'),'utf8'),context);
+vm.createContext(Object.assign(context,require('./i18n-runtime.cjs'))); vm.runInContext(fs.readFileSync(require.resolve('../web/planning.js'),'utf8'),context);
 const table = vm.runInContext('renderTable()',context);
 assert(!table.includes('<img')); assert(!table.includes('<script>')); assert(table.includes('scope="row"')); assert(table.includes('scope="col"')); assert(table.includes('data-table-card="5"')); assert(table.includes('<td>0</td>'));
 const values = vm.runInContext('readCustomValues()',context); assert.equal(values.score,0); assert.equal(values.ready,false); assert.equal(values.retired,'preserved');
@@ -59,7 +59,7 @@ assert.throws(() => p.catalog({...catalogFixture,labels:JSON.parse('{"__proto__"
 
 const labelRenderer = fs.readFileSync(require.resolve('../web/app.js'),'utf8').match(/function labelBadges\(card\) \{[^\n]+/)[0];
 const labelContext = {labels:{design:'<img src=x onerror=attack()>'},cardLabels:()=>['design'],escapeHTML:context.escapeHTML};
-vm.createContext(labelContext); vm.runInContext(labelRenderer,labelContext);
+vm.createContext(Object.assign(labelContext,require('./i18n-runtime.cjs'))); vm.runInContext(labelRenderer,labelContext);
 assert(!vm.runInContext('labelBadges({})',labelContext).includes('<img'));
 
 // Run real asynchronous UI loaders against independently controlled HTTP replies.
@@ -76,7 +76,7 @@ assert(!vm.runInContext('labelBadges({})',labelContext).includes('<img'));
       perform:async(action) => { try { return await action(); } catch(error) { runtime.lastError=error; } },committed:async(write,refresh) => {const result=await write(); if(refresh) await refresh(result); return result;}};
     // Global functions have no implicit receiver, as in the browser.
     runtime.showPanel = async(title,loader,kind) => { runtime.state.panel=kind; const generation=runtime.state.panelSequence=(runtime.state.panelSequence||0)+1; const body=await loader(); if(generation===runtime.state.panelSequence) nodes.get('panel-body').innerHTML=body; };
-    vm.createContext(runtime); vm.runInContext(fs.readFileSync(require.resolve('../web/planning.js'),'utf8'),runtime);
+    vm.createContext(Object.assign(runtime,require('./i18n-runtime.cjs'))); vm.runInContext(fs.readFileSync(require.resolve('../web/planning.js'),'utf8'),runtime);
     return {runtime,nodes,requests,storage,listeners,call:(code) => vm.runInContext(code,runtime)};
   }
   const n = uiRuntime();
@@ -121,4 +121,90 @@ assert(!vm.runInContext('labelBadges({})',labelContext).includes('<img'));
   t.requests[4].resolve({parent:{id:3,card_id:8,body:'Parent'},replies:[{id:9,body:'Reply awaiting server'}]});
   await new Promise((resolve) => setImmediate(resolve)); assert(!t.storage.has('reply.1.8.3'));
   console.log('Frontend race tests: filtri, registro tempo, segnalibri e bozze risposta verificati.');
+})().catch((error) => { console.error(error); process.exitCode=1; });
+
+// Requests authorized in one session must never repopulate another account's
+// view, including when a quiet refresh finishes after logout and a new login.
+(async () => {
+  const app = fs.readFileSync(require.resolve('../web/app.js'),'utf8');
+  const take = (start,end) => app.slice(app.indexOf(start),app.indexOf(end,app.indexOf(start)));
+  const nodes = new Map(), requests = [], storage = new Map(), renders = [], errors = [], authHandlers = new Map();
+  let authPrompts = 0;
+  const node = (id) => {
+    if (!nodes.has(id)) nodes.set(id,{open:false,value:'',innerHTML:'',hidden:false,closest(){return {open:true};},addEventListener(name,handler){authHandlers.set(`${id}:${name}`,handler);}});
+    return nodes.get(id);
+  };
+  node('card-dialog').open = true;
+  const session = (id,csrf = `csrf-${id}`) => ({enabled:true,csrf,user:{id,role:'admin'}});
+  const context = {
+    state:{auth:session(1),authGeneration:0,loadSequence:0,cardSequence:0,panelSequence:0,selectedCards:new Map(),
+      board:{id:7,name:'Account A'},boards:[{id:7}],cardEditor:{id:31,version:4},view:'stats',loading:false,saving:false},
+    Map,Number,JSON,Date,AbortController,setTimeout,clearTimeout,$:node,escapeHTML:(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])),uuid:()=>`key-${requests.length}`,
+    updateBusy(){},toast(message){errors.push(message);},clearFilters(){},route(){},refreshWatchState(){},
+    renderSidebar(){},renderHeader(){},renderBoard(){renders.push({owner:context.state.auth?.user?.id,name:context.state.board?.name});},
+    showLoadError(error){errors.push(error.message);},closeEditors:()=>true,closeDialog(id){node(id).open=false;},showAuth(){authPrompts++;},
+    loadInitial:async()=>{},editorDirty:()=>true,readDraft:()=>null,pendingWorklog:()=>({}),
+    cardData:()=>({title:'Account A unsaved secret',column_id:9}),
+    stored:(key)=>storage.get(key)||'',remember:(key,value)=>storage.set(key,value),forget:(key)=>storage.delete(key),
+    fetch:(url,options)=>new Promise((resolve,reject)=>requests.push({url,options,resolve:(value,status=200)=>resolve({ok:status<400,status,json:async()=>value}),reject}))
+  };
+  vm.createContext(Object.assign(context,require('./i18n-runtime.cjs')));
+  vm.runInContext(take('class APIError','function toast('),context);
+  vm.runInContext(take('async function perform(','function allCards('),context);
+  vm.runInContext(take('function draftKey(','function readDraft('),context);
+  vm.runInContext(take('async function selectBoard(','function showLoadError('),context);
+  vm.runInContext(take('async function refreshBoards()','function clearFilters('),context);
+  vm.runInContext(take('async function renderStats()','function renderBoard('),context);
+  vm.runInContext(take('function stableRequest(','let searchTimer;'),context);
+  vm.runInContext(take("$('auth-form').addEventListener('submit'","$('card-form').addEventListener('submit'"),context);
+  const logout = take("    case 'logout':","  }\n});");
+  vm.runInContext(`function logoutForTest(){switch('logout'){${logout}}}`,context);
+  const tick = () => new Promise(resolve=>setImmediate(resolve));
+  const call = code => vm.runInContext(code,context);
+  const oldBoard = call('selectBoard(7,{quiet:true,navigate:false})');
+  const oldBoards = call('refreshBoards()').then(()=>null,error=>error);
+  const oldStats = call('renderStats()');
+  const oldPost = call("api('/api/cards/31/comments','POST',{body:'Account A private comment'})").then(()=>null,error=>error);
+  assert.equal(requests.length,4);
+  assert.equal(requests[3].options.headers['X-CSRF-Token'],'csrf-1');
+  call('logoutForTest()');
+  assert.equal(requests[4].url,'/api/auth/logout');
+  requests[4].resolve({}); await tick();
+  assert.equal(requests[5].url,'/api/auth/session');
+  requests[5].resolve({enabled:true,user:null,csrf:''}); await tick();
+  assert.equal(context.state.auth.user,null);
+  assert.equal(context.state.board,null);
+  assert.equal(JSON.parse(storage.get('draft.1.7.31')).data.title,'Account A unsaved secret');
+  node('auth-username').value='bob';node('auth-password').value='Disposable-test-password!';
+  const login = authHandlers.get('auth-form:submit')({preventDefault(){}});
+  assert.equal(requests[6].url,'/api/auth/login');
+  requests[6].resolve(session(2)); await login;
+  assert.equal(context.state.auth.user.id,2);
+  requests[0].resolve({id:7,name:'PRIVATE_ACCOUNT_A',columns:[{id:9,cards:[{title:'Secret'}]}]});
+  requests[1].resolve({boards:[{id:7,name:'PRIVATE_ACCOUNT_A'}]});
+  requests[2].resolve({error:'PRIVATE_ACCOUNT_A_ERROR'},401);
+  requests[3].reject(new TypeError('Lost response'));
+  await Promise.all([oldBoard,oldStats]);
+  assert.equal((await oldBoards).staleSession,true);assert.equal((await oldPost).staleSession,true);
+  assert.equal(requests.length,7,'An obsolete POST must not retry with the new session cookie');
+  assert.equal(context.state.board,null);assert.equal(context.state.boards.length,0);
+  assert(!renders.some(render=>render.owner===2 && render.name==='PRIVATE_ACCOUNT_A'));
+  assert(!errors.some(message=>message.includes('PRIVATE_ACCOUNT_A')));
+  assert.equal(authPrompts,1,'An obsolete 401 must not reopen the sign-in dialog for account B');
+  assert(!Array.from(storage.keys()).some(key=>key.startsWith('draft.2.')));
+  assert(storage.has('draft.1.7.31'),'The original account recovery draft must remain available');
+
+  // Renewing the same account's session also rejects late success and errors.
+  const lateError = call('selectBoard(7,{quiet:true,navigate:false})');
+  call("setSession({enabled:true,user:{id:2,role:'admin'},csrf:'renewed'},{renewed:true})");
+  requests[7].reject(new Error('STALE_SESSION_ERROR')); await lateError;
+  assert(!errors.some(message=>message.includes('STALE_SESSION_ERROR')));
+  const lateSuccess = call('selectBoard(7,{quiet:true,navigate:false})');
+  // The owner check remains protective even if a future caller forgets to
+  // invalidate the generation before replacing an account object.
+  context.state.auth=session(3);
+  requests[8].resolve({id:7,name:'OLD_OWNER_DATA',columns:[]}); await lateSuccess;
+  assert.equal(context.state.board,null);
+  assert(!renders.some(render=>render.name==='OLD_OWNER_DATA'));
+  console.log('Frontend session isolation: real logout/login handlers, late success/errors, POST retries and owner-scoped drafts verified.');
 })().catch((error) => { console.error(error); process.exitCode=1; });

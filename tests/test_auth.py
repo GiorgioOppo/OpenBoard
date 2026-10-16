@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Account/session and authorization integration tests using disposable databases."""
+import concurrent.futures
+from contextlib import closing
 import http.client
 import json
 import os
@@ -8,6 +10,7 @@ import socket
 import sqlite3
 import subprocess
 import tempfile
+import threading
 import time
 import unittest
 
@@ -126,8 +129,90 @@ class OpenBoardAuth(unittest.TestCase):
         return result
 
     def sql(self, query, parameters=()):
-        with sqlite3.connect(self.db) as connection:
+        with closing(sqlite3.connect(self.db)) as connection, connection:
             return connection.execute(query, parameters).fetchall()
+
+    def revoke_while_write_waits(self, method, path, payload, actor, revocation):
+        """Revoke after session SELECT, while its timestamp UPDATE waits for a writer."""
+        sent = threading.Event()
+        headers = {"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{self.port}",
+                   "Cookie": self.sessions[actor]["cookie"], "X-CSRF-Token": self.sessions[actor]["csrf"]}
+        def request():
+            connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=6)
+            try:
+                connection.request(method, path, json.dumps(payload).encode(), headers)
+                sent.set()
+                response = connection.getresponse()
+                return response.status, json.loads(response.read())
+            finally:
+                connection.close()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            with closing(sqlite3.connect(self.db, timeout=5, isolation_level=None)) as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                pending = pool.submit(request)
+                try:
+                    self.assertTrue(sent.wait(timeout=2))
+                    time.sleep(.2)
+                    self.assertFalse(pending.done(), "Protected mutation should wait for the held writer lock")
+                    user_id = self.sessions[actor]["id"]
+                    if revocation == "demote":
+                        connection.execute("UPDATE users SET role='member' WHERE id=?", (user_id,))
+                    else:
+                        if revocation == "deactivate":
+                            connection.execute("UPDATE users SET active=0 WHERE id=?", (user_id,))
+                        connection.execute("DELETE FROM sessions WHERE user_id=?", (user_id,))
+                    connection.execute("COMMIT")
+                finally:
+                    if connection.in_transaction:
+                        connection.execute("ROLLBACK")
+            return pending.result(timeout=6)
+
+    def test_revoked_admin_cannot_create_users_after_waiting_for_a_writer(self):
+        self.add_user("revoked-admin", "admin")
+        self.login("revoked-admin")
+        status, result = self.revoke_while_write_waits("POST", "/api/users", {
+            "name": "Forbidden administrator", "username": "forbidden-admin",
+            "password": PASSWORD, "role": "admin",
+        }, "revoked-admin", "deactivate")
+        self.assertEqual(status, 401, result)
+        self.assertEqual(self.sql("SELECT id FROM users WHERE username='forbidden-admin'"), [])
+
+    def test_demoted_admin_cannot_update_accounts_after_authentication(self):
+        self.add_user("demoted-admin", "admin")
+        self.login("demoted-admin")
+        original = self.sql("SELECT name FROM users WHERE id=1")
+        status, result = self.revoke_while_write_waits("PATCH", "/api/users/1", {
+            "name": "Forbidden change",
+        }, "demoted-admin", "demote")
+        self.assertEqual(status, 403, result)
+        self.assertEqual(self.sql("SELECT name FROM users WHERE id=1"), original)
+
+    def test_revoked_session_cannot_change_password_after_authentication(self):
+        user_id = self.add_user("revoked-session")
+        self.login("revoked-session")
+        original = self.sql("SELECT password_hash,salt FROM users WHERE id=?", (user_id,))
+        status, result = self.revoke_while_write_waits("POST", "/api/auth/password", {
+            "current_password": PASSWORD, "password": "replacement-password-123",
+        }, "revoked-session", "session")
+        self.assertEqual(status, 401, result)
+        self.assertEqual(self.sql("SELECT password_hash,salt FROM users WHERE id=?", (user_id,)), original)
+
+    def test_demoted_admin_cannot_mutate_memberships_or_stars_after_authentication(self):
+        user_id = self.add_user("board-admin", "admin")
+        for method, path, payload, expected in (
+            ("POST", "/api/boards/1/members", {"user_id": 1, "role": "observer"}, 403),
+            ("DELETE", "/api/boards/1/members/1", {}, 403),
+            ("PATCH", "/api/boards/1/star", {"starred": True}, 404),
+        ):
+            with self.subTest(method=method, path=path):
+                self.sql("UPDATE users SET role='admin' WHERE id=?", (user_id,))
+                self.login("board-admin")
+                members = self.sql("SELECT * FROM board_members ORDER BY board_id,user_id")
+                stars = self.sql("SELECT * FROM user_stars ORDER BY board_id,user_id")
+                status, result = self.revoke_while_write_waits(method, path, payload, "board-admin", "demote")
+                self.assertEqual(status, expected, result)
+                self.assertEqual(self.sql("SELECT * FROM board_members ORDER BY board_id,user_id"), members)
+                self.assertEqual(self.sql("SELECT * FROM user_stars ORDER BY board_id,user_id"), stars)
 
     def test_setup_session_and_hashed_storage(self):
         self.api("POST", "/api/auth/setup", {}, actor=None, expected=409)

@@ -221,6 +221,22 @@ bool auth_authorize(Request *r, Response *response) {
     return true;
 }
 bool auth_is_admin(const Request *r) { return !ob_config.auth_enabled || !strcmp(r->role, "admin"); }
+/* Recheck the live session and role while holding the same writer transaction
+ * as the protected mutation. A preceding password hash or lock wait can outlive
+ * an administrator's session revocation, deactivation or role change. */
+static bool reauthorize_transaction(AuthTransaction t, Request *r, Response *response,
+                                    bool admin) {
+    if (!auth_authorize(r, response)) {
+        transaction_end(t, false);
+        return false;
+    }
+    if (admin && !auth_is_admin(r)) {
+        *response = auth_error(403, "È richiesto il ruolo amministratore.");
+        transaction_end(t, false);
+        return false;
+    }
+    return true;
+}
 bool auth_board_allowed(const Request *r, int64_t board_id, bool write) {
     if (!ob_config.auth_enabled) return true;
     if (!r->user_id) return false;
@@ -368,6 +384,11 @@ static Response change_password(Request *r) {
     char salt[33], hash[65], token[65], session_hash[65];
     ok = random_hex(salt, 16) && password_hash(password, salt, hash) && session_cookie(r, token) && token_digest(token, session_hash);
     secret_free(password); OPENSSL_cleanse(token, sizeof token); AuthTransaction t = transaction_begin(); ok = ok && t.begun;
+    Response denied;
+    if (t.begun && !reauthorize_transaction(t, r, &denied, false)) {
+        OPENSSL_cleanse(hash, sizeof hash); OPENSSL_cleanse(salt, sizeof salt); OPENSSL_cleanse(verified_hash, sizeof verified_hash);
+        return denied;
+    }
     if (ok) {
         s = prepare("UPDATE users SET password_hash=?2,salt=?3 WHERE id=?1 AND active=1 AND password_hash=?4");
         sqlite3_bind_int64(s, 1, r->user_id); bind_text(s, 2, hash); bind_text(s, 3, salt); bind_text(s, 4, verified_hash);
@@ -393,6 +414,11 @@ static Response create_user(Request *r) {
     if (!valid) { ob_free(name); ob_free(username); secret_free(password); ob_free(role); return auth_error(400, "Dati utente non validi. Password: 12–256 byte; username: 3–64 caratteri a-z, 0-9, . _ -."); }
     char salt[33], hash[65]; bool ok = random_hex(salt, 16) && password_hash(password, salt, hash); secret_free(password);
     AuthTransaction t = transaction_begin(); ok = ok && t.begun; int code = SQLITE_ERROR; int64_t id = 0;
+    Response denied;
+    if (t.begun && !reauthorize_transaction(t, r, &denied, true)) {
+        ob_free(name); ob_free(username); ob_free(role); OPENSSL_cleanse(hash, sizeof hash); OPENSSL_cleanse(salt, sizeof salt);
+        return denied;
+    }
     if (ok) {
         sqlite3_stmt *s = prepare("INSERT INTO users(name,username,password_hash,salt,role) VALUES(?1,?2,?3,?4,?5)");
         bind_text(s, 1, name); bind_text(s, 2, username); bind_text(s, 3, hash); bind_text(s, 4, salt); bind_text(s, 5, role ? role : "member");
@@ -409,6 +435,8 @@ static Response update_user(Request *r, int64_t id) {
     bool valid = nf >= 0 && rf >= 0 && af >= 0 && (nf || rf || af) && (!nf || has_text(name)) && (!rf || role_valid(role));
     if (!valid) { ob_free(name); ob_free(role); return auth_error(400, "Indica nome, ruolo o stato attivo validi."); }
     AuthTransaction t = transaction_begin(); if (!t.begun) { ob_free(name); ob_free(role); return auth_error(503, "Utente non aggiornato. Riprova."); }
+    Response denied;
+    if (!reauthorize_transaction(t, r, &denied, true)) { ob_free(name); ob_free(role); return denied; }
     sqlite3_stmt *s = prepare("SELECT role,active,(SELECT count(*) FROM users WHERE role='admin' AND active=1) FROM users WHERE id=?1");
     sqlite3_bind_int64(s, 1, id); bool found = sqlite3_step(s) == SQLITE_ROW;
     bool protected_admin = found && !strcmp((const char *)sqlite3_column_text(s, 0), "admin") && sqlite3_column_int(s, 1) == 1 &&
@@ -447,6 +475,8 @@ static Response save_member(Request *r, int64_t board_id) {
         json_string(r->body, "role", &role, 16) == 1 && role_valid(role);
     if (!valid) { ob_free(role); return auth_error(400, "Indica utente e ruolo admin, member oppure observer."); }
     AuthTransaction t = transaction_begin(); if (!t.begun) { ob_free(role); return auth_error(503, "Membro non aggiornato. Riprova."); }
+    Response denied;
+    if (!reauthorize_transaction(t, r, &denied, false)) { ob_free(role); return denied; }
     if (!board_exists(board_id) || !board_admin(r, board_id)) {
         transaction_end(t, false); ob_free(role); return auth_error(403, "Non puoi modificare i membri di questa bacheca.");
     }
@@ -462,6 +492,8 @@ static Response save_member(Request *r, int64_t board_id) {
 }
 static Response delete_member(Request *r, int64_t board_id, int64_t user_id) {
     AuthTransaction t = transaction_begin(); if (!t.begun) return auth_error(503, "Membro non rimosso. Riprova.");
+    Response denied;
+    if (!reauthorize_transaction(t, r, &denied, false)) return denied;
     if (!board_exists(board_id) || !board_admin(r, board_id)) {
         transaction_end(t, false); return auth_error(403, "Non puoi modificare i membri di questa bacheca.");
     }
@@ -520,7 +552,19 @@ bool auth_handle(Request *r, Response *response) {
         int64_t starred = 0;
         if (strcmp(r->method, "PATCH")) *response = auth_error(405, "Usa PATCH per modificare i preferiti.");
         else if (json_integer(r->body, "starred", &starred, 0, 1, true) != 1) *response = auth_error(400, "Il campo starred deve essere booleano.");
-        else *response = auth_set_star(r, board_id, starred != 0) ? success(200, board_id) : auth_error(503, "Preferito non aggiornato. Riprova.");
+        else {
+            AuthTransaction t = transaction_begin();
+            if (!t.begun) *response = auth_error(503, "Preferito non aggiornato. Riprova.");
+            else if (!reauthorize_transaction(t, r, response, false)) return true;
+            else if (!auth_board_allowed(r, board_id, false) || !board_exists(board_id)) {
+                transaction_end(t, false);
+                *response = auth_error(404, "Bacheca non trovata.");
+            } else {
+                bool ok = auth_set_star(r, board_id, starred != 0);
+                ok = transaction_end(t, ok);
+                *response = ok ? success(200, board_id) : auth_error(503, "Preferito non aggiornato. Riprova.");
+            }
+        }
         return true;
     }
     if (!strcmp(suffix, "/members") && !strcmp(r->method, "GET")) { *response = list_members(board_id); return true; }

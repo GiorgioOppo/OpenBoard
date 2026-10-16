@@ -40,6 +40,9 @@ build/openboard-sanitize: $(SOURCES) $(HEADERS) Makefile build/.config
 test-sanitize: build/openboard-sanitize
 	OPENBOARD_BINARY="$(CURDIR)/build/openboard-sanitize" UBSAN_OPTIONS=halt_on_error=1 python3 -m unittest discover -s tests -p 'test_*.py' -v
 test-frontend:
+	python3 scripts/build-locales.py --check
+	$(NODE) tests/test_i18n.js
+	$(NODE) tests/test_i18n_sources.js
 	$(NODE) tests/test_frontend.js
 	$(NODE) tests/test_enterprise.js
 	$(NODE) tests/test_workflows.js

@@ -1,0 +1,1938 @@
+{
+  "date": "2026-10-16",
+  "baseline_commit": "28626d2",
+  "includes_uncommitted_i18n_and_audit_changes": true,
+  "scanner": "Docker Scout 1.25.0",
+  "scope": "Local Linux ARM64 images; counts are package/advisory findings, not confirmed exploits.",
+  "secret_scan": {
+    "scanner": "Gitleaks 8.30.1",
+    "commits_scanned": 8,
+    "confirmed_live_secrets": 0,
+    "triaged_findings": "One historical and one corresponding working-file finding: the documented example Idempotency-Key."
+  },
+  "images": [
+    {
+      "image": "openboard:0.6.0",
+      "id": "sha256:e85056bb8756570905b2a09c982bb2708584fc8ae547ef886e09098b7a5782e8",
+      "platform": "linux/arm64",
+      "package_findings": 52,
+      "unique_advisory_ids": 52,
+      "severity_counts": {
+        "LOW": 50,
+        "MEDIUM": 1,
+        "HIGH": 1
+      },
+      "high_and_critical": [
+        {
+          "advisory": "CVE-2026-85091",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/zlib@1%3A1.3.dfsg%2Breally1.3.1-1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-85091?s=debian&n=zlib&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/zlib1g/copyright",
+            "/var/lib/dpkg/info/zlib1g:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/lib/aarch64-linux-gnu/libz.so.1.3.1"
+          ]
+        }
+      ]
+    },
+    {
+      "image": "openboard-frontend:0.6.0",
+      "id": "sha256:8a25563f52b79eb99314253ec92ecb3c1ab1d1ca704eeab1e9c761017fec931f",
+      "platform": "linux/arm64",
+      "package_findings": 0,
+      "unique_advisory_ids": 0,
+      "severity_counts": {},
+      "high_and_critical": []
+    },
+    {
+      "image": "jc21/nginx-proxy-manager:2.16.0",
+      "id": "sha256:4393e642e233e5efd5adeb7f10918d4aaea71c9ed875b94190273fc8e87f9594",
+      "platform": "linux/arm64",
+      "package_findings": 254,
+      "unique_advisory_ids": 247,
+      "severity_counts": {
+        "LOW": 172,
+        "MEDIUM": 30,
+        "HIGH": 45,
+        "CRITICAL": 7
+      },
+      "high_and_critical": [
+        {
+          "advisory": "CVE-2026-73637",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-73637?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-102276",
+          "severity": "HIGH",
+          "package": "pkg:npm/brace-expansion@5.0.9",
+          "fixed_version": "5.0.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-102276?s=github&n=brace-expansion&t=npm&vr=%3E%3D2.0.0%2C%3C2.1.5",
+          "locations": [
+            "/app/node_modules/brace-expansion/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-102276",
+          "severity": "HIGH",
+          "package": "pkg:npm/brace-expansion@2.0.2",
+          "fixed_version": "5.0.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-102276?s=github&n=brace-expansion&t=npm&vr=%3E%3D2.0.0%2C%3C2.1.5",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-102278",
+          "severity": "HIGH",
+          "package": "pkg:npm/brace-expansion@5.0.9",
+          "fixed_version": "5.0.11",
+          "reference": "https://scout.docker.com/v/CVE-2026-102278?s=github&n=brace-expansion&t=npm&vr=%3E%3D2.0.0%2C%3C2.1.6",
+          "locations": [
+            "/app/node_modules/brace-expansion/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-102278",
+          "severity": "HIGH",
+          "package": "pkg:npm/brace-expansion@2.0.2",
+          "fixed_version": "5.0.11",
+          "reference": "https://scout.docker.com/v/CVE-2026-102278?s=github&n=brace-expansion&t=npm&vr=%3E%3D2.0.0%2C%3C2.1.6",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-14257",
+          "severity": "HIGH",
+          "package": "pkg:npm/brace-expansion@2.0.2",
+          "fixed_version": "5.0.8",
+          "reference": "https://scout.docker.com/v/CVE-2026-14257?s=github&n=brace-expansion&t=npm&vr=%3E%3D2.0.0%2C%3C2.1.3",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-19534",
+          "severity": "HIGH",
+          "package": "pkg:npm/undici@6.28.0",
+          "fixed_version": "6.28.1",
+          "reference": "https://scout.docker.com/v/CVE-2026-19534?s=github&n=undici&t=npm&vr=%3E%3D6.7.0%2C%3C6.28.1",
+          "locations": [
+            "/app/node_modules/node-gyp/node_modules/undici/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-33671",
+          "severity": "HIGH",
+          "package": "pkg:npm/picomatch@4.0.3",
+          "fixed_version": "4.0.4",
+          "reference": "https://scout.docker.com/v/CVE-2026-33671?s=github&n=picomatch&t=npm&vr=%3E%3D4.0.0%2C%3C4.0.4",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/picomatch/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-46729",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-46729?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-47360",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-47360?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-48005",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-48005?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-48815",
+          "severity": "HIGH",
+          "package": "pkg:npm/sigstore@3.1.0",
+          "fixed_version": "4.1.1",
+          "reference": "https://scout.docker.com/v/CVE-2026-48815?s=github&n=sigstore&t=npm&vr=%3C%3D4.1.0",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/sigstore/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56153",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-56153?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56449",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-56449?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-57585",
+          "severity": "HIGH",
+          "package": "pkg:pypi/msgpack@1.1.2",
+          "fixed_version": "1.2.1",
+          "reference": "https://scout.docker.com/v/CVE-2026-57585?s=pypa&n=msgpack&t=pypi&vr=%3C1.2.1",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/pip/_vendor/bom.cdx.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63045",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63045?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63292",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63292?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63686",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63686?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-63718",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-63718?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-69152",
+          "severity": "HIGH",
+          "package": "pkg:npm/brace-expansion@2.0.2",
+          "fixed_version": "2.1.4",
+          "reference": "https://scout.docker.com/v/CVE-2026-69152?s=github&n=brace-expansion&t=npm&vr=%3E%3D2.0.0%2C%3C2.1.4",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-73566",
+          "severity": "HIGH",
+          "package": "pkg:npm/tar@7.5.11",
+          "fixed_version": "7.5.21",
+          "reference": "https://scout.docker.com/v/CVE-2026-73566?s=github&n=tar&t=npm&vr=%3C%3D7.5.20",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/tar/package.json"
+          ]
+        },
+        {
+          "advisory": "GHSA-537c-gmf6-5ccf",
+          "severity": "HIGH",
+          "package": "pkg:pypi/cryptography@48.0.0",
+          "fixed_version": "48.0.1",
+          "reference": "https://scout.docker.com/v/GHSA-537c-gmf6-5ccf?s=github&n=cryptography&t=pypi&vr=%3E%3D0.5.0%2C%3C48.0.1",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/cryptography-48.0.0.dist-info/METADATA",
+            "/opt/certbot/lib/python3.13/site-packages/cryptography-48.0.0.dist-info/RECORD"
+          ]
+        },
+        {
+          "advisory": "GHSA-6v7p-g79w-8964",
+          "severity": "HIGH",
+          "package": "pkg:pypi/msgpack@1.1.2",
+          "fixed_version": "1.2.1",
+          "reference": "https://scout.docker.com/v/GHSA-6v7p-g79w-8964?s=github&n=msgpack&t=pypi&vr=%3C%3D1.2.0",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/pip/_vendor/bom.cdx.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-103111",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/pcre2@10.46-1~deb13u2?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "10.46-1~deb13u3",
+          "reference": "https://scout.docker.com/v/CVE-2026-103111?s=debian&n=pcre2&ns=debian&t=deb&osn=debian&osv=13&vr=%3C10.46-1%7Edeb13u3",
+          "locations": [
+            "/usr/share/doc/libpcre2-8-0/copyright",
+            "/var/lib/dpkg/info/libpcre2-8-0:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/lib/aarch64-linux-gnu/libpcre2-8.so.0.14.0"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97687",
+          "severity": "HIGH",
+          "package": "pkg:pypi/urllib3@2.7.0",
+          "fixed_version": "2.8.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-97687?s=github&n=urllib3&t=pypi&vr=%3E%3D1.26.0%2C%3C2.8.0",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/pip/_vendor/bom.cdx.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-47273",
+          "severity": "HIGH",
+          "package": "pkg:pypi/setuptools@70.3.0",
+          "fixed_version": "78.1.1",
+          "reference": "https://scout.docker.com/v/CVE-2025-47273?s=github&n=setuptools&t=pypi&vr=%3C78.1.1",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/pip/_vendor/bom.cdx.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-13149",
+          "severity": "HIGH",
+          "package": "pkg:npm/brace-expansion@2.0.2",
+          "fixed_version": "2.1.2",
+          "reference": "https://scout.docker.com/v/CVE-2026-13149?s=github&n=brace-expansion&t=npm&vr=%3E%3D2.0.0%2C%3C2.1.2",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-69192",
+          "severity": "HIGH",
+          "package": "pkg:npm/ip-address@10.1.0",
+          "fixed_version": "10.3.1",
+          "reference": "https://scout.docker.com/v/CVE-2026-69192?s=github&n=ip-address&t=npm&vr=%3C%3D10.3.0",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/ip-address/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-9496",
+          "severity": "HIGH",
+          "package": "pkg:npm/pacote@19.0.2",
+          "fixed_version": "21.5.1",
+          "reference": "https://scout.docker.com/v/CVE-2026-9496?s=github&n=pacote&t=npm&vr=%3E%3D11.2.7%2C%3C21.5.1",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/pacote/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-9496",
+          "severity": "HIGH",
+          "package": "pkg:npm/pacote@20.0.1",
+          "fixed_version": "21.5.1",
+          "reference": "https://scout.docker.com/v/CVE-2026-9496?s=github&n=pacote&t=npm&vr=%3E%3D11.2.7%2C%3C21.5.1",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/@npmcli/metavuln-calculator/node_modules/pacote/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-73636",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-73636?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-8286",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/curl@8.14.1-2%2Bdeb13u5?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "8.14.1-2+deb13u7",
+          "reference": "https://scout.docker.com/v/CVE-2026-8286?s=debian&n=curl&ns=debian&t=deb&osn=debian&osv=13&vr=%3C8.14.1-2%2Bdeb13u7",
+          "locations": [
+            "/usr/share/doc/curl/copyright",
+            "/usr/share/doc/libcurl3t64-gnutls/copyright",
+            "/usr/share/doc/libcurl4t64/copyright",
+            "/var/lib/dpkg/info/curl.list",
+            "/var/lib/dpkg/info/curl.md5sums",
+            "/var/lib/dpkg/info/libcurl3t64-gnutls:arm64.md5sums",
+            "/var/lib/dpkg/info/libcurl4t64:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/curl",
+            "/usr/bin/wcurl",
+            "/usr/lib/aarch64-linux-gnu/libcurl-gnutls.so.4.8.0",
+            "/usr/lib/aarch64-linux-gnu/libcurl.so.4.8.0",
+            "/usr/share/fish/vendor_completions.d/curl.fish",
+            "/usr/share/zsh/vendor-completions/_curl"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-102633",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/expat@2.8.3-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "2.9.0-1~deb13u1",
+          "reference": "https://scout.docker.com/v/CVE-2026-102633?s=debian&n=expat&ns=debian&t=deb&osn=debian&osv=13&vr=%3C2.9.0-1%7Edeb13u1",
+          "locations": [
+            "/usr/share/doc/libexpat1/copyright",
+            "/var/lib/dpkg/info/libexpat1:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/lib/aarch64-linux-gnu/libexpat.so.1.12.3",
+            "/usr/lib/aarch64-linux-gnu/libexpatw.so.1.12.3"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-102990",
+          "severity": "HIGH",
+          "package": "pkg:npm/basic-ftp@5.3.1",
+          "fixed_version": "6.2.1",
+          "reference": "https://scout.docker.com/v/CVE-2026-102990?s=github&n=basic-ftp&t=npm&vr=%3C%3D6.2.0",
+          "locations": [
+            "/app/node_modules/basic-ftp/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-69247",
+          "severity": "HIGH",
+          "package": "pkg:pypi/cryptography@48.0.0",
+          "fixed_version": "50.0.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-69247?s=github&n=cryptography&t=pypi&vr=%3E%3D44.0.0%2C%3C50.0.0",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/cryptography-48.0.0.dist-info/METADATA",
+            "/opt/certbot/lib/python3.13/site-packages/cryptography-48.0.0.dist-info/RECORD"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-84782",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/openssl@3.5.7-1~deb13u2?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "3.5.7-1~deb13u3",
+          "reference": "https://scout.docker.com/v/CVE-2026-84782?s=debian&n=openssl&ns=debian&t=deb&osn=debian&osv=13&vr=%3C3.5.7-1%7Edeb13u3",
+          "locations": [
+            "/usr/share/doc/libssl3t64/copyright",
+            "/usr/share/doc/openssl-provider-legacy/copyright",
+            "/usr/share/doc/openssl/copyright",
+            "/var/lib/dpkg/info/libssl3t64:arm64.md5sums",
+            "/var/lib/dpkg/info/openssl-provider-legacy.list",
+            "/var/lib/dpkg/info/openssl-provider-legacy.md5sums",
+            "/var/lib/dpkg/info/openssl.conffiles",
+            "/var/lib/dpkg/info/openssl.list",
+            "/var/lib/dpkg/info/openssl.md5sums",
+            "/var/lib/dpkg/info/openssl.postinst",
+            "/var/lib/dpkg/status",
+            "/etc/ssl/openssl.cnf",
+            "/usr/bin/c_rehash",
+            "/usr/bin/openssl",
+            "/usr/lib/aarch64-linux-gnu/engines-3/afalg.so",
+            "/usr/lib/aarch64-linux-gnu/engines-3/loader_attic.so",
+            "/usr/lib/aarch64-linux-gnu/libcrypto.so.3",
+            "/usr/lib/aarch64-linux-gnu/libssl.so.3",
+            "/usr/lib/aarch64-linux-gnu/ossl-modules/legacy.so",
+            "/usr/lib/ssl/misc/CA.pl",
+            "/usr/lib/ssl/misc/tsget.pl"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-77214",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/expat@2.8.3-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "2.9.0-1~deb13u1",
+          "reference": "https://scout.docker.com/v/CVE-2026-77214?s=debian&n=expat&ns=debian&t=deb&osn=debian&osv=13&vr=%3C2.9.0-1%7Edeb13u1",
+          "locations": [
+            "/usr/share/doc/libexpat1/copyright",
+            "/var/lib/dpkg/info/libexpat1:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/lib/aarch64-linux-gnu/libexpat.so.1.12.3",
+            "/usr/lib/aarch64-linux-gnu/libexpatw.so.1.12.3"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-85091",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/zlib@1%3A1.3.dfsg%2Breally1.3.1-1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-85091?s=debian&n=zlib&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/zlib1g/copyright",
+            "/var/lib/dpkg/info/zlib1g:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/lib/aarch64-linux-gnu/libz.so.1.3.1"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-59874",
+          "severity": "HIGH",
+          "package": "pkg:npm/tar@7.5.11",
+          "fixed_version": "7.5.18",
+          "reference": "https://scout.docker.com/v/CVE-2026-59874?s=github&n=tar&t=npm&vr=%3C%3D7.5.17",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/tar/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-66046",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/expat@2.8.3-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "2.9.0-1~deb13u1",
+          "reference": "https://scout.docker.com/v/CVE-2026-66046?s=debian&n=expat&ns=debian&t=deb&osn=debian&osv=13&vr=%3C2.9.0-1%7Edeb13u1",
+          "locations": [
+            "/usr/share/doc/libexpat1/copyright",
+            "/var/lib/dpkg/info/libexpat1:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/lib/aarch64-linux-gnu/libexpat.so.1.12.3",
+            "/usr/lib/aarch64-linux-gnu/libexpatw.so.1.12.3"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-69249",
+          "severity": "HIGH",
+          "package": "pkg:pypi/cryptography@48.0.0",
+          "fixed_version": "49.0.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-69249?s=github&n=cryptography&t=pypi&vr=%3E%3D42.0.0%2C%3C49.0.0",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/cryptography-48.0.0.dist-info/METADATA",
+            "/opt/certbot/lib/python3.13/site-packages/cryptography-48.0.0.dist-info/RECORD"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-93748",
+          "severity": "HIGH",
+          "package": "pkg:npm/http-cache-semantics@4.2.0",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-93748?s=github&n=http-cache-semantics&t=npm&vr=%3C%3D4.2.0",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/http-cache-semantics/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-93990",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/expat@2.8.3-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "2.9.0-1~deb13u1",
+          "reference": "https://scout.docker.com/v/CVE-2026-93990?s=debian&n=expat&ns=debian&t=deb&osn=debian&osv=13&vr=%3C2.9.0-1%7Edeb13u1",
+          "locations": [
+            "/usr/share/doc/libexpat1/copyright",
+            "/var/lib/dpkg/info/libexpat1:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/lib/aarch64-linux-gnu/libexpat.so.1.12.3",
+            "/usr/lib/aarch64-linux-gnu/libexpatw.so.1.12.3"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-93546",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-93546?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97689",
+          "severity": "HIGH",
+          "package": "pkg:pypi/urllib3@2.7.0",
+          "fixed_version": "2.8.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-97689?s=github&n=urllib3&t=pypi&vr=%3E%3D1.10.3%2C%3C2.8.0",
+          "locations": [
+            "/opt/certbot/lib/python3.13/site-packages/pip/_vendor/bom.cdx.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-8924",
+          "severity": "CRITICAL",
+          "package": "pkg:deb/debian/curl@8.14.1-2%2Bdeb13u5?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "8.14.1-2+deb13u7",
+          "reference": "https://scout.docker.com/v/CVE-2026-8924?s=debian&n=curl&ns=debian&t=deb&osn=debian&osv=13&vr=%3C8.14.1-2%2Bdeb13u7",
+          "locations": [
+            "/usr/share/doc/curl/copyright",
+            "/usr/share/doc/libcurl3t64-gnutls/copyright",
+            "/usr/share/doc/libcurl4t64/copyright",
+            "/var/lib/dpkg/info/curl.list",
+            "/var/lib/dpkg/info/curl.md5sums",
+            "/var/lib/dpkg/info/libcurl3t64-gnutls:arm64.md5sums",
+            "/var/lib/dpkg/info/libcurl4t64:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/curl",
+            "/usr/bin/wcurl",
+            "/usr/lib/aarch64-linux-gnu/libcurl-gnutls.so.4.8.0",
+            "/usr/lib/aarch64-linux-gnu/libcurl.so.4.8.0",
+            "/usr/share/fish/vendor_completions.d/curl.fish",
+            "/usr/share/zsh/vendor-completions/_curl"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-8927",
+          "severity": "CRITICAL",
+          "package": "pkg:deb/debian/curl@8.14.1-2%2Bdeb13u5?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "8.14.1-2+deb13u7",
+          "reference": "https://scout.docker.com/v/CVE-2026-8927?s=debian&n=curl&ns=debian&t=deb&osn=debian&osv=13&vr=%3C8.14.1-2%2Bdeb13u7",
+          "locations": [
+            "/usr/share/doc/curl/copyright",
+            "/usr/share/doc/libcurl3t64-gnutls/copyright",
+            "/usr/share/doc/libcurl4t64/copyright",
+            "/var/lib/dpkg/info/curl.list",
+            "/var/lib/dpkg/info/curl.md5sums",
+            "/var/lib/dpkg/info/libcurl3t64-gnutls:arm64.md5sums",
+            "/var/lib/dpkg/info/libcurl4t64:arm64.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/curl",
+            "/usr/bin/wcurl",
+            "/usr/lib/aarch64-linux-gnu/libcurl-gnutls.so.4.8.0",
+            "/usr/lib/aarch64-linux-gnu/libcurl.so.4.8.0",
+            "/usr/share/fish/vendor_completions.d/curl.fish",
+            "/usr/share/zsh/vendor-completions/_curl"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-90711",
+          "severity": "CRITICAL",
+          "package": "pkg:npm/proxy-addr@2.0.7",
+          "fixed_version": "2.0.8",
+          "reference": "https://scout.docker.com/v/CVE-2026-90711?s=github&n=proxy-addr&t=npm&vr=%3E%3D1.1.0%2C%3C2.0.8",
+          "locations": [
+            "/app/node_modules/proxy-addr/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-59873",
+          "severity": "CRITICAL",
+          "package": "pkg:npm/tar@7.5.11",
+          "fixed_version": "7.5.19",
+          "reference": "https://scout.docker.com/v/CVE-2026-59873?s=github&n=tar&t=npm&vr=%3C%3D7.5.18",
+          "locations": [
+            "/usr/lib/node_modules/npm/node_modules/tar/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56154",
+          "severity": "CRITICAL",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-56154?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-57941",
+          "severity": "CRITICAL",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-57941?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-59797",
+          "severity": "CRITICAL",
+          "package": "pkg:deb/debian/apache2@2.4.68-1~deb13u1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-59797?s=debian&n=apache2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "/usr/share/doc/apache2-utils/copyright",
+            "/var/lib/dpkg/info/apache2-utils.list",
+            "/var/lib/dpkg/info/apache2-utils.md5sums",
+            "/var/lib/dpkg/status",
+            "/usr/bin/ab",
+            "/usr/bin/checkgid",
+            "/usr/bin/fcgistarter",
+            "/usr/bin/htcacheclean",
+            "/usr/bin/htdbm",
+            "/usr/bin/htdigest",
+            "/usr/bin/htpasswd",
+            "/usr/bin/logresolve",
+            "/usr/bin/rotatelogs",
+            "/usr/sbin/check_forensic",
+            "/usr/sbin/httxt2dbm",
+            "/usr/sbin/split-logfile"
+          ]
+        }
+      ]
+    },
+    {
+      "image": "postgres:17-trixie",
+      "id": "sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3",
+      "platform": "linux/arm64",
+      "package_findings": 122,
+      "unique_advisory_ids": 122,
+      "severity_counts": {
+        "LOW": 55,
+        "MEDIUM": 30,
+        "HIGH": 33,
+        "CRITICAL": 4
+      },
+      "high_and_critical": [
+        {
+          "advisory": "CVE-2025-58187",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.9",
+          "reference": "https://scout.docker.com/v/CVE-2025-58187?s=golang&n=stdlib&t=golang&vr=%3C1.24.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-58188",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.8",
+          "reference": "https://scout.docker.com/v/CVE-2025-58188?s=golang&n=stdlib&t=golang&vr=%3C1.24.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61723",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.8",
+          "reference": "https://scout.docker.com/v/CVE-2025-61723?s=golang&n=stdlib&t=golang&vr=%3C1.24.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61725",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.8",
+          "reference": "https://scout.docker.com/v/CVE-2025-61725?s=golang&n=stdlib&t=golang&vr=%3C1.24.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61726",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.12",
+          "reference": "https://scout.docker.com/v/CVE-2025-61726?s=golang&n=stdlib&t=golang&vr=%3C1.24.12",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61729",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.11",
+          "reference": "https://scout.docker.com/v/CVE-2025-61729?s=golang&n=stdlib&t=golang&vr=%3C1.24.11",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-25679",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.8",
+          "reference": "https://scout.docker.com/v/CVE-2026-25679?s=golang&n=stdlib&t=golang&vr=%3C1.25.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-32280",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-32280?s=golang&n=stdlib&t=golang&vr=%3C1.25.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-32281",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-32281?s=golang&n=stdlib&t=golang&vr=%3C1.25.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-32283",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-32283?s=golang&n=stdlib&t=golang&vr=%3C1.25.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-33811",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-33811?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-33814",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-33814?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-33818",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-33818?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39820",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-39820?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39836",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-39836?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-42499",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-42499?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-42504",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.11",
+          "reference": "https://scout.docker.com/v/CVE-2026-42504?s=golang&n=stdlib&t=golang&vr=%3C1.25.11",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56853",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-56853?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56859",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-56859?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56862",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-56862?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56866",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-56866?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78659",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78659?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78660",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78660?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78667",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78667?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78669",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78669?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-94439",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-94439?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-94440",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-94440?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97031",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-97031?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97032",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-97032?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39822",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.12",
+          "reference": "https://scout.docker.com/v/CVE-2026-39822?s=golang&n=stdlib&t=golang&vr=%3C1.25.12",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-86140",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/libxml2@2.12.7%2Bdfsg%2Breally2.9.14-2.1%2Bdeb13u3?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-86140?s=debian&n=libxml2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "17/trixie/Dockerfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-85091",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/zlib@1%3A1.3.dfsg%2Breally1.3.1-1?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-85091?s=debian&n=zlib&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "17/trixie/Dockerfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-74860",
+          "severity": "HIGH",
+          "package": "pkg:deb/debian/libxml2@2.12.7%2Bdfsg%2Breally2.9.14-2.1%2Bdeb13u3?os_distro=trixie&os_name=debian&os_version=13",
+          "fixed_version": "not fixed",
+          "reference": "https://scout.docker.com/v/CVE-2026-74860?s=debian&n=libxml2&ns=debian&t=deb&osn=debian&osv=13&vr=%3E0",
+          "locations": [
+            "17/trixie/Dockerfile"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78663",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78663?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39821",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-39821?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56857",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-56857?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-68121",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.13",
+          "reference": "https://scout.docker.com/v/CVE-2025-68121?s=golang&n=stdlib&t=golang&vr=%3C1.24.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        }
+      ]
+    },
+    {
+      "image": "mongo:8.0-noble",
+      "id": "sha256:0dc2511c4261bffa84f5af2c7df2aae148c0bea68d9b0aacd85c3d7be07e0583",
+      "platform": "linux/arm64",
+      "package_findings": 121,
+      "unique_advisory_ids": 103,
+      "severity_counts": {
+        "UNSPECIFIED": 1,
+        "LOW": 13,
+        "MEDIUM": 54,
+        "HIGH": 46,
+        "CRITICAL": 7
+      },
+      "high_and_critical": [
+        {
+          "advisory": "CVE-2025-58187",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.9",
+          "reference": "https://scout.docker.com/v/CVE-2025-58187?s=golang&n=stdlib&t=golang&vr=%3C1.24.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-58188",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.8",
+          "reference": "https://scout.docker.com/v/CVE-2025-58188?s=golang&n=stdlib&t=golang&vr=%3C1.24.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61723",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.8",
+          "reference": "https://scout.docker.com/v/CVE-2025-61723?s=golang&n=stdlib&t=golang&vr=%3C1.24.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61725",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.8",
+          "reference": "https://scout.docker.com/v/CVE-2025-61725?s=golang&n=stdlib&t=golang&vr=%3C1.24.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61726",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.12",
+          "reference": "https://scout.docker.com/v/CVE-2025-61726?s=golang&n=stdlib&t=golang&vr=%3C1.24.12",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-61729",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.11",
+          "reference": "https://scout.docker.com/v/CVE-2025-61729?s=golang&n=stdlib&t=golang&vr=%3C1.24.11",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-25679",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.8",
+          "reference": "https://scout.docker.com/v/CVE-2026-25679?s=golang&n=stdlib&t=golang&vr=%3C1.25.8",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-32280",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-32280?s=golang&n=stdlib&t=golang&vr=%3C1.25.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-32281",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-32281?s=golang&n=stdlib&t=golang&vr=%3C1.25.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-32283",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-32283?s=golang&n=stdlib&t=golang&vr=%3C1.25.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-33811",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-33811?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-33814",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-33814?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-33818",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-33818?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39820",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-39820?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39836",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-39836?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-42499",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.10",
+          "reference": "https://scout.docker.com/v/CVE-2026-42499?s=golang&n=stdlib&t=golang&vr=%3C1.25.10",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-42504",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.11",
+          "reference": "https://scout.docker.com/v/CVE-2026-42504?s=golang&n=stdlib&t=golang&vr=%3C1.25.11",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56853",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-56853?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56859",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-56859?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56862",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-56862?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56866",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-56866?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56866",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-56866?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-59869",
+          "severity": "HIGH",
+          "package": "pkg:npm/js-yaml@3.13.1",
+          "fixed_version": "3.15.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-59869?s=github&n=js-yaml&t=npm&vr=%3E%3D3.0.0%2C%3C3.15.0",
+          "locations": [
+            "/opt/js-yaml/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78659",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78659?s=golang&n=net&ns=golang.org%2Fx&t=golang&vr=%3C0.60.0",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78659",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78659?s=golang&n=net&ns=golang.org%2Fx&t=golang&vr=%3C0.60.0",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78659",
+          "severity": "HIGH",
+          "package": "pkg:golang/golang.org/x/net@0.59.0",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78659?s=golang&n=net&ns=golang.org%2Fx&t=golang&vr=%3C0.60.0",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78660",
+          "severity": "HIGH",
+          "package": "pkg:golang/golang.org/x/net@0.59.0",
+          "fixed_version": "0.60.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-78660?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78660",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "0.60.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-78660?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78660",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "0.60.0",
+          "reference": "https://scout.docker.com/v/CVE-2026-78660?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78667",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78667?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78667",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78667?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78669",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78669?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78669",
+          "severity": "HIGH",
+          "package": "pkg:golang/golang.org/x/net@0.59.0",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78669?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78669",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78669?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-84375",
+          "severity": "HIGH",
+          "package": "pkg:npm/js-yaml@3.13.1",
+          "fixed_version": "3.15.2",
+          "reference": "https://scout.docker.com/v/CVE-2026-84375?s=github&n=js-yaml&t=npm&vr=%3E%3D3.0.0%2C%3C3.15.2",
+          "locations": [
+            "/opt/js-yaml/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-94439",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-94439?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-94439",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-94439?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-94440",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-94440?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-94440",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-94440?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97031",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-97031?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97031",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-97031?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97032",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-97032?s=golang&n=net&ns=golang.org%2Fx&t=golang&vr=%3C0.60.0",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97032",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-97032?s=golang&n=net&ns=golang.org%2Fx&t=golang&vr=%3C0.60.0",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-97032",
+          "severity": "HIGH",
+          "package": "pkg:golang/golang.org/x/net@0.59.0",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-97032?s=golang&n=net&ns=golang.org%2Fx&t=golang&vr=%3C0.60.0",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "GHSA-5p4m-2wfm-xmqj",
+          "severity": "HIGH",
+          "package": "pkg:npm/js-yaml@3.13.1",
+          "fixed_version": "3.15.1",
+          "reference": "https://scout.docker.com/v/GHSA-5p4m-2wfm-xmqj?s=github&n=js-yaml&t=npm&vr=%3E%3D3.0.0%2C%3C3.15.1",
+          "locations": [
+            "/opt/js-yaml/package.json"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39822",
+          "severity": "HIGH",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.12",
+          "reference": "https://scout.docker.com/v/CVE-2026-39822?s=golang&n=stdlib&t=golang&vr=%3C1.25.12",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78663",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78663?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78663",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/golang.org/x/net@0.59.0",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78663?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-78663",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-78663?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-39821",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.25.13",
+          "reference": "https://scout.docker.com/v/CVE-2026-39821?s=golang&n=stdlib&t=golang&vr=%3C1.25.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56857",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-56857?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        },
+        {
+          "advisory": "CVE-2026-56857",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.26.8",
+          "fixed_version": "1.26.9",
+          "reference": "https://scout.docker.com/v/CVE-2026-56857?s=golang&n=stdlib&t=golang&vr=%3C1.26.9",
+          "locations": [
+            "/usr/bin/bsondump",
+            "/usr/bin/mongodump",
+            "/usr/bin/mongoexport",
+            "/usr/bin/mongofiles",
+            "/usr/bin/mongoimport",
+            "/usr/bin/mongorestore",
+            "/usr/bin/mongostat",
+            "/usr/bin/mongotop"
+          ]
+        },
+        {
+          "advisory": "CVE-2025-68121",
+          "severity": "CRITICAL",
+          "package": "pkg:golang/stdlib@1.24.6",
+          "fixed_version": "1.24.13",
+          "reference": "https://scout.docker.com/v/CVE-2025-68121?s=golang&n=stdlib&t=golang&vr=%3C1.24.13",
+          "locations": [
+            "/usr/local/bin/gosu"
+          ]
+        }
+      ]
+    }
+  ]
+}

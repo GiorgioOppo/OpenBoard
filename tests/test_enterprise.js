@@ -46,7 +46,7 @@ function runtime() {
   context.showPanel = async(title,loader,kind) => {context.panel(title,'Loading',kind); const sequence=context.state.panelSequence; try { const body=await loader(); if (sequence===context.state.panelSequence) nodes.get('panel-body').innerHTML=body; } catch (error) { if(sequence===context.state.panelSequence) {context.lastError=error; nodes.get('panel-body').innerHTML=escapeHTML(error.message);} } };
   context.perform = async(action) => {try {return await action();} catch(error) {context.lastError=error; nodes.get('panel-error').textContent=error.message;} };
   context.committed = async(write,refresh) => {const result=await write(); if(refresh) await refresh(result); return result;};
-  vm.createContext(context); vm.runInContext(source+'\nthis.enterprise=OpenBoardEnterprise;',context);
+  vm.createContext(Object.assign(context,require('./i18n-runtime.cjs'))); vm.runInContext(source+'\nthis.enterprise=OpenBoardEnterprise;',context);
   async function emit(name,target) { for (const listener of listeners.get(name) || []) await listener({target,preventDefault(){}}); await tick(); }
   return {context,nodes,storage,requests,downloads,api:context.enterprise,emit,
     click:async(dataset,id='') => {const button={dataset,id,disabled:false,closest(){return this;}}; await emit('click',button);},

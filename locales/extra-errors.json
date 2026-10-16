@@ -1,0 +1,458 @@
+{
+  "Accedi per continuare.": [
+    "Sign in to continue.",
+    "Connectez-vous pour continuer.",
+    "Inicia sesión para continuar.",
+    "Melde dich an, um fortzufahren.",
+    "请登录后继续。",
+    "続行するにはログインしてください。"
+  ],
+  "Accesso temporaneamente non disponibile.": [
+    "Sign-in is temporarily unavailable.",
+    "La connexion est temporairement indisponible.",
+    "El inicio de sesión no está disponible temporalmente.",
+    "Die Anmeldung ist vorübergehend nicht verfügbar.",
+    "登录暂时不可用。",
+    "現在ログインできません。"
+  ],
+  "Archivio non disponibile.": [
+    "Archive unavailable.",
+    "Archives indisponibles.",
+    "Archivo no disponible.",
+    "Archiv nicht verfügbar.",
+    "归档不可用。",
+    "アーカイブを利用できません。"
+  ],
+  "Configurazione non riuscita. Riprova.": [
+    "Setup failed. Try again.",
+    "Échec de la configuration. Réessayez.",
+    "La configuración ha fallado. Inténtalo de nuevo.",
+    "Einrichtung fehlgeschlagen. Versuche es erneut.",
+    "设置失败。请重试。",
+    "設定に失敗しました。再試行してください。"
+  ],
+  "Database temporaneamente non disponibile.": [
+    "Database temporarily unavailable.",
+    "Base de données temporairement indisponible.",
+    "Base de datos no disponible temporalmente.",
+    "Datenbank vorübergehend nicht verfügbar.",
+    "数据库暂时不可用。",
+    "現在データベースを利用できません。"
+  ],
+  "Dati utente non validi. Password: 12–256 byte; username: 3–64 caratteri a-z, 0-9, . _ -.": [
+    "Invalid user details. Password: 12–256 bytes; username: 3–64 characters using a-z, 0-9, . _ -.",
+    "Données utilisateur invalides. Mot de passe : 12–256 octets ; username : 3–64 caractères parmi a-z, 0-9, . _ -.",
+    "Datos de usuario no válidos. Contraseña: 12–256 bytes; username: 3–64 caracteres de a-z, 0-9, . _ -.",
+    "Ungültige Benutzerdaten. Passwort: 12–256 Byte; username: 3–64 Zeichen aus a-z, 0-9, . _ -.",
+    "用户信息无效。密码：12–256 字节；username：3–64 个字符，可使用 a-z、0-9、. _ -。",
+    "ユーザー情報が無効です。パスワード：12–256 バイト、username：a-z、0-9、. _ - を使用した 3–64 文字。"
+  ],
+  "Deve rimanere almeno un amministratore attivo.": [
+    "At least one active administrator must remain.",
+    "Au moins un administrateur actif doit être conservé.",
+    "Debe quedar al menos un administrador activo.",
+    "Mindestens ein aktiver Administrator muss verbleiben.",
+    "必须保留至少一位已启用的管理员。",
+    "有効な管理者を少なくとも 1 人残す必要があります。"
+  ],
+  "Endpoint account non trovato.": [
+    "Account endpoint not found.",
+    "Point de terminaison du compte introuvable.",
+    "No se encontró el endpoint de cuenta.",
+    "Konto-Endpunkt nicht gefunden.",
+    "未找到账户端点。",
+    "アカウントのエンドポイントが見つかりません。"
+  ],
+  "Endpoint membri non trovato.": [
+    "Members endpoint not found.",
+    "Point de terminaison des membres introuvable.",
+    "No se encontró el endpoint de miembros.",
+    "Mitglieder-Endpunkt nicht gefunden.",
+    "未找到成员端点。",
+    "メンバーのエンドポイントが見つかりません。"
+  ],
+  "Endpoint utenti non trovato.": [
+    "Users endpoint not found.",
+    "Point de terminaison des utilisateurs introuvable.",
+    "No se encontró el endpoint de usuarios.",
+    "Benutzer-Endpunkt nicht gefunden.",
+    "未找到用户端点。",
+    "ユーザーのエンドポイントが見つかりません。"
+  ],
+  "Fornisci la password attuale e una nuova password di 12–256 byte.": [
+    "Provide your current password and a new password of 12–256 bytes.",
+    "Indiquez votre mot de passe actuel et un nouveau mot de passe de 12–256 octets.",
+    "Introduce la contraseña actual y una nueva de 12–256 bytes.",
+    "Gib dein aktuelles Passwort und ein neues Passwort mit 12–256 Byte an.",
+    "请提供当前密码及 12–256 字节的新密码。",
+    "現在のパスワードと 12–256 バイトの新しいパスワードを入力してください。"
+  ],
+  "Gli account richiedono l'avvio con --auth.": [
+    "Accounts require starting the server with --auth.",
+    "Les comptes nécessitent de démarrer le serveur avec --auth.",
+    "Las cuentas requieren iniciar el servidor con --auth.",
+    "Konten erfordern den Serverstart mit --auth.",
+    "使用账户需要通过 --auth 启动服务器。",
+    "アカウントを使うには --auth を指定してサーバーを起動してください。"
+  ],
+  "Header troppo grandi.": [
+    "Headers too large.",
+    "En-têtes trop volumineux.",
+    "Cabeceras demasiado grandes.",
+    "Header zu groß.",
+    "请求头过大。",
+    "ヘッダーが大きすぎます。"
+  ],
+  "If-Match deve contenere una versione positiva.": [
+    "If-Match must contain a positive version number.",
+    "If-Match doit contenir un numéro de version positif.",
+    "If-Match debe contener un número de versión positivo.",
+    "If-Match muss eine positive Versionsnummer enthalten.",
+    "If-Match 必须包含正数版本号。",
+    "If-Match には正のバージョン番号が必要です。"
+  ],
+  "If-Match non valido.": [
+    "Invalid If-Match.",
+    "If-Match invalide.",
+    "If-Match no válido.",
+    "Ungültiges If-Match.",
+    "If-Match 无效。",
+    "If-Match が無効です。"
+  ],
+  "Il campo language è consentito solo alla creazione della bacheca.": [
+    "The language field is only allowed when creating a board.",
+    "Le champ language est autorisé uniquement à la création du tableau.",
+    "El campo language solo está permitido al crear el tablero.",
+    "Das Feld language ist nur beim Erstellen eines Boards erlaubt.",
+    "仅在创建看板时允许使用 language 字段。",
+    "language フィールドはボードの作成時のみ指定できます。"
+  ],
+  "Il campo starred deve essere booleano.": [
+    "The starred field must be a boolean.",
+    "Le champ starred doit être un booléen.",
+    "El campo starred debe ser booleano.",
+    "Das Feld starred muss ein boolescher Wert sein.",
+    "starred 字段必须为布尔值。",
+    "starred フィールドは真偽値である必要があります。"
+  ],
+  "Indica nome, ruolo o stato attivo validi.": [
+    "Provide a valid name, role, or active status.",
+    "Indiquez un nom, un rôle ou un statut actif valide.",
+    "Indica un nombre, rol o estado activo válido.",
+    "Gib einen gültigen Namen, eine Rolle oder einen Aktivstatus an.",
+    "请提供有效的名称、角色或启用状态。",
+    "有効な名前、役割、または有効状態を指定してください。"
+  ],
+  "Indica utente e ruolo admin, member oppure observer.": [
+    "Provide a user and the role admin, member, or observer.",
+    "Indiquez un utilisateur et le rôle admin, member ou observer.",
+    "Indica un usuario y el rol admin, member u observer.",
+    "Gib einen Benutzer und die Rolle admin, member oder observer an.",
+    "请指定用户及 admin、member 或 observer 角色。",
+    "ユーザーと admin、member、observer のいずれかの役割を指定してください。"
+  ],
+  "La configurazione iniziale è già completa.": [
+    "Initial setup is already complete.",
+    "La configuration initiale est déjà terminée.",
+    "La configuración inicial ya está completa.",
+    "Die Ersteinrichtung ist bereits abgeschlossen.",
+    "初始设置已完成。",
+    "初期設定はすでに完了しています。"
+  ],
+  "La password attuale non è corretta.": [
+    "Your current password is incorrect.",
+    "Votre mot de passe actuel est incorrect.",
+    "La contraseña actual es incorrecta.",
+    "Dein aktuelles Passwort ist falsch.",
+    "当前密码不正确。",
+    "現在のパスワードが正しくありません。"
+  ],
+  "Limite di 100 report raggiunto.": [
+    "The limit of 100 reports has been reached.",
+    "La limite de 100 rapports est atteinte.",
+    "Se ha alcanzado el límite de 100 informes.",
+    "Das Limit von 100 Berichten wurde erreicht.",
+    "已达到 100 份报表的上限。",
+    "レポート数の上限である 100 件に達しました。"
+  ],
+  "Lingua della bacheca non valida.": [
+    "Invalid board language.",
+    "Langue du tableau invalide.",
+    "Idioma del tablero no válido.",
+    "Ungültige Board-Sprache.",
+    "看板语言无效。",
+    "ボードの言語が無効です。"
+  ],
+  "Membro non aggiornato. Riprova.": [
+    "Member could not be updated. Try again.",
+    "Le membre n’a pas pu être mis à jour. Réessayez.",
+    "No se pudo actualizar el miembro. Inténtalo de nuevo.",
+    "Mitglied konnte nicht aktualisiert werden. Versuche es erneut.",
+    "无法更新成员。请重试。",
+    "メンバーを更新できませんでした。再試行してください。"
+  ],
+  "Membro non rimosso. Riprova.": [
+    "Member could not be removed. Try again.",
+    "Le membre n’a pas pu être retiré. Réessayez.",
+    "No se pudo quitar el miembro. Inténtalo de nuevo.",
+    "Mitglied konnte nicht entfernt werden. Versuche es erneut.",
+    "无法移除成员。请重试。",
+    "メンバーを削除できませんでした。再試行してください。"
+  ],
+  "Membro non trovato.": [
+    "Member not found.",
+    "Membre introuvable.",
+    "Miembro no encontrado.",
+    "Mitglied nicht gefunden.",
+    "未找到成员。",
+    "メンバーが見つかりません。"
+  ],
+  "Modifica del report non valida.": [
+    "Invalid report update.",
+    "Modification du rapport invalide.",
+    "Modificación del informe no válida.",
+    "Ungültige Berichtsänderung.",
+    "报表更改无效。",
+    "レポートの変更が無効です。"
+  ],
+  "Nome o filtri non validi.": [
+    "Invalid name or filters.",
+    "Nom ou filtres invalides.",
+    "Nombre o filtros no válidos.",
+    "Ungültiger Name oder ungültige Filter.",
+    "名称或筛选条件无效。",
+    "名前またはフィルターが無効です。"
+  ],
+  "Nome, username (3–64 caratteri a-z, 0-9, . _ -) e password (12–256 byte) sono obbligatori.": [
+    "Name, username (3–64 characters using a-z, 0-9, . _ -), and password (12–256 bytes) are required.",
+    "Le nom, le username (3–64 caractères parmi a-z, 0-9, . _ -) et le mot de passe (12–256 octets) sont obligatoires.",
+    "El nombre, username (3–64 caracteres de a-z, 0-9, . _ -) y la contraseña (12–256 bytes) son obligatorios.",
+    "Name, username (3–64 Zeichen aus a-z, 0-9, . _ -) und Passwort (12–256 Byte) sind erforderlich.",
+    "名称、username（3–64 个字符，可使用 a-z、0-9、. _ -）及密码（12–256 字节）为必填项。",
+    "名前、username（a-z、0-9、. _ - を使用した 3–64 文字）、パスワード（12–256 バイト）が必要です。"
+  ],
+  "Non puoi modificare i membri di questa bacheca.": [
+    "You cannot manage members of this board.",
+    "Vous ne pouvez pas modifier les membres de ce tableau.",
+    "No puedes modificar los miembros de este tablero.",
+    "Du kannst die Mitglieder dieses Boards nicht ändern.",
+    "你无权修改此看板的成员。",
+    "このボードのメンバーを変更する権限がありません。"
+  ],
+  "Origine o host non consentiti.": [
+    "Origin or host not allowed.",
+    "Origine ou hôte non autorisé.",
+    "Origen o host no permitido.",
+    "Ursprung oder Host nicht erlaubt.",
+    "来源或主机不允许。",
+    "オリジンまたはホストが許可されていません。"
+  ],
+  "Password non aggiornata. Riprova.": [
+    "Password could not be updated. Try again.",
+    "Le mot de passe n’a pas pu être mis à jour. Réessayez.",
+    "No se pudo actualizar la contraseña. Inténtalo de nuevo.",
+    "Passwort konnte nicht aktualisiert werden. Versuche es erneut.",
+    "无法更新密码。请重试。",
+    "パスワードを更新できませんでした。再試行してください。"
+  ],
+  "Per revocare la sessione corrente usa Esci.": [
+    "Use Sign out to revoke the current session.",
+    "Utilisez Se déconnecter pour révoquer la session actuelle.",
+    "Usa Cerrar sesión para revocar la sesión actual.",
+    "Nutze Abmelden, um die aktuelle Sitzung zu widerrufen.",
+    "请使用“退出账户”撤销当前会话。",
+    "現在のセッションを取り消すには「ログアウト」を選択してください。"
+  ],
+  "Preferito non aggiornato. Riprova.": [
+    "Favorite could not be updated. Try again.",
+    "Le favori n’a pas pu être mis à jour. Réessayez.",
+    "No se pudo actualizar el favorito. Inténtalo de nuevo.",
+    "Favorit konnte nicht aktualisiert werden. Versuche es erneut.",
+    "无法更新收藏。请重试。",
+    "お気に入りを更新できませんでした。再試行してください。"
+  ],
+  "Richiesta HTTP non valida.": [
+    "Invalid HTTP request.",
+    "Requête HTTP invalide.",
+    "Solicitud HTTP no válida.",
+    "Ungültige HTTP-Anfrage.",
+    "HTTP 请求无效。",
+    "HTTP リクエストが無効です。"
+  ],
+  "Richiesta troppo grande.": [
+    "Request too large.",
+    "Requête trop volumineuse.",
+    "Solicitud demasiado grande.",
+    "Anfrage zu groß.",
+    "请求过大。",
+    "リクエストが大きすぎます。"
+  ],
+  "Tempo totale della richiesta scaduto.": [
+    "Total request time exceeded.",
+    "Délai total de la requête dépassé.",
+    "Se agotó el tiempo total de la solicitud.",
+    "Gesamte Anfragezeit überschritten.",
+    "请求总时限已超出。",
+    "リクエスト全体の制限時間を超えました。"
+  ],
+  "Token CSRF mancante o non valido. Ricarica la pagina.": [
+    "Missing or invalid CSRF token. Reload the page.",
+    "Jeton CSRF manquant ou invalide. Rechargez la page.",
+    "Token CSRF ausente o no válido. Recarga la página.",
+    "CSRF-Token fehlt oder ist ungültig. Lade die Seite neu.",
+    "CSRF 令牌缺失或无效。请重新加载页面。",
+    "CSRF トークンがないか無効です。ページを再読み込みしてください。"
+  ],
+  "Troppi tentativi. Riprova tra cinque minuti.": [
+    "Too many attempts. Try again in five minutes.",
+    "Trop de tentatives. Réessayez dans cinq minutes.",
+    "Demasiados intentos. Inténtalo de nuevo en cinco minutos.",
+    "Zu viele Versuche. Versuche es in fünf Minuten erneut.",
+    "尝试次数过多。请在五分钟后重试。",
+    "試行回数が多すぎます。5 分後に再試行してください。"
+  ],
+  "Una scheda non appartiene allo sprint.": [
+    "A card does not belong to this sprint.",
+    "Une carte n’appartient pas à ce sprint.",
+    "Una tarjeta no pertenece a este sprint.",
+    "Eine Karte gehört nicht zu diesem Sprint.",
+    "有一张卡片不属于此冲刺。",
+    "このスプリントに属していないカードがあります。"
+  ],
+  "Una scheda è già pianificata in uno sprint.": [
+    "A card is already scheduled in a sprint.",
+    "Une carte est déjà planifiée dans un sprint.",
+    "Una tarjeta ya está planificada en un sprint.",
+    "Eine Karte ist bereits in einem Sprint eingeplant.",
+    "有一张卡片已被安排到冲刺中。",
+    "すでにスプリントに計画されているカードがあります。"
+  ],
+  "Usa PATCH per modificare i preferiti.": [
+    "Use PATCH to update favorites.",
+    "Utilisez PATCH pour modifier les favoris.",
+    "Usa PATCH para modificar los favoritos.",
+    "Verwende PATCH, um Favoriten zu ändern.",
+    "请使用 PATCH 修改收藏。",
+    "お気に入りを変更するには PATCH を使用してください。"
+  ],
+  "Uscita non riuscita. Riprova.": [
+    "Sign-out failed. Try again.",
+    "Échec de la déconnexion. Réessayez.",
+    "No se pudo cerrar sesión. Inténtalo de nuevo.",
+    "Abmeldung fehlgeschlagen. Versuche es erneut.",
+    "退出失败。请重试。",
+    "ログアウトに失敗しました。再試行してください。"
+  ],
+  "Username già utilizzato.": [
+    "Username already in use.",
+    "Ce nom d’utilisateur est déjà utilisé.",
+    "El nombre de usuario ya está en uso.",
+    "Benutzername bereits vergeben.",
+    "用户名已被使用。",
+    "このユーザー名はすでに使用されています。"
+  ],
+  "Username o password non corretti.": [
+    "Incorrect username or password.",
+    "Nom d’utilisateur ou mot de passe incorrect.",
+    "Nombre de usuario o contraseña incorrectos.",
+    "Benutzername oder Passwort falsch.",
+    "用户名或密码不正确。",
+    "ユーザー名またはパスワードが正しくありません。"
+  ],
+  "Username o password non validi.": [
+    "Invalid username or password.",
+    "Nom d’utilisateur ou mot de passe invalide.",
+    "Nombre de usuario o contraseña no válidos.",
+    "Ungültiger Benutzername oder ungültiges Passwort.",
+    "用户名或密码无效。",
+    "ユーザー名またはパスワードが無効です。"
+  ],
+  "Utente attivo non trovato.": [
+    "Active user not found.",
+    "Utilisateur actif introuvable.",
+    "Usuario activo no encontrado.",
+    "Aktiver Benutzer nicht gefunden.",
+    "未找到已启用的用户。",
+    "有効なユーザーが見つかりません。"
+  ],
+  "Utente non aggiornato. Riprova.": [
+    "User could not be updated. Try again.",
+    "L’utilisateur n’a pas pu être mis à jour. Réessayez.",
+    "No se pudo actualizar el usuario. Inténtalo de nuevo.",
+    "Benutzer konnte nicht aktualisiert werden. Versuche es erneut.",
+    "无法更新用户。请重试。",
+    "ユーザーを更新できませんでした。再試行してください。"
+  ],
+  "Utente non creato. Riprova.": [
+    "User could not be created. Try again.",
+    "L’utilisateur n’a pas pu être créé. Réessayez.",
+    "No se pudo crear el usuario. Inténtalo de nuevo.",
+    "Benutzer konnte nicht erstellt werden. Versuche es erneut.",
+    "无法创建用户。请重试。",
+    "ユーザーを作成できませんでした。再試行してください。"
+  ],
+  "Utente non trovato.": [
+    "User not found.",
+    "Utilisateur introuvable.",
+    "Usuario no encontrado.",
+    "Benutzer nicht gefunden.",
+    "未找到用户。",
+    "ユーザーが見つかりません。"
+  ],
+  "Versione del report non aggiornata.": [
+    "The report version is outdated.",
+    "La version du rapport n’est plus à jour.",
+    "La versión del informe está desactualizada.",
+    "Die Berichtsversion ist veraltet.",
+    "报表版本已过期。",
+    "レポートのバージョンが古くなっています。"
+  ],
+  "Versione dello sprint superata.": [
+    "The sprint version is outdated.",
+    "La version du sprint n’est plus à jour.",
+    "La versión del sprint está desactualizada.",
+    "Die Sprint-Version ist veraltet.",
+    "冲刺版本已过期。",
+    "スプリントのバージョンが古くなっています。"
+  ],
+  "Versione non aggiornata. Ricarica i dati.": [
+    "Outdated version. Reload the data.",
+    "Version obsolète. Rechargez les données.",
+    "Versión desactualizada. Vuelve a cargar los datos.",
+    "Veraltete Version. Lade die Daten neu.",
+    "版本已过期。请重新加载数据。",
+    "バージョンが古くなっています。データを再読み込みしてください。"
+  ],
+  "Versione non aggiornata. Ricarica la revisione.": [
+    "Outdated version. Reload the review.",
+    "Version obsolète. Rechargez la révision.",
+    "Versión desactualizada. Vuelve a cargar la revisión.",
+    "Veraltete Version. Lade die Prüfung neu.",
+    "版本已过期。请重新加载审核。",
+    "バージョンが古くなっています。レビューを再読み込みしてください。"
+  ],
+  "Versione non aggiornata. Ricarica prima di riprovare.": [
+    "Outdated version. Reload before trying again.",
+    "Version obsolète. Rechargez avant de réessayer.",
+    "Versión desactualizada. Vuelve a cargar antes de reintentar.",
+    "Veraltete Version. Lade vor einem erneuten Versuch neu.",
+    "版本已过期。请重新加载后再试。",
+    "バージョンが古くなっています。再読み込みしてから再試行してください。"
+  ],
+  "È richiesto il ruolo amministratore della bacheca.": [
+    "The board administrator role is required.",
+    "Le rôle d’administrateur du tableau est requis.",
+    "Se requiere el rol de administrador del tablero.",
+    "Die Rolle als Board-Administrator ist erforderlich.",
+    "需要看板管理员角色。",
+    "ボードの管理者の役割が必要です。"
+  ],
+  "È richiesto il ruolo amministratore.": [
+    "The administrator role is required.",
+    "Le rôle d’administrateur est requis.",
+    "Se requiere el rol de administrador.",
+    "Die Administratorrolle ist erforderlich.",
+    "需要管理员角色。",
+    "管理者の役割が必要です。"
+  ]
+}

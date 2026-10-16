@@ -13,7 +13,7 @@ flowchart LR
     App -.-> Cache[SQLite temporaneo]
 ```
 
-Solo NPM pubblica porte dell'host. Il frontend non riceve variabili o credenziali database e non inoltra richieste API. NPM raggiunge separatamente frontend e backend sulla rete `frontend`; app e database comunicano sulle reti Docker; `backend` è interna. La gestione NPM resta su loopback. L'app usa UID/GID `10001`, filesystem di sola lettura, nessuna capability Linux e un `tmpfs` da 256 MiB per cache e file temporanei. Il frontend usa UID/GID `101`, filesystem di sola lettura e un piccolo `tmpfs` per PID e file temporanei Nginx. PostgreSQL, MongoDB e NPM hanno volumi nominati distinti. Gli utenti database dell'app non sono amministratori globali.
+Solo NPM pubblica porte dell'host, vincolate a `127.0.0.1` per impostazione predefinita. Il frontend non riceve variabili o credenziali database e non inoltra richieste API. NPM raggiunge separatamente frontend e backend sulla rete `frontend`; app e database comunicano sulle reti Docker; `backend` è interna. La gestione NPM resta su loopback. L'app usa UID/GID `10001`, filesystem di sola lettura, nessuna capability Linux e un `tmpfs` da 256 MiB per cache e file temporanei. Il frontend usa UID/GID `101`, filesystem di sola lettura e un piccolo `tmpfs` per PID e file temporanei Nginx. PostgreSQL, MongoDB e NPM hanno volumi nominati distinti. Gli utenti database dell'app non sono amministratori globali.
 
 ## Requisiti e immagini
 
@@ -30,6 +30,8 @@ python3 scripts/init-env.py
 docker compose config --quiet
 docker compose up -d --build --wait
 ```
+
+HTTP e HTTPS restano su loopback: `OPENBOARD_PUBLISH_IP=127.0.0.1`. Per un server pubblico occorre scegliere esplicitamente `OPENBOARD_PUBLISH_IP=0.0.0.0` (oppure `init-env.py --publish-ip 0.0.0.0` su una nuova installazione) dopo aver configurato TLS e amministrazione privata.
 
 `init-env.py` crea `.env` con permessi `0600` e quattro password casuali distinte da 256 bit. Non stampa i segreti e non sovrascrive un file esistente. `.env` è escluso da Git e dal contesto Docker. `.env.example` lascia intenzionalmente vuote le password: Compose rifiuta l'avvio finché non sono state configurate. Non usare `docker compose config` senza `--quiet` in log condivisi: la configurazione espansa contiene le stringhe di connessione.
 
@@ -89,10 +91,10 @@ NPM 2.16.0 mostra il wizard quando non esistono utenti e non sono impostate cred
 
 ### Dominio pubblico e TLS
 
-Impostare in `.env`, ad esempio, `OPENBOARD_PUBLIC_URL=https://board.example.org`, configurare il DNS verso l'host e usare quel dominio nel Proxy Host. Nella scheda SSL richiedere un certificato Let's Encrypt e attivare Force SSL. `.localhost` serve alle prove locali e non riceve un certificato pubblico. Ricreare l'app dopo aver cambiato l'origine:
+Prima di esporre il servizio consultare [il security audit](SECURITY_AUDIT_2026-10-16.md), compresi i finding residui delle immagini e il limite di login aggregato dietro proxy. Impostare in `.env` `OPENBOARD_PUBLISH_IP=0.0.0.0` e, ad esempio, `OPENBOARD_PUBLIC_URL=https://board.example.org`, configurare il DNS verso l'host e usare quel dominio nel Proxy Host. Nella scheda SSL richiedere un certificato Let's Encrypt e attivare Force SSL. `.localhost` serve alle prove locali e non riceve un certificato pubblico. Ricreare l'app dopo aver cambiato l'origine:
 
 ```sh
-docker compose up -d app
+docker compose up -d app npm
 ```
 
 L'origine esatta controlla Host, Origin e cookie Secure: deve includere una porta pubblica non standard, se presente. NPM inoltra il nome originale dell'host sia alla posizione `/api` sia al frontend. Non sostituirlo con `app:8080`. Il backend non serve HTML, CSS, JavaScript o file di progetto; il frontend risponde `404` a `/api` quando viene contattato direttamente. Per allegati da 1 MiB, il blocco API del proxy e il backend accettano corpi JSON fino a 2 MiB.

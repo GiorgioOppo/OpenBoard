@@ -101,6 +101,52 @@ class TransportTests(unittest.TestCase):
                 try: r.begin();self.assertEqual(r.status,400);r.read()
                 finally: r.close()
 
+    def test_login_quotas_use_real_peers_and_ignore_forwarded_headers(self):
+        self.stop(); self.start(local=False)
+        password = 'correct-password-123'
+        body = json.dumps({'name':'Administrator','username':'admin','password':password})
+        status, _, response = self.request('POST','/api/auth/setup',body,{'Content-Type':'application/json'})
+        self.assertEqual(status,201,response)
+        candidates = ['127.0.0.2']
+        try:
+            # UDP connect selects a local route; it sends no packet to this reserved address.
+            with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as probe:
+                probe.connect(('192.0.2.1',9))
+                candidates.append(probe.getsockname()[0])
+        except OSError:
+            pass
+        source = None
+        for candidate in candidates:
+            if candidate == '127.0.0.1':
+                continue
+            try:
+                with socket.create_connection(('127.0.0.1',self.port),timeout=2,source_address=(candidate,0)) as connection:
+                    connection.sendall((f'GET /api/health HTTP/1.1\r\nHost: 127.0.0.1:{self.port}\r\n\r\n').encode())
+                    response = http.client.HTTPResponse(connection)
+                    response.begin(); response.read(); response.close()
+                source = candidate
+                break
+            except OSError:
+                continue
+        if not source:
+            self.skipTest('This host cannot provide two distinct local source addresses')
+        def login(peer, username, secret, forwarded=None):
+            connection = http.client.HTTPConnection('127.0.0.1',self.port,timeout=5,source_address=(peer,0))
+            try:
+                headers = {'Content-Type':'application/json'}
+                if forwarded:
+                    headers.update({'X-Forwarded-For':forwarded,'X-Real-IP':forwarded,'Forwarded':f'for={forwarded}'})
+                connection.request('POST','/api/auth/login',json.dumps({'username':username,'password':secret}),headers)
+                result = connection.getresponse(); result.read()
+                return result.status
+            finally:
+                connection.close()
+        for attempt in range(59):
+            self.assertEqual(login(source,f'unknown{attempt//10}','wrong'),401)
+        self.assertEqual(login('127.0.0.1','admin',password),200)
+        self.assertEqual(login(source,'unknown-final','wrong','198.51.100.1'),401)
+        self.assertEqual(login(source,'unknown-after-limit','wrong','198.51.100.2'),429)
+
     def test_public_https_origin_configuration(self):
         self.stop();self.start('--public-url','https://board.example.test')
         body=json.dumps({'name':'HTTPS proxy board'})

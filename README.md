@@ -1,12 +1,12 @@
 # OpenBoard
 
-Un'app kanban open source ispirata a Trello, con **server in C**. Lo stack Docker separa **frontend statico e backend API autenticato**, **PostgreSQL** per i dati strutturati, **MongoDB** per i documenti JSON e **Nginx Proxy Manager** per HTTP/HTTPS. Per lo sviluppo locale è disponibile anche SQLite. L'interfaccia usa HTML, CSS e JavaScript senza framework, dipendenze npm o CDN.
+An open source kanban application inspired by Trello, powered by a **C backend**. The Docker stack separates the **static frontend and authenticated API**, with **PostgreSQL** for structured data, **MongoDB** for JSON documents, and **Nginx Proxy Manager** for HTTP/HTTPS. SQLite is also available for local development. The interface uses plain HTML, CSS, and JavaScript, with no frontend framework, npm dependencies, or CDN.
 
-![Bacheca OpenBoard](docs/preview.png)
+![OpenBoard kanban board](docs/preview-language-en.png)
 
-## Avvio rapido
+## Quick start
 
-Con Docker Compose:
+Start the Docker Compose stack:
 
 ```sh
 python3 scripts/init-env.py
@@ -14,187 +14,207 @@ docker compose up -d --build --wait
 python3 scripts/bootstrap-local.py
 ```
 
-Apri **http://openboard.localhost**. Il bootstrap locale crea i primi amministratori e il Proxy Host solo su un'istanza nuova, con password casuali in `.env.local-admin` (`0600`, escluso da Git). Il pannello Nginx Proxy Manager è su **http://127.0.0.1:81**. Per scegliere manualmente gli account o usare un dominio reale, segui la [guida di installazione](docs/DEPLOYMENT.md).
+Open **http://openboard.localhost**. HTTP, HTTPS and the proxy administration console bind to loopback by default; network exposure requires an explicit `OPENBOARD_PUBLISH_IP=0.0.0.0` setting. On a fresh installation, the local bootstrap creates the first administrators and the proxy host, then saves randomly generated passwords in `.env.local-admin` (`0600`, excluded from Git). Nginx Proxy Manager is available at **http://127.0.0.1:81**. To set up accounts manually or use a real domain, follow the [deployment guide](docs/DEPLOYMENT.md).
 
-La cache SQLite dell'app viene ricostruita dai due database esterni. Le scritture vengono confermate dopo la persistenza dei documenti MongoDB e il commit PostgreSQL. Questa prima integrazione serializza le richieste e pubblica uno snapshot completo a ogni modifica: è adatta a installazioni pilota, con un limite di scalabilità documentato nella guida.
+The application rebuilds its SQLite cache from the two external databases. A write is acknowledged after its MongoDB documents have been persisted and the PostgreSQL transaction has committed. The current storage integration serializes requests and publishes a complete snapshot for each mutation. It is intended for pilot installations; the deployment guide documents this scalability limit.
 
-### Sviluppo locale
+### Local development
 
-Servono un compilatore C11, `make`, SQLite con supporto JSON, OpenSSL libcrypto e `pkg-config`.
+Requirements: a C11 compiler, `make`, SQLite with JSON support, OpenSSL libcrypto, and `pkg-config`. Python 3 runs the development frontend server and the backend tests.
 
-Su macOS servono gli strumenti della riga di comando di Xcode e OpenSSL con `pkg-config`, installabili tramite Homebrew:
+On macOS, install the Xcode command line tools and the Homebrew packages:
 
 ```sh
 xcode-select --install
 brew install openssl@3 pkg-config
 ```
 
-Su Debian/Ubuntu:
+On Debian or Ubuntu:
 
 ```sh
 sudo apt-get install build-essential libsqlite3-dev libssl-dev pkg-config python3
 ```
 
-Dalla cartella del progetto:
+From the project directory:
 
 ```sh
 make
 ./build/openboard --public-url http://127.0.0.1:8090
-# In un secondo terminale:
+# In a second terminal:
 python3 scripts/dev-frontend.py
 ```
 
-Apri **http://127.0.0.1:8090** e configura il primo amministratore. Al primo avvio vengono create tre bacheche dimostrative; le modifiche successive vengono salvate in `data/openboard.db`. Ferma i due processi con `Ctrl+C`. Il backend su `127.0.0.1:8080` espone soltanto API JSON; le richieste ai dati richiedono autenticazione. `--no-auth` abilita esplicitamente lo sviluppo senza account soltanto su loopback.
+Open **http://127.0.0.1:8090** and create the first administrator. A new database starts with three demonstration boards; subsequent changes are saved in `data/openboard.db`. Stop both processes with `Ctrl+C`. The backend at `127.0.0.1:8080` exposes JSON APIs only, and data endpoints require authentication. `--no-auth` explicitly enables account-free development on loopback only.
 
-Puoi scegliere porta e database del backend:
+To select a backend port and database:
 
 ```sh
-./build/openboard --port 8080 --db data/personale.db --public-url http://127.0.0.1:8090
+./build/openboard --port 8080 --db data/personal.db --public-url http://127.0.0.1:8090
 ```
 
-## Cosa puoi fare
+## Security review
 
-- Creare, rinominare, personalizzare e rimuovere bacheche; aggiungerle ai preferiti.
-- Aggiungere, rinominare e rimuovere colonne.
-- Creare e modificare schede con descrizione, etichette multiple, priorità, scadenza, assegnatario, stima, copertina e checklist.
-- Spostare e riordinare schede con il trascinamento oppure scegliendo lista e posizione; impostare limiti WIP.
-- Cercare schede, applicare filtri e usare viste a colonne, elenco, calendario e statistiche.
-- Definire campi personalizzati tipizzati, traguardi e linee guida; consultare una vista tabellare e report del carico.
-- Registrare il tempo con data e nota, leggere report personali/per utente ed esportare il registro in CSV.
-- Rispondere ai commenti, aggiungere reazioni, fissare aggiornamenti e conservare segnalibri personali.
-- Collaborare con account individuali, ruoli, commenti, cronologia e aggiornamenti tra sessioni.
-- Richiedere revisioni delle schede, assegnare revisori e raccogliere approvazioni o modifiche motivate.
-- Consultare un portfolio fra bacheche, salvare report personali e confrontare ritardi, carico e avanzamento.
-- Pianificare sprint dal backlog, assegnare capacità al team e registrare l'avanzamento giornaliero.
-- Creare moduli interni tipizzati, valutare le richieste ricevute e convertirle in schede.
-- Duplicare, archiviare e recuperare dal cestino; importare ed esportare bacheche in JSON.
+The [pre-publication security audit](docs/SECURITY_AUDIT_2026-10-16.md) records confirmed findings, fixes, regression tests and remaining dependency risks. Internet deployment requires HTTPS, private administration and review of the scanned image dependencies. The audit is not a security certification.
 
-Le preferenze dell'interfaccia rimangono nel browser; bacheche e schede rimangono nel database. L’esportazione OpenBoard versione 2 è importabile dall’interfaccia su una nuova bacheca. Il backup SQLite conserva anche account, commenti, cronologia e cestino.
+## Features
 
-## Struttura
+- Create, rename, customize, and delete boards; keep personal favorites.
+- Add, rename, reorder, and remove columns.
+- Create cards with descriptions, multiple labels, priorities, due dates, assignees, estimates, covers, and checklists.
+- Move and reorder cards by dragging or choosing a list and position; enforce work-in-progress (WIP) limits.
+- Search and filter cards; switch between kanban, list, calendar, and statistics views.
+- Define typed custom fields, milestones, and board guidelines; use table and workload views.
+- Log time with a date and note, review personal and per-user reports, and export work logs to CSV.
+- Reply to comments, add reactions, pin updates, and keep personal bookmarks.
+- Collaborate through individual accounts, roles, comments, activity history, and updates across sessions.
+- Request card reviews, assign reviewers, and collect approvals or explained change requests.
+- Browse a cross-board portfolio, save personal reports, and compare overdue work, workload, and progress.
+- Plan sprints from the backlog, allocate team capacity, and capture daily progress.
+- Build typed internal forms, triage incoming requests, and convert them into cards.
+- Duplicate, archive, and restore items from the trash; import and export boards as JSON.
+
+Interface preferences are stored in the browser; boards and cards are stored in the database. OpenBoard JSON export version 2 can be imported into a new board through the interface. A complete application backup also preserves accounts, comments, history, trash, and collaboration data. Board exports do not replace full backups.
+
+## Languages
+
+The interface supports **English, Italian, French, Spanish, German, Simplified Chinese, and Japanese**. OpenBoard detects a supported browser language on first use, with English as the fallback. An accessible language selector is available before and after login; your choice is saved locally in the browser. Changing the interface language preserves board content and other user-entered data. The backend API contract remains language-independent.
+
+New boards create their initial lists in the selected language. Existing content keeps its original language. See the [translation guide](docs/INTERNATIONALIZATION.md) for catalogue maintenance, URL and storage fallback, and validation results.
+
+## Project structure
 
 ```text
-src/http.c          Trasporto API HTTP concorrente, limiti e configurazione
-src/server.c        API di dominio, migrazioni e persistenza SQLite
-src/auth.c          Account, sessioni e autorizzazioni
-src/collaboration.c Notifiche, sottoscrizioni, allegati e strumenti personali
-src/teamwork.c      Registri del tempo, conversazioni, reazioni e segnalibri
-src/reviews.c       Richieste di revisione, voti, cronologia e inbox
-src/portfolio.c     Ricerca fra bacheche, indicatori e report personali
-src/sprints.c       Sprint, backlog, capacità e osservazioni giornaliere
-src/intake.c        Moduli interni, richieste tipizzate e conversione in schede
-src/cloud.c         PostgreSQL e MongoDB; cache SQLite ricostruibile
-web/index.html      Struttura dell'interfaccia
-web/styles.css      Stili e layout responsive
-web/app.js          Interazioni e comunicazione con le API
-web/planning.js     Campi, traguardi, report e collaborazione della 0.4
-web/enterprise.js   Interfaccia per revisioni, portfolio e report della 0.5
-web/workflows.js    Interfaccia per sprint e raccolta richieste della 0.6
-compose.yaml        Backend C, frontend statico, PostgreSQL, MongoDB e proxy
-tests/              Test di regressione, dominio, autenticazione e HTTP
-Makefile            Compilazione e comandi di sviluppo
-data/               Database locale, escluso dal controllo versione
-build/              Eseguibile, escluso dal controllo versione
+src/http.c          Concurrent HTTP API transport, limits, and configuration
+src/server.c        Domain APIs, migrations, and SQLite persistence
+src/auth.c          Accounts, sessions, and authorization
+src/collaboration.c Notifications, subscriptions, attachments, and personal tools
+src/teamwork.c      Work logs, conversations, reactions, and bookmarks
+src/reviews.c       Review requests, decisions, history, and inbox
+src/portfolio.c     Cross-board search, metrics, and personal reports
+src/sprints.c       Sprints, backlog, capacity, and daily snapshots
+src/intake.c        Internal forms, typed requests, and card conversion
+src/cloud.c         PostgreSQL and MongoDB; rebuildable SQLite cache
+web/index.html      Interface structure
+web/styles.css      Styles and responsive layout
+web/app.js          Interactions and API communication
+web/i18n.js         Language detection, selection, and interface localization
+web/locales.js      Translation catalogs
+web/planning.js     Custom fields, milestones, reports, and collaboration (0.4)
+web/enterprise.js   Reviews, portfolio, and report interface (0.5)
+web/workflows.js    Sprint and request intake interface (0.6)
+compose.yaml        C backend, static frontend, PostgreSQL, MongoDB, and proxy
+tests/              Regression, domain, authentication, and HTTP tests
+Makefile            Build and development commands
+data/               Local database; excluded from version control
+build/              Compiled binaries; excluded from version control
 ```
 
-Il server usa socket POSIX e statement SQLite preparati. Espone soltanto API; non contiene né serve HTML, CSS o JavaScript. Il frontend statico è distribuito da un container separato. Nessuno dei due richiede Node.js a runtime. I dati iniziali vengono inseriti una volta sola per database.
+The server uses POSIX sockets and prepared SQLite statements. It exposes APIs only; it neither embeds nor serves HTML, CSS, or JavaScript. A separate container serves the static frontend. Neither component requires Node.js at runtime. Demonstration data is inserted once per database.
 
-La documentazione degli endpoint e dei campi si trova in [docs/API.md](docs/API.md).
+See the [API reference](docs/API.md) for endpoints and fields.
 
-## Verifica
+## Testing
 
 ```sh
 make test
 ```
 
-I test avviano il server su porte locali libere con database temporanei e verificano operazioni CRUD, migrazioni, conflitti concorrenti, idempotenza, permessi, sessioni e limiti HTTP. Non toccano il database personale. Le prove manuali nell'interfaccia sono documentate nell'elenco delle migliorie.
+The tests start the server on available local ports with temporary databases. They cover CRUD operations, migrations, concurrent updates, idempotency, permissions, sessions, and HTTP limits without modifying your own database. The improvement checklists document manual interface checks.
 
-## Accesso condiviso
-
-Gli account sono abilitati per impostazione predefinita. Per iniziare senza dati dimostrativi:
-
-```sh
-./build/openboard --no-demo --public-url http://127.0.0.1:8090
-```
-
-Apri il browser locale, configura il primo amministratore, poi crea gli utenti nel pannello di gestione. I ruoli disponibili sono amministratore, membro e osservatore. Le bacheche si condividono dal pannello Membri; i preferiti sono personali.
-
-Per un proxy HTTPS sullo stesso host, configura anche l’origine pubblica, senza percorso né slash finale:
-
-```sh
-./build/openboard --auth --public-url https://board.example.com
-```
-
-Il processo locale ascolta su loopback. Il container usa esplicitamente `OPENBOARD_BIND=0.0.0.0` sulla rete privata, senza pubblicare la porta dell'app. Completa il setup prima di aggiungere il Proxy Host; la modalità senza account è destinata all’uso personale locale. I dettagli sono in [SECURITY.md](SECURITY.md).
-
-## Funzioni della versione 0.2
-
-Cestino con ripristino, archivio, duplicazione, priorità, etichette multiple, stima dell’impegno, limiti WIP, riordino liste, commenti e cronologia delle attività. L’interfaccia offre anche ricerca globale, statistiche, calendario, importazione JSON, bozze recuperabili, link diretti, tema scuro e densità configurabile. Le revisioni segnalano i conflitti fra sessioni.
-
-L’elenco numerato dei 100 interventi, con stato e verifiche, è in [docs/MIGLIORIE_100.md](docs/MIGLIORIE_100.md).
-
-## Funzioni della versione 0.3
-
-Data di inizio, blocchi, tempo effettivo e timer manuale; assegnazioni a più utenti, attività personali e dipendenze fra schede. Template personali per schede e bacheche, filtri salvati e completamento/archiviazione multipla con controllo delle versioni.
-
-Seguendo una bacheca o una scheda ricevi notifiche interne per gli aggiornamenti degli altri membri. Ogni scheda può conservare fino a 10 allegati attivi, di massimo 1 MiB ciascuno e 5 MiB complessivi. Gli allegati rimossi sono ripristinabili. Il pannello account permette di aggiornare il nome e revocare le altre sessioni.
-
-Sono disponibili anteprima Markdown, esportazioni CSV/iCalendar e scorciatoie documentate nell'app. L'[elenco dei nuovi 100 interventi](docs/MIGLIORIE_200.md) prosegue la numerazione fino a 200. Le nuove API sono documentate in [produttività](docs/API_PRODUTTIVITA.md) e [collaborazione](docs/API_COLLABORAZIONE.md).
-
-Le istruzioni per installazione, Docker Compose, systemd, nginx HTTPS, configurazione da ambiente, metriche e manutenzione sono in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
-
-## Funzioni della versione 0.4
-
-Terzo gruppo di 100 interventi: campi testo/numero/data/booleano/scelta, traguardi con avanzamento, priorità/etichette/traguardi multipli, linee guida e carico di lavoro. Registro del tempo recuperabile con totali e report CSV; commenti Markdown con risposte, reazioni ed evidenza, segnalibri personali, tabella e notifiche filtrate prima della paginazione.
-
-L'[elenco numerato 201–300 con evidenze](docs/MIGLIORIE_300.md) descrive tutte le funzioni implementate. I contratti sono in [pianificazione](docs/API_PIANIFICAZIONE.md) e [tempo e conversazioni](docs/API_TEAMWORK.md). Lo schema locale passa a 5; l'import/export JSON v2 comprende definizioni personalizzate e traguardi. Il backup completo conserva anche account e dati di collaborazione.
-
-## Funzioni della versione 0.5
-
-Quarto gruppo di 100 interventi: richieste di revisione con più revisori, regola tutti/almeno uno, approvazioni e modifiche motivate, inbox personale, scadenze, cestino, cronologia e CSV. La revoca dei permessi invalida i voti e un successivo reinvito richiede una nuova decisione. Il richiedente non può approvare la propria richiesta.
-
-Il portfolio raccoglie le bacheche accessibili, offre ricerca e filtri fra progetti, report personali fissabili ed esportazione CSV paginata. Gli indicatori mostrano attività giornaliera, ritardi, carico per persona, stima/tempo effettivo, limiti WIP, checklist, dipendenze e traguardi. Revisioni e report personali richiedono un account; i filtri salvati rispettano i permessi correnti.
-
-L'[elenco completo 301–400 con verifiche](docs/MIGLIORIE_400.md) distingue API e interfaccia. I contratti sono in [revisioni](docs/API_REVISIONI.md) e [portfolio](docs/API_PORTFOLIO.md). Lo schema 6 conserva i dati precedenti; l'aggiornamento PostgreSQL/MongoDB 5 → 6 aggiunge le nuove tabelle senza riscrivere i documenti esistenti. Prima dell'aggiornamento seguire la [procedura di backup e migrazione](docs/DEPLOYMENT.md).
-
-![Portfolio fra bacheche](docs/preview-portfolio.png)
-
-## Funzioni della versione 0.6
-
-Quinto gruppo di 100 interventi: sprint con obiettivo e date, una sola iterazione attiva per bacheca, pianificazione singola o multipla dal backlog, capacità per persona, confronto con l'impegno residuo, osservazioni giornaliere, attività personali, cronologia e CSV. La chiusura dello sprint conserva le schede incomplete e lo storico; le osservazioni vengono acquisite su comando, senza inventare dati dei giorni precedenti.
-
-I moduli interni raccolgono testo, numeri, date, booleani e scelte. Ogni richiesta conserva lo schema dei campi usato all'invio, così le modifiche successive al modulo non cambiano il significato delle vecchie risposte. Sono disponibili inbox personale e della bacheca, valutazione, note, cestino e conversione atomica in una scheda, rispettando permessi e limiti WIP. I moduli richiedono account e appartenenza corrente alla bacheca, anche quando pubblicati.
-
-L'[elenco completo 401–500](docs/MIGLIORIE_500.md) distingue API e interfaccia e documenta le verifiche. I contratti sono in [sprint e capacità](docs/API_SPRINT.md) e [moduli e richieste](docs/API_RICHIESTE.md). Lo schema 7 aggiunge tabelle, indici e trigger; la migrazione esterna supporta 5 → 7 e 6 → 7 conservando le righe e i riferimenti JSON precedenti. Seguire la [procedura di aggiornamento e backup](docs/DEPLOYMENT.md).
-
-![Anteprima del componente sprint con dati dimostrativi](docs/preview-sprints.png)
-
-## Dati e backup
-
-Il database iniziale viene migrato automaticamente: una copia `.pre-vN.bak` precede l’aggiornamento. I database con schema futuro non supportato vengono rifiutati. `--no-demo` disattiva i dati dimostrativi sui database nuovi.
-
-Per creare un backup consistente, anche se un’altra istanza usa il database:
-
-```sh
-./build/openboard --db data/openboard.db --backup /percorso/backup.db
-```
-
-Per il ripristino arresta il servizio e sostituisci il database con una copia del backup verificato. Conserva l’originale finché il ripristino non è stato controllato. `make clean` elimina soltanto gli artefatti di compilazione.
-
-Per i controlli della memoria e del comportamento indefinito:
+Run memory and undefined-behavior checks:
 
 ```sh
 make test-sanitize
 ```
 
-Per verificare i formati prodotti dal frontend serve Node.js, usato soltanto nei test:
+Frontend tests require Node.js, which is used for testing only:
 
 ```sh
 make test-frontend
 ```
 
-Il server usa per impostazione predefinita 8 worker; `--workers 1..32` ne cambia il numero. `--quiet` disattiva i log HTTP. `/api/health`, `/api/ready` e `/api/version` permettono rispettivamente controlli di processo, database e versione.
+## Team access
 
-## Contribuire
+Accounts are enabled by default. To start without demonstration data:
 
-Vedi [CONTRIBUTING.md](CONTRIBUTING.md). Il codice è disponibile con licenza [MIT](LICENSE). OpenBoard è un progetto indipendente e non è affiliato a Trello o Atlassian.
+```sh
+./build/openboard --no-demo --public-url http://127.0.0.1:8090
+```
+
+Open the local frontend, create the first administrator, then add users in the administration panel. Available roles are administrator, member, and observer. Share boards through the Members panel; favorites remain personal.
+
+For an HTTPS proxy on the same host, configure the public origin without a path or trailing slash:
+
+```sh
+./build/openboard --auth --public-url https://board.example.com
+```
+
+The local process listens on loopback. The container explicitly sets `OPENBOARD_BIND=0.0.0.0` on its private network and does not publish the application port. Complete account setup before adding the proxy host. Account-free mode is intended for local personal use. See [SECURITY.md](SECURITY.md) for details.
+
+## Version 0.2
+
+Trash and restore, archives, duplication, priorities, multiple labels, effort estimates, WIP limits, list ordering, comments, and activity history. The interface also adds global search, statistics, a calendar, JSON import, recoverable drafts, direct links, dark mode, and configurable density. Revision checks report conflicts between sessions.
+
+The [numbered checklist of 100 improvements](docs/MIGLIORIE_100.md) records implementation status and verification.
+
+## Version 0.3
+
+Start dates, blockers, actual time, and a manual timer; multiple assignees, personal tasks, and card dependencies. Personal card and board templates, saved filters, and bulk completion and archiving with version checks.
+
+Follow a board or card to receive internal notifications when other members make changes. Each card supports up to 10 active attachments, with a maximum of 1 MiB per file and 5 MiB total. Deleted attachments can be restored. Account settings let users update their display name and revoke other sessions.
+
+Markdown previews, CSV/iCalendar exports, and in-app keyboard shortcut documentation are also available. The [second checklist](docs/MIGLIORIE_200.md) extends the improvement list to 200. See the [productivity](docs/API_PRODUTTIVITA.md) and [collaboration](docs/API_COLLABORAZIONE.md) API references.
+
+The [deployment guide](docs/DEPLOYMENT.md) covers installation, Docker Compose, systemd, nginx HTTPS, environment configuration, metrics, and maintenance.
+
+## Version 0.4
+
+The third set of 100 improvements adds text, number, date, boolean, and choice fields; milestone progress; bulk priority, label, and milestone changes; board guidelines; and workload reporting. Restorable work logs provide totals and CSV reports. Markdown comments support replies, reactions, and pinning. Personal bookmarks, a table view, and notifications filtered before pagination complete this release.
+
+The [201–300 checklist with evidence](docs/MIGLIORIE_300.md) describes the implemented features. API contracts are documented under [planning](docs/API_PIANIFICAZIONE.md) and [time tracking and conversations](docs/API_TEAMWORK.md). Local database schema version 5 preserves previous data. JSON import/export version 2 includes custom field definitions and milestones; complete backups also preserve accounts and collaboration data.
+
+## Version 0.5
+
+The fourth set of 100 improvements introduces review requests with multiple reviewers, all-reviewer or any-reviewer approval rules, explained decisions, personal inboxes, deadlines, trash, history, and CSV exports. Revoking access invalidates a reviewer's decision, and a subsequent invitation requires a new decision. Requesters cannot approve their own requests.
+
+The portfolio brings accessible boards together with cross-project search, filters, pinnable personal reports, and paginated CSV exports. Metrics cover daily activity, overdue work, workload per person, estimates and actual time, WIP limits, checklists, dependencies, and milestones. Reviews and personal reports require an account; saved filters respect current permissions.
+
+The [301–400 checklist with verification](docs/MIGLIORIE_400.md) distinguishes API and interface work. See the [reviews](docs/API_REVISIONI.md) and [portfolio](docs/API_PORTFOLIO.md) contracts. Schema version 6 preserves existing data; the PostgreSQL/MongoDB upgrade from 5 to 6 adds tables without rewriting existing documents. Follow the [backup and migration procedure](docs/DEPLOYMENT.md) before upgrading.
+
+![Cross-board portfolio](docs/preview-portfolio.png)
+
+## Version 0.6
+
+The fifth set of 100 improvements adds sprints with goals and dates, one active sprint per board, single and bulk backlog planning, per-person capacity, comparisons against remaining effort, daily snapshots, personal tasks, history, and CSV exports. Closing a sprint retains unfinished cards and historical membership. Snapshots are captured explicitly; previous days are not reconstructed from invented data.
+
+Internal forms collect text, numbers, dates, booleans, and choices. Each request retains the field schema used at submission, so later form changes do not alter the meaning of previous answers. Personal and board inboxes support triage, notes, trash, and atomic conversion into a card while enforcing permissions and WIP limits. Forms require an account and current board membership, including when published.
+
+The [401–500 checklist](docs/MIGLIORIE_500.md) documents API and interface changes and their verification. See the [sprints and capacity](docs/API_SPRINT.md) and [forms and requests](docs/API_RICHIESTE.md) contracts. Schema version 7 adds tables, indexes, and triggers. External storage supports upgrades from 5 to 7 and from 6 to 7, preserving previous rows and JSON references. Follow the [upgrade and backup procedure](docs/DEPLOYMENT.md).
+
+![Sprint interface with demonstration data](docs/preview-sprints.png)
+
+## Data and backups
+
+Local databases are migrated automatically, with a `.pre-vN.bak` copy created before an upgrade. Unsupported future schema versions are rejected. `--no-demo` disables demonstration data for new databases.
+
+To create a consistent backup of a local SQLite database, including while another instance is using it:
+
+```sh
+./build/openboard --db data/openboard.db --backup /path/to/backup.db
+```
+
+To restore a local database, stop the service and replace the database with a verified backup. Keep the original until the restoration has been checked. `make clean` removes build artifacts only.
+
+For the Docker deployment with PostgreSQL and MongoDB, create a complete application snapshot:
+
+```sh
+python3 scripts/backup.py
+```
+
+This backup includes structured data and referenced JSON documents, rehydrated into a consistent SQLite snapshot. Restore external storage into a fresh pair of empty databases using the [documented procedure](docs/DEPLOYMENT.md). PostgreSQL and MongoDB form one application dataset; an isolated dump of either database is not a complete backup. Proxy configuration, certificates, and deployment secrets require their own backups.
+
+The server runs eight workers by default; use `--workers 1..32` to change the count. `--quiet` disables HTTP logs. `/api/health`, `/api/ready`, and `/api/version` expose process health, database readiness, and version information, respectively.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). OpenBoard is released under the [MIT license](LICENSE). It is an independent project and is not affiliated with Trello or Atlassian.

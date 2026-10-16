@@ -236,6 +236,31 @@ class CloudPersistence(unittest.TestCase):
                 process.terminate()
                 process.wait(timeout=15)
 
+    def test_cached_authenticated_reply_respects_revocation_after_cold_cache(self):
+        port, admin = self.authenticate()
+        username = 'audit.member.' + uuid.uuid4().hex[:16]
+        password = 'Disposable-security-test-1016!'
+        member = self.api('POST', '/api/users', {'name': 'Audit member', 'username': username,
+                          'password': password, 'role': 'member'}, port=port, headers=admin, expected=201)
+        board = self.api('POST', '/api/boards', {'name': self.name}, port=port, headers=admin, expected=201)
+        self.api('POST', f"/api/boards/{board['id']}/members", {'user_id': member['id'], 'role': 'admin'},
+                 port=port, headers=admin)
+        status, headers, session = self.request(port, 'POST', '/api/auth/login',
+                                               {'username': username, 'password': password})
+        self.assertEqual(status, 200)
+        member_headers = {'Cookie': headers['Set-Cookie'].split(';')[0], 'X-CSRF-Token': session['csrf']}
+        path, payload, key = f"/api/boards/{board['id']}/sprints", {'name': self.name + '-sprint'}, uuid.uuid4().hex
+        created = self.api('POST', path, payload, port=port, headers=member_headers, key=key, expected=201)
+        self.assertEqual(self.api('POST', path, payload, port=port, headers=member_headers,
+                                  key=key, expected=201), created)
+        self.api('DELETE', f"/api/boards/{board['id']}/members/{member['id']}", port=port, headers=admin)
+        restarted = self.start('--auth')
+        status, response_headers, denied = self.request(restarted, 'POST', path, payload,
+                                                       key=key, headers=member_headers)
+        self.assertEqual(status, 404, denied)
+        self.assertNotIn('Idempotency-Replayed', response_headers)
+        self.assertNotIn('sprint', denied)
+
     def test_accounts_sessions_and_comments_survive_new_cache(self):
         authenticated = self.start('--auth')
         session = self.api('GET', '/api/auth/session', port=authenticated)

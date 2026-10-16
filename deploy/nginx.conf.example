@@ -21,7 +21,7 @@ server {
         proxy_read_timeout 30s;
     }
     location = / { try_files /index.html =404; }
-    location ~ ^/(index\.html|app\.js|planning\.js|productivity\.js|styles\.css|favicon\.svg)$ {
+    location ~ ^/(index\.html|i18n\.js|locales\.js|app\.js|planning\.js|productivity\.js|enterprise\.js|workflows\.js|styles\.css|enterprise\.css|workflows\.css|favicon\.svg)$ {
         limit_except GET { deny all; }
         try_files $uri =404;
     }

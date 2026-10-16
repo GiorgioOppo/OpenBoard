@@ -459,7 +459,11 @@ static void handle(int fd) {
   snprintf(request.request_id, sizeof request.request_id, "%lx-%llu",
            (unsigned long)getpid(),
            (unsigned long long)atomic_fetch_add(&sequence, 1));
-  snprintf(request.peer, sizeof request.peer, "127.0.0.1");
+  struct sockaddr_in peer = {0};
+  socklen_t peer_length = sizeof peer;
+  if (getpeername(fd, (struct sockaddr *)&peer, &peer_length) == 0 &&
+      peer.sin_family == AF_INET)
+    inet_ntop(AF_INET, &peer.sin_addr, request.peer, sizeof request.peer);
   int64_t start = milliseconds();
   atomic_fetch_add(&metric_requests, 1);
   atomic_fetch_add(&metric_active, 1);

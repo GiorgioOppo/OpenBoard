@@ -2904,3 +2904,10 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,t
 @media(max-width:600px) { .planning-filters { gap:7px; }.planning-filters label { flex:1 1 100%; }.planning-filters select,.planning-filters input { max-width:none; flex:1; min-width:0; }.table-scroll { margin:0 12px; }.worklog-row { flex-wrap:wrap; }.planning-row { display:block; }.planning-row label { display:block; margin:10px 0; }.planning-row button { margin:8px 5px 0 0; }.comment-filters label { width:100%; }.comment-filters input { min-width:0; flex:1; }.milestone-grid { grid-template-columns:1fr; } }
 
 .dropdown-menu { max-height:min(65vh,600px); overflow-y:auto; }
+
+/* Language controls remain available in both the workspace and sign-in dialog. */
+.language-control { display:flex; align-items:center; gap:7px; flex-shrink:0; color:var(--muted,#687361); font-size:12px; }
+.language-control select { max-width:135px; min-height:36px; padding:6px 25px 6px 8px; border:1px solid var(--border,#e4e6de); border-radius:7px; background:var(--surface,#fff); color:var(--text,#323d2e); }
+#auth-form > .language-control { justify-content:flex-end; margin-bottom:12px; }
+.language-status:not(:empty) { position:fixed; bottom:15px; left:15px; right:15px; z-index:9999; margin:0 auto; max-width:650px; padding:12px 16px; border:1px solid #b7c6af; border-radius:10px; background:#f7f8f4; color:#323d2e; box-shadow:0 3px 15px #0002; }
+@media (max-width:700px) { .topbar > .language-control span { display:none; } .topbar > .language-control select { max-width:105px; } .topbar .breadcrumb { display:none; } .topbar { flex-wrap:wrap; } }
