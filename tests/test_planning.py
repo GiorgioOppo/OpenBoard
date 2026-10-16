@@ -152,6 +152,9 @@ class OpenBoardPlanning(unittest.TestCase):
         b=self.create_board();card=self.create_card(b["columns"][0]["id"],"Before upgrade",actual_minutes=7)
         self.stop_server()
         with sqlite3.connect(self.db) as connection:
+            additions = connection.execute("SELECT type,name FROM sqlite_master WHERE name='sprints' OR name GLOB 'sprint_*' OR name GLOB 'intake_*' ORDER BY CASE type WHEN 'trigger' THEN 0 WHEN 'view' THEN 1 WHEN 'index' THEN 2 ELSE 3 END").fetchall()
+            for kind, name in additions:
+                connection.execute('DROP ' + kind.upper() + ' IF EXISTS "' + name.replace('"', '""') + '"')
             connection.executescript("""
                 DROP VIEW ob_board_objects; DROP VIEW ob_card_objects;
                 DROP VIEW review_resolved; DROP VIEW review_eligibility;
@@ -173,7 +176,7 @@ class OpenBoardPlanning(unittest.TestCase):
         self.start_server()
         detail=self.api("GET",f"/api/cards/{card}")
         self.assertEqual((detail["title"],detail["actual_minutes"],detail["custom_values"],detail["milestone_key"],detail["logged_minutes"]),("Before upgrade",7,{},"",0))
-        with sqlite3.connect(self.db) as connection:self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0],6)
+        with sqlite3.connect(self.db) as connection:self.assertEqual(connection.execute("PRAGMA user_version").fetchone()[0],7)
         backup=self.db.with_name(self.db.name+".pre-v4.bak")
         self.assertTrue(backup.exists())
         with sqlite3.connect(backup) as connection:

@@ -21,6 +21,8 @@ ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
           '/planning.js': ('planning.js', 'application/javascript; charset=utf-8'),
           '/enterprise.js': ('enterprise.js', 'application/javascript; charset=utf-8'),
           '/enterprise.css': ('enterprise.css', 'text/css; charset=utf-8'),
+          '/workflows.js': ('workflows.js', 'application/javascript; charset=utf-8'),
+          '/workflows.css': ('workflows.css', 'text/css; charset=utf-8'),
           '/productivity.js': ('productivity.js', 'application/javascript; charset=utf-8'),
           '/styles.css': ('styles.css', 'text/css; charset=utf-8'),
           '/favicon.svg': ('favicon.svg', 'image/svg+xml')}

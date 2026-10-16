@@ -1,6 +1,6 @@
-# API di OpenBoard 0.5.0
+# API di OpenBoard 0.6.0
 
-Il contratto di base della versione 0.2 resta disponibile qui. Le API della 0.3 sono descritte in [produttività](API_PRODUTTIVITA.md) e [collaborazione e account](API_COLLABORAZIONE.md); la 0.4 aggiunge [campi e traguardi](API_PIANIFICAZIONE.md) e [tempo e conversazioni](API_TEAMWORK.md). La 0.5 aggiunge [revisioni e approvazioni](API_REVISIONI.md) e [portfolio e report personali](API_PORTFOLIO.md). Configurazione, database separati e metriche sono in [installazione e gestione](DEPLOYMENT.md).
+Il contratto di base della versione 0.2 resta disponibile qui. Le API della 0.3 sono descritte in [produttività](API_PRODUTTIVITA.md) e [collaborazione e account](API_COLLABORAZIONE.md); la 0.4 aggiunge [campi e traguardi](API_PIANIFICAZIONE.md) e [tempo e conversazioni](API_TEAMWORK.md). La 0.5 aggiunge [revisioni e approvazioni](API_REVISIONI.md) e [portfolio e report personali](API_PORTFOLIO.md); la 0.6 aggiunge [sprint e capacità](API_SPRINT.md) e [moduli e richieste](API_RICHIESTE.md). Configurazione, database separati e metriche sono in [installazione e gestione](DEPLOYMENT.md).
 
 Le API sono disponibili sulla stessa origine dell'interfaccia, per impostazione predefinita `http://127.0.0.1:8090` in sviluppo o `http://openboard.localhost` con Compose. Il backend risponde soltanto con API JSON e restituisce `404` per HTML/CSS/JavaScript e tutti i percorsi non API. Il server locale ascolta su loopback; il container imposta `--bind 0.0.0.0` su una rete privata. `--public-url https://board.example.com` configura host e origine pubblici per il reverse proxy. TLS è gestito da Nginx Proxy Manager.
 
@@ -32,7 +32,7 @@ Questi endpoint sono disponibili anche senza sessione quando gli account sono ab
 | --- | --- | --- |
 | GET | `/api/health` | `{"status":"ok"}`: il processo risponde |
 | GET | `/api/ready` | `200 {"status":"ready"}` se il database è aperto in scrittura e la lettura di controllo riesce; altrimenti `503 {"status":"unavailable"}` |
-| GET | `/api/version` | `{"version":"0.5.0","sqlite":"…","auth_enabled":false,"workers":8,"storage":"sqlite"}`; lo storage esterno riporta `postgresql+mongodb` |
+| GET | `/api/version` | `{"version":"0.6.0","sqlite":"…","auth_enabled":false,"workers":8,"storage":"sqlite"}`; lo storage esterno riporta `postgresql+mongodb` |
 
 La readiness verifica apertura e lettura del database e, in modalità esterna, raggiungibilità di PostgreSQL e MongoDB; non esegue una scrittura di prova. Una scrittura non persistita sui servizi esterni restituisce `503`; riusare la stessa `Idempotency-Key` quando si ritenta un `POST` supportato.
 

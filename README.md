@@ -65,6 +65,8 @@ Puoi scegliere porta e database del backend:
 - Collaborare con account individuali, ruoli, commenti, cronologia e aggiornamenti tra sessioni.
 - Richiedere revisioni delle schede, assegnare revisori e raccogliere approvazioni o modifiche motivate.
 - Consultare un portfolio fra bacheche, salvare report personali e confrontare ritardi, carico e avanzamento.
+- Pianificare sprint dal backlog, assegnare capacità al team e registrare l'avanzamento giornaliero.
+- Creare moduli interni tipizzati, valutare le richieste ricevute e convertirle in schede.
 - Duplicare, archiviare e recuperare dal cestino; importare ed esportare bacheche in JSON.
 
 Le preferenze dell'interfaccia rimangono nel browser; bacheche e schede rimangono nel database. L’esportazione OpenBoard versione 2 è importabile dall’interfaccia su una nuova bacheca. Il backup SQLite conserva anche account, commenti, cronologia e cestino.
@@ -79,12 +81,15 @@ src/collaboration.c Notifiche, sottoscrizioni, allegati e strumenti personali
 src/teamwork.c      Registri del tempo, conversazioni, reazioni e segnalibri
 src/reviews.c       Richieste di revisione, voti, cronologia e inbox
 src/portfolio.c     Ricerca fra bacheche, indicatori e report personali
+src/sprints.c       Sprint, backlog, capacità e osservazioni giornaliere
+src/intake.c        Moduli interni, richieste tipizzate e conversione in schede
 src/cloud.c         PostgreSQL e MongoDB; cache SQLite ricostruibile
 web/index.html      Struttura dell'interfaccia
 web/styles.css      Stili e layout responsive
 web/app.js          Interazioni e comunicazione con le API
 web/planning.js     Campi, traguardi, report e collaborazione della 0.4
 web/enterprise.js   Interfaccia per revisioni, portfolio e report della 0.5
+web/workflows.js    Interfaccia per sprint e raccolta richieste della 0.6
 compose.yaml        Backend C, frontend statico, PostgreSQL, MongoDB e proxy
 tests/              Test di regressione, dominio, autenticazione e HTTP
 Makefile            Compilazione e comandi di sviluppo
@@ -153,6 +158,16 @@ Il portfolio raccoglie le bacheche accessibili, offre ricerca e filtri fra proge
 L'[elenco completo 301–400 con verifiche](docs/MIGLIORIE_400.md) distingue API e interfaccia. I contratti sono in [revisioni](docs/API_REVISIONI.md) e [portfolio](docs/API_PORTFOLIO.md). Lo schema 6 conserva i dati precedenti; l'aggiornamento PostgreSQL/MongoDB 5 → 6 aggiunge le nuove tabelle senza riscrivere i documenti esistenti. Prima dell'aggiornamento seguire la [procedura di backup e migrazione](docs/DEPLOYMENT.md).
 
 ![Portfolio fra bacheche](docs/preview-portfolio.png)
+
+## Funzioni della versione 0.6
+
+Quinto gruppo di 100 interventi: sprint con obiettivo e date, una sola iterazione attiva per bacheca, pianificazione singola o multipla dal backlog, capacità per persona, confronto con l'impegno residuo, osservazioni giornaliere, attività personali, cronologia e CSV. La chiusura dello sprint conserva le schede incomplete e lo storico; le osservazioni vengono acquisite su comando, senza inventare dati dei giorni precedenti.
+
+I moduli interni raccolgono testo, numeri, date, booleani e scelte. Ogni richiesta conserva lo schema dei campi usato all'invio, così le modifiche successive al modulo non cambiano il significato delle vecchie risposte. Sono disponibili inbox personale e della bacheca, valutazione, note, cestino e conversione atomica in una scheda, rispettando permessi e limiti WIP. I moduli richiedono account e appartenenza corrente alla bacheca, anche quando pubblicati.
+
+L'[elenco completo 401–500](docs/MIGLIORIE_500.md) distingue API e interfaccia e documenta le verifiche. I contratti sono in [sprint e capacità](docs/API_SPRINT.md) e [moduli e richieste](docs/API_RICHIESTE.md). Lo schema 7 aggiunge tabelle, indici e trigger; la migrazione esterna supporta 5 → 7 e 6 → 7 conservando le righe e i riferimenti JSON precedenti. Seguire la [procedura di aggiornamento e backup](docs/DEPLOYMENT.md).
+
+![Anteprima del componente sprint con dati dimostrativi](docs/preview-sprints.png)
 
 ## Dati e backup
 

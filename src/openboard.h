@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define OB_VERSION "0.5.0"
+#define OB_VERSION "0.6.0"
 #define OB_HEADER_LIMIT 16384
 #define OB_BODY_LIMIT 2097152
 
@@ -55,6 +55,8 @@ int ob_initialize_database(void);
 int ob_worker_init(void);
 void ob_worker_close(void);
 Response ob_route(Request *request);
+/* Internal composition, inside the request transaction and under the same ACL. */
+Response ob_create_card(Request *request, int64_t column, const char *payload);
 int ob_backup(const char *path);
 int ob_query(const Request *request, const char *key, char *out,
              size_t capacity);

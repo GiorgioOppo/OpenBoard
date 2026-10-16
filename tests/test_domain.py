@@ -274,7 +274,7 @@ class OpenBoardDomain(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertTrue(legacy.with_name(legacy.name + ".pre-v1.bak").exists())
         with sqlite3.connect(legacy) as conn:
-            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 6)
+            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 7)
             self.assertEqual(conn.execute("SELECT count(*) FROM boards").fetchone()[0], 1)
             self.assertEqual(conn.execute("SELECT labels FROM cards").fetchone()[0], '["design"]')
             self.assertTrue(conn.execute("SELECT created_at FROM cards").fetchone()[0])

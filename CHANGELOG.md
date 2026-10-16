@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+Quinto gruppo di 100 interventi: sprint, backlog, assegnazione multipla atomica, capacità per persona, confronti dell'impegno residuo, osservazioni giornaliere esplicite, attività personali, cronologia e CSV. Una sola iterazione attiva per bacheca; le schede incomplete restano tali alla chiusura. Quote di stima e tempo ripartite fra gli assegnatari attuali del team.
+
+Moduli interni con campi tipizzati, schema conservato nelle richieste, inbox, valutazione, note, modifiche personali, cestino e conversione atomica in schede con controllo WIP. Interfaccia costruita dalle API, bozze personali, versioni, filtri e recupero dai conflitti. [Elenco 401–500 e verifiche](docs/MIGLIORIE_500.md).
+
+Schema 7 additivo, backup SQLite prima della migrazione e aggiornamenti esterni espliciti 5/6 → 7 sotto lock PostgreSQL. Opzioni, risposte e schemi dei moduli in MongoDB; relazioni e dati scalari in PostgreSQL. Frontend e backend 0.6 separati, nuovi asset autorizzati nei due server statici.
+
 ## 0.5.0
 
 Quarto gruppo di 100 interventi: revisioni delle schede con revisori nominativi, quorum tutti/almeno uno, decisioni motivate, ritiro del voto, annullamento, riapertura, duplicazione, cestino, cronologia e inbox filtrate. Nessuna autoapprovazione; autorizzazioni correnti e invalidazione permanente dei voti alla revoca dei permessi. Conflitti gestiti tramite versioni.

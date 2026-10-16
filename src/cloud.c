@@ -229,6 +229,9 @@ static bool json_column(const char *table, const char *column) {
          (!strcmp(table, "templates") && !strcmp(column, "payload")) ||
          (!strcmp(table, "saved_views") && !strcmp(column, "filters")) ||
          (!strcmp(table, "saved_reports") && !strcmp(column, "filters")) ||
+         (!strcmp(table, "intake_fields") && !strcmp(column, "options")) ||
+         (!strcmp(table, "intake_requests") &&
+          (!strcmp(column, "answers") || !strcmp(column, "schema_snapshot"))) ||
          (!strcmp(table, "idempotency") &&
           (!strcmp(column, "request_body") ||
            !strcmp(column, "response_body"))) ||
@@ -914,21 +917,22 @@ done:
     cache_epoch = -1;
   return rc;
 }
-/* Schema 6 only adds tables. Keep old rows and immutable document references
+/* Schemas 6 and 7 only add tables. Keep old rows and document references
  * intact, and publish the new layout under the same advisory lock used by
  * requests. Older processes subsequently fail their version check instead of
  * publishing a snapshot that omits the new tables. No arbitrary schema jump is
  * inferred here: a future migration must explicitly describe its data changes.
  */
-static int upgrade_five_to_six(sqlite3 *cache, int64_t epoch) {
+static int upgrade_additive_schema(sqlite3 *cache, int64_t epoch, int previous) {
   if (pg_command("BEGIN"))
     return -1;
   if (create_layout() || hydrate_snapshot(cache, epoch))
     goto failed;
-  PGresult *updated = PQexec(
-      postgres,
-      "UPDATE ob_store SET schema_version=6,epoch=epoch+1 WHERE id=1 AND "
-      "schema_version=5 RETURNING epoch");
+  char sql[160];
+  snprintf(sql, sizeof sql,
+           "UPDATE ob_store SET schema_version=%d,epoch=epoch+1 WHERE id=1 AND "
+           "schema_version=%d RETURNING epoch", local_schema, previous);
+  PGresult *updated = PQexec(postgres, sql);
   bool ok = updated && PQresultStatus(updated) == PGRES_TUPLES_OK &&
             PQntuples(updated) == 1;
   int64_t next_epoch = ok ? strtoll(PQgetvalue(updated, 0, 0), NULL, 10) : -1;
@@ -970,8 +974,10 @@ int cloud_bootstrap(sqlite3 *cache) {
   if (state < 0)
     goto done;
   if (!state && version != local_schema) {
-    if (version == 5 && local_schema == 6) {
-      rc = upgrade_five_to_six(cache, epoch);
+    bool additive = (version == 5 && (local_schema == 6 || local_schema == 7)) ||
+                    (version == 6 && local_schema == 7);
+    if (additive) {
+      rc = upgrade_additive_schema(cache, epoch, version);
       if (!rc)
         bootstrapped = true;
       goto done;

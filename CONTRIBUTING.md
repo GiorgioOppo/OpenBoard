@@ -10,4 +10,4 @@ Le proposte, le segnalazioni di bug e le pull request sono benvenute.
 
 Nella proposta descrivi il problema, il comportamento risultante e la verifica effettuata. Non includere database personali, eseguibili o dati sensibili.
 
-Le aree future comprendono allegati, notifiche, automazioni, SSO, integrazioni e distribuzione ad alta disponibilità. La versione 0.2 include account, permessi per bacheca, importazione JSON e aggiornamenti tramite polling. Lo studio e il perimetro implementato sono documentati in `docs/`.
+Le aree future comprendono automazioni, SSO, integrazioni e distribuzione ad alta disponibilità. La versione 0.6 comprende account e permessi, allegati e notifiche, pianificazione, revisioni, portfolio, sprint e moduli interni. I contratti delle API, gli elenchi numerati e il perimetro verificato sono documentati in `docs/`.

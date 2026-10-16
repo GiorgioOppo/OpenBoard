@@ -4,8 +4,10 @@
 #include "collaboration.h"
 #include "cloud.h"
 #include "openboard.h"
+#include "intake.h"
 #include "portfolio.h"
 #include "reviews.h"
+#include "sprints.h"
 #include "teamwork.h"
 #include <ctype.h>
 #include <errno.h>
@@ -19,7 +21,7 @@
 #include <time.h>
 #include <unistd.h>
 #define COUNT_OF(a) (sizeof(a) / sizeof((a)[0]))
-#define SCHEMA_VERSION 6
+#define SCHEMA_VERSION 7
 _Thread_local sqlite3 *db;
 static _Thread_local jmp_buf request_recovery;
 static _Thread_local jmp_buf *failure_target;
@@ -795,9 +797,12 @@ int ob_initialize_database(void) {
             collaboration_schema(db);
         } else if (next == 5)
             migration_five();
-        else {
+        else if (next == 6) {
             reviews_schema(db);
             portfolio_schema(db);
+        } else {
+            sprints_schema(db);
+            intake_schema(db);
         }
         char p[64];
         snprintf(p, sizeof p, "PRAGMA user_version=%d;COMMIT", next);
@@ -1693,6 +1698,16 @@ done:
     ob_free(custom_values);
     ob_free(milestone);
     return result;
+}
+Response ob_create_card(Request *request, int64_t column, const char *payload) {
+    if (!outer_transaction || sqlite3_get_autocommit(db) || !payload || !valid_object(payload))
+        return error_response(503, "Creazione della scheda fuori transazione.");
+    Request child = *request;
+    child.body = (char *)payload;
+    child.body_len = strlen(payload);
+    child.if_match[0] = 0;
+    child.idempotency_key[0] = 0;
+    return save_card(&child, column, true);
 }
 static Response delete_resource(Request *r, const char *kind, int64_t id) {
     if (!accessible(r, kind, id, true, false))
@@ -3492,11 +3507,24 @@ Response ob_route(Request *r) {
             "{\"value\":\"blocked\",\"label\":\"Bloccate\"},"
             "{\"value\":\"overdue\",\"label\":\"Scadute\"},"
             "{\"value\":\"due_soon\",\"label\":\"In scadenza\"},"
-            "{\"value\":\"unassigned\",\"label\":\"Non assegnate\"}]}"
+            "{\"value\":\"unassigned\",\"label\":\"Non assegnate\"}],"
+            "\"sprint_states\":[{\"value\":\"planned\",\"label\":\"Pianificato\"},"
+            "{\"value\":\"active\",\"label\":\"In corso\"},{\"value\":\"closed\",\"label\":\"Chiuso\"}],"
+            "\"sprint_card_statuses\":[{\"value\":\"all\",\"label\":\"Tutte\"},"
+            "{\"value\":\"open\",\"label\":\"Aperte\"},{\"value\":\"completed\",\"label\":\"Completate\"},"
+            "{\"value\":\"blocked\",\"label\":\"Bloccate\"}],"
+            "\"intake_field_types\":[{\"value\":\"text\",\"label\":\"Testo\"},"
+            "{\"value\":\"number\",\"label\":\"Numero\"},{\"value\":\"date\",\"label\":\"Data\"},"
+            "{\"value\":\"boolean\",\"label\":\"Sì / No\"},{\"value\":\"select\",\"label\":\"Scelta\"}],"
+            "\"intake_request_states\":[{\"value\":\"new\",\"label\":\"Nuova\"},"
+            "{\"value\":\"in_review\",\"label\":\"In valutazione\"},"
+            "{\"value\":\"accepted\",\"label\":\"Accettata\"},"
+            "{\"value\":\"rejected\",\"label\":\"Respinta\"}]}"
         ) : error_response(405, "Metodo non consentito.");
     } else if (!strcmp(r->path, "/api/metrics")) {
         result = get ? ob_metrics(r) : error_response(405, "Metodo non consentito.");
-    } else if (!reviews_handle(r, &result) && !portfolio_handle(r, &result) &&
+    } else if (!sprints_handle(r, &result) && !intake_handle(r, &result) &&
+               !reviews_handle(r, &result) && !portfolio_handle(r, &result) &&
                !teamwork_handle(r, &result) && !collaboration_handle(r, &result)) {
         if (!get && !strcmp(r->role, "observer") && !personal_view_route(r))
             result = error_response(403, "Il ruolo osservatore consente solo la lettura.");

@@ -1,7 +1,9 @@
 """Real PostgreSQL/MongoDB persistence tests (opt in with OPENBOARD_CLOUD_TEST=1).
 
 Use disposable databases in OPENBOARD_POSTGRES_URL/OPENBOARD_MONGODB_URI. The
-suite adds uniquely named data, never drops databases. Driver inspection uses
+suite adds uniquely named data, never drops databases. Migration tests also drop
+introduced tables and change version metadata; enable them only on disposable
+stores with OPENBOARD_CLOUD_MIGRATION_TEST=1. Driver inspection uses
 ctypes and the same native libraries as the application, with no Python DB
 packages. Optional outage test: OPENBOARD_CLOUD_MONGO_CONTAINER=<test container>.
 """
@@ -217,6 +219,23 @@ class CloudPersistence(unittest.TestCase):
         created = self.api('POST', '/api/boards', {'name':self.name}, expected=201)
         return self.api('GET', f'/api/boards/{created["id"]}')
 
+    def authenticate(self, port=None, username='cloud.admin'):
+        port = port or self.start('--auth')
+        credentials = {'username': username, 'password': 'Cloud-test-password-1016!'}
+        setup = self.api('GET', '/api/auth/session', port=port)['setup_required']
+        if setup:
+            credentials['name'] = 'Cloud test admin'
+        status, headers, session = self.request(port, 'POST',
+            '/api/auth/setup' if setup else '/api/auth/login', credentials)
+        self.assertEqual(status, 201 if setup else 200)
+        return port, {'Cookie': headers['Set-Cookie'].split(';')[0], 'X-CSRF-Token': session['csrf']}
+
+    def stop_processes(self):
+        for process, _, _, _ in self.processes:
+            if process.poll() is None:
+                process.terminate()
+                process.wait(timeout=15)
+
     def test_accounts_sessions_and_comments_survive_new_cache(self):
         authenticated = self.start('--auth')
         session = self.api('GET', '/api/auth/session', port=authenticated)
@@ -412,6 +431,124 @@ class CloudPersistence(unittest.TestCase):
             self.assertEqual(json.loads(connection.execute('SELECT filters FROM saved_reports WHERE id=?',
                 (report['id'],)).fetchone()[0]), filters)
 
+    @unittest.skipUnless(os.environ.get('OPENBOARD_CLOUD_MIGRATION_TEST') == '1',
+                         'Set OPENBOARD_CLOUD_MIGRATION_TEST=1 only for disposable stores')
+    def test_schema_six_upgrade_keeps_approved_review_and_original_report_document(self):
+        port, headers = self.authenticate()
+        board_id = self.api('POST', '/api/boards', {'name': self.name}, port=port,
+                            headers=headers, expected=201)['id']
+        board = self.api('GET', f'/api/boards/{board_id}', port=port, headers=headers)
+        card_id = self.api('POST', f'/api/columns/{board["columns"][0]["id"]}/cards',
+            {'title': 'Da conservare nella migrazione 6 → 7'}, port=port, headers=headers, expected=201)['id']
+        username = 'migration.' + uuid.uuid4().hex[:12]
+        reviewer_id = self.api('POST', '/api/users', {'username': username, 'name': 'Revisore migrazione',
+            'password': 'Cloud-test-password-1016!', 'role': 'member'}, port=port, headers=headers, expected=201)['id']
+        self.api('POST', f'/api/boards/{board_id}/members', {'user_id': reviewer_id, 'role': 'member'},
+                 port=port, headers=headers)
+        review = self.api('POST', f'/api/cards/{card_id}/reviews', {'title': self.name,
+            'reviewer_ids': [reviewer_id]}, port=port, headers=headers, expected=201)
+        _, reviewer_headers = self.authenticate(port, username)
+        self.api('POST', f'/api/reviews/{review["id"]}/vote', {'decision': 'approved', 'note': 'Da conservare'},
+                 port=port, headers=reviewer_headers)
+        filters = {'q': 'Caffè ☕', 'board_id': board_id, 'include_archived': False}
+        report = self.api('POST', '/api/me/reports', {'name': self.name, 'filters': filters, 'pinned': True},
+                         port=port, headers=headers, expected=201)
+        reference = self.stores.sql(f'SELECT filters__doc FROM ob_saved_reports WHERE id={report["id"]}')[0][0]
+        self.stop_processes()
+        self.stores.sql("DROP TABLE ob_sprint_cards,ob_sprint_capacity,ob_sprint_snapshots,ob_sprint_events,ob_sprints,"
+            "ob_intake_fields,ob_intake_requests,ob_intake_notes,ob_intake_events,ob_intake_forms; "
+            "DELETE FROM ob_sqlite_sequence WHERE name IN('sprints','sprint_events','intake_forms',"
+            "'intake_fields','intake_requests','intake_notes','intake_events'); "
+            "UPDATE ob_store SET schema_version=6; SELECT schema_version FROM ob_store")
+        recovered = self.start('--auth')
+        self.assertEqual(self.stores.sql('SELECT schema_version FROM ob_store'), [['7']])
+        self.assertEqual(self.stores.sql(f'SELECT filters__doc FROM ob_saved_reports WHERE id={report["id"]}'), [[reference]])
+        self.assertEqual(self.api('GET', f'/api/reports/{report["id"]}', port=recovered, headers=headers), report)
+        restored = self.api('GET', f'/api/reviews/{review["id"]}', port=recovered, headers=headers)
+        self.assertEqual(restored['status'], 'approved')
+        self.assertEqual(restored['reviewers'][0]['note'], 'Da conservare')
+
+    def test_workflow_sprints_typed_requests_conversion_and_snapshots_survive_cold_cache_and_backup(self):
+        port, headers = self.authenticate()
+        session = self.api('GET', '/api/auth/session', port=port, headers=headers)
+        user_id = session['user']['id']
+        board_id = self.api('POST', '/api/boards', {'name': self.name}, port=port,
+                            headers=headers, expected=201)['id']
+        board = self.api('GET', f'/api/boards/{board_id}', port=port, headers=headers)
+        column_id = board['columns'][0]['id']
+        card_id = self.api('POST', f'/api/columns/{column_id}/cards',
+            {'title': 'Lavoro pianificato', 'estimate_minutes': 45, 'assignee_ids': [user_id]},
+            port=port, headers=headers, expected=201)['id']
+        sprint = self.api('POST', f'/api/boards/{board_id}/sprints', {'name': self.name,
+            'goal': 'Persistenza completa', 'start_date': '2026-10-16', 'end_date': '2026-10-30'},
+            port=port, headers=headers, expected=201)
+        sid = sprint['id']
+        self.api('POST', f'/api/sprints/{sid}/cards', {'card_id': card_id}, port=port, headers=headers)
+        self.api('PATCH', f'/api/sprints/{sid}/capacity/{user_id}', {'minutes': 120}, port=port, headers=headers)
+        self.api('POST', f'/api/sprints/{sid}/activate', {}, port=port, headers=headers)
+        form = self.api('POST', f'/api/boards/{board_id}/intake/forms', {'name': self.name,
+            'description': 'Un modulo da conservare', 'column_id': column_id}, port=port, headers=headers, expected=201)
+        fid = form['id']
+        for field in [{'key': 'score', 'name': 'Punteggio', 'type': 'number', 'required': True},
+                      {'key': 'ready', 'name': 'Pronto', 'type': 'boolean', 'required': True},
+                      {'key': 'choice', 'name': 'Scelta', 'type': 'select', 'options': ['Caffè ☕', 'Altro'], 'required': True}]:
+            self.api('POST', f'/api/intake/forms/{fid}/fields', field, port=port, headers=headers, expected=201)
+        form = self.api('POST', f'/api/intake/forms/{fid}/publish', {}, port=port, headers=headers)
+        answers = {'score': 0, 'ready': False, 'choice': 'Caffè ☕'}
+        request = self.api('POST', f'/api/intake/forms/{fid}/requests', {'title': 'Richiesta Unicode ☕', 'answers': answers},
+            port=port, headers={**headers, 'If-Match': str(form['version'])}, expected=201)
+        rid = request['id']
+        original_schema = request['schema_snapshot']
+        self.api('POST', f'/api/intake/requests/{rid}/notes', {'body': 'Contesto da conservare'}, port=port, headers=headers, expected=201)
+        self.api('POST', f'/api/intake/requests/{rid}/state', {'state': 'accepted'}, port=port, headers=headers)
+        converted = self.api('POST', f'/api/intake/requests/{rid}/convert', {}, port=port, headers=headers)
+        converted_id = converted['converted_card_id']
+        self.assertGreater(converted_id, 0)
+        self.assertEqual(self.api('GET', f'/api/cards/{converted_id}', port=port, headers=headers)['title'], 'Richiesta Unicode ☕')
+        self.api('POST', f'/api/sprints/{sid}/cards', {'card_id': converted_id}, port=port, headers=headers)
+        sprint = self.api('GET', f'/api/sprints/{sid}', port=port, headers=headers)
+        self.api('POST', f'/api/sprints/{sid}/snapshots', {}, port=port,
+                 headers={**headers, 'If-Match': str(sprint['version'])})
+        references = self.stores.sql(f'SELECT answers__doc,schema_snapshot__doc FROM ob_intake_requests WHERE id={rid}')[0]
+        for reference, kind, value in zip(references, ('answers', 'schema_snapshot'), (answers, original_schema)):
+            document = self.stores.command({'find': 'documents', 'filter': {'_id': reference},
+                                           'limit': 1})['cursor']['firstBatch'][0]
+            self.assertEqual(document['kind'], 'intake_requests.' + kind)
+            self.assertEqual(document['value'], value)
+            self.assertEqual(json.loads(document['raw']), value)
+        self.assertEqual(self.stores.sql("SELECT column_name FROM information_schema.columns WHERE table_name='ob_intake_requests' "
+            "AND column_name IN('answers','schema_snapshot')"), [])
+        self.stop_processes()
+        # Nullable structured targets survive rehydration when a destination
+        # column has been permanently removed; historical answers remain valid.
+        self.stores.sql(f'UPDATE ob_intake_forms SET column_id=NULL,published=0,version=version+1 WHERE id={fid}; SELECT 1')
+        recovered = self.start('--auth')
+        restored = self.api('GET', f'/api/intake/requests/{rid}', port=recovered, headers=headers)
+        self.assertEqual(restored['answers'], answers)
+        self.assertEqual(restored['schema_snapshot'], original_schema)
+        self.assertEqual(restored['converted_card_id'], converted_id)
+        self.assertIsNone(self.api('GET', f'/api/intake/forms/{fid}', port=recovered, headers=headers)['column_id'])
+        self.assertEqual(self.api('GET', f'/api/sprints/{sid}', port=recovered, headers=headers)['state'], 'active')
+        self.assertEqual(len(self.api('GET', f'/api/sprints/{sid}/cards', port=recovered, headers=headers)['items']), 2)
+        self.assertEqual(len(self.api('GET', f'/api/sprints/{sid}/snapshots', port=recovered, headers=headers)['items']), 1)
+        backup = Path(self.temp.name) / 'workflows-backup.db'
+        environment = clean_environment()
+        environment.update({k: os.environ[k] for k in ('OPENBOARD_POSTGRES_URL', 'OPENBOARD_MONGODB_URI')})
+        result = subprocess.run([str(BINARY), '--db', str(Path(self.temp.name) / 'backup-cache.db'),
+            '--no-demo', '--backup', str(backup)], env=environment, capture_output=True, timeout=25)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import sqlite3
+        with sqlite3.connect(backup) as connection:
+            self.assertEqual(connection.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+            raw, schema, card = connection.execute('SELECT answers,schema_snapshot,converted_card_id FROM intake_requests WHERE id=?', (rid,)).fetchone()
+            self.assertEqual(json.loads(raw), answers)
+            self.assertEqual(json.loads(schema), original_schema)
+            self.assertEqual(card, converted_id)
+            self.assertEqual(connection.execute('SELECT count(*) FROM sprint_cards WHERE sprint_id=?', (sid,)).fetchone()[0], 2)
+            self.assertEqual(connection.execute('SELECT count(*) FROM sprint_snapshots WHERE sprint_id=?', (sid,)).fetchone()[0], 1)
+
+    @unittest.skipUnless(os.environ.get('OPENBOARD_CLOUD_MIGRATION_TEST') == '1',
+                         'Set OPENBOARD_CLOUD_MIGRATION_TEST=1 only for disposable stores')
     def test_schema_five_upgrade_preserves_document_references_and_rolls_back_failed_hydration(self):
         # These opt-in tests require disposable stores, as documented above.
         board = self.new_board()
@@ -422,8 +559,11 @@ class CloudPersistence(unittest.TestCase):
         for process, _, _, _ in self.processes:
             process.terminate()
             process.wait(timeout=15)
-        self.stores.sql("DROP TABLE ob_review_votes,ob_review_members,ob_review_events,ob_reviews,ob_saved_reports; "
-            "DELETE FROM ob_sqlite_sequence WHERE name IN('reviews','review_events','saved_reports'); "
+        self.stores.sql("DROP TABLE ob_review_votes,ob_review_members,ob_review_events,ob_reviews,ob_saved_reports,"
+            "ob_sprint_cards,ob_sprint_capacity,ob_sprint_snapshots,ob_sprint_events,ob_sprints,"
+            "ob_intake_fields,ob_intake_requests,ob_intake_notes,ob_intake_events,ob_intake_forms; "
+            "DELETE FROM ob_sqlite_sequence WHERE name IN('reviews','review_events','saved_reports',"
+            "'sprints','sprint_events','intake_forms','intake_fields','intake_requests','intake_notes','intake_events'); "
             "UPDATE ob_store SET schema_version=5; SELECT schema_version FROM ob_store")
         epoch = self.stores.sql('SELECT epoch FROM ob_store')[0][0]
         # A missing immutable document must abort both the new SQL layout and
@@ -442,7 +582,7 @@ class CloudPersistence(unittest.TestCase):
             self.stores.sql(f"UPDATE ob_cards SET checklist__doc='{reference}' WHERE id={card_id}; SELECT 1")
         recovered = self.start()
         self.assertEqual(self.api('GET', f'/api/cards/{card_id}', port=recovered), original)
-        self.assertEqual(self.stores.sql('SELECT schema_version FROM ob_store'), [['6']])
+        self.assertEqual(self.stores.sql('SELECT schema_version FROM ob_store'), [['7']])
         self.assertEqual(self.stores.sql(f'SELECT checklist__doc FROM ob_cards WHERE id={card_id}'), [[reference]])
         self.assertEqual(self.stores.sql('SELECT epoch FROM ob_store'), [[str(int(epoch) + 1)]])
 

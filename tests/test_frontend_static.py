@@ -1,6 +1,6 @@
 """Opt-in HTTP tests against an isolated, read-only frontend container.
 
-OPENBOARD_FRONTEND_IMAGE=openboard-frontend:0.5.0 python3 -m unittest discover
+OPENBOARD_FRONTEND_IMAGE=openboard-frontend:0.6.0 python3 -m unittest discover
 -s tests -p test_frontend_static.py -v
 The fixture starts and removes only its own container. No database is used.
 """
@@ -58,6 +58,7 @@ class FrontendStatic(unittest.TestCase):
         self.assertEqual(body, (ROOT/'web/index.html').read_bytes())
         for name, mime in [('app.js', 'javascript'), ('planning.js', 'javascript'),
                            ('enterprise.js', 'javascript'), ('enterprise.css', 'text/css'),
+                           ('workflows.js', 'javascript'), ('workflows.css', 'text/css'),
                            ('productivity.js', 'javascript'), ('styles.css', 'text/css'),
                            ('favicon.svg', 'image/svg+xml')]:
             with self.subTest(asset=name):

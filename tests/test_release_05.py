@@ -39,7 +39,7 @@ class Release05Migration(unittest.TestCase):
             self.assertIsNone(connection.execute("SELECT name FROM sqlite_master WHERE name='reviews'").fetchone())
             self.assertEqual(connection.execute('SELECT sum(minutes) FROM worklogs').fetchone()[0], 13)
         with closing(sqlite3.connect(self.db)) as connection:
-            self.assertEqual(connection.execute('PRAGMA user_version').fetchone()[0], 6)
+            self.assertEqual(connection.execute('PRAGMA user_version').fetchone()[0], 7)
             for table in ('reviews', 'review_members', 'review_votes', 'review_events', 'saved_reports'):
                 self.assertEqual(connection.execute(f'SELECT count(*) FROM {table}').fetchone()[0], 0)
             self.assertEqual(connection.execute('PRAGMA foreign_key_check').fetchall(), [])
