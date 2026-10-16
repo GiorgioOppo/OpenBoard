@@ -3,16 +3,35 @@ name: Build and test
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   test:
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
       - name: Install SQLite headers (Linux)
@@ -21,13 +40,21 @@ jobs:
       - name: Install OpenSSL build metadata (macOS)
         if: runner.os == 'macOS'
         run: brew install openssl@3 pkg-config
+      - name: Build environment
+        run: |
+          python3 --version
+          node --version
+          cc --version
+          pkg-config --modversion openssl
       - name: Build
         run: make
       - name: Integration tests
         run: make test
       - name: Frontend data formats
+        if: ${{ !cancelled() }}
         run: make test-frontend
       - name: Address and undefined behavior sanitizers
+        if: ${{ !cancelled() }}
         run: make test-sanitize
   container:
     runs-on: ubuntu-latest
@@ -35,7 +62,12 @@ jobs:
     env:
       COMPOSE_PROJECT_NAME: openboard-ci-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
       - name: Generate private Compose configuration
         run: python3 scripts/init-env.py --http-port 8088 --https-port 8443 --admin-port 8181
       - name: Validate Compose

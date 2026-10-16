@@ -9,6 +9,7 @@ import http.client
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import socket
+import socketserver
 import threading
 from urllib.parse import urlsplit
 
@@ -46,6 +47,14 @@ def backend_address(value):
     if not valid:
         raise argparse.ArgumentTypeError('Il backend deve essere http://127.0.0.1:PORTA.')
     return ('127.0.0.1', port)
+
+
+class LoopbackServer(ThreadingHTTPServer):
+    def server_bind(self):
+        # HTTPServer normally reverse-resolves the bind address with getfqdn().
+        # This loopback-only helper has no use for DNS or a canonical hostname.
+        socketserver.TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address[:2]
 
 
 class Frontend(BaseHTTPRequestHandler):
@@ -194,7 +203,7 @@ def main():
     root = arguments.web_root.resolve()
     if not (root/'index.html').is_file():
         parser.error('La cartella frontend deve contenere index.html.')
-    server = ThreadingHTTPServer(('127.0.0.1', arguments.port), Frontend)
+    server = LoopbackServer(('127.0.0.1', arguments.port), Frontend)
     server.daemon_threads = True
     server.backend = arguments.backend
     server.web_root = root

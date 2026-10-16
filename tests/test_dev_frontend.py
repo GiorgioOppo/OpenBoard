@@ -1,5 +1,6 @@
 """Real authenticated API round trips through the loopback development frontend."""
 import http.client
+import importlib.util
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
@@ -11,9 +12,14 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 BINARY = Path(os.environ.get('OPENBOARD_BINARY', ROOT/'build/openboard'))
+
+SPEC = importlib.util.spec_from_file_location('openboard_dev_frontend', ROOT/'scripts/dev-frontend.py')
+DEV = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(DEV)
 
 
 def free_port():
@@ -39,17 +45,26 @@ class DevelopmentFrontend(unittest.TestCase):
                         [sys.executable, str(ROOT/'scripts/dev-frontend.py'), '--port', str(self.frontend_port), '--backend', f'http://127.0.0.1:{self.backend_port}']):
             self.processes.append(subprocess.Popen(command, env=environment, stdout=self.log, stderr=self.log))
         deadline = time.monotonic()+10
+        last_probe = 'not attempted'
         while time.monotonic() < deadline:
             if any(process.poll() is not None for process in self.processes):
-                self.log.seek(0)
-                self.fail(self.log.read().decode(errors='replace'))
+                self.fail(self.startup_diagnostics(last_probe))
             try:
-                if self.request('/health')[0] == 200 and self.request('/api/ready')[0] == 200:
+                health = self.request('/health', timeout=.5)
+                ready = self.request('/api/ready', timeout=.5)
+                last_probe = f'health={health[0]}, API readiness={ready[0]}, body={ready[2]!r}'
+                if health[0] == 200 and ready[0] == 200:
                     return
-            except (OSError, http.client.HTTPException):
-                pass
+            except (OSError, http.client.HTTPException) as error:
+                last_probe = f'{type(error).__name__}: {error}'
             time.sleep(.03)
-        self.fail('Development frontend/API failed to become ready')
+        self.fail(self.startup_diagnostics(last_probe))
+
+    def startup_diagnostics(self, last_probe):
+        logs = os.pread(self.log.fileno(), 16384, 0).decode(errors='replace')
+        processes = ', '.join(f'pid={process.pid} exit={process.poll()}' for process in self.processes)
+        return (f'Development frontend/API failed to become ready: frontend={self.frontend_port}, '
+                f'backend={self.backend_port}; {last_probe}; {processes}\n{logs}')
 
     def stop(self):
         for process in self.processes:
@@ -61,12 +76,12 @@ class DevelopmentFrontend(unittest.TestCase):
                     process.kill()
                     process.wait(timeout=5)
 
-    def request(self, path, method='GET', data=None, headers=None):
+    def request(self, path, method='GET', data=None, headers=None, timeout=10):
         headers = dict(headers or {})
         if data is not None:
             data = json.dumps(data).encode()
             headers['Content-Type'] = 'application/json'
-        connection = http.client.HTTPConnection('127.0.0.1', self.frontend_port, timeout=10)
+        connection = http.client.HTTPConnection('127.0.0.1', self.frontend_port, timeout=timeout)
         try:
             connection.request(method, path, data, headers)
             response = connection.getresponse()
@@ -150,7 +165,7 @@ class DevelopmentFrontend(unittest.TestCase):
                 self.send_header('X-Upstream-Probe', 'preserved')
                 self.end_headers()
                 self.wfile.write(response_body)
-        upstream = ThreadingHTTPServer(('127.0.0.1', self.backend_port), Upstream)
+        upstream = DEV.LoopbackServer(('127.0.0.1', self.backend_port), Upstream)
         self.addCleanup(upstream.server_close)
         self.addCleanup(upstream.shutdown)
         thread = threading.Thread(target=upstream.serve_forever, daemon=True)
@@ -165,3 +180,24 @@ class DevelopmentFrontend(unittest.TestCase):
         self.assertEqual(raw, json.dumps({'zero':0, 'false':False}).encode())
         for name,value in headers.items():
             self.assertEqual(forwarded[name], value)
+
+
+class LoopbackFrontendStartup(unittest.TestCase):
+    def test_numeric_loopback_bind_does_not_depend_on_reverse_dns(self):
+        with patch('socket.getfqdn', side_effect=AssertionError('Unexpected DNS lookup')):
+            with DEV.LoopbackServer(('127.0.0.1', 0), DEV.Frontend) as server:
+                self.assertEqual(server.server_name, '127.0.0.1')
+                self.assertGreater(server.server_port, 0)
+                thread = threading.Thread(target=server.serve_forever, daemon=True)
+                thread.start()
+                try:
+                    connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=2)
+                    try:
+                        connection.request('GET', '/health')
+                        response = connection.getresponse()
+                        self.assertEqual((response.status, response.read()), (200, b'ok\n'))
+                    finally:
+                        connection.close()
+                finally:
+                    server.shutdown()
+                    thread.join(timeout=2)
