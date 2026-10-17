@@ -4,7 +4,7 @@ Version sections describe the code's development history. They do not imply that
 
 ## Unreleased
 
-No unreleased changes.
+Refresh the pinned MongoDB `8.0.34-noble` multi-platform base image to the upstream rebuild published on 2026-10-17. Preserve MongoDB 8.0.34, its data format and the existing rebuilt tools and hardening. The OCI base-digest label follows the new pin. Historical audit measurements and the published `v0.6.1` tag continue to identify their original artifacts.
 
 ## 0.6.1 — 2026-10-16 (Early preview)
 

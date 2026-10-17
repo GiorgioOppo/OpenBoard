@@ -12,7 +12,7 @@ COPY scripts/build-mongo-tools.sh /usr/local/bin/build-mongo-tools.sh
 RUN sh /usr/local/bin/build-mongo-tools.sh
 
 # Preserve the 8.0 server format, initialization and administration binaries.
-FROM mongo:8.0.34-noble@sha256:0dc2511c4261bffa84f5af2c7df2aae148c0bea68d9b0aacd85c3d7be07e0583 AS patched
+FROM mongo:8.0.34-noble@sha256:c2d54fddfb3738fb27fe117f51692e3f44e640a3e7aeb8da3937ee9cd33a650b AS patched
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -34,7 +34,7 @@ ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     MONGO_VERSION=8.0.34 HOME=/data/db GLIBC_TUNABLES=glibc.pthread.rseq=0
 LABEL org.opencontainers.image.title="OpenBoard MongoDB 8.0" \
     org.opencontainers.image.base.name="mongo:8.0.34-noble" \
-    org.opencontainers.image.base.digest="sha256:0dc2511c4261bffa84f5af2c7df2aae148c0bea68d9b0aacd85c3d7be07e0583"
+    org.opencontainers.image.base.digest="sha256:c2d54fddfb3738fb27fe117f51692e3f44e640a3e7aeb8da3937ee9cd33a650b"
 VOLUME /data/db /data/configdb
 EXPOSE 27017
 ENTRYPOINT ["docker-entrypoint.sh"]

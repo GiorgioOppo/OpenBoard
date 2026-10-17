@@ -21,6 +21,8 @@ Start Docker Engine or Docker Desktop. You also need Docker Compose with `depend
 
 Compose builds five project images: `openboard:0.6.1`, `openboard-frontend:0.6.1`, `openboard-postgres:0.6.1`, `openboard-mongo:0.6.1` and `openboard-proxy:0.6.1`. The database and proxy images pin PostgreSQL 17.11, MongoDB 8.0.34 and NPM 2.16.0 bases by digest, update distribution packages and rebuild affected components. They retain the database major versions and data formats. The first build also downloads Go sources and dependencies, so subsequent builds are faster. The [remediation report](SECURITY_REMEDIATION_2026-10-16.md) records versions, verification and residual findings. Review image pins and repeat scans when updating dependencies.
 
+The unreleased MongoDB base refresh of 2026-10-17 retains server version 8.0.34 and updates the index digest in [Dockerfile.mongo](../Dockerfile.mongo). The published `v0.6.1` tag retains its original pin. The dated security inventories describe the earlier artifacts; their vulnerability counts are not new scan results for this rebuild.
+
 The frontend uses `nginxinc/nginx-unprivileged:1.30.6-alpine-slim` with distribution updates and starts Nginx directly with temporary directories in `/tmp`. PostgreSQL 17 persists in `/var/lib/postgresql/data`; upgrading to PostgreSQL 18 requires a migration plan. See the [PostgreSQL image documentation](https://hub.docker.com/_/postgres) and the [frontend image documentation](https://github.com/nginx/docker-nginx-unprivileged/blob/main/README.md).
 
 ## First local start
