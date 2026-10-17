@@ -69,7 +69,13 @@ class DisposableStores(AbstractContextManager):
 
     def __enter__(self):
         try:
-            docker('network', 'create', '--internal', '--label', 'openboard.disposable=true', self.network)
+            # A container-only recovery needs no host connectivity. Native
+            # integration clients, however, use published loopback ports: do
+            # not depend on forwarding behavior of Docker internal bridges.
+            network = ['network', 'create']
+            if not self.publish:
+                network.append('--internal')
+            docker(*network, '--label', 'openboard.disposable=true', self.network)
             self.network_created = True
             self._start(self.postgres, self.postgres_image, {
                 'POSTGRES_USER': 'postgres', 'POSTGRES_DB': 'openboard',
@@ -83,8 +89,11 @@ class DisposableStores(AbstractContextManager):
                 'OPENBOARD_MONGO_APP_PASSWORD': self.variables['OPENBOARD_MONGO_APP_PASSWORD']},
                 'mongo-init.js', '/docker-entrypoint-initdb.d/10-openboard.js', self.mongo_port, 27017)
             self._wait(self.postgres, ['sh', '-ec', 'PGPASSWORD="$POSTGRES_APP_PASSWORD" psql -h 127.0.0.1 -U openboard -d openboard -Atqc "SELECT 1"'])
-            self._wait(self.mongo, ['mongosh', '--quiet', '--eval',
+            self._wait(self.mongo, ['mongosh', '--host', '127.0.0.1', '--quiet', '--eval',
                        'if (!db.getSiblingDB("openboard").auth("openboard", process.env.OPENBOARD_MONGO_APP_PASSWORD)) quit(1)'])
+            if self.publish:
+                self._wait_host(self.postgres, self.pg_port)
+                self._wait_host(self.mongo, self.mongo_port)
             return self
         except Exception:
             self.__exit__(*sys.exc_info())
@@ -120,6 +129,23 @@ class DisposableStores(AbstractContextManager):
                 pass
             time.sleep(min(.15, max(0, deadline - time.monotonic())))
         raise BackupError('Disposable database readiness deadline exceeded.')
+
+    def _wait_host(self, container, port):
+        """Check the exact runner-to-container route used by native drivers."""
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            state = docker('inspect', '--format', '{{.State.Status}}', container, timeout=5).stdout.strip()
+            if state in (b'exited', b'dead', b'removing'):
+                raise BackupError('Disposable database stopped before its published port became ready.')
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            try:
+                with socket.create_connection(('127.0.0.1', port), timeout=min(1, remaining)):
+                    return
+            except OSError:
+                time.sleep(min(.15, max(0, deadline - time.monotonic())))
+        raise BackupError('Disposable database published loopback port is unavailable to the test runner.')
 
     def urls(self, host=False):
         if host and not self.publish:

@@ -1,4 +1,5 @@
 """Run actual bounded workload measurements against an isolated C server."""
+import errno
 import json
 import os
 from pathlib import Path
@@ -56,10 +57,18 @@ class BenchmarkHostIsolation(unittest.TestCase):
     def test_random_authority_cannot_prepare_data_in_another_backend(self):
         module = runpy.run_path(str(ROOT / 'scripts/benchmark.py'))
         before = self.request('GET', '/api/boards')[2]
-        status, _ = module['call'](self.port, 'POST', '/api/boards', {'name': 'Must not create'},
-                                   authority='benchmark-isolation-proof.localhost')
-        self.assertEqual(status, 403)
+        try:
+            status, _ = module['call'](self.port, 'POST', '/api/boards', {'name': 'Must not create'},
+                                       authority='benchmark-isolation-proof.localhost')
+        except ConnectionResetError as error:
+            # Host validation rejects before reading the request body. Closing
+            # while that body is arriving can reset the TCP stream on macOS.
+            self.assertEqual(error.errno, errno.ECONNRESET)
+        else:
+            self.assertEqual(status, 403)
         self.assertEqual(self.request('GET', '/api/boards')[2], before)
+        self.assertIsNone(self.process.poll())
+        self.assertEqual(self.request('GET', '/api/health')[0], 200)
 
 
 if __name__ == "__main__":

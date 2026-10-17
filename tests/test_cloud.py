@@ -62,6 +62,20 @@ def native_library(packages, names):
     raise RuntimeError('Native cloud driver not found; configure PKG_CONFIG_PATH')
 
 
+def postgres_failure_category(message):
+    """Expose a fixed diagnostic category, never libpq's URI-bearing text."""
+    message = (message or b'').lower()
+    for fragments, category in (
+            ((b'password authentication failed', b'no pg_hba.conf entry', b'no password supplied'), 'authentication'),
+            ((b'connection refused',), 'connection-refused'),
+            ((b'timeout', b'timed out'), 'timeout'),
+            ((b'could not translate host name', b'name or service not known'), 'name-resolution'),
+            ((b'certificate', b'ssl error', b'tls error'), 'tls')):
+        if any(fragment in message for fragment in fragments):
+            return category
+    return 'connection'
+
+
 class NativeStores:
     def __init__(self):
         self.pq = native_library(['libpq'], ['pq'])
@@ -70,6 +84,7 @@ class NativeStores:
         for name, args, result in [
             ('PQconnectdb', [C.c_char_p], C.c_void_p),
             ('PQstatus', [C.c_void_p], C.c_int),
+            ('PQerrorMessage', [C.c_void_p], C.c_char_p),
             ('PQexec', [C.c_void_p, C.c_char_p], C.c_void_p),
             ('PQresultStatus', [C.c_void_p], C.c_int),
             ('PQntuples', [C.c_void_p], C.c_int),
@@ -97,7 +112,11 @@ class NativeStores:
         self.mongo.mongoc_init()
         self.postgres = self.pq.PQconnectdb(os.environ['OPENBOARD_POSTGRES_URL'].encode())
         if not self.postgres or self.pq.PQstatus(self.postgres) != 0:
-            raise RuntimeError('Test PostgreSQL unavailable')
+            category = postgres_failure_category(self.pq.PQerrorMessage(self.postgres))
+            if self.postgres:
+                self.pq.PQfinish(self.postgres)
+                self.postgres = None
+            raise RuntimeError('Test PostgreSQL unavailable (' + category + ')')
         self.client = self.mongo.mongoc_client_new(os.environ['OPENBOARD_MONGODB_URI'].encode())
         if not self.client:
             raise RuntimeError('Test MongoDB URI invalid')
