@@ -1,0 +1,164 @@
+{
+  "Assegnatario non elencato: {0}": [
+    "Unlisted assignee: {0}", "Responsable non répertorié : {0}", "Asignado no listado: {0}", "Nicht aufgeführte zugewiesene Person: {0}", "未列出的负责人：{0}", "一覧にない担当者：{0}"
+  ],
+  "Anteprima applicata all’editor. Controlla i valori e salva esplicitamente.": [
+    "Preview applied to the editor. Check the values and save explicitly.",
+    "Aperçu appliqué à l’éditeur. Vérifiez les valeurs et enregistrez explicitement.",
+    "Vista previa aplicada al editor. Revisa los valores y guarda explícitamente.",
+    "Vorschau im Editor übernommen. Prüfe die Werte und speichere ausdrücklich.",
+    "预览已应用到编辑器。请检查各项值并手动保存。",
+    "プレビューを編集画面に適用しました。値を確認し、明示的に保存してください。"
+  ],
+  "Applica anteprima all’editor": [
+    "Apply preview to editor", "Appliquer l’aperçu à l’éditeur", "Aplicar vista previa al editor", "Vorschau im Editor übernehmen", "将预览应用到编辑器", "プレビューを編集画面に適用"
+  ],
+  "Applicare l’anteprima aggiorna solo l’editor. Salva esplicitamente la scheda per inviare le modifiche.": [
+    "Applying the preview updates only the editor. Explicitly save the card to send changes.",
+    "L’application de l’aperçu met uniquement à jour l’éditeur. Enregistrez explicitement la carte pour envoyer les modifications.",
+    "Aplicar la vista previa solo actualiza el editor. Guarda explícitamente la tarjeta para enviar los cambios.",
+    "Das Übernehmen der Vorschau aktualisiert nur den Editor. Speichere die Karte ausdrücklich, um Änderungen zu senden.",
+    "应用预览只会更新编辑器。请手动保存卡片以提交更改。",
+    "プレビューの適用は編集画面のみを更新します。変更を送信するには、カードを明示的に保存してください。"
+  ],
+  "Campo personalizzato: {0}": [
+    "Custom field: {0}", "Champ personnalisé : {0}", "Campo personalizado: {0}", "Benutzerdefiniertes Feld: {0}", "自定义字段：{0}", "カスタムフィールド：{0}"
+  ],
+  "Checklist, assegnatari ed etichette sono gruppi indivisibili. I campi personalizzati sono confrontati singolarmente.": [
+    "Checklists, assignees and labels are indivisible groups. Custom fields are compared individually.",
+    "Les checklists, les responsables et les étiquettes sont des groupes indivisibles. Les champs personnalisés sont comparés individuellement.",
+    "Las listas de verificación, los asignados y las etiquetas son grupos indivisibles. Los campos personalizados se comparan individualmente.",
+    "Checklisten, zugewiesene Personen und Labels sind unteilbare Gruppen. Benutzerdefinierte Felder werden einzeln verglichen.",
+    "检查清单、负责人和标签分别作为不可拆分的组处理。自定义字段逐项比较。",
+    "チェックリスト、担当者、ラベルは分割せずグループ単位で扱います。カスタムフィールドは個別に比較します。"
+  ],
+  "Etichette: primaria e aggiuntive": [
+    "Labels: primary and additional", "Étiquettes : principale et supplémentaires", "Etiquetas: principal y adicionales", "Labels: primäres und zusätzliche", "标签：主标签及附加标签", "ラベル：主ラベルと追加ラベル"
+  ],
+  "I dati da confrontare non sono validi o superano i limiti. La bozza è conservata.": [
+    "The comparison data is invalid or exceeds the limits. Your draft has been kept.",
+    "Les données à comparer sont invalides ou dépassent les limites. Votre brouillon est conservé.",
+    "Los datos que se van a comparar no son válidos o superan los límites. Se ha conservado el borrador.",
+    "Die Vergleichsdaten sind ungültig oder überschreiten die Grenzen. Dein Entwurf bleibt erhalten.",
+    "待比较的数据无效或超出限制。草稿已保留。",
+    "比較するデータが無効か、制限を超えています。下書きは保持されています。"
+  ],
+  "I valori uniti non sono validi. Correggi la bozza o modifica le scelte.": [
+    "The merged values are invalid. Correct the draft or change your choices.",
+    "Les valeurs fusionnées sont invalides. Corrigez le brouillon ou modifiez vos choix.",
+    "Los valores combinados no son válidos. Corrige el borrador o cambia tus selecciones.",
+    "Die zusammengeführten Werte sind ungültig. Korrigiere den Entwurf oder ändere deine Auswahl.",
+    "合并后的值无效。请修正草稿或更改选择。",
+    "マージ後の値が無効です。下書きを修正するか、選択を変更してください。"
+  ],
+  "Il server è cambiato di nuovo. Ricarica il confronto; la bozza è conservata.": [
+    "The server version has changed again. Reload the comparison; your draft has been kept.",
+    "La version sur le serveur a encore changé. Rechargez la comparaison ; votre brouillon est conservé.",
+    "La versión del servidor ha vuelto a cambiar. Vuelve a cargar la comparación; se ha conservado el borrador.",
+    "Die Serverversion hat sich erneut geändert. Lade den Vergleich neu; dein Entwurf bleibt erhalten.",
+    "服务器版本再次发生更改。请重新加载比较；草稿已保留。",
+    "サーバーのバージョンが再び変更されました。比較を再読み込みしてください。下書きは保持されています。"
+  ],
+  "Il traguardo scelto non è più disponibile. La bozza è conservata.": [
+    "The selected milestone is no longer available. Your draft has been kept.",
+    "Le jalon sélectionné n’est plus disponible. Votre brouillon est conservé.",
+    "El hito seleccionado ya no está disponible. Se ha conservado el borrador.",
+    "Der gewählte Meilenstein ist nicht mehr verfügbar. Dein Entwurf bleibt erhalten.",
+    "所选里程碑已不可用。草稿已保留。",
+    "選択したマイルストーンは利用できなくなりました。下書きは保持されています。"
+  ],
+  "La bozza è cambiata durante il confronto. Ricarica il confronto prima di applicarlo.": [
+    "The draft changed during comparison. Reload the comparison before applying it.",
+    "Le brouillon a changé pendant la comparaison. Rechargez la comparaison avant de l’appliquer.",
+    "El borrador ha cambiado durante la comparación. Vuelve a cargar la comparación antes de aplicarla.",
+    "Der Entwurf hat sich während des Vergleichs geändert. Lade den Vergleich vor dem Übernehmen neu.",
+    "草稿在比较期间发生了更改。应用前请重新加载比较。",
+    "比較中に下書きが変更されました。適用する前に比較を再読み込みしてください。"
+  ],
+  "La lista scelta non è più disponibile. La bozza è conservata.": [
+    "The selected list is no longer available. Your draft has been kept.",
+    "La liste sélectionnée n’est plus disponible. Votre brouillon est conservé.",
+    "La lista seleccionada ya no está disponible. Se ha conservado el borrador.",
+    "Die gewählte Liste ist nicht mehr verfügbar. Dein Entwurf bleibt erhalten.",
+    "所选列表已不可用。草稿已保留。",
+    "選択したリストは利用できなくなりました。下書きは保持されています。"
+  ],
+  "La scheda o la lista non è più disponibile. La bozza è conservata.": [
+    "The card or list is no longer available. Your draft has been kept.",
+    "La carte ou la liste n’est plus disponible. Votre brouillon est conservé.",
+    "La tarjeta o la lista ya no está disponible. Se ha conservado el borrador.",
+    "Die Karte oder Liste ist nicht mehr verfügbar. Dein Entwurf bleibt erhalten.",
+    "卡片或列表已不可用。草稿已保留。",
+    "カードまたはリストは利用できなくなりました。下書きは保持されています。"
+  ],
+  "La tua bozza": ["Your draft", "Votre brouillon", "Tu borrador", "Dein Entwurf", "你的草稿", "自分の下書き"],
+  "Le date unite non sono valide: l’inizio deve precedere la scadenza.": [
+    "The merged dates are invalid: the start must be on or before the due date.",
+    "Les dates fusionnées sont invalides : le début doit précéder ou correspondre à l’échéance.",
+    "Las fechas combinadas no son válidas: el inicio debe ser anterior o igual al vencimiento.",
+    "Die zusammengeführten Daten sind ungültig: Der Beginn darf nicht nach dem Fälligkeitsdatum liegen.",
+    "合并后的日期无效：开始日期不得晚于截止日期。",
+    "マージ後の日付が無効です。開始日は期限日以前にしてください。"
+  ],
+  "Le modifiche indipendenti sono unite automaticamente. Scegli la bozza o il server per ogni campo in conflitto.": [
+    "Independent changes are merged automatically. Choose the draft or server value for each conflicting field.",
+    "Les modifications indépendantes sont fusionnées automatiquement. Choisissez le brouillon ou le serveur pour chaque champ en conflit.",
+    "Los cambios independientes se combinan automáticamente. Elige el valor del borrador o del servidor para cada campo en conflicto.",
+    "Unabhängige Änderungen werden automatisch zusammengeführt. Wähle für jedes widersprüchliche Feld den Entwurfs- oder Serverwert.",
+    "互不冲突的更改会自动合并。请为每个冲突字段选择草稿值或服务器值。",
+    "独立した変更は自動的にマージされます。競合するフィールドごとに、下書きまたはサーバーの値を選択してください。"
+  ],
+  "Non ci sono differenze nei campi modificabili.": [
+    "There are no differences in editable fields.", "Il n’y a aucune différence dans les champs modifiables.", "No hay diferencias en los campos editables.", "Die bearbeitbaren Felder unterscheiden sich nicht.", "可编辑字段没有差异。", "編集可能なフィールドに差分はありません。"
+  ],
+  "Non hai più il permesso di modificare la scheda. La bozza è conservata.": [
+    "You no longer have permission to edit the card. Your draft has been kept.",
+    "Vous n’avez plus l’autorisation de modifier la carte. Votre brouillon est conservé.",
+    "Ya no tienes permiso para editar la tarjeta. Se ha conservado el borrador.",
+    "Du hast keine Berechtigung mehr, die Karte zu bearbeiten. Dein Entwurf bleibt erhalten.",
+    "你已无权编辑该卡片。草稿已保留。",
+    "カードを編集する権限がなくなりました。下書きは保持されています。"
+  ],
+  "Questa bozza non contiene una versione iniziale verificabile. Ogni differenza richiede una scelta esplicita.": [
+    "This draft has no usable initial version. Every difference requires an explicit choice.",
+    "Ce brouillon ne contient pas de version initiale exploitable. Chaque différence nécessite un choix explicite.",
+    "Este borrador no contiene una versión inicial utilizable. Cada diferencia requiere una elección explícita.",
+    "Dieser Entwurf enthält keine verwendbare Ausgangsversion. Jeder Unterschied erfordert eine ausdrückliche Auswahl.",
+    "此草稿没有可用的初始版本。每处差异都需要明确选择。",
+    "この下書きには利用可能な初期バージョンがありません。すべての差分で明示的な選択が必要です。"
+  ],
+  "Ricarica confronto": ["Reload comparison", "Recharger la comparaison", "Volver a cargar la comparación", "Vergleich neu laden", "重新加载比较", "比較を再読み込み"],
+  "Scegli esplicitamente": ["Choose explicitly", "Choisissez explicitement", "Elige explícitamente", "Ausdrücklich auswählen", "请明确选择", "明示的に選択"],
+  "Scegli un valore per ogni campo in conflitto.": [
+    "Choose a value for every conflicting field.", "Choisissez une valeur pour chaque champ en conflit.", "Elige un valor para cada campo en conflicto.", "Wähle für jedes widersprüchliche Feld einen Wert.", "请为每个冲突字段选择一个值。", "競合するフィールドごとに値を選択してください。"
+  ],
+  "Un assegnatario non è più disponibile. Correggi gli assegnatari nella bozza.": [
+    "An assignee is no longer available. Correct the assignees in your draft.",
+    "Un responsable n’est plus disponible. Corrigez les responsables dans votre brouillon.",
+    "Un asignado ya no está disponible. Corrige los asignados en el borrador.",
+    "Eine zugewiesene Person ist nicht mehr verfügbar. Korrigiere die Zuweisungen in deinem Entwurf.",
+    "某个负责人已不可用。请修正草稿中的负责人。",
+    "利用できなくなった担当者がいます。下書きの担当者を修正してください。"
+  ],
+  "Un campo personalizzato non è più disponibile. Mantieni il valore sul server.": [
+    "A custom field is no longer available. Keep the server value.",
+    "Un champ personnalisé n’est plus disponible. Conservez la valeur du serveur.",
+    "Un campo personalizado ya no está disponible. Mantén el valor del servidor.",
+    "Ein benutzerdefiniertes Feld ist nicht mehr verfügbar. Behalte den Serverwert.",
+    "某个自定义字段已不可用。请保留服务器值。",
+    "利用できなくなったカスタムフィールドがあります。サーバーの値を保持してください。"
+  ],
+  "Un valore personalizzato non è più valido per la definizione corrente.": [
+    "A custom value is no longer valid for the current definition.",
+    "Une valeur personnalisée n’est plus valide pour la définition actuelle.",
+    "Un valor personalizado ya no es válido para la definición actual.",
+    "Ein benutzerdefinierter Wert ist für die aktuelle Definition nicht mehr gültig.",
+    "某个自定义值不再符合当前字段定义。",
+    "現在の定義に対して無効なカスタム値があります。"
+  ],
+  "Unione automatica: modifica locale.": ["Automatic merge: local change.", "Fusion automatique : modification locale.", "Combinación automática: cambio local.", "Automatisch zusammengeführt: lokale Änderung.", "自动合并：本地更改。", "自動マージ：ローカルの変更。"],
+  "Unione automatica: modifica sul server.": ["Automatic merge: server change.", "Fusion automatique : modification du serveur.", "Combinación automática: cambio del servidor.", "Automatisch zusammengeführt: Serveränderung.", "自动合并：服务器更改。", "自動マージ：サーバーの変更。"],
+  "Valore da mantenere": ["Value to keep", "Valeur à conserver", "Valor que se conservará", "Zu behaltender Wert", "要保留的值", "保持する値"],
+  "Versione iniziale": ["Initial version", "Version initiale", "Versión inicial", "Ausgangsversion", "初始版本", "初期バージョン"],
+  "Versione sul server": ["Server version", "Version sur le serveur", "Versión del servidor", "Serverversion", "服务器版本", "サーバーのバージョン"]
+}

@@ -1,0 +1,306 @@
+{
+  "Aggiorna dipendenze": [
+    "Refresh dependencies",
+    "Actualiser les dépendances",
+    "Actualizar dependencias",
+    "Abhängigkeiten aktualisieren",
+    "刷新依赖关系",
+    "依存関係を更新"
+  ],
+  "Altre dipendenze: {0}": [
+    "More dependencies: {0}",
+    "Autres dépendances : {0}",
+    "Más dependencias: {0}",
+    "Weitere Abhängigkeiten: {0}",
+    "其他依赖关系：{0}",
+    "その他の依存関係: {0}"
+  ],
+  "Archiviata": [
+    "Archived",
+    "Archivée",
+    "Archivada",
+    "Archiviert",
+    "已归档",
+    "アーカイブ済み"
+  ],
+  "Caricamento dipendenze…": [
+    "Loading dependencies…",
+    "Chargement des dépendances…",
+    "Cargando dependencias…",
+    "Abhängigkeiten werden geladen…",
+    "正在加载依赖关系…",
+    "依存関係を読み込み中…"
+  ],
+  "Data di riferimento": [
+    "Reference date",
+    "Date de référence",
+    "Fecha de referencia",
+    "Bezugsdatum",
+    "参考日期",
+    "基準日"
+  ],
+  "Date": [
+    "Dates",
+    "Dates",
+    "Fechas",
+    "Daten",
+    "日期",
+    "日付"
+  ],
+  "Date non valide": [
+    "Invalid dates",
+    "Dates non valides",
+    "Fechas no válidas",
+    "Ungültige Daten",
+    "日期无效",
+    "無効な日付"
+  ],
+  "Dipendenze": [
+    "Dependencies",
+    "Dépendances",
+    "Dependencias",
+    "Abhängigkeiten",
+    "依赖关系",
+    "依存関係"
+  ],
+  "Dipendenze non disponibili.": [
+    "Dependencies unavailable.",
+    "Dépendances indisponibles.",
+    "Dependencias no disponibles.",
+    "Abhängigkeiten nicht verfügbar.",
+    "依赖关系不可用。",
+    "依存関係を利用できません。"
+  ],
+  "Intervallo tagliato dalla finestra visibile": [
+    "Range clipped to the visible window",
+    "Intervalle limité à la fenêtre visible",
+    "Intervalo recortado a la ventana visible",
+    "Zeitraum auf sichtbares Fenster begrenzt",
+    "范围已裁剪至可见时间窗口",
+    "表示期間に合わせて範囲を切り詰めています"
+  ],
+  "Le dipendenze sono lette separatamente dalle schede; aggiorna la bacheca per riallineare i dati.": [
+    "Dependencies are read separately from cards; refresh the board to realign the data.",
+    "Les dépendances sont lues séparément des cartes ; actualisez le tableau pour réaligner les données.",
+    "Las dependencias se leen por separado de las tarjetas; actualiza el tablero para volver a sincronizar los datos.",
+    "Abhängigkeiten werden getrennt von Karten gelesen; aktualisieren Sie das Board, um die Daten abzugleichen.",
+    "依赖关系与卡片分别读取；请刷新看板以重新对齐数据。",
+    "依存関係はカードとは別に読み込まれます。ボードを更新してデータを再同期してください。"
+  ],
+  "Lista": [
+    "List",
+    "Liste",
+    "Lista",
+    "Liste",
+    "列表",
+    "リスト"
+  ],
+  "Mese": [
+    "Month",
+    "Mois",
+    "Mes",
+    "Monat",
+    "月",
+    "月"
+  ],
+  "Mostrate al massimo 2000 dipendenze; il grafo può essere incompleto.": [
+    "At most 2000 dependencies are shown; the graph may be incomplete.",
+    "Au maximum 2000 dépendances sont affichées ; le graphe peut être incomplet.",
+    "Se muestran como máximo 2000 dependencias; el grafo puede estar incompleto.",
+    "Es werden höchstens 2000 Abhängigkeiten angezeigt; der Graph kann unvollständig sein.",
+    "最多显示 2000 个依赖关系；关系图可能不完整。",
+    "最大 2000 件の依存関係を表示します。グラフが不完全な場合があります。"
+  ],
+  "Mostrate {0} di {1} schede": [
+    "Showing {0} of {1} cards",
+    "{0} cartes affichées sur {1}",
+    "Se muestran {0} de {1} tarjetas",
+    "{0} von {1} Karten angezeigt",
+    "显示 {1} 张卡片中的 {0} 张",
+    "{1} 件中 {0} 件のカードを表示"
+  ],
+  "Nessuna dipendenza visibile": [
+    "No visible dependencies",
+    "Aucune dépendance visible",
+    "Sin dependencias visibles",
+    "Keine sichtbaren Abhängigkeiten",
+    "没有可见的依赖关系",
+    "表示できる依存関係はありません"
+  ],
+  "Nessuna scheda nel periodo con questi filtri.": [
+    "No cards in this period match these filters.",
+    "Aucune carte de cette période ne correspond à ces filtres.",
+    "Ninguna tarjeta del período coincide con estos filtros.",
+    "Keine Karten in diesem Zeitraum entsprechen diesen Filtern.",
+    "此期间没有符合筛选条件的卡片。",
+    "この期間にフィルターに一致するカードはありません。"
+  ],
+  "Nessuna scheda senza date con questi filtri.": [
+    "No undated cards match these filters.",
+    "Aucune carte sans dates ne correspond à ces filtres.",
+    "Ninguna tarjeta sin fechas coincide con estos filtros.",
+    "Keine Karten ohne Datum entsprechen diesen Filtern.",
+    "没有符合筛选条件的无日期卡片。",
+    "フィルターに一致する日付未設定のカードはありません。"
+  ],
+  "Oggi": [
+    "Today",
+    "Aujourd’hui",
+    "Hoy",
+    "Heute",
+    "今天",
+    "今日"
+  ],
+  "Pagina precedente": [
+    "Previous page",
+    "Page précédente",
+    "Página anterior",
+    "Vorherige Seite",
+    "上一页",
+    "前のページ"
+  ],
+  "Pagina successiva": [
+    "Next page",
+    "Page suivante",
+    "Página siguiente",
+    "Nächste Seite",
+    "下一页",
+    "次のページ"
+  ],
+  "Pagina {0} di {1}": [
+    "Page {0} of {1}",
+    "Page {0} sur {1}",
+    "Página {0} de {1}",
+    "Seite {0} von {1}",
+    "第 {0} 页，共 {1} 页",
+    "{1} ページ中 {0} ページ"
+  ],
+  "Periodo": [
+    "Period",
+    "Période",
+    "Período",
+    "Zeitraum",
+    "期间",
+    "期間"
+  ],
+  "Periodo precedente": [
+    "Previous period",
+    "Période précédente",
+    "Período anterior",
+    "Vorheriger Zeitraum",
+    "上一时段",
+    "前の期間"
+  ],
+  "Periodo successivo": [
+    "Next period",
+    "Période suivante",
+    "Período siguiente",
+    "Nächster Zeitraum",
+    "下一时段",
+    "次の期間"
+  ],
+  "Richiede: {0}": [
+    "Requires: {0}",
+    "Requiert : {0}",
+    "Requiere: {0}",
+    "Benötigt: {0}",
+    "依赖于：{0}",
+    "必要: {0}"
+  ],
+  "Risposta della timeline non valida.": [
+    "Invalid timeline response.",
+    "Réponse de la chronologie non valide.",
+    "Respuesta de la cronología no válida.",
+    "Ungültige Antwort für die Zeitleiste.",
+    "时间线响应无效。",
+    "タイムラインの応答が無効です。"
+  ],
+  "Scheda": [
+    "Card",
+    "Carte",
+    "Tarjeta",
+    "Karte",
+    "卡片",
+    "カード"
+  ],
+  "Schede fuori dal periodo: {0}": [
+    "Cards outside this period: {0}",
+    "Cartes hors de cette période : {0}",
+    "Tarjetas fuera del período: {0}",
+    "Karten außerhalb dieses Zeitraums: {0}",
+    "此期间之外的卡片：{0}",
+    "期間外のカード: {0}"
+  ],
+  "Schede nel periodo": [
+    "Cards in this period",
+    "Cartes de cette période",
+    "Tarjetas del período",
+    "Karten in diesem Zeitraum",
+    "此期间的卡片",
+    "期間内のカード"
+  ],
+  "Schede senza date": [
+    "Undated cards",
+    "Cartes sans dates",
+    "Tarjetas sin fechas",
+    "Karten ohne Datum",
+    "无日期卡片",
+    "日付未設定のカード"
+  ],
+  "Senza date": [
+    "No dates",
+    "Sans dates",
+    "Sin fechas",
+    "Ohne Datum",
+    "未设置日期",
+    "日付未設定"
+  ],
+  "Settimana": [
+    "Week",
+    "Semaine",
+    "Semana",
+    "Woche",
+    "周",
+    "週"
+  ],
+  "Solo inizio: {0}": [
+    "Start only: {0}",
+    "Début uniquement : {0}",
+    "Solo inicio: {0}",
+    "Nur Beginn: {0}",
+    "仅开始日期：{0}",
+    "開始日のみ: {0}"
+  ],
+  "Solo lettura: le date non vengono modificate. Le date singole sono ancore, non durate stimate.": [
+    "Read only: dates are not changed. Single dates are anchors, not estimated durations.",
+    "Lecture seule : les dates ne sont pas modifiées. Les dates seules sont des repères, pas des durées estimées.",
+    "Solo lectura: las fechas no se modifican. Las fechas únicas son referencias, no duraciones estimadas.",
+    "Nur Lesen: Daten werden nicht geändert. Einzelne Daten sind Bezugspunkte, keine geschätzten Dauern.",
+    "只读：不会修改日期。单个日期是时间锚点，并非估算的持续时间。",
+    "読み取り専用です。日付は変更されません。単独の日付は基準点であり、推定期間ではありません。"
+  ],
+  "Solo scadenza: {0}": [
+    "Due only: {0}",
+    "Échéance uniquement : {0}",
+    "Solo vencimiento: {0}",
+    "Nur Fälligkeit: {0}",
+    "仅截止日期：{0}",
+    "期限のみ: {0}"
+  ],
+  "Timeline": [
+    "Timeline",
+    "Chronologie",
+    "Cronología",
+    "Zeitleiste",
+    "时间线",
+    "タイムライン"
+  ],
+  "Timeline della bacheca": [
+    "Board timeline",
+    "Chronologie du tableau",
+    "Cronología del tablero",
+    "Board-Zeitleiste",
+    "看板时间线",
+    "ボードのタイムライン"
+  ]
+}

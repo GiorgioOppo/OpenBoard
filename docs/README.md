@@ -21,6 +21,7 @@ OpenBoard 0.6.1 is an early preview. Start with the guide that matches your task
 | --- | --- |
 | [Contributing](../CONTRIBUTING.md) | Development setup, conventions and pull requests |
 | [Testing](TESTING.md) | Default, sanitizer, frontend and opt-in integration checks |
+| [Native fuzzing](FUZZING.md) | Bounded HTTP, JSON and Unicode campaigns, synthetic corpora and reproduction |
 | [Base API](API.md) | HTTP conventions, authentication, permissions and board/card APIs |
 | [Productivity API](API_PRODUTTIVITA.md) | Dependencies, assignees, templates, saved filters and bulk actions |
 | [Collaboration API](API_COLLABORAZIONE.md) | Notifications, attachments and account/session tools |

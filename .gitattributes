@@ -1,0 +1,5 @@
+# Keep the checksum-pinned generated upstream table byte-for-byte unchanged.
+vendor/utf8proc/utf8proc.c -text
+vendor/utf8proc/utf8proc.h -text
+vendor/utf8proc/LICENSE.md -text
+vendor/utf8proc/utf8proc_data.c -text whitespace=-blank-at-eol,-blank-at-eof

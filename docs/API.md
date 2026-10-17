@@ -219,13 +219,14 @@ The client must read `/api/cards/:id` to open and edit full detail.
 | GET | `/api/boards/:id/activity` | `{"events":[{"id":1,"action":"updated","entity_type":"cards","entity_id":123,"title":"…","actor":"Alex","actor_id":1,"created_at":"…"}]}` |
 | GET | `/api/search?q=text` | `{"cards":[{"id":123,"title":"…","board_id":1,"board_name":"…","column_title":"…","priority":"normal","due_date":""}]}` |
 | GET | `/api/search/content?q=text` | Unreleased collaborative search: `{items:[...],next_cursor}` with typed result keys; see below |
+| GET | `/api/boards/:id/timeline` | Unreleased bounded dependency read for the board timeline; see below |
 | GET | `/api/boards/:id/stats` | Statistics for non-deleted, unarchived cards in active columns |
 
 In explicit `--no-auth` mode, comments have `author_id: 0` and `author: "Locale"`. The body is text; the server does not interpret it as HTML. The canonical local-author value remains language-independent.
 
 Activity includes creations, updates, moves, archiving, trashing, restores, imports, board duplication, comments, and membership changes. Personal favorites do not generate shared activity. `/api/boards/:id/activity` returns at most 200 events without pagination; use the [paginated activity endpoint](API_COLLABORAZIONE.md#paginated-activity) to continue beyond a page.
 
-Search requires nonempty `q` of up to 200 Unicode characters, encoded in the query string. It searches substrings in titles, descriptions, and assignees only on authorized boards. It excludes archived boards and cards unless `include_archived=1`, returns at most 200 cards, and sorts by latest update. It uses SQLite `lower()`: default case conversion covers ASCII and does not provide full Unicode linguistic search.
+Search requires nonempty `q` of up to 200 Unicode characters, encoded in the query string. It searches substrings in titles, descriptions, and assignees only on authorized boards. It excludes archived boards and cards unless `include_archived=1`, returns at most 200 cards, and sorts by latest update. Published `v0.6.1` uses SQLite's default ASCII case conversion. Unreleased builds use the [Unicode substring semantics](#unicode-search-unreleased) below without changing this response shape.
 
 The unreleased paginated form is `GET /api/search?q=text&limit=30&before=123`. `limit` is 1–200; omitting it when `before` is supplied uses 30. `before` is a positive card ID, excluded from the next page. Supplying either option selects descending immutable-ID ordering and returns `{cards,next_cursor}`. `next_cursor` is the last returned ID when more authorized matches exist, otherwise `null`. Keep query/archive filters unchanged between pages. ACLs apply before pagination and are rechecked on every page. Calls without either pagination option retain the legacy ordering and response shape. Invalid or duplicate pagination parameters return `400`.
 
@@ -247,11 +248,35 @@ The unreleased paginated form is `GET /api/search?q=text&limit=30&before=123`. `
 
 `q` must contain non-whitespace text and at most 200 Unicode characters. `kind` is `all` (default), `card`, `comment`, `request`, `request_note` or `form`. `limit` defaults to 30 and accepts 1–200. `include_archived=1` includes archived boards and cards; `0` or omission excludes them. Invalid or duplicate supported parameters return `400`; unsupported methods return `405`.
 
-Each item has a plain-text `snippet` of at most 240 characters. The title describes the card, request or form containing the match. `context` is the list title for cards/comments, the form name for requests/notes, or an empty string for forms. Nullable navigation IDs identify the containing resource. Replies use the `comment` kind.
+Each item has a plain-text `snippet` of at most 240 original Unicode code points. Excerpts retain stored spelling and case; folded search offsets are mapped back to the original text. The title describes the card, request or form containing the match. `context` is the list title for cards/comments, the form name for requests/notes, or an empty string for forms. Nullable navigation IDs identify the containing resource. Replies use the `comment` kind.
 
 Ordering is fixed by kind rank (`card=0`, `comment=1`, `request=2`, `request_note=3`, `form=4`), then descending immutable ID within each kind; it is not relevance or update-time ordering. Numeric IDs can overlap between kinds: use the full `key` to identify a result. Pass `next_cursor` unchanged as the URL-encoded `cursor` on the next request, keeping query, kind and archive filters unchanged. The cursor has the form `rank:positive-id`; it is `null` when there are no further matches. New insertions do not shift previously traversed positions, but results are not a frozen snapshot and can disappear after edits or access changes.
 
-Current board permissions and non-deleted ancestry apply before the page limit and on every page. Observers can search content they may read. Explicit account-free local mode searches cards/comments but excludes forms, requests and request notes, which require an account. Substring matching uses SQLite `lower()` with its default ASCII case conversion; this is neither full-text indexing nor complete Unicode linguistic search. Responses use `Cache-Control: no-store`, and snippets must be rendered as text rather than HTML.
+Current board permissions and non-deleted ancestry apply before the page limit and on every page. Observers can search content they may read. Explicit account-free local mode searches cards/comments but excludes forms, requests and request notes, which require an account. Matching follows the Unicode substring rules below. Responses use `Cache-Control: no-store`, and snippets must be rendered as text rather than HTML.
+
+### Unicode search (unreleased)
+
+Both global search endpoints compare canonically composed NFC text with full default Unicode case folding. For example, `STRASSE` matches `Straße`, and composed `é` matches its canonically equivalent `e` plus combining accent. Accents remain significant: `cafe` does not match `café`. Stored values and returned snippets are not normalized or rewritten.
+
+This is substring search, without stemming, transliteration, compatibility normalization, accent stripping, relevance ranking or a full-text index. It uses the bundled utf8proc data documented in [vendor provenance](../vendor/utf8proc/README.openboard.md). The browser's existing current-board free-text filter is unchanged and does not promise the same Unicode matching behavior; typed custom-field comparisons retain their documented semantics.
+
+### Board timeline (unreleased)
+
+`GET /api/boards/:id/timeline?include_archived=0` returns dependency edges for a board the current user may read, including observers:
+
+```json
+{
+  "board_id": 7,
+  "version": 4,
+  "dependencies": [{"card_id": 11, "required_card_id": 12}],
+  "limit": 2000,
+  "truncated": false
+}
+```
+
+`card_id` requires `required_card_id`. Edges are ordered by these two IDs ascending, with at most 2000 returned. `truncated: true` means more eligible edges exist; there is no edge cursor. Current board authorization, both endpoints' board membership and live card/list/board ancestry are checked before the limit. Cross-board and deleted-ancestor edges are excluded. `include_archived=1` includes archived boards and cards at either end; `0` or omission excludes them. Invalid or duplicate archive values return `400`, an unreadable or unavailable board returns `404`, and unsupported methods return `405`. Responses use `Cache-Control: no-store`.
+
+Dates and visible card data come from the existing board summary; this endpoint does not modify schedules or return card details. Its `version` is board metadata, not a revision of every card or dependency edit. The summary and dependency read are separate requests and do not form an atomic snapshot. Refresh the board to realign them; clients must not cache edges using only the board ID/version.
 
 ### Board statistics
 
@@ -288,6 +313,8 @@ Content-Type: application/json
 Authenticated writes also require the session cookie and `X-CSRF-Token` described above. If the current version differs, the response is `412` and the mutation is not applied. Read the resource again and present the conflict while preserving the user's draft. Do not automatically retry with a newer version and replace the entire card.
 
 A single decimal number is accepted, with or without quotes. Wildcard `*`, tag lists, and weak tags `W/` are not implemented. Omitting the header remains allowed for compatibility. Core restore, duplicate, membership, and account operations do not apply this precondition. [Comment editing](API_COLLABORAZIONE.md#editing-comments), card assignments and dependencies, and later APIs document their own version requirements. API resource responses do not send a resource ETag: use the `version` field. Static frontend assets have separate caching behavior.
+
+The unreleased full-card editor offers a three-way comparison of its initial snapshot, local draft and a fresh server read. **Apply preview to editor** changes the local draft only, after rechecking the card, board permissions and comparison version; it sends no mutation. The user must explicitly **Save**, which sends the existing card `PATCH` with `If-Match` set to the reviewed server version. A later concurrent edit still returns `412`. There is no new merge API or automatic server overwrite. See the [conflict workflow](USER_GUIDE.md#drafts-conflicts-and-recovery).
 
 ## Idempotent creation and commands
 

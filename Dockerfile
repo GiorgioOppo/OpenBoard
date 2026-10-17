@@ -1,11 +1,12 @@
 FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS builder
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       build-essential pkg-config libsqlite3-dev libssl-dev libpq-dev libmongoc-dev \
+       build-essential pkg-config python3 libsqlite3-dev libssl-dev libpq-dev libmongoc-dev \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 COPY Makefile ./
 COPY src/ src/
+COPY vendor/ vendor/
 RUN make EXTERNAL_STORAGE=1 \
     CFLAGS="-O2 -g -std=c11 -Wall -Wextra -Wpedantic -Wformat -Werror=format-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=3" \
     LDFLAGS="-pie -Wl,-z,relro,-z,now,-z,noexecstack"
@@ -18,6 +19,8 @@ RUN apt-get update \
     && groupadd --system --gid 10001 openboard \
     && useradd --system --uid 10001 --gid openboard --home-dir /tmp/openboard openboard
 COPY --from=builder /src/build/openboard /usr/local/bin/openboard
+COPY LICENSE /usr/local/share/licenses/openboard/LICENSE
+COPY vendor/utf8proc/LICENSE.md /usr/local/share/licenses/openboard/utf8proc-LICENSE.md
 COPY scripts/container-healthcheck.sh /usr/local/bin/openboard-healthcheck
 RUN chmod 755 /usr/local/bin/openboard-healthcheck
 USER 10001:10001

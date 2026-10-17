@@ -8,9 +8,11 @@
 #include "portfolio.h"
 #include "reviews.h"
 #include "sprints.h"
+#include "timeline.h"
 #include "teamwork.h"
 #include "storage.h"
 #include "search.h"
+#include "unicode.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -469,6 +471,8 @@ static void register_functions(void) {
     sqlite3_create_function(db, "ob_summary", 0, SQLITE_UTF8, NULL, summary_sql, NULL, NULL);
     sqlite3_create_function(db, "ob_role", 1, SQLITE_UTF8, NULL, role_sql, NULL, NULL);
     sqlite3_create_function(db, "ob_readonly", 1, SQLITE_UTF8, NULL, readonly_sql, NULL, NULL);
+    if (ob_unicode_register(db) != SQLITE_OK)
+        db_die("Registrazione ricerca Unicode fallita");
 }
 static void make_parent_dirs(const char *path) {
     if (!path || !*path)
@@ -2073,9 +2077,9 @@ static Response search_api(Request *r) {
                               "c.deleted_at IS NULL AND b.deleted_at IS "
                               "NULL AND (ob_archived() OR(k.archived=0 AND b.archived=0))AND "
                               "ob_allowed(b.id) "
-                              "AND(instr(lower(k.title),lower(?1))>0 OR "
-                              "instr(lower(k.description),lower(?1))>0 OR "
-                              "instr(lower(k.assignee),lower(?1))>0)";
+                              "AND(ob_unicode_contains(k.title,?1) OR "
+                              "ob_unicode_contains(k.description,?1) OR "
+                              "ob_unicode_contains(k.assignee,?1))";
     const char *suffix = paged ?
         "AND (?2=0 OR k.id<?2) ORDER BY k.id DESC LIMIT ?3) SELECT "
         "json_object('cards',json((SELECT json_group_array(json(item)) FROM "
@@ -3461,6 +3465,8 @@ static Response route_domain(Request *r) {
     int64_t id = parse_id(parts[2]);
     if (!id)
         return error_response(404, "Risorsa non trovata.");
+    if (count == 4 && !strcmp(parts[1], "boards") && !strcmp(parts[3], "timeline"))
+        return get ? ob_board_timeline(r, id) : error_response(405, "Metodo non consentito.");
     if (!strcmp(parts[1], "fields") || !strcmp(parts[1], "milestones")) {
         bool field = !strcmp(parts[1], "fields");
         if (count == 3 && patch)

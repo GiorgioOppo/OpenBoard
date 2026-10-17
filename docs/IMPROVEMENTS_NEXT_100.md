@@ -19,7 +19,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 11 | Reproducible workload benchmarks | Partial | Isolated SQLite benchmark records workload, hardware, binary hash and latency; external/authenticated workloads remain unmeasured. |
 | 12 | Performance regression budgets | Partial | Benchmark CLI enforces p95/error budgets; memory budgets and representative CI baselines remain. |
 | 13 | Paginated global search | Implemented | Stable ID cursor, permissions before pagination, frontend load-more and stale-response tests. Legacy ordering remains available. |
-| 14 | Unicode-aware search | Pending | Existing SQLite `lower` behavior remains. |
+| 14 | Unicode-aware search | Implemented | Global card/content APIs use pinned utf8proc full case-folding and canonical NFC, preserve accents and original excerpts, and keep ACL/paging semantics. Eight HTTP/native checks, all 2,692 changed scalar mappings and long combining sequences. The separate local board filter retains its existing JavaScript comparison; relevance/linguistic ranking remains ID 15. |
 | 15 | Full-text relevance ranking | Pending | No new search index/ranking engine. |
 | 16 | Search collaborative content | Implemented | Dedicated content API searches cards, comments/replies, requests/answer values/notes and forms; live ACL/ancestry before typed cursor pagination, escaped excerpts and guarded UI navigation. Nine HTTP regressions and a frontend race/escaping suite. Unicode linguistic search and relevance ranking remain IDs 14–15. |
 | 17 | Advanced custom-field filters | Implemented | Typed operators, set/unset, 1–10 flat all/any API conditions and ID pagination; toolbar exposes one typed condition while preserving free search. Six HTTP regressions and two frontend suites. |
@@ -37,7 +37,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 29 | TOTP and recovery codes | Pending | No application second-factor workflow implemented. |
 | 30 | Passkeys | Pending | No WebAuthn registration/authentication implemented. |
 | 31 | Threat model and ASVS traceability | Pending | Existing audit is not a complete requirements matrix. |
-| 32 | Native fuzzing | Pending | ASan/UBSan regressions do not constitute a fuzzing corpus/campaign. |
+| 32 | Native fuzzing | Implemented | Three real C libFuzzer+ASan/UBSan targets cover HTTP/query/address parsing, JSON validators and Unicode/excerpt origins. Synthetic corpus/dictionaries, bounded local campaigns, exact-source/binary reports and reproducible failure inputs; separate CI job configured. Short campaigns are not a complete or long-running security assessment. |
 | 33 | Account recovery | Pending | No recovery-token workflow implemented. |
 | 34 | Administrative reauthentication | Pending | No elevation window implemented. |
 | 35 | Distributed authentication quotas | Pending | Counters remain process-local. |
@@ -74,11 +74,11 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 66 | Workflow transition rules | Pending | Approvals do not automatically block completion. |
 | 67 | Content-bound approvals | Implemented | Relevant content changes clear votes, increment review versions and record history atomically; identical content/order changes retain votes. |
 | 68 | Daily sprint capacity | Pending | Existing total-minute capacity remains. |
-| 69 | Timeline/Gantt | Pending | No dependency timeline implemented. |
+| 69 | Timeline/Gantt | Implemented | Read-only week/month date bars, explicit single-date anchors, undated rows, filtered board summaries and one ACL-protected dependency read capped at 2,000 edges. UTC dates, pagination capped at 200 DOM rows, keyboard and stale-response checks. No automatic scheduling/date changes or atomic snapshot claim. |
 | 70 | Observed flow analytics | Pending | No cumulative-flow/lead-time data model implemented. |
 | 71 | Virtualized card rendering | Pending | Board rendering is not virtualized. |
 | 72 | Authorized realtime events | Pending | Existing polling remains. |
-| 73 | Field-by-field conflict resolution | Pending | Existing draft/reload recovery remains. |
+| 73 | Field-by-field conflict resolution | Implemented | Base/local/server preview merges independent fields and requires explicit choices for conflicts; custom values compare per key while checklist/assignees/labels remain atomic. Apply updates only the draft after fresh version/ACL/definition reads; Save retains If-Match. Legacy/tampered drafts, auxiliary notes, constructor keys and races tested. |
 | 74 | Compensating undo | Pending | No mutation undo command implemented. |
 | 75 | Command palette | Implemented | Contextual actions, filtering, current permission checks and keyboard shortcut; `test_experience.js`. |
 | 76 | Monthly/weekly calendar | Implemented | Agenda/month/week, period navigation, localized dates, filters and card opening. |
@@ -103,7 +103,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 95 | Full restore verification | Partial | Disposable restore/check command implemented; real SQL/Mongo/NPM round trip remains unexecuted locally. |
 | 96 | Exact-image local vulnerability scans | Pending | No new scan executed; historical inventories are unchanged. |
 | 97 | Pin all Docker bases | Implemented | Debian/backend and Nginx/frontend OCI indexes pinned; database/proxy/toolchain pins retained. |
-| 98 | Full cloud suite in CI | Implemented | CI at `5688602` passed the complete disposable cloud suite, migrations/outage, encrypted fixture recovery, image and five-service routing checks without skipped cloud tests. This is not evidence for later local changes. |
+| 98 | Full cloud suite in CI | Implemented | CI at `5688602` and `25da2ba` passed the complete disposable cloud suite, migrations/outage, encrypted fixture recovery, image and five-service routing checks without skipped cloud tests. This is not evidence for later local changes. |
 | 99 | Browser end-to-end matrix | Pending | Node helper/interaction suites do not replace real browser E2E. |
 | 100 | Verifiable official distributions | Pending | No signed registry release, multiarch runtime matrix or release SBOM produced. |
 
@@ -144,4 +144,18 @@ IDs 16, 17, 47, 48 and 77 are implemented on the development branch. Their contr
 - Local HTTP checks serve the new importer asset through the development frontend. Container/static-proxy tests are wired to check that asset on the next CI run; they remain skipped locally. Browser interaction tests use VM/DOM adapters, not a real-browser E2E matrix.
 - This feature block has local verification only; it has not been exercised against real PostgreSQL/MongoDB. The earlier CI evidence above applies only to `5688602`. No existing installation or credentials were used.
 
-Current ledger: **19 implemented, 13 partial, 68 pending**. The requested 100-item implementation remains incomplete.
+### Later CI confirmation for the preceding block
+
+[Run 39030617497](https://github.com/GiorgioOppo/OpenBoard/actions/runs/39030617497) at `25da2ba5e86e2774459d305b6af048e95c06fd89` subsequently passed all four jobs: documentation/secrets, macOS, Ubuntu and containers. It passed 16 real-store scenarios, one encrypted recovery test, four database-image checks, three proxy checks and three static-frontend checks, including the importer asset. This supersedes the local-only validation gap above for that commit, without claiming every new interaction was independently exercised against external stores or a real browser. It predates the next block.
+
+## Unicode, native fuzzing, timeline and conflict resolution — 17 October 2026
+
+IDs 14, 32, 69 and 73 are implemented. Their contracts are documented in the [API reference](API.md), [user guide](USER_GUIDE.md) and [fuzzing guide](FUZZING.md). This block adds no schema migration or runtime host library; the selected utf8proc sources and licenses are bundled and verified offline.
+
+- The native suite with external-storage drivers ran **323 tests: 297 passed, 26 optional integrations skipped**, normally (83.235 seconds) and with ASan/UBSan (104.601 seconds). Three subsequent Python runner regressions passed for sanitized child configuration, compiler/metadata deadlines and preservation of partial timeout diagnostics. The next full discovery includes those three additional tests.
+- All **15 frontend suites** pass. They include Unicode API coverage through the existing global search UI, real three-way merge/apply/save handlers, versioned legacy-draft recovery, prototype-safe custom fields, auxiliary draft retention, bounded timeline geometry, keyboard use, permissions and account/view/panel/load races.
+- Native fuzzing uses real production helpers and only synthetic inputs. Final fresh-corpus campaigns each executed **1,000,000 inputs** for HTTP, JSON and Unicode with Homebrew Clang 23.1.1 on Darwin arm64; all three exited successfully without failure artifacts. Exact commands, source/binary hashes and execution/coverage counts are recorded in the ignored private `build/fuzz-final/report.json`. This is bounded local evidence, not a security certification.
+- All JavaScript syntax, vendor checksum, documentation, Actionlint and NPM limiter checks pass. Gitleaks scanned 259 publishable source files with zero findings; private environments, ignored builds/corpora and backups were excluded.
+- The new fifth CI job has not yet run remotely. Docker/cloud checks, real-browser E2E, a complete accessibility/native-language review and a fresh dependency vulnerability scan remain outside this local validation. The preceding CI run applies only to `25da2ba`.
+
+Current ledger: **23 implemented, 13 partial, 64 pending**. The requested 100-item implementation remains incomplete.

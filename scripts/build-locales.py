@@ -7,7 +7,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 PARTS = ('common', 'core', 'planning', 'workflows', 'errors', 'extra-errors', 'counts', 'activity', 'experience', 'capacity',
-         'importers', 'import-ui', 'table-editor', 'field-filters', 'field-filter-ui', 'content-search')
+         'importers', 'import-ui', 'table-editor', 'field-filters', 'field-filter-ui', 'content-search', 'conflicts', 'timeline')
 
 
 def build():

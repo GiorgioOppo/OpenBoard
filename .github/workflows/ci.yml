@@ -89,6 +89,32 @@ jobs:
       - name: Address and undefined behavior sanitizers
         if: ${{ !cancelled() }}
         run: make test-sanitize
+  fuzz:
+    name: Native fuzzing
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - name: Install native fuzzer prerequisites
+        run: sudo apt-get update && sudo apt-get install -y clang libsqlite3-dev libssl-dev pkg-config
+      - name: Run bounded HTTP, JSON and Unicode fuzz campaigns
+        run: FUZZ_CC=clang make fuzz-smoke
+      - name: Preserve synthetic fuzz results and crash inputs
+        if: ${{ !cancelled() && hashFiles('build/fuzz/report.json') != '' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-fuzz-${{ github.sha }}
+          path: |
+            build/fuzz/report.json
+            build/fuzz/*.log
+            build/fuzz/artifacts/
+          if-no-files-found: error
+          retention-days: 7
   container:
     runs-on: ubuntu-latest
     timeout-minutes: 35

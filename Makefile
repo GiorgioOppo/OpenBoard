@@ -16,25 +16,25 @@ CPPFLAGS += -DOB_EXTERNAL_STORAGE $(shell $(PKG_CONFIG) --cflags libpq $(MONGOC_
 LDLIBS += $(shell $(PKG_CONFIG) --libs libpq $(MONGOC_PKG))
 endif
 SOURCES := $(wildcard src/*.c)
-HEADERS := $(wildcard src/*.h)
+HEADERS := $(wildcard src/*.h) $(wildcard vendor/utf8proc/*.[ch])
 PREFIX ?= /usr/local
 DESTDIR ?=
 NODE ?= node
 
-.PHONY: all build run test test-sanitize test-frontend test-security test-docs test-cloud install install-frontend clean FORCE
+.PHONY: all build run test test-sanitize test-frontend test-security test-docs test-cloud test-vendor fuzz-build fuzz-smoke install install-frontend clean FORCE
 all: build
 build: build/openboard
 build/.config: FORCE
 	@mkdir -p build
 	@printf '%s\n' '$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS)' | cmp -s - $@ || printf '%s\n' '$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LDLIBS)' > $@
-build/openboard: $(SOURCES) $(HEADERS) Makefile build/.config
+build/openboard: $(SOURCES) $(HEADERS) Makefile build/.config | test-vendor
 	mkdir -p build
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(SOURCES) -o $@ $(LDFLAGS) $(LDLIBS)
 run: build/openboard
 	./build/openboard
 test: build/openboard
 	python3 -m unittest discover -s tests -p 'test_*.py' -v
-build/openboard-sanitize: $(SOURCES) $(HEADERS) Makefile build/.config
+build/openboard-sanitize: $(SOURCES) $(HEADERS) Makefile build/.config | test-vendor
 	mkdir -p build
 	$(CC) $(CPPFLAGS) -O1 -g -std=c11 -Wall -Wextra -Wpedantic -fsanitize=address,undefined $(SOURCES) -o $@ $(LDFLAGS) $(LDLIBS)
 test-sanitize: build/openboard-sanitize
@@ -54,15 +54,26 @@ test-frontend:
 	$(NODE) tests/test_field_filters.js
 	$(NODE) tests/test_field_filter_ui.js
 	$(NODE) tests/test_content_search_ui.js
+	$(NODE) tests/test_conflict_resolution.js
+	$(NODE) tests/test_timeline.js
 test-cloud: build/openboard
 	OPENBOARD_CLOUD_TEST=1 python3 -m unittest discover -s tests -p 'test_cloud.py' -v
 test-security:
 	$(NODE) tests/test_npm_limits.mjs
 test-docs:
 	python3 scripts/check-docs.py
+test-vendor:
+	python3 vendor/utf8proc/check-vendor.py
+fuzz-build: test-vendor
+	python3 scripts/fuzz.py --build-only
+fuzz-smoke: test-vendor
+	python3 scripts/fuzz.py
 install: build/openboard
 	install -d "$(DESTDIR)$(PREFIX)/bin"
 	install -m 755 build/openboard "$(DESTDIR)$(PREFIX)/bin/openboard"
+	install -d "$(DESTDIR)$(PREFIX)/share/licenses/openboard"
+	install -m 644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/openboard/LICENSE"
+	install -m 644 vendor/utf8proc/LICENSE.md "$(DESTDIR)$(PREFIX)/share/licenses/openboard/utf8proc-LICENSE.md"
 install-frontend:
 	install -d "$(DESTDIR)$(PREFIX)/share/openboard"
 	install -m 644 web/*.html web/*.css web/*.js web/*.svg "$(DESTDIR)$(PREFIX)/share/openboard/"

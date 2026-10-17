@@ -27,6 +27,8 @@ ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
           '/workflows.css': ('workflows.css', 'text/css; charset=utf-8'),
           '/productivity.js': ('productivity.js', 'application/javascript; charset=utf-8'),
           '/importers.js': ('importers.js', 'application/javascript; charset=utf-8'),
+          '/conflicts.js': ('conflicts.js', 'application/javascript; charset=utf-8'),
+          '/timeline.js': ('timeline.js', 'application/javascript; charset=utf-8'),
           '/styles.css': ('styles.css', 'text/css; charset=utf-8'),
           '/favicon.svg': ('favicon.svg', 'image/svg+xml')}
 CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"

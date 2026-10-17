@@ -258,6 +258,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "从服务器刷新数据",
     "サーバーのデータを更新"
   ],
+  "Aggiorna dipendenze": [
+    "Refresh dependencies",
+    "Actualiser les dépendances",
+    "Actualizar dependencias",
+    "Abhängigkeiten aktualisieren",
+    "刷新依赖关系",
+    "依存関係を更新"
+  ],
   "Aggiorna misure": [
     "Refresh measurements",
     "Actualiser les mesures",
@@ -522,6 +530,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "其他会话",
     "別のセッション"
   ],
+  "Altre dipendenze: {0}": [
+    "More dependencies: {0}",
+    "Autres dépendances : {0}",
+    "Más dependencias: {0}",
+    "Weitere Abhängigkeiten: {0}",
+    "其他依赖关系：{0}",
+    "その他の依存関係: {0}"
+  ],
   "Altre sessioni revocate.": [
     "Other sessions revoked.",
     "Autres sessions révoquées.",
@@ -602,6 +618,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "描述的 Markdown 预览",
     "説明の Markdown プレビュー"
   ],
+  "Anteprima applicata all’editor. Controlla i valori e salva esplicitamente.": [
+    "Preview applied to the editor. Check the values and save explicitly.",
+    "Aperçu appliqué à l’éditeur. Vérifiez les valeurs et enregistrez explicitement.",
+    "Vista previa aplicada al editor. Revisa los valores y guarda explícitamente.",
+    "Vorschau im Editor übernommen. Prüfe die Werte und speichere ausdrücklich.",
+    "预览已应用到编辑器。请检查各项值并手动保存。",
+    "プレビューを編集画面に適用しました。値を確認し、明示的に保存してください。"
+  ],
   "Anzianità delle scadenze": [
     "Overdue age",
     "Ancienneté des retards",
@@ -642,6 +666,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "全部应用",
     "すべてに適用"
   ],
+  "Applica anteprima all’editor": [
+    "Apply preview to editor",
+    "Appliquer l’aperçu à l’éditeur",
+    "Aplicar vista previa al editor",
+    "Vorschau im Editor übernehmen",
+    "将预览应用到编辑器",
+    "プレビューを編集画面に適用"
+  ],
   "Applica filtri": [
     "Apply filters",
     "Appliquer les filtres",
@@ -657,6 +689,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Zeitraum anwenden",
     "应用日期范围",
     "期間を適用"
+  ],
+  "Applicare l’anteprima aggiorna solo l’editor. Salva esplicitamente la scheda per inviare le modifiche.": [
+    "Applying the preview updates only the editor. Explicitly save the card to send changes.",
+    "L’application de l’aperçu met uniquement à jour l’éditeur. Enregistrez explicitement la carte pour envoyer les modifications.",
+    "Aplicar la vista previa solo actualiza el editor. Guarda explícitamente la tarjeta para enviar los cambios.",
+    "Das Übernehmen der Vorschau aktualisiert nur den Editor. Speichere die Karte ausdrücklich, um Änderungen zu senden.",
+    "应用预览只会更新编辑器。请手动保存卡片以提交更改。",
+    "プレビューの適用は編集画面のみを更新します。変更を送信するには、カードを明示的に保存してください。"
   ],
   "Approva": [
     "Approve",
@@ -905,6 +945,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Zuständige Person",
     "负责人",
     "担当者"
+  ],
+  "Assegnatario non elencato: {0}": [
+    "Unlisted assignee: {0}",
+    "Responsable non répertorié : {0}",
+    "Asignado no listado: {0}",
+    "Nicht aufgeführte zugewiesene Person: {0}",
+    "未列出的负责人：{0}",
+    "一覧にない担当者：{0}"
   ],
   "Assegnati (min)": [
     "Assigned (min)",
@@ -1570,6 +1618,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "自定义字段",
     "カスタム項目"
   ],
+  "Campo personalizzato: {0}": [
+    "Custom field: {0}",
+    "Champ personnalisé : {0}",
+    "Campo personalizado: {0}",
+    "Benutzerdefiniertes Feld: {0}",
+    "自定义字段：{0}",
+    "カスタムフィールド：{0}"
+  ],
   "Campo ripristinato": [
     "Field restored",
     "Champ restauré",
@@ -1754,6 +1810,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "加载较早记录",
     "以前の記録を読み込む"
   ],
+  "Caricamento dipendenze…": [
+    "Loading dependencies…",
+    "Chargement des dépendances…",
+    "Cargando dependencias…",
+    "Abhängigkeiten werden geladen…",
+    "正在加载依赖关系…",
+    "依存関係を読み込み中…"
+  ],
   "Caricamento membri…": [
     "Loading members…",
     "Chargement des membres…",
@@ -1937,6 +2001,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Erledigte Checklist-Einträge",
     "已完成清单项",
     "完了したチェックリスト項目"
+  ],
+  "Checklist, assegnatari ed etichette sono gruppi indivisibili. I campi personalizzati sono confrontati singolarmente.": [
+    "Checklists, assignees and labels are indivisible groups. Custom fields are compared individually.",
+    "Les checklists, les responsables et les étiquettes sont des groupes indivisibles. Les champs personnalisés sont comparés individuellement.",
+    "Las listas de verificación, los asignados y las etiquetas son grupos indivisibles. Los campos personalizados se comparan individualmente.",
+    "Checklisten, zugewiesene Personen und Labels sind unteilbare Gruppen. Benutzerdefinierte Felder werden einzeln verglichen.",
+    "检查清单、负责人和标签分别作为不可拆分的组处理。自定义字段逐项比较。",
+    "チェックリスト、担当者、ラベルは分割せずグループ単位で扱います。カスタムフィールドは個別に比較します。"
   ],
   "Chiaro": [
     "Light",
@@ -2810,6 +2882,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "数据库暂时不可用。请重试。",
     "データベースを一時的に利用できません。再試行してください。"
   ],
+  "Date": [
+    "Dates",
+    "Dates",
+    "Fechas",
+    "Daten",
+    "日期",
+    "日付"
+  ],
+  "Date non valide": [
+    "Invalid dates",
+    "Dates non valides",
+    "Fechas no válidas",
+    "Ungültige Daten",
+    "日期无效",
+    "無効な日付"
+  ],
   "Dati Trello non validi o esportazione incompleta.": [
     "Invalid Trello data or incomplete export.",
     "Données Trello invalides ou export incomplet.",
@@ -3129,6 +3217,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Abzuschließende Abhängigkeiten",
     "待完成依赖",
     "完了が必要な依存関係"
+  ],
+  "Dipendenze non disponibili.": [
+    "Dependencies unavailable.",
+    "Dépendances indisponibles.",
+    "Dependencias no disponibles.",
+    "Abhängigkeiten nicht verfügbar.",
+    "依赖关系不可用。",
+    "依存関係を利用できません。"
   ],
   "Disattivato": [
     "Disabled",
@@ -3586,6 +3682,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "标签与优先级",
     "ラベルと優先度"
   ],
+  "Etichette: primaria e aggiuntive": [
+    "Labels: primary and additional",
+    "Étiquettes : principale et supplémentaires",
+    "Etiquetas: principal y adicionales",
+    "Labels: primäres und zusätzliche",
+    "标签：主标签及附加标签",
+    "ラベル：主ラベルと追加ラベル"
+  ],
   "Etichette…": [
     "Labels…",
     "Étiquettes…",
@@ -4026,6 +4130,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "比较完成：继续编辑草稿",
     "比較済み：下書きの編集を続ける"
   ],
+  "I dati da confrontare non sono validi o superano i limiti. La bozza è conservata.": [
+    "The comparison data is invalid or exceeds the limits. Your draft has been kept.",
+    "Les données à comparer sont invalides ou dépassent les limites. Votre brouillon est conservé.",
+    "Los datos que se van a comparar no son válidos o superan los límites. Se ha conservado el borrador.",
+    "Die Vergleichsdaten sind ungültig oder überschreiten die Grenzen. Dein Entwurf bleibt erhalten.",
+    "待比较的数据无效或超出限制。草稿已保留。",
+    "比較するデータが無効か、制限を超えています。下書きは保持されています。"
+  ],
   "I dati sono cambiati. Conserva la bozza e ricarica la versione più recente.": [
     "The data has changed. Keep your draft and reload the latest version.",
     "Les données ont changé. Conservez votre brouillon et rechargez la dernière version.",
@@ -4105,6 +4217,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Werte bleiben erhalten, wenn ein Feld im Papierkorb liegt. Schlüssel und Typ bleiben unverändert.",
     "字段移入回收站后仍保留其值，键和类型保持不变。",
     "フィールドをゴミ箱に移しても値は保持され、キーと種類は変わりません。"
+  ],
+  "I valori uniti non sono validi. Correggi la bozza o modifica le scelte.": [
+    "The merged values are invalid. Correct the draft or change your choices.",
+    "Les valeurs fusionnées sont invalides. Corrigez le brouillon ou modifiez vos choix.",
+    "Los valores combinados no son válidos. Corrige el borrador o cambia tus selecciones.",
+    "Die zusammengeführten Werte sind ungültig. Korrigiere den Entwurf oder ändere deine Auswahl.",
+    "合并后的值无效。请修正草稿或更改选择。",
+    "マージ後の値が無効です。下書きを修正するか、選択を変更してください。"
   ],
   "IN EVIDENZA": [
     "PINNED",
@@ -4490,6 +4610,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "服务器未返回有效的 CSV。",
     "サーバーから有効な CSV が返されませんでした。"
   ],
+  "Il server è cambiato di nuovo. Ricarica il confronto; la bozza è conservata.": [
+    "The server version has changed again. Reload the comparison; your draft has been kept.",
+    "La version sur le serveur a encore changé. Rechargez la comparaison ; votre brouillon est conservé.",
+    "La versión del servidor ha vuelto a cambiar. Vuelve a cargar la comparación; se ha conservado el borrador.",
+    "Die Serverversion hat sich erneut geändert. Lade den Vergleich neu; dein Entwurf bleibt erhalten.",
+    "服务器版本再次发生更改。请重新加载比较；草稿已保留。",
+    "サーバーのバージョンが再び変更されました。比較を再読み込みしてください。下書きは保持されています。"
+  ],
   "Il server è in modalità locale. Abilita l’autenticazione nella configurazione del server per usare account, ruoli e membri delle bacheche.": [
     "The server is in local mode. Enable authentication in the server configuration to use accounts, roles, and board members.",
     "Le serveur est en mode local. Activez l’authentification dans sa configuration pour utiliser les comptes, les rôles et les membres des tableaux.",
@@ -4513,6 +4641,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Die Summe misst die dekodierten Bytes der Anhänge. Verlauf, Wiederholung, Indizes, WAL, Backups und der gesamte physische Speicherverbrauch sind darin nicht enthalten.",
     "总量按附件解码后的字节数计算，不包含历史记录、重放数据、索引、WAL、备份或整体物理存储占用。",
     "合計は添付ファイルのデコード後のバイト数を示します。履歴、リプレイ、インデックス、WAL、バックアップ、物理ストレージ全体の使用量は含みません。"
+  ],
+  "Il traguardo scelto non è più disponibile. La bozza è conservata.": [
+    "The selected milestone is no longer available. Your draft has been kept.",
+    "Le jalon sélectionné n’est plus disponible. Votre brouillon est conservé.",
+    "El hito seleccionado ya no está disponible. Se ha conservado el borrador.",
+    "Der gewählte Meilenstein ist nicht mehr verfügbar. Dein Entwurf bleibt erhalten.",
+    "所选里程碑已不可用。草稿已保留。",
+    "選択したマイルストーンは利用できなくなりました。下書きは保持されています。"
   ],
   "Il tuo lavoro, condiviso in sicurezza.": [
     "Your work, shared securely.",
@@ -4898,6 +5034,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "范围或用户无效。",
     "範囲またはユーザーが無効です。"
   ],
+  "Intervallo tagliato dalla finestra visibile": [
+    "Range clipped to the visible window",
+    "Intervalle limité à la fenêtre visible",
+    "Intervalo recortado a la ventana visible",
+    "Zeitraum auf sichtbares Fenster begrenzt",
+    "范围已裁剪至可见时间窗口",
+    "表示期間に合わせて範囲を切り詰めています"
+  ],
   "Invia decisione": [
     "Submit decision",
     "Envoyer la décision",
@@ -5033,6 +5177,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Der Entwurf basiert auf einer älteren Version. Verwerfen Sie ihn und laden Sie vor dem Speichern die Serverdaten neu.",
     "此草稿基于旧版本。请先丢弃草稿并重新加载服务器数据，再保存。",
     "下書きは以前のバージョンに基づいています。保存する前に破棄してサーバーのデータを再読み込みしてください。"
+  ],
+  "La bozza è cambiata durante il confronto. Ricarica il confronto prima di applicarlo.": [
+    "The draft changed during comparison. Reload the comparison before applying it.",
+    "Le brouillon a changé pendant la comparaison. Rechargez la comparaison avant de l’appliquer.",
+    "El borrador ha cambiado durante la comparación. Vuelve a cargar la comparación antes de aplicarla.",
+    "Der Entwurf hat sich während des Vergleichs geändert. Lade den Vergleich vor dem Übernehmen neu.",
+    "草稿在比较期间发生了更改。应用前请重新加载比较。",
+    "比較中に下書きが変更されました。適用する前に比較を再読み込みしてください。"
   ],
   "La bozza è cambiata. Aggiorna l’elenco prima di eliminarla.": [
     "The draft has changed. Refresh the list before deleting it.",
@@ -5170,6 +5322,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "列表必须属于同一看板。",
     "リストは同じボードに属している必要があります。"
   ],
+  "La lista scelta non è più disponibile. La bozza è conservata.": [
+    "The selected list is no longer available. Your draft has been kept.",
+    "La liste sélectionnée n’est plus disponible. Votre brouillon est conservé.",
+    "La lista seleccionada ya no está disponible. Se ha conservado el borrador.",
+    "Die gewählte Liste ist nicht mehr verfügbar. Dein Entwurf bleibt erhalten.",
+    "所选列表已不可用。草稿已保留。",
+    "選択したリストは利用できなくなりました。下書きは保持されています。"
+  ],
   "La mia settimana": [
     "My week",
     "Ma semaine",
@@ -5306,6 +5466,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "此看板上无法访问该卡片。草稿已保留。",
     "このボードではカードを利用できません。下書きは保持されています。"
   ],
+  "La scheda o la lista non è più disponibile. La bozza è conservata.": [
+    "The card or list is no longer available. Your draft has been kept.",
+    "La carte ou la liste n’est plus disponible. Votre brouillon est conservé.",
+    "La tarjeta o la lista ya no está disponible. Se ha conservado el borrador.",
+    "Die Karte oder Liste ist nicht mehr verfügbar. Dein Entwurf bleibt erhalten.",
+    "卡片或列表已不可用。草稿已保留。",
+    "カードまたはリストは利用できなくなりました。下書きは保持されています。"
+  ],
+  "La tua bozza": [
+    "Your draft",
+    "Votre brouillon",
+    "Tu borrador",
+    "Dein Entwurf",
+    "你的草稿",
+    "自分の下書き"
+  ],
   "La tua bozza resta aperta nell’editor. Confronta i contenuti, poi correggi la bozza prima di salvare.": [
     "Your draft stays open in the editor. Compare the content, then revise your draft before saving.",
     "Votre brouillon reste ouvert dans l’éditeur. Comparez les contenus, puis corrigez le brouillon avant d’enregistrer.",
@@ -5370,6 +5546,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "不导入未映射的 CSV 列。",
     "対応付けのない CSV 列はインポートされません。"
   ],
+  "Le date unite non sono valide: l’inizio deve precedere la scadenza.": [
+    "The merged dates are invalid: the start must be on or before the due date.",
+    "Les dates fusionnées sont invalides : le début doit précéder ou correspondre à l’échéance.",
+    "Las fechas combinadas no son válidas: el inicio debe ser anterior o igual al vencimiento.",
+    "Die zusammengeführten Daten sind ungültig: Der Beginn darf nicht nach dem Fälligkeitsdatum liegen.",
+    "合并后的日期无效：开始日期不得晚于截止日期。",
+    "マージ後の日付が無効です。開始日は期限日以前にしてください。"
+  ],
   "Le dipendenze devono appartenere alla stessa bacheca.": [
     "Dependencies must belong to the same board.",
     "Les dépendances doivent appartenir au même tableau.",
@@ -5377,6 +5561,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Abhängigkeiten müssen zum selben Board gehören.",
     "依赖项必须属于同一看板。",
     "依存先は同じボードに属している必要があります。"
+  ],
+  "Le dipendenze sono lette separatamente dalle schede; aggiorna la bacheca per riallineare i dati.": [
+    "Dependencies are read separately from cards; refresh the board to realign the data.",
+    "Les dépendances sont lues séparément des cartes ; actualisez le tableau pour réaligner les données.",
+    "Las dependencias se leen por separado de las tarjetas; actualiza el tablero para volver a sincronizar los datos.",
+    "Abhängigkeiten werden getrennt von Karten gelesen; aktualisieren Sie das Board, um die Daten abzugleichen.",
+    "依赖关系与卡片分别读取；请刷新看板以重新对齐数据。",
+    "依存関係はカードとは別に読み込まれます。ボードを更新してデータを再同期してください。"
   ],
   "Le etichette Trello sono conservate nella descrizione; colori e filtri delle etichette non vengono ricreati.": [
     "Trello labels are kept in the description; label colors and filters are not recreated.",
@@ -5433,6 +5625,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Meine gespeicherten Karten",
     "我保存的卡片",
     "保存したカード"
+  ],
+  "Le modifiche indipendenti sono unite automaticamente. Scegli la bozza o il server per ogni campo in conflitto.": [
+    "Independent changes are merged automatically. Choose the draft or server value for each conflicting field.",
+    "Les modifications indépendantes sont fusionnées automatiquement. Choisissez le brouillon ou le serveur pour chaque champ en conflit.",
+    "Los cambios independientes se combinan automáticamente. Elige el valor del borrador o del servidor para cada campo en conflicto.",
+    "Unabhängige Änderungen werden automatisch zusammengeführt. Wähle für jedes widersprüchliche Feld den Entwurfs- oder Serverwert.",
+    "互不冲突的更改会自动合并。请为每个冲突字段选择草稿值或服务器值。",
+    "独立した変更は自動的にマージされます。競合するフィールドごとに、下書きまたはサーバーの値を選択してください。"
   ],
   "Le pagine libere sono riutilizzabili da SQLite: non sono spazio libero del filesystem.": [
     "Free pages can be reused by SQLite; they are not free space on the filesystem.",
@@ -6634,6 +6834,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "显示当前版本",
     "最新バージョンを表示"
   ],
+  "Mostrate al massimo 2000 dipendenze; il grafo può essere incompleto.": [
+    "At most 2000 dependencies are shown; the graph may be incomplete.",
+    "Au maximum 2000 dépendances sont affichées ; le graphe peut être incomplet.",
+    "Se muestran como máximo 2000 dependencias; el grafo puede estar incompleto.",
+    "Es werden höchstens 2000 Abhängigkeiten angezeigt; der Graph kann unvollständig sein.",
+    "最多显示 2000 个依赖关系；关系图可能不完整。",
+    "最大 2000 件の依存関係を表示します。グラフが不完全な場合があります。"
+  ],
+  "Mostrate {0} di {1} schede": [
+    "Showing {0} of {1} cards",
+    "{0} cartes affichées sur {1}",
+    "Se muestran {0} de {1} tarjetas",
+    "{0} von {1} Karten angezeigt",
+    "显示 {1} 张卡片中的 {0} 张",
+    "{1} 件中 {0} 件のカードを表示"
+  ],
   "Motivo del blocco": [
     "Blocker reason",
     "Motif du blocage",
@@ -6890,6 +7106,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "暂无描述。",
     "説明はありません。"
   ],
+  "Nessuna dipendenza visibile": [
+    "No visible dependencies",
+    "Aucune dépendance visible",
+    "Sin dependencias visibles",
+    "Keine sichtbaren Abhängigkeiten",
+    "没有可见的依赖关系",
+    "表示できる依存関係はありません"
+  ],
   "Nessuna dipendenza.": [
     "No dependencies.",
     "Aucune dépendance.",
@@ -6985,6 +7209,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Keine Karten anzuzeigen.",
     "没有可显示的卡片。",
     "表示するカードはありません。"
+  ],
+  "Nessuna scheda nel periodo con questi filtri.": [
+    "No cards in this period match these filters.",
+    "Aucune carte de cette période ne correspond à ces filtres.",
+    "Ninguna tarjeta del período coincide con estos filtros.",
+    "Keine Karten in diesem Zeitraum entsprechen diesen Filtern.",
+    "此期间没有符合筛选条件的卡片。",
+    "この期間にフィルターに一致するカードはありません。"
+  ],
+  "Nessuna scheda senza date con questi filtri.": [
+    "No undated cards match these filters.",
+    "Aucune carte sans dates ne correspond à ces filtres.",
+    "Ninguna tarjeta sin fechas coincide con estos filtros.",
+    "Keine Karten ohne Datum entsprechen diesen Filtern.",
+    "没有符合筛选条件的无日期卡片。",
+    "フィルターに一致する日付未設定のカードはありません。"
   ],
   "Nessuna scheda trovata.": [
     "No cards found.",
@@ -7210,6 +7450,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "未分配",
     "未割り当て"
   ],
+  "Non ci sono differenze nei campi modificabili.": [
+    "There are no differences in editable fields.",
+    "Il n’y a aucune différence dans les champs modifiables.",
+    "No hay diferencias en los campos editables.",
+    "Die bearbeitbaren Felder unterscheiden sich nicht.",
+    "可编辑字段没有差异。",
+    "編集可能なフィールドに差分はありません。"
+  ],
   "Non disponibile": [
     "Unavailable",
     "Indisponible",
@@ -7233,6 +7481,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Sie haben keine Berechtigung für diese Aktion.",
     "你没有执行此操作的权限。",
     "この操作を実行する権限がありません。"
+  ],
+  "Non hai più il permesso di modificare la scheda. La bozza è conservata.": [
+    "You no longer have permission to edit the card. Your draft has been kept.",
+    "Vous n’avez plus l’autorisation de modifier la carte. Votre brouillon est conservé.",
+    "Ya no tienes permiso para editar la tarjeta. Se ha conservado el borrador.",
+    "Du hast keine Berechtigung mehr, die Karte zu bearbeiten. Dein Entwurf bleibt erhalten.",
+    "你已无权编辑该卡片。草稿已保留。",
+    "カードを編集する権限がなくなりました。下書きは保持されています。"
   ],
   "Non hai più il permesso di modificare questa riga. La bozza è conservata.": [
     "You no longer have permission to edit this row. Your draft has been kept.",
@@ -7786,6 +8042,30 @@ globalThis.OpenBoardLocales = Object.freeze({
     "CSV 页面已下载。还有更多结果。",
     "CSV ページをダウンロードしました。他の結果もあります。"
   ],
+  "Pagina precedente": [
+    "Previous page",
+    "Page précédente",
+    "Página anterior",
+    "Vorherige Seite",
+    "上一页",
+    "前のページ"
+  ],
+  "Pagina successiva": [
+    "Next page",
+    "Page suivante",
+    "Página siguiente",
+    "Nächste Seite",
+    "下一页",
+    "次のページ"
+  ],
+  "Pagina {0} di {1}": [
+    "Page {0} of {1}",
+    "Page {0} sur {1}",
+    "Página {0} de {1}",
+    "Seite {0} von {1}",
+    "第 {0} 页，共 {1} 页",
+    "{1} ページ中 {0} ページ"
+  ],
   "Paginazione dello storico non valida.": [
     "Invalid history pagination.",
     "Non valide : pagination de l’historique.",
@@ -7929,6 +8209,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Nicht gefunden: Route.",
     "未找到路径。",
     "パスが見つかりません。"
+  ],
+  "Periodo": [
+    "Period",
+    "Période",
+    "Período",
+    "Zeitraum",
+    "期间",
+    "期間"
   ],
   "Periodo del calendario": [
     "Calendar period",
@@ -8321,6 +8609,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Was ist der nächste Meilenstein?",
     "下一个里程碑是什么？",
     "次のマイルストーンは？"
+  ],
+  "Questa bozza non contiene una versione iniziale verificabile. Ogni differenza richiede una scelta esplicita.": [
+    "This draft has no usable initial version. Every difference requires an explicit choice.",
+    "Ce brouillon ne contient pas de version initiale exploitable. Chaque différence nécessite un choix explicite.",
+    "Este borrador no contiene una versión inicial utilizable. Cada diferencia requiere una elección explícita.",
+    "Dieser Entwurf enthält keine verwendbare Ausgangsversion. Jeder Unterschied erfordert eine ausdrückliche Auswahl.",
+    "此草稿没有可用的初始版本。每处差异都需要明确选择。",
+    "この下書きには利用可能な初期バージョンがありません。すべての差分で明示的な選択が必要です。"
   ],
   "Questa funzione richiede account e avvio con --auth.": [
     "This feature requires an account and startup with --auth.",
@@ -8882,6 +9178,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "重新打开此请求并重置投票？",
     "依頼を再開し、投票をリセットしますか？"
   ],
+  "Ricarica confronto": [
+    "Reload comparison",
+    "Recharger la comparaison",
+    "Volver a cargar la comparación",
+    "Vergleich neu laden",
+    "重新加载比较",
+    "比較を再読み込み"
+  ],
   "Ricarica versione corrente": [
     "Reload current version",
     "Recharger la version actuelle",
@@ -8977,6 +9281,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Du erhältst Benachrichtigungen zu Aktualisierungen.",
     "你将收到更新通知。",
     "更新の通知を受け取ります。"
+  ],
+  "Richiede: {0}": [
+    "Requires: {0}",
+    "Requiert : {0}",
+    "Requiere: {0}",
+    "Benötigt: {0}",
+    "依赖于：{0}",
+    "必要: {0}"
   ],
   "Richiedente": [
     "Requester",
@@ -9490,6 +9802,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "服务器响应无效。重试前请检查操作结果。",
     "サーバーの応答が無効です。再試行する前に結果を確認してください。"
   ],
+  "Risposta della timeline non valida.": [
+    "Invalid timeline response.",
+    "Réponse de la chronologie non valide.",
+    "Respuesta de la cronología no válida.",
+    "Ungültige Antwort für die Zeitleiste.",
+    "时间线响应无效。",
+    "タイムラインの応答が無効です。"
+  ],
   "Risposta pubblicata": [
     "Reply posted",
     "Réponse publiée",
@@ -9986,6 +10306,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "选择看板",
     "ボードを選択"
   ],
+  "Scegli esplicitamente": [
+    "Choose explicitly",
+    "Choisissez explicitement",
+    "Elige explícitamente",
+    "Ausdrücklich auswählen",
+    "请明确选择",
+    "明示的に選択"
+  ],
   "Scegli un file": [
     "Choose a file",
     "Choisir un fichier",
@@ -10025,6 +10353,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Wert auswählen",
     "选择一个值",
     "値を選択"
+  ],
+  "Scegli un valore per ogni campo in conflitto.": [
+    "Choose a value for every conflicting field.",
+    "Choisissez une valeur pour chaque champ en conflit.",
+    "Elige un valor para cada campo en conflicto.",
+    "Wähle für jedes widersprüchliche Feld einen Wert.",
+    "请为每个冲突字段选择一个值。",
+    "競合するフィールドごとに値を選択してください。"
   ],
   "Scegli uno Sprint e da 1 a 100 schede.": [
     "Choose a sprint and 1 to 100 cards.",
@@ -10306,6 +10642,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "{0} 的卡片 · {1} 个结果",
     "{0} のカード · {1} 件"
   ],
+  "Schede fuori dal periodo: {0}": [
+    "Cards outside this period: {0}",
+    "Cartes hors de cette période : {0}",
+    "Tarjetas fuera del período: {0}",
+    "Karten außerhalb dieses Zeitraums: {0}",
+    "此期间之外的卡片：{0}",
+    "期間外のカード: {0}"
+  ],
+  "Schede nel periodo": [
+    "Cards in this period",
+    "Cartes de cette période",
+    "Tarjetas del período",
+    "Karten in diesem Zeitraum",
+    "此期间的卡片",
+    "期間内のカード"
+  ],
   "Schede nella lista": [
     "Cards in this list",
     "Cartes de cette liste",
@@ -10337,6 +10689,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ausgewählte Karten aktualisiert.",
     "所选卡片已更新。",
     "選択したカードを更新しました。"
+  ],
+  "Schede senza date": [
+    "Undated cards",
+    "Cartes sans dates",
+    "Tarjetas sin fechas",
+    "Karten ohne Datum",
+    "无日期卡片",
+    "日付未設定のカード"
   ],
   "Schede senza stima": [
     "Cards without estimates",
@@ -10546,6 +10906,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "选择 {1}",
     "{1} を選択"
   ],
+  "Senza date": [
+    "No dates",
+    "Sans dates",
+    "Sin fechas",
+    "Ohne Datum",
+    "未设置日期",
+    "日付未設定"
+  ],
   "Senza scadenza": [
     "No due date",
     "Sans échéance",
@@ -10682,6 +11050,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "只有具有写入权限的成员可以转换请求。",
     "リクエストを変換できるのは書き込み権限を持つメンバーのみです。"
   ],
+  "Solo inizio: {0}": [
+    "Start only: {0}",
+    "Début uniquement : {0}",
+    "Solo inicio: {0}",
+    "Nur Beginn: {0}",
+    "仅开始日期：{0}",
+    "開始日のみ: {0}"
+  ],
   "Solo l'autore e i membri scriventi possono discutere la richiesta.": [
     "Only the author and members with write access can discuss the request.",
     "Seuls l'auteur et les membres avec accès en écriture peuvent discuter de la demande.",
@@ -10705,6 +11081,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Nur der Autor kann Antworten bearbeiten.",
     "只有作者可以编辑回答。",
     "回答を編集できるのは作成者のみです。"
+  ],
+  "Solo lettura: le date non vengono modificate. Le date singole sono ancore, non durate stimate.": [
+    "Read only: dates are not changed. Single dates are anchors, not estimated durations.",
+    "Lecture seule : les dates ne sont pas modifiées. Les dates seules sont des repères, pas des durées estimées.",
+    "Solo lectura: las fechas no se modifican. Las fechas únicas son referencias, no duraciones estimadas.",
+    "Nur Lesen: Daten werden nicht geändert. Einzelne Daten sind Bezugspunkte, keine geschätzten Dauern.",
+    "只读：不会修改日期。单个日期是时间锚点，并非估算的持续时间。",
+    "読み取り専用です。日付は変更されません。単独の日付は基準点であり、推定期間ではありません。"
   ],
   "Solo non lette": [
     "Unread only",
@@ -10737,6 +11121,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Nur neue Anfragen oder Anfragen in Prüfung können bearbeitet werden.",
     "只能编辑新建或审核中的请求。",
     "編集できるのは新規または確認中のリクエストのみです。"
+  ],
+  "Solo scadenza: {0}": [
+    "Due only: {0}",
+    "Échéance uniquement : {0}",
+    "Solo vencimiento: {0}",
+    "Nur Fälligkeit: {0}",
+    "仅截止日期：{0}",
+    "期限のみ: {0}"
   ],
   "Solo scadute": [
     "Overdue only",
@@ -11386,6 +11778,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "TiB",
     "TiB"
   ],
+  "Timeline": [
+    "Timeline",
+    "Chronologie",
+    "Cronología",
+    "Zeitleiste",
+    "时间线",
+    "タイムライン"
+  ],
+  "Timeline della bacheca": [
+    "Board timeline",
+    "Chronologie du tableau",
+    "Cronología del tablero",
+    "Board-Zeitleiste",
+    "看板时间线",
+    "ボードのタイムライン"
+  ],
   "Timer avviato. Resta disponibile su questo dispositivo anche dopo un ricaricamento.": [
     "Timer started. It remains available on this device after a reload.",
     "Minuteur démarré. Il reste disponible sur cet appareil même après un rechargement.",
@@ -11826,6 +12234,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "上次更新：{0}",
     "最終更新：{0}"
   ],
+  "Un assegnatario non è più disponibile. Correggi gli assegnatari nella bozza.": [
+    "An assignee is no longer available. Correct the assignees in your draft.",
+    "Un responsable n’est plus disponible. Corrigez les responsables dans votre brouillon.",
+    "Un asignado ya no está disponible. Corrige los asignados en el borrador.",
+    "Eine zugewiesene Person ist nicht mehr verfügbar. Korrigiere die Zuweisungen in deinem Entwurf.",
+    "某个负责人已不可用。请修正草稿中的负责人。",
+    "利用できなくなった担当者がいます。下書きの担当者を修正してください。"
+  ],
   "Un campo importato non è valido o supera i limiti consentiti.": [
     "An imported field is invalid or exceeds the allowed limits.",
     "Un champ importé est invalide ou dépasse les limites autorisées.",
@@ -11833,6 +12249,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ein importiertes Feld ist ungültig oder überschreitet die zulässigen Grenzen.",
     "导入字段无效或超出允许的限制。",
     "インポートするフィールドが無効、または許容範囲を超えています。"
+  ],
+  "Un campo personalizzato non è più disponibile. Mantieni il valore sul server.": [
+    "A custom field is no longer available. Keep the server value.",
+    "Un champ personnalisé n’est plus disponible. Conservez la valeur du serveur.",
+    "Un campo personalizado ya no está disponible. Mantén el valor del servidor.",
+    "Ein benutzerdefiniertes Feld ist nicht mehr verfügbar. Behalte den Serverwert.",
+    "某个自定义字段已不可用。请保留服务器值。",
+    "利用できなくなったカスタムフィールドがあります。サーバーの値を保持してください。"
   ],
   "Un membro": [
     "A member",
@@ -11857,6 +12281,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ein wenig Ordnung.",
     "一点条理。",
     "少しの整理。"
+  ],
+  "Un valore personalizzato non è più valido per la definizione corrente.": [
+    "A custom value is no longer valid for the current definition.",
+    "Une valeur personnalisée n’est plus valide pour la définition actuelle.",
+    "Un valor personalizado ya no es válido para la definición actual.",
+    "Ein benutzerdefinierter Wert ist für die aktuelle Definition nicht mehr gültig.",
+    "某个自定义值不再符合当前字段定义。",
+    "現在の定義に対して無効なカスタム値があります。"
   ],
   "Una dipendenza non è completata: nessuna modifica applicata.": [
     "A dependency is incomplete: no changes applied.",
@@ -11905,6 +12337,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Eine Karte wurde geändert: Keine Änderungen angewendet.",
     "某张卡片已被修改：未应用任何更改。",
     "カードが変更されています。変更は適用されていません。"
+  ],
+  "Unione automatica: modifica locale.": [
+    "Automatic merge: local change.",
+    "Fusion automatique : modification locale.",
+    "Combinación automática: cambio local.",
+    "Automatisch zusammengeführt: lokale Änderung.",
+    "自动合并：本地更改。",
+    "自動マージ：ローカルの変更。"
+  ],
+  "Unione automatica: modifica sul server.": [
+    "Automatic merge: server change.",
+    "Fusion automatique : modification du serveur.",
+    "Combinación automática: cambio del servidor.",
+    "Automatisch zusammengeführt: Serveränderung.",
+    "自动合并：服务器更改。",
+    "自動マージ：サーバーの変更。"
   ],
   "Un’altra scheda del browser ha aggiornato la bozza locale. I valori di questo editor restano in memoria.": [
     "Another browser tab has updated the local draft. The values in this editor remain in memory.",
@@ -12106,6 +12554,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "JSON 值无效。",
     "JSON 値が無効です。"
   ],
+  "Valore da mantenere": [
+    "Value to keep",
+    "Valeur à conserver",
+    "Valor que se conservará",
+    "Zu behaltender Wert",
+    "要保留的值",
+    "保持する値"
+  ],
   "Valori campo non validi.": [
     "Invalid field values.",
     "Non valide : valeurs du champ.",
@@ -12162,6 +12618,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "冲刺版本已过期。",
     "スプリントのバージョンが古くなっています。"
   ],
+  "Versione iniziale": [
+    "Initial version",
+    "Version initiale",
+    "Versión inicial",
+    "Ausgangsversion",
+    "初始版本",
+    "初期バージョン"
+  ],
   "Versione non aggiornata. Ricarica i dati.": [
     "Outdated version. Reload the data.",
     "Version obsolète. Rechargez les données.",
@@ -12185,6 +12649,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Veraltete Version. Lade vor einem erneuten Versuch neu.",
     "版本已过期。请重新加载后再试。",
     "バージョンが古くなっています。再読み込みしてから再試行してください。"
+  ],
+  "Versione sul server": [
+    "Server version",
+    "Version sur le serveur",
+    "Versión del servidor",
+    "Serverversion",
+    "服务器版本",
+    "サーバーのバージョン"
   ],
   "Versione sul server: {6}. Confermando manterrai il testo della tua bozza per completare l’unione manualmente.": [
     "Server version: {6}. Confirming keeps your draft text so you can merge it manually.",

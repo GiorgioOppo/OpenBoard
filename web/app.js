@@ -46,7 +46,12 @@ function stored(key, fallback = '') { try { return localStorage.getItem(`openboa
 function remember(key, value) { try { localStorage.setItem(`openboard.${key}`, value); } catch { /* Local preferences remain optional. */ } }
 function forget(key) { try { localStorage.removeItem(`openboard.${key}`); } catch { /* Storage can be disabled. */ } }
 const uuid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-state.view = ['board','list','calendar','stats','table'].includes(stored('view')) ? stored('view') : 'board';
+state.view = ['board','list','calendar','stats','table','timeline'].includes(stored('view')) ? stored('view') : 'board';
+function setView(view) {
+  if (state.saving || !['board','list','calendar','stats','table','timeline'].includes(view)) return;
+  state.timelineSequence = (state.timelineSequence || 0)+1;
+  state.view = view; remember('view',view); renderBoard();
+}
 document.documentElement.dataset.theme = stored('theme','light');
 document.documentElement.dataset.density = stored('density','comfortable');
 function hydrateIcons(root = document) { root.querySelectorAll('[data-icon]').forEach((element) => { element.innerHTML = icon(element.dataset.icon); }); }
@@ -74,7 +79,7 @@ function setSession(session,{renewed = false} = {}) {
     ['card-dialog','board-dialog','column-dialog','move-dialog','panel-dialog'].forEach((id) => { if ($(id)?.open) closeDialog(id,{force:true,navigate:false}); });
     state.board = null; state.boards = []; state.cardEditor = null; state.boardEditor = null; state.columnEditor = null;
     state.selectedCards.clear(); state.selectionMode = false; state.importData = null; state.importSource = null; state.importContext = null; state.importKey = null; state.conflictVersion = null;
-    state.draftCenter = null; state.commandActions = []; state.globalSearch = null;
+    state.draftCenter = null; state.commandActions = []; state.globalSearch = null; state.timeline = null; state.timelineVisible = null; state.timelineRendered = null;
   }
   if (renewed || changedOwner || session?.csrf !== state.auth?.csrf || session?.user?.role !== state.auth?.user?.role) invalidateSession();
   state.auth = session;
@@ -244,7 +249,7 @@ function updateFilters() {
     : `${OpenBoardI18n.count('{count} scheda','{count} schede',cards.length)} · ${OpenBoardI18n.count('{count} completata','{count} completate',cards.filter((card) => card.completed).length)}`;
   $('clear-filters').classList.toggle('selected',!hasFilters());
   ['label','assignee','priority','status'].forEach((key) => $(`${key}-filter`).classList.toggle('filter-active',!!state[key]));
-  ['board','list','calendar','stats','table'].forEach((view) => { const button = $(`view-${view}`); button.classList.toggle('selected',state.view === view); button.setAttribute('aria-pressed',String(state.view === view)); });
+  ['board','list','calendar','stats','table','timeline'].forEach((view) => { const button = $(`view-${view}`); button.classList.toggle('selected',state.view === view); button.setAttribute('aria-pressed',String(state.view === view)); });
 }
 function dueDate(card) {
   if (!card.due_date || !/^\d{4}-\d{2}-\d{2}$/.test(card.due_date)) return '';
@@ -298,6 +303,7 @@ function renderBoard() {
   else if (state.view === 'stats') { $('board-canvas').innerHTML = ui`<div class="initial-loading"><span class="spinner"></span>Calcolo statistiche…</div>`; renderStats(); }
   else if (state.view === 'calendar') $('board-canvas').innerHTML = renderCalendar();
   else if (state.view === 'table') $('board-canvas').innerHTML = renderTable();
+  else if (state.view === 'timeline') { $('board-canvas').innerHTML = renderTimeline(); timelineAfterRender(); }
   else if (state.view === 'list') $('board-canvas').innerHTML = renderList();
   else $('board-canvas').innerHTML = ui`<div class="kanban-board">${state.board.columns.map(renderColumn).join('')}<button class="add-column-button" type="button" data-add-column data-write>${icon('plus')}Aggiungi una lista</button></div>`;
   updateSelection(); updateFilters(); updateBusy();
@@ -418,7 +424,15 @@ function cardData() {
 }
 function cardSnapshot() { return JSON.stringify({card:cardData(),checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,worklog:pendingWorklog()}); }
 function editorDirty(id) {
-  if (id === 'card-dialog') return !!state.cardEditor && cardSnapshot() !== state.cardEditor.original;
+  if (id === 'card-dialog') {
+    const editor = state.cardEditor; if (!editor) return false;
+    if (!editor.baseData || typeof OpenBoardConflicts === 'undefined') return cardSnapshot() !== editor.original;
+    try {
+      const current = JSON.parse(cardSnapshot()), original = JSON.parse(editor.original);
+      const auxiliary = value => ({checklist_new:value.checklist_new,comment_body:value.comment_body,worklog:value.worklog});
+      return !OpenBoardConflicts.equal(OpenBoardConflicts.snapshot(current.card),cardConflictBaseline(editor.baseData)) || !OpenBoardConflicts.equal(auxiliary(current),auxiliary(original));
+    } catch { return true; }
+  }
   if (id === 'board-dialog') return !!state.boardOriginal && JSON.stringify(boardData()) !== state.boardOriginal;
   if (id === 'column-dialog') return !!state.columnOriginal && JSON.stringify(columnData()) !== state.columnOriginal;
   return false;
@@ -438,10 +452,19 @@ function saveDraft() {
     return;
   }
   if (!editor.writtenDraft && !editor.previousDraft && readDraft()) editor.previousDraft = stored(draftKey());
-  const serialized = JSON.stringify({data:cardData(),version:editor.version,pending:editor.pending,pendingAmbiguous:!!editor.pendingAmbiguous,checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,worklog:pendingWorklog(),updated_at:Date.now()});
+  const serialized = JSON.stringify({data:cardData(),version:editor.version,base_data:editor.baseData || null,base_version:editor.baseVersion || null,pending:editor.pending,pendingAmbiguous:!!editor.pendingAmbiguous,checklist_new:$('checklist-new').value,comment_body:$('comment-body').value,worklog:pendingWorklog(),updated_at:Date.now()});
   remember(draftKey(),serialized); editor.writtenDraft = serialized;
 }
-function readDraft() { try { const draft = JSON.parse(stored(draftKey(),'null')); return draft?.data && Date.now()-draft.updated_at < 30*86400000 ? draft : null; } catch { return null; } }
+function cardDraftVersionValid(draft) { return !state.cardEditor?.id || (Number.isSafeInteger(draft?.version) && draft.version > 0); }
+function readDraft() {
+  try {
+    const raw = stored(draftKey(),'null'); if (raw.length > 2*1024*1024) return null;
+    const draft = JSON.parse(raw), now = Date.now();
+    if (!draft?.data || typeof draft.data !== 'object' || Array.isArray(draft.data) || !cardDraftVersionValid(draft) || !Number.isFinite(draft.updated_at) || draft.updated_at > now+60000 || now-draft.updated_at >= 30*86400000) return null;
+    if (typeof OpenBoardConflicts !== 'undefined') OpenBoardConflicts.snapshot(draft.data);
+    return draft;
+  } catch { return null; }
+}
 function closeDialog(id, {force = false,navigate = true} = {}) {
   if (id === 'panel-dialog' && state.panel === 'thread') saveReplyDraft();
   if (state.saving && !force) return false;
@@ -496,7 +519,7 @@ async function openCard(cardId, columnId, {navigate = true} = {}) {
     if (cardId) { const result = await api(`/api/cards/${Number(cardId)}`); card = result.card || result; }
     if (sequence !== state.cardSequence || state.board?.id !== boardId || state.loadSequence !== boardLoadSequence || state.loading || state.saving) return;
     if (card && !state.board.columns.some((column) => column.id === card.column_id)) throw new APIError(tr('Questa scheda appartiene a un’altra bacheca. Aprila dalla ricerca globale.'));
-    const editor=state.cardEditor = {id:card?.id || null,version:card?.version,cover:card?.cover || '',checklist:[],archived:!!card?.archived,pending:null,persistedMilestone:card?.milestone_key || ''};
+    const editor=state.cardEditor = {id:card?.id || null,version:card?.version,cover:card?.cover || '',checklist:[],archived:!!card?.archived,pending:null,persistedMilestone:card?.milestone_key || '',baseData:card && typeof OpenBoardConflicts !== 'undefined' ? OpenBoardConflicts.snapshot(card):null,baseVersion:card?.version || null};
     $('card-form').reset();
     $('card-dialog-context').textContent = card ? tr('DETTAGLI DELLA SCHEDA') : tr('UNA NUOVA IDEA');
     $('card-column').innerHTML = state.board.columns.map((column) => ui`<option value="${Number(column.id)}">${escapeHTML(column.title)}</option>`).join('');
@@ -815,12 +838,120 @@ function updateMovePosition() {
 }
 async function showConflict() {
   const editor = state.cardEditor;
-  if (!editor?.id) return;
-  await showPanel(tr('Confronta con la versione sul server'),async () => {
-    const result = await api(`/api/cards/${editor.id}`); const card = result.card || result;
-    state.conflictVersion = card.version;
-    return ui`<p>La tua bozza resta aperta nell’editor. Confronta i contenuti, poi correggi la bozza prima di salvare.</p><div class="conflict-copy"><h3>${escapeHTML(card.title)}</h3><p>${escapeHTML(card.description || '')}</p><p>Responsabile: ${escapeHTML(card.assignee || tr('Nessuno'))} · Scadenza: ${escapeHTML(card.due_date || tr('Nessuna'))} · Priorità: ${escapeHTML(priorities[card.priority] || tr('Normale'))}</p><ul>${(card.checklist || []).map((item) => ui`<li>${item.done ? '✓ ' : ''}${escapeHTML(item.text)}</li>`).join('')}</ul></div><p>Versione sul server: ${Number(card.version)}. Confermando manterrai il testo della tua bozza per completare l’unione manualmente.</p><button id="adopt-version" class="button primary" type="button">Ho confrontato: continua a modificare la bozza</button>`;
-  },'conflict');
+  if (!editor?.id || !$('card-dialog').open || state.saving || state.loading || !cardConflictCanWrite()) return;
+  saveDraft(); state.cardConflict = null;
+  panel(tr('Confronta con la versione sul server'),ui`<p>Caricamento…</p>`,'conflict');
+  const context = cardConflictContext(editor);
+  try {
+    const local = OpenBoardConflicts.snapshot(cardData()), snapshot = JSON.stringify(cardData());
+    const current = await readCardConflict(editor,context); if (!current || !cardConflictCurrent(editor,context) || JSON.stringify(cardData()) !== snapshot) return;
+    const plan = OpenBoardConflicts.compare(editor.baseData,local,current.card);
+    state.cardConflict = {editor,context,plan,server:current.card,board:current.board,members:current.members,snapshot,busy:false};
+    $('panel-body').innerHTML = renderCardConflict(state.cardConflict);
+  } catch (error) { if (cardConflictCurrent(editor,context) && !error.staleSession) $('panel-body').innerHTML = ui`<p class="form-error" role="alert">${escapeHTML(cardConflictError(error))}</p>`; }
+}
+function cardConflictCanWrite(board = state.board) {
+  const session = state.auth, allowed = session?.enabled === false || (session?.enabled === true && ['admin','member'].includes(session.user?.role));
+  return !!(allowed && board?.id && !board.deleted_at && board.readonly === false && ['admin','member'].includes(board.role));
+}
+function cardConflictContext(editor) { return {session:sessionContext(),boardId:state.board.id,cardId:editor.id,cardSequence:state.cardSequence,loadSequence:state.loadSequence,panelSequence:state.panelSequence}; }
+function cardConflictBaseline(data) {
+  const snapshot = OpenBoardConflicts.snapshot(data);
+  // Empty active inputs are read as null by fieldValue(), and null clears a
+  // custom value. Retained values of deleted fields never pass through inputs.
+  for (const field of state.board.custom_fields || []) if (!field.deleted_at && OpenBoardConflicts.customValue(snapshot,field.key) === '') delete snapshot.custom_values[field.key];
+  return snapshot;
+}
+function cardConflictCurrent(editor,context) { return sessionCurrent(context.session) && state.cardEditor === editor && editor.id === context.cardId && state.board?.id === context.boardId && state.cardSequence === context.cardSequence && state.loadSequence === context.loadSequence && state.panelSequence === context.panelSequence && state.panel === 'conflict' && $('card-dialog').open && $('panel-dialog').open && !state.loading; }
+function cardConflictError(error) { return error?.message === 'invalid_card_snapshot' ? tr('I dati da confrontare non sono validi o superano i limiti. La bozza è conservata.'):error?.message || tr('Operazione non riuscita.'); }
+async function readCardConflict(editor,context) {
+  const results = await Promise.all([api(`/api/cards/${editor.id}`),api(`/api/boards/${context.boardId}?summary=1&include_archived=1`),state.auth?.enabled ? api(`/api/boards/${context.boardId}/members`):Promise.resolve({members:[]})]);
+  if (!cardConflictCurrent(editor,context)) return null;
+  const card = results[0].card || results[0], board = results[1].board || results[1];
+  if (!cardConflictCanWrite(board)) throw new APIError(tr('Non hai più il permesso di modificare la scheda. La bozza è conservata.'),403);
+  if (card.id !== editor.id || board.id !== context.boardId || card.deleted_at || !Number.isSafeInteger(card.version) || card.version < 1 || !(board.columns || []).some(column => !column.deleted_at && column.id === card.column_id)) throw new APIError(tr('La scheda o la lista non è più disponibile. La bozza è conservata.'),404);
+  return {card,board,members:results[2].members || []};
+}
+function cardConflictLabel(row,board) {
+  if (row.custom) return tr`Campo personalizzato: ${(board.custom_fields || []).find(field => field.key === row.key)?.name || row.key}`;
+  const names={title:tr('Titolo'),description:tr('Descrizione'),column_id:tr('Lista'),assignee:tr('Responsabile'),due_date:tr('Scadenza'),cover:tr('Copertina'),completed:tr('Completato'),start_date:tr('Data di inizio'),blocked_reason:tr('Motivo del blocco'),actual_minutes:tr('Tempo manuale (min)'),reference_url:tr('URL di riferimento'),milestone_key:tr('Traguardo'),priority:tr('Priorità'),estimate_minutes:tr('Stima (min)'),labels:tr('Etichette: primaria e aggiuntive'),assignee_ids:tr('Assegnatari'),checklist:tr('Checklist')};
+  return names[row.key];
+}
+function cardConflictValue(value,row,comparison) {
+  if (value === undefined || value === null || value === '') return tr('Non impostato');
+  if (row.key === 'column_id' && !row.custom) return comparison.board.columns.find(column => column.id === value)?.title || String(value);
+  if (row.key === 'assignee_ids' && !row.custom) return value.map(id => comparison.members.find(member => Number(member.user_id || member.id) === id)?.name || String(id)).join(', ') || tr('Nessuno');
+  if (typeof value === 'boolean') return value ? tr('Sì'):tr('No');
+  return typeof value === 'object' ? JSON.stringify(value,null,2):String(value);
+}
+function renderCardConflict(comparison) {
+  const rows = comparison.plan.rows.filter(row => !OpenBoardConflicts.equal(row.local,row.server));
+  return ui`<p>Le modifiche indipendenti sono unite automaticamente. Scegli la bozza o il server per ogni campo in conflitto.</p>${!comparison.plan.base ? ui`<p class="notice">Questa bozza non contiene una versione iniziale verificabile. Ogni differenza richiede una scelta esplicita.</p>`:''}<p>Checklist, assegnatari ed etichette sono gruppi indivisibili. I campi personalizzati sono confrontati singolarmente.</p><p>Applicare l’anteprima aggiorna solo l’editor. Salva esplicitamente la scheda per inviare le modifiche.</p><div class="conflict-fields">${rows.map(row => {
+    const index = comparison.plan.rows.indexOf(row), name = cardConflictLabel(row,comparison.board);
+    return ui`<section class="conflict-field" aria-labelledby="conflict-heading-${index}"><h3 id="conflict-heading-${index}">${escapeHTML(name)}</h3><div class="conflict-values"><div><h4>Versione iniziale</h4><pre>${escapeHTML(comparison.plan.base ? cardConflictValue(row.base,row,comparison):tr('Non disponibile'))}</pre></div><div><h4>La tua bozza</h4><pre>${escapeHTML(cardConflictValue(row.local,row,comparison))}</pre></div><div><h4>Versione sul server</h4><pre>${escapeHTML(cardConflictValue(row.server,row,comparison))}</pre></div></div>${row.automatic ? ui`<p class="helper-text">${row.automatic === 'local' ? tr('Unione automatica: modifica locale.'):tr('Unione automatica: modifica sul server.')}</p>`:ui`<label for="conflict-choice-${index}">Valore da mantenere</label><select id="conflict-choice-${index}" aria-labelledby="conflict-heading-${index}" required><option value="">Scegli esplicitamente</option><option value="local">La tua bozza</option><option value="server">Versione sul server</option></select>`}</section>`;
+  }).join('') || ui`<p>Non ci sono differenze nei campi modificabili.</p>`}</div><p id="conflict-error" class="form-error" role="alert"></p><button id="adopt-version" class="button primary" type="button">Applica anteprima all’editor</button><button id="load-conflict" class="button secondary" type="button">Ricarica confronto</button>`;
+}
+function validateCardConflict(data,current) {
+  const {board,card,members} = current;
+  if (!data.title.trim() || data.estimate_minutes < 0 || data.estimate_minutes > 100000 || data.actual_minutes < 0 || data.actual_minutes > 1000000 || !Object.hasOwn(priorities,data.priority) || !covers.includes(data.cover) || (data.label && !Object.hasOwn(labels,data.label)) || data.labels.some(label => !Object.hasOwn(labels,label)) || (data.reference_url && !productivity.safeURL(data.reference_url))) return tr('I valori uniti non sono validi. Correggi la bozza o modifica le scelte.');
+  if ([data.start_date,data.due_date].some(value => value && (!productivity.validDate(value) || value < '0001-01-01')) || (data.start_date && data.due_date && data.start_date > data.due_date)) return tr('Le date unite non sono valide: l’inizio deve precedere la scadenza.');
+  if (!board.columns.some(column => !column.deleted_at && column.id === data.column_id)) return tr('La lista scelta non è più disponibile. La bozza è conservata.');
+  // The explicit membership list is incomplete: active global administrators
+  // may be assigned without membership. Absence is not proof of ineligibility;
+  // the eventual Save validates every ID in the backend write transaction.
+  if (data.assignee_ids.some(id => members.some(member => Number(member.user_id || member.id) === id && member.active === false))) return tr('Un assegnatario non è più disponibile. Correggi gli assegnatari nella bozza.');
+  for (const key of new Set([...Object.keys(data.custom_values),...Object.keys(card.custom_values || {})])) {
+    const field = (board.custom_fields || []).find(item => item.key === key), value = OpenBoardConflicts.customValue(data,key);
+    if (!field || field.deleted_at) { if (!OpenBoardConflicts.equal(value,OpenBoardConflicts.customValue(card,key) ?? undefined)) return tr('Un campo personalizzato non è più disponibile. Mantieni il valore sul server.'); }
+    else if (value !== undefined && !productivity.fieldMatchesAdvanced(value,field,{op:'eq',value})) return tr('Un valore personalizzato non è più valido per la definizione corrente.');
+  }
+  if (data.milestone_key && !(board.milestones || []).some(item => !item.deleted_at && item.key === data.milestone_key) && data.milestone_key !== (card.milestone_key || '')) return tr('Il traguardo scelto non è più disponibile. La bozza è conservata.');
+  return '';
+}
+function fillCardConflict(data,current) {
+  const editor = state.cardEditor, controls={title:'card-title',description:'card-description',column_id:'card-column',assignee:'card-assignee',due_date:'card-due-date',start_date:'card-start-date',blocked_reason:'card-blocked-reason',actual_minutes:'card-actual',reference_url:'card-reference',priority:'card-priority',estimate_minutes:'card-estimate',label:'card-label'};
+  state.board.custom_fields = current.board.custom_fields || []; state.board.milestones = current.board.milestones || []; state.board.role = current.board.role; state.board.readonly = current.board.readonly;
+  $('card-column').innerHTML = current.board.columns.filter(column => !column.deleted_at).map(column => ui`<option value="${Number(column.id)}">${escapeHTML(column.title)}</option>`).join('');
+  for (const [key,id]of Object.entries(controls)) $(id).value = String(data[key]);
+  $('card-completed').checked = data.completed; setCover(data.cover);
+  document.querySelectorAll('input[name="extra-label"]').forEach(input => { input.checked = data.labels.includes(input.value); });
+  editor.checklist = data.checklist.map(item => ({...item})); renderChecklist(); editor.assigneeIds = [...data.assignee_ids];
+  const roster = current.members.filter(member => member.active);
+  for (const id of data.assignee_ids) if (!roster.some(member => Number(member.user_id || member.id) === id)) roster.push({user_id:id,name:current.card.assignees?.find(member => member.id === id)?.name || tr`Assegnatario non elencato: ${id}`,username:''});
+  renderMemberAssignments(roster);
+  editor.customValues = {...data.custom_values};
+  $('card-custom-fields').innerHTML = activeFields().map(field => ui`<label class="form-field" for="custom-${Number(field.id)}"><span class="field-label">${escapeHTML(field.name)}</span>${customInput(field,OpenBoardConflicts.customValue(data,field.key))}</label>`).join('');
+  const milestones = activeMilestones(); if (data.milestone_key && !milestones.some(item => item.key === data.milestone_key)) milestones.push({key:data.milestone_key,title:milestoneName(data.milestone_key)+tr(' (eliminato)')});
+  $('card-milestone').innerHTML = ui`<option value="">Nessuno</option>`+milestones.map(item => ui`<option value="${escapeHTML(item.key)}">${escapeHTML(item.title)}</option>`).join(''); $('card-milestone').value = data.milestone_key;
+  $('markdown-preview').innerHTML = productivity.markdown(data.description); renderReference();
+}
+async function applyCardConflict() {
+  const comparison = state.cardConflict;
+  if (!comparison || comparison.busy || state.saving || !cardConflictCurrent(comparison.editor,comparison.context) || !cardConflictCanWrite()) return;
+  const choices = {};
+  comparison.plan.rows.forEach((row,index) => { if (!row.automatic) choices[index] = $(`conflict-choice-${index}`)?.value; });
+  let resolved;
+  try { resolved = OpenBoardConflicts.resolve(comparison.plan,choices); }
+  catch (error) { $('conflict-error').textContent = cardConflictError(error); return; }
+  if (resolved.unresolved.length) { $('conflict-error').textContent = tr('Scegli un valore per ogni campo in conflitto.'); $(`conflict-choice-${resolved.unresolved[0]}`)?.focus(); return; }
+  if (JSON.stringify(cardData()) !== comparison.snapshot) { $('conflict-error').textContent = tr('La bozza è cambiata durante il confronto. Ricarica il confronto prima di applicarlo.'); return; }
+  comparison.busy = true; $('adopt-version').disabled = true; $('conflict-error').textContent = '';
+  try {
+    const current = await readCardConflict(comparison.editor,comparison.context);
+    if (!current || state.cardConflict !== comparison || !cardConflictCurrent(comparison.editor,comparison.context)) return;
+    const currentData = OpenBoardConflicts.snapshot(current.card);
+    if (current.card.version !== comparison.server.version || !OpenBoardConflicts.equal(currentData,comparison.plan.server)) throw new APIError(tr('Il server è cambiato di nuovo. Ricarica il confronto; la bozza è conservata.'),412);
+    if (JSON.stringify(cardData()) !== comparison.snapshot) throw new APIError(tr('La bozza è cambiata durante il confronto. Ricarica il confronto prima di applicarlo.'));
+    const error = validateCardConflict(resolved.data,current); if (error) throw new APIError(error);
+    fillCardConflict(resolved.data,current);
+    comparison.editor.version = current.card.version; comparison.editor.baseVersion = current.card.version; comparison.editor.baseData = currentData; comparison.editor.persistedMilestone = current.card.milestone_key || ''; comparison.editor.pending = null; comparison.editor.pendingAmbiguous = false;
+    $('conflict-notice').hidden = true; saveDraft(); state.cardConflict = null; closeDialog('panel-dialog',{force:true}); toast(tr('Anteprima applicata all’editor. Controlla i valori e salva esplicitamente.'));
+  } catch (error) { if (state.cardConflict === comparison && cardConflictCurrent(comparison.editor,comparison.context) && !error.staleSession) $('conflict-error').textContent = cardConflictError(error); }
+  finally { comparison.busy = false; if (state.cardConflict === comparison && cardConflictCurrent(comparison.editor,comparison.context)) $('adopt-version').disabled = false; }
+}
+function restoreCardConflictBase(draft) {
+  const editor = state.cardEditor; editor.baseData = null; editor.baseVersion = null;
+  try { if (draft.base_data && Number.isSafeInteger(draft.base_version) && draft.base_version > 0 && draft.base_version <= draft.version) { editor.baseData = OpenBoardConflicts.snapshot(draft.base_data); editor.baseVersion = draft.base_version; } } catch { /* Legacy or invalid bases require explicit choices. */ }
 }
 async function exportBoard() {
   if (!state.board) return;
@@ -901,10 +1032,10 @@ document.addEventListener('click',async (event) => {
     case 'move-card': showMove(); break;
     case 'load-conflict': showConflict(); break;
     case 'adopt-version':
-      state.cardEditor.version = state.conflictVersion; $('conflict-notice').hidden = true; saveDraft(); closeDialog('panel-dialog'); toast(tr('Versione corrente acquisita. Completa la tua bozza e salva.')); break;
+      await applyCardConflict(); break;
     case 'recover-draft': {
       const draft = readDraft();
-      if (draft) { fillCard(draft.data); $('checklist-new').value = draft.checklist_new || ''; $('comment-body').value = draft.comment_body || ''; $('worklog-date').value = draft.worklog?.date || todayISO(); $('worklog-minutes').value = draft.worklog?.minutes || ''; $('worklog-note').value = draft.worklog?.note || ''; state.cardEditor.version = draft.version; if (draft.pending) state.cardEditor.pending = draft.pending; state.cardEditor.pendingAmbiguous = draft.pendingAmbiguous ?? !!draft.pending; state.cardEditor.writtenDraft = stored(draftKey()); state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; saveDraft(); toast(tr('Bozza recuperata. Verifica e salva quando pronta.')); }
+      if (draft && cardDraftVersionValid(draft)) { fillCard(draft.data); restoreCardConflictBase(draft); $('checklist-new').value = draft.checklist_new || ''; $('comment-body').value = draft.comment_body || ''; $('worklog-date').value = draft.worklog?.date || todayISO(); $('worklog-minutes').value = draft.worklog?.minutes || ''; $('worklog-note').value = draft.worklog?.note || ''; state.cardEditor.version = draft.version; if (draft.pending) state.cardEditor.pending = draft.pending; state.cardEditor.pendingAmbiguous = draft.pendingAmbiguous ?? !!draft.pending; state.cardEditor.writtenDraft = stored(draftKey()); state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; saveDraft(); toast(tr('Bozza recuperata. Verifica e salva quando pronta.')); }
       break;
     }
     case 'discard-draft': forget(draftKey()); state.cardEditor.writtenDraft = null; state.cardEditor.previousDraft = null; $('draft-notice').hidden = true; break;
@@ -956,7 +1087,7 @@ $('search-input').addEventListener('input',() => { state.query = $('search-input
 ['label','assignee','priority','status','sort'].forEach((key) => $(`${key}-filter`).addEventListener('change',() => { state[key] = $(`${key}-filter`).value; renderBoard(); }));
 $('show-archived').addEventListener('change',() => { state.archived = $('show-archived').checked; perform(refreshBoard); });
 $('clear-filters').addEventListener('click',() => clearFilters());
-['board','list','calendar','stats','table'].forEach((view) => $(`view-${view}`).addEventListener('click',() => { state.view = view; remember('view',view); renderBoard(); }));
+['board','list','calendar','stats','table','timeline'].forEach((view) => $(`view-${view}`).addEventListener('click',() => setView(view)));
 ['create-board-sidebar','create-board-link'].forEach((id) => $(id).addEventListener('click',() => openBoardEditor()));
 ['boards-nav','mobile-boards'].forEach((id) => $(id).addEventListener('click',() => { renderSidebar(); openDialog('boards-dialog'); }));
 $('add-card-main').addEventListener('click',() => openCard());
@@ -1561,7 +1692,7 @@ function commandActions() {
     {id:'account',name:tr('Il tuo profilo'),run:showAccount},
     {id:'shortcuts',name:tr('Scorciatoie da tastiera'),run:showShortcuts},
     ...(canCreateBoard() ? [{id:'board',name:tr('Nuova bacheca'),run:()=>openBoardEditor()}]:[]),
-    ...(state.board ? [{id:'calendar',name:tr('Calendario'),run:()=>{state.view='calendar';remember('view','calendar');renderBoard();}},{id:'table',name:tr('Tabella'),run:()=>{state.view='table';remember('view','table');renderBoard();}}]:[]),
+    ...(state.board ? [{id:'calendar',name:tr('Calendario'),run:()=>setView('calendar')},{id:'table',name:tr('Tabella'),run:()=>setView('table')},{id:'timeline',name:tr('Timeline'),run:()=>setView('timeline')}]:[]),
     ...(state.board?.columns.length && canWrite() ? [{id:'card',name:tr('Nuova scheda'),run:()=>openCard()}]:[])
   ];
 }

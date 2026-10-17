@@ -25,6 +25,14 @@ flowchart LR
 
 The backend serves API responses, not frontend assets. The production frontend receives no database credentials and does not proxy APIs. NPM routes `/api` directly to the backend and pages to the static frontend. Local development instead uses the Python frontend server to present both under one origin.
 
+## Development-branch search and views
+
+Global card and collaborative-content search use deterministic SQLite functions in `src/unicode.c`, registered on every worker connection. Unmodified bundled utf8proc supplies canonical NFC composition and full default Unicode case folding; accents remain significant, and stored strings are unchanged. Content snippets map folded matches back to original UTF-8. This is a scan-based substring comparison, without a full-text index, stemming or relevance ranking. The browser's current-board free-text filter retains its previous behavior. Immutable upstream provenance and file hashes are recorded in [SOURCE.json](../vendor/utf8proc/SOURCE.json) and verified offline by `scripts/check-vendor.py`.
+
+`web/timeline.js` computes UTC week/month geometry from actual summary dates and renders at most 100 scheduled plus 100 undated rows. Partial dates are explicit anchors. `src/timeline.c` serves one authorized board dependency read, applying live ancestry and both endpoint checks before a stable 2000-edge limit. Summary dates and edges are separate reads, with no atomic snapshot guarantee. The frontend invalidates edge state on a new board object, load, session, view generation or archive setting; board ID/version alone is insufficient. The view sends no schedule mutations.
+
+`web/conflicts.js` compares the full-card editor's initial, local and current server snapshots. Independent changes resolve automatically; conflicting scalar/custom values require choices, while checklist, assignments and labels remain atomic groups. Applying a preview rechecks server state and permissions, then updates only the account-scoped local draft. Explicit Save uses the existing `PATCH` and `If-Match`; no merge service bypasses the backend's transaction validation.
+
 ## Storage modes
 
 **Local mode** uses a SQLite file as the authoritative database. This is the native development default when neither external connection variable is set. SQLite migrations preserve a private pre-migration backup.
@@ -48,5 +56,7 @@ Only NPM publishes host ports. Public HTTP/HTTPS bind to loopback by default, an
 ## Extension and operations
 
 Add a feature through its C handler and data schema, expose a documented API, then implement the corresponding frontend interaction. The [API guide](API.md) describes request contracts; [Contributing](../CONTRIBUTING.md) describes builds and verification. Localized UI and error catalogues are covered in [Internationalization](INTERNATIONALIZATION.md).
+
+The development branch also adds three native [libFuzzer](https://llvm.org/docs/LibFuzzer.html) targets for actual HTTP parsing, JSON validation and Unicode matching/snippet origin handling. They use synthetic inputs, sanitizer instrumentation and isolated in-memory SQLite; no deployment configuration or external store is involved. Reports record source and binary SHA-256 hashes, bounds and campaign results. Bounded local campaigns exercise these targets, and a fifth CI job is configured but has not yet run remotely. Fuzzing finds failures within exercised paths; it is not a security certification. See [Fuzzing](FUZZING.md) for commands and measured evidence.
 
 Schema 7 supports explicit external upgrades from schemas 5 and 6. Database major-version upgrades are separate migrations. A full application backup rehydrates both external stores into one SQLite snapshot; NPM configuration, certificates and deployment secrets need their own protected backups. Follow the [deployment and restore procedures](DEPLOYMENT.md), and consult the [security policy](../SECURITY.md) and [remediation report](SECURITY_REMEDIATION_2026-10-16.md) before internet exposure.

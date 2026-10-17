@@ -41,7 +41,7 @@ Search, filters, favorites and personal bookmarks help find work. Board JSON, CS
 
 ## Finding work (unreleased)
 
-Global search now covers cards, comments/replies, internal requests and their answers/notes, and forms. Choose a content type to narrow the results, then use **Load more** for another page. Results include a text excerpt and open the relevant card, conversation, request or form. Only content you can currently read is returned. The search uses literal substrings with limited case conversion, rather than ranked or language-aware full-text search. Attachments, checklist items and custom fields are not included in this text search.
+Global search now covers cards, comments/replies, internal requests and their answers/notes, and forms. Choose a content type to narrow the results, then use **Load more** for another page. Results include an excerpt in the original spelling and open the relevant card, conversation, request or form. Only content you can currently read is returned. Unicode case folding and canonical NFC equivalence let `STRASSE` find `Straße` and recognize equivalent accent encodings. Accents remain significant: `cafe` does not find `café`. This remains substring search, without stemming, relevance ranking or transliteration. Attachments, checklist items and custom fields are not included. The current-board free-text filter retains its previous browser matching behavior.
 
 To filter a custom field on the current board, select the field in the planning toolbar, choose an operator and enter a value. Number/date fields support comparisons; text/select fields support exact substring matching; booleans use **Yes/No**. **Set/Unset** require no value: zero, false and an empty text value count as set. Exact substring matching is case-sensitive. **Free search** retains the existing descriptive text filter. Invalid typed input displays an error and does not silently remove the filter. The toolbar applies one custom-field condition to the loaded board; API integrations can combine up to ten conditions with all/any matching.
 
@@ -52,6 +52,14 @@ Open the board's **Table** view and select **Edit row**. Members with current wr
 **Save** sends the four fields together. **Cancel** closes the row editor and keeps its draft for later. Drafts are separated by account, board and card on this browser; **Resume draft** reopens one. Filtering, changing view or a background refresh preserves the values and their original server version. An edited row hidden by filters remains available below the visible results. If browser storage is unavailable, an explicit warning explains that values survive only in memory while the page stays open.
 
 If the server version changes, the draft stays visible and further saves are blocked. **Reload current version** asks for confirmation and replaces the draft only after a successful authorized read. Preserve any text you want to keep before accepting. An uncertain save result also requires an explicit reload before another save. Access revocation or a deleted card prevents editing and keeps the draft; a cached row never grants permission to write. Another tab's changed draft is not silently overwritten or removed.
+
+## Board timeline (unreleased)
+
+Choose **Timeline** to read card schedules by week or month. Select a reference date, move to the previous/next period or use **Today**. The date window uses UTC and supports years 1–9999. Existing board filters apply. Cards with both start and due dates show their actual interval; a start-only or due-only card shows a labeled anchor, without inventing a duration. Cards without dates or with invalid date pairs appear in a separate table.
+
+Each table displays at most 100 cards per page, with separate page controls for scheduled and undated cards. Cards outside the current period are counted. This bounds the rendered rows; it is not virtual scrolling or a large-board capacity guarantee. Tables retain readable date text, keyboard focus and card links. Arrow keys and Home/End move between card-title controls. Observers with board access can use this view.
+
+The dependency column links visible prerequisites and displays at most three links per card plus a remaining count. One board request reads at most 2000 dependency edges; a warning identifies a truncated graph. **Refresh dependencies** retries or refreshes that read. Dates and edges are read separately, so they may reflect different moments; refresh the board to realign them. Permission failures hide the stale card rows. The timeline never changes dates automatically; open a card's normal editor to make an authorized change.
 
 ## Importing a board (unreleased)
 
@@ -88,5 +96,9 @@ Conversion allows at most 100 lists, 10,000 cards and 100 combined checklist ite
 ## Drafts, conflicts and recovery
 
 The interface keeps recoverable personal drafts for supported editors. When another user changes an item, a version conflict may require reloading current data and reviewing your draft before retrying. Avoid repeatedly submitting an old version. A lost response does not prove that a change failed: refresh or inspect the activity log before repeating it.
+
+In unreleased builds, the full-card editor's **Compare with server version** displays the initial snapshot, your draft and the latest readable server values. Independent changes merge automatically. For a field changed differently on both sides, explicitly choose **Your draft** or **Server version**. Checklist, assignees and primary/additional labels remain indivisible groups; custom values are compared individually. A legacy draft without a verified initial snapshot requires an explicit choice for every difference.
+
+**Apply preview to editor** rechecks current permissions and the server version, validates the combined values, then updates only the local editor and its draft. Review it and explicitly **Save** to submit the change with the reviewed version. If the server or draft changes again, reload the comparison; your draft is retained. Removed lists or invalid combined dates/custom values prevent application. A further server edit after applying the preview can still cause a save conflict. This comparison covers the full-card form's editable fields, not comments, attachments or every collaboration record.
 
 For a sign-in failure, a `403` permission error, a `429` retry delay or storage unavailability, see [Troubleshooting](TROUBLESHOOTING.md). Report reproducible problems through the repository's [support guide](../SUPPORT.md); security reports follow the [security policy](../SECURITY.md).

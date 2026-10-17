@@ -2,7 +2,7 @@
 
 OpenBoard's original code, interface, documentation and deployment scripts are licensed under the [MIT license](LICENSE), copyright © 2026 OpenBoard contributors. Third-party software retains its own copyright notices and license terms. The MIT license of this repository does not relicense its databases, runtime libraries, container distributions or bundled dependencies.
 
-This inventory identifies the main components used by the supplied build and deployment files. It is not a complete software bill of materials or a substitute for the license and notice files accompanying each artifact. Versions below identify an explicitly selected source or an upstream license reference; distribution-managed versions must be checked in the exact image being released. License references were reviewed on 2026-10-16.
+This inventory identifies the main components used by the supplied build and deployment files. It is not a complete software bill of materials or a substitute for the license and notice files accompanying each artifact. Versions below identify an explicitly selected source or an upstream license reference; distribution-managed versions must be checked in the exact image being released. License references were reviewed on 2026-10-16; the vendored utf8proc selection was added on 2026-10-17.
 
 ## Backend libraries and databases
 
@@ -10,6 +10,7 @@ This inventory identifies the main components used by the supplied build and dep
 | --- | --- | --- |
 | SQLite | Local persistence and the reconstructible cache used with external storage | The SQLite deliverable code and documentation are dedicated to the public domain. See the [SQLite copyright statement](https://www.sqlite.org/copyright.html). Build tools may have separate terms. |
 | OpenSSL 3.x, including libcrypto | Password hashing, secure randomness and cryptographic operations in the C backend | Apache-2.0. See the [OpenSSL 3.5 license](https://github.com/openssl/openssl/blob/openssl-3.5.4/LICENSE.txt). The installed package version is resolved by the distribution. |
+| utf8proc 2.12.0 | Vendored Unicode 18.0.0 case-folding and canonical normalization for global search | MIT for the library, plus the included Unicode data notice. The complete original [license](vendor/utf8proc/LICENSE.md), [immutable source/checksums](vendor/utf8proc/SOURCE.json) and [integration notes](vendor/utf8proc/README.openboard.md) are retained in this repository. |
 | PostgreSQL and libpq | Structured data and the PostgreSQL C client | PostgreSQL License. See the [PostgreSQL license](https://www.postgresql.org/about/licence/) and [PostgreSQL 17.11 copyright file](https://github.com/postgres/postgres/blob/REL_17_11/COPYRIGHT). |
 | MongoDB Community Server 8.0 | JSON document storage in the Docker deployment | SSPL-1.0. See the [8.0 Community Server license](https://github.com/mongodb/mongo/blob/v8.0/LICENSE-Community.txt) and [MongoDB licensing FAQ](https://www.mongodb.com/legal/licensing/server-side-public-license/faq). |
 | MongoDB C driver, including libmongoc and libbson | MongoDB access from the C backend; selected by `pkg-config` and the distribution | Apache-2.0 for the driver. See the [driver license](https://raw.githubusercontent.com/mongodb/mongo-c-driver/1.30.6/COPYING). Bundled dependencies have their own notices. |
@@ -40,6 +41,7 @@ The OpenBoard frontend uses locally supplied HTML, CSS, JavaScript and translati
 
 The following files record the source selections and modifications made by this repository:
 
+- [vendor/utf8proc/SOURCE.json](vendor/utf8proc/SOURCE.json) pins four unmodified files to upstream commit `79cdd5ab40c79afa559f689ffc13b76812dee1ac`; [check-vendor.py](vendor/utf8proc/check-vendor.py) verifies their lengths and SHA-256 hashes offline. The native install and backend runtime image include the full upstream license beside OpenBoard's license under `share/licenses/openboard/`.
 - [Dockerfile](Dockerfile) selects distribution packages for the C backend; [Dockerfile.frontend](Dockerfile.frontend) selects the frontend server image.
 - [Dockerfile.postgres](Dockerfile.postgres) and [Dockerfile.mongo](Dockerfile.mongo) identify their base images and copy the rebuilt tools.
 - [build-gosu.sh](scripts/build-gosu.sh) pins and verifies the gosu source archive and build metadata helper.

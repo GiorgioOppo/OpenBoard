@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "http": {
+    "get": "HGET /api/boards?q=hello HTTP/1.1\r\nHost: localhost:8080\r\n\r\n",
+    "trusted-peer": "DGET /api/boards HTTP/1.1\r\nHost: localhost:8080\r\nX-Real-IP: ::ffff:c000:201\r\n\r\n",
+    "public-origin": "HPOST /api/import HTTP/1.1\r\nHost: fuzz.example.invalid\r\nContent-Length: 2\r\nOrigin: https://fuzz.example.invalid\r\n\r\n{}",
+    "post": "HPOST /api/import HTTP/1.1\r\nHost: localhost:8080\r\nContent-Type: application/json\r\nContent-Length: 2\r\nOrigin: http://localhost:8080\r\n\r\n{}",
+    "duplicate-length": "HPOST /api/import HTTP/1.1\r\nHost: localhost:8080\r\nContent-Length: 0\r\nContent-Length: 1\r\n\r\n",
+    "chunked": "HPOST /api/boards HTTP/1.1\r\nHost: localhost:8080\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n",
+    "oversized-length": "HPOST /api/import HTTP/1.1\r\nHost: localhost:8080\r\nContent-Length: 18446744073709551615\r\n\r\n",
+    "header-fold": "HGET /api/boards HTTP/1.1\r\nHost: localhost:8080\r\n X-Injected: value\r\n\r\n",
+    "decode-unicode": "M?Stra%C3%9Fe+%E6%97%A5%E6%9C%AC",
+    "decode-invalid": "M?%C0%AF%00%ED%A0%80",
+    "query-duplicate": "R?q=first&q=second",
+    "query-literal": "R?q=100%25_%5C%22&limit=30",
+    "ipv6-mapped": "S::ffff:c000:201",
+    "ipv6-zone": "Sfe80::1%en0"
+  },
+  "unicode": {
+    "german": "Ein langer Text mit Straße und Ende\u0000STRASSE",
+    "greek": "Σίσυφος σςΣ\u0000ΣΊΣΥΦΟΣ",
+    "decomposed": "Un Café caldo\u0000CAFÉ",
+    "reordered": "Á̧\u0000Á̧",
+    "hangul": "가\u0000가",
+    "japanese": "日本語の計画\u0000日本語",
+    "chinese": "中文项目\u0000中文",
+    "astral": "𐐀𐐨\u0000𐐨",
+    "ligature": "ﬃ\u0000FFI",
+    "not-stripped": "café\u0000cafe",
+    "query-nul": "text\u0000query\u0000extra",
+    "empty": "\u0000"
+  },
+  "json": {
+    "empty-object": "{}",
+    "typed": "{\"title\":\"Synthetic 日本 Straße\",\"minutes\":15,\"completed\":false,\"custom_values\":{\"approved\":true,\"cost\":1.5},\"assignee_ids\":[1,2]}",
+    "checklist": "{\"checklist\":[{\"id\":\"synthetic\",\"text\":\"Review\",\"done\":true}]}",
+    "duplicate-root": "{\"title\":\"one\",\"title\":\"two\"}",
+    "duplicate-checklist": "{\"checklist\":[{\"id\":\"same\",\"text\":\"one\",\"done\":false},{\"id\":\"same\",\"text\":\"two\",\"done\":true}]}",
+    "duplicate-custom": "{\"custom_values\":{\"x\":1,\"x\":2}}",
+    "embedded-nul": "{\"title\":\"before\\u0000after\"}",
+    "surrogates": "{\"title\":\"\\ud800\",\"description\":\"\\udc00\"}",
+    "wrong-types": "{\"title\":[],\"minutes\":1e999,\"completed\":0,\"assignee_ids\":[1,1,-1,null],\"checklist\":[false]}",
+    "nested": "{\"custom_values\":{\"key\":{\"list\":[null,false,1,\"text\"]}}}",
+    "invalid": "{\"title\":\"unfinished",
+    "scalar": "9223372036854775808"
+  }
+}
