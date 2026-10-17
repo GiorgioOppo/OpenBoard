@@ -6,12 +6,73 @@ const reactionNames = {like:tr('👍 Mi piace'),heart:tr('❤️ Grazie'),celebr
 function activeFields() { return (state.board?.custom_fields || []).filter((field) => !field.deleted_at).sort((a,b) => a.position-b.position); }
 function activeMilestones() { return (state.board?.milestones || []).filter((item) => !item.deleted_at); }
 function milestoneName(key) { return (state.board?.milestones || []).find((item) => item.key === key)?.title || key || tr('Nessuno'); }
+function customFilterField() { return activeFields().find(field => field.key === state.customKey); }
+function customFilterOperators(field) {
+  const names = {'':tr('Ricerca libera'),eq:tr('Uguale a'),ne:tr('Diverso da'),contains:tr('Contiene esattamente'),gt:tr('Maggiore di'),gte:tr('Maggiore o uguale a'),lt:tr('Minore di'),lte:tr('Minore o uguale a'),is_set:tr('Impostato'),is_unset:tr('Non impostato')};
+  const keys = ['', 'eq', 'ne', ...(['text','select'].includes(field?.type) ? ['contains']:[]), ...(['number','date'].includes(field?.type) ? ['gt','gte','lt','lte']:[]), 'is_set', 'is_unset'];
+  return keys.map(key => [key,names[key]]);
+}
+function customFilterCondition(field = customFilterField()) {
+  const op = state.customOp || '', raw = state.customQuery ?? '';
+  if (!field || !customFilterOperators(field).some(([key]) => key === op) || !op) return null;
+  if (op === 'is_set' || op === 'is_unset') return {op};
+  if (typeof raw !== 'string') return null;
+  let value = raw;
+  if (field.type === 'number') {
+    if (!/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(raw)) return null;
+    value = Number(raw);
+    if (!Number.isFinite(value) || Math.abs(value) > 1e12) return null;
+  } else if (field.type === 'boolean') {
+    if (raw !== 'true' && raw !== 'false') return null;
+    value = raw === 'true';
+  } else if (field.type === 'date') {
+    if (!productivity.validDate(raw) || raw < '0001-01-01') return null;
+  } else if (field.type === 'select' && op !== 'contains') {
+    if (!Array.isArray(field.options) || !field.options.includes(raw)) return null;
+  } else {
+    if (Array.from(raw).length > 2000 || Array.from(raw).some(char => !char.codePointAt(0) || (char.codePointAt(0) >= 0xD800 && char.codePointAt(0) <= 0xDFFF))) return null;
+  }
+  return {op,value};
+}
+function customFilterMatches(card) {
+  if (!state.customKey) return true;
+  const field = customFilterField(), values = card.custom_values || {};
+  if (!field) return false;
+  const value = Object.hasOwn(values,state.customKey) ? values[state.customKey]:undefined;
+  if (!state.customOp) return productivity.fieldMatches(value,state.customQuery || '');
+  const condition = customFilterCondition(field);
+  return !!condition && productivity.fieldMatchesAdvanced(value,field,condition);
+}
+function customFilterInput(field,op) {
+  const attributes = 'id="custom-filter-value" aria-describedby="custom-filter-error custom-filter-hint"';
+  if (!op) return ui`<input ${attributes} type="search" maxlength="500" placeholder="Contiene…">`;
+  if (field?.type === 'boolean') return ui`<select ${attributes}><option value="">Scegli un valore</option><option value="true">Sì</option><option value="false">No</option></select>`;
+  if (field?.type === 'select' && op !== 'contains') return ui`<select ${attributes}><option value="">Scegli un valore</option>${(field.options || []).map(option => ui`<option value="${escapeHTML(option)}">${escapeHTML(option)}</option>`).join('')}</select>`;
+  if (field?.type === 'date') return ui`<input ${attributes} type="date" min="0001-01-01" max="9999-12-31">`;
+  return ui`<input ${attributes} type="text" ${field?.type === 'number' ? 'inputmode="decimal"':'maxlength="2000"'}>`;
+}
 function renderPlanningFilters() {
   if (!$('milestone-filter')) return;
   $('milestone-filter').innerHTML = ui`<option value="">Tutti</option>`+activeMilestones().map((item) => ui`<option value="${escapeHTML(item.key)}">${escapeHTML(item.title)}</option>`).join('');
   $('milestone-filter').value = state.milestone || '';
-  $('custom-filter-key').innerHTML = ui`<option value="">Nessuno</option>`+activeFields().map((field) => ui`<option value="${escapeHTML(field.key)}">${escapeHTML(field.name)}</option>`).join('');
-  $('custom-filter-key').value = state.customKey || ''; $('custom-filter-value').value = state.customQuery || '';
+  const field = customFilterField(), keySelect = $('custom-filter-key'), operator = $('custom-filter-op'), holder = $('custom-filter-value-holder');
+  const keys = ui`<option value="">Nessuno</option>`+activeFields().map(item => ui`<option value="${escapeHTML(item.key)}">${escapeHTML(item.name)}</option>`).join('')+(state.customKey && !field ? ui`<option value="${escapeHTML(state.customKey)}">Campo non disponibile</option>`:'');
+  if (keySelect.dataset.filterOptions !== keys) { keySelect.innerHTML = keys; keySelect.dataset.filterOptions = keys; }
+  keySelect.value = state.customKey || '';
+  if (!operator || !holder) { if ($('custom-filter-value')) $('custom-filter-value').value = state.customQuery || ''; return; }
+  const op = state.customOp || '', options = customFilterOperators(field).map(([key,name]) => ui`<option value="${escapeHTML(key)}">${escapeHTML(name)}</option>`).join('');
+  if (operator.dataset.filterOptions !== options) { operator.innerHTML = options; operator.dataset.filterOptions = options; }
+  operator.value = op; operator.disabled = !field;
+  // Polling must not replace an input while its value or caret is being edited.
+  const signature = JSON.stringify([field?.type || '',op,field?.options || [],OpenBoardI18n.locale]);
+  if (holder.dataset.filterSignature !== signature) { holder.innerHTML = customFilterInput(field,op); holder.dataset.filterSignature = signature; }
+  const input = $('custom-filter-value'), presence = op === 'is_set' || op === 'is_unset';
+  if (input.value !== (state.customQuery ?? '')) input.value = state.customQuery ?? '';
+  input.disabled = !field || presence; $('custom-filter-value-label').hidden = presence;
+  const error = state.customKey && !field ? tr('Il campo del filtro non è più disponibile.') : field && op && !customFilterCondition(field) ? tr('Il filtro richiede un valore valido per il tipo di campo.') : '';
+  const message = $('custom-filter-error'); message.textContent = error; message.hidden = !error;
+  if (error) input.setAttribute('aria-invalid','true'); else input.removeAttribute('aria-invalid');
+  const hint = $('custom-filter-hint'); hint.textContent = field && (op === 'contains' || (field.type === 'text' && ['eq','ne'].includes(op))) ? tr('Il filtro distingue maiuscole e minuscole.') : ''; hint.hidden = !hint.textContent;
 }
 function planningBadges(card) {
   return (card.milestone_key ? ui`<span class="planning-badge">◎ ${escapeHTML(milestoneName(card.milestone_key))}</span>` : '')+activeFields().filter((field) => card.custom_values?.[field.key] !== null && card.custom_values?.[field.key] !== undefined).slice(0,3).map((field) => ui`<span class="planning-badge" title="${escapeHTML(field.name)}">${escapeHTML(field.name)}: ${escapeHTML(productivity.fieldText(card.custom_values[field.key]))}</span>`).join('');
@@ -38,8 +99,216 @@ function readCustomValues() {
   return values;
 }
 function renderTable() {
-  const fields = activeFields(), cards = state.board.columns.flatMap((column) => sorted(column.cards).map((card) => ({card,column})));
-  return ui`<div class="table-scroll" tabindex="0" role="region" aria-label="Tabella schede, scorri orizzontalmente per tutti i campi"><table class="board-table"><caption>Schede di ${escapeHTML(state.board.name)} · ${cards.length} risultati</caption><thead><tr><th scope="col">Scheda</th><th scope="col">Lista</th><th scope="col">Traguardo</th><th scope="col">Priorità</th><th scope="col">Scadenza</th><th scope="col">Stima (min)</th><th scope="col">Tempo totale (min)</th>${fields.map((field) => ui`<th scope="col">${escapeHTML(field.name)}</th>`).join('')}</tr></thead><tbody>${cards.map(({card,column}) => ui`<tr><th scope="row">${selectionCheckbox(card)}<button type="button" class="table-card-link" data-table-card="${Number(card.id)}">${card.completed ? '✓ ':''}${escapeHTML(card.title)}</button></th><td>${escapeHTML(column.title)}</td><td>${escapeHTML(milestoneName(card.milestone_key))}</td><td>${escapeHTML(priorities[card.priority] || card.priority || '—')}</td><td>${escapeHTML(productivity.dateText(card.due_date) || '—')}</td><td>${Number(card.estimate_minutes)||0}</td><td>${Number(card.total_minutes ?? card.actual_minutes)||0}</td>${fields.map((field) => ui`<td>${productivity.fieldCell(card.custom_values?.[field.key])}</td>`).join('')}</tr>`).join('') || ui`<tr><td colspan="${7+fields.length}">Nessuna scheda con questi filtri.</td></tr>`}</tbody></table></div>`;
+  const fields = activeFields(), cards = state.board.columns.flatMap((column) => sorted(column.cards).map((card) => ({card,column}))), editor = tableEditorForBoard(), writable = tableCanWrite(), columns = 8+fields.length;
+  tableRestoreFocus(editor);
+  const row = ({card,column}) => ui`<tr><th scope="row">${selectionCheckbox(card)}<button type="button" class="table-card-link" data-table-card="${Number(card.id)}">${card.completed ? '✓ ':''}${escapeHTML(card.title)}</button></th><td>${escapeHTML(column.title)}</td><td>${escapeHTML(milestoneName(card.milestone_key))}</td><td>${escapeHTML(priorities[card.priority] || card.priority || '—')}</td><td>${escapeHTML(productivity.dateText(card.due_date) || '—')}</td><td>${Number(card.estimate_minutes)||0}</td><td>${Number(card.total_minutes ?? card.actual_minutes)||0}</td>${fields.map((field) => ui`<td>${productivity.fieldCell(card.custom_values?.[field.key])}</td>`).join('')}<td>${writable && !card.deleted_at ? ui`<button type="button" class="button secondary table-edit-button" data-table-edit="${Number(card.id)}" ${editor?.busy || state.saving || state.loading ? 'disabled':''}>${escapeHTML(tableReadDraft(card.id) ? tr('Riprendi bozza'):tr('Modifica riga'))}</button>`:''}</td></tr>${editor?.cardId === Number(card.id) ? renderTableEditor(editor,columns):''}`;
+  const hiddenEditor = editor && !cards.some(({card}) => Number(card.id) === editor.cardId);
+  return ui`<div class="table-scroll" tabindex="0" role="region" aria-label="Tabella schede, scorri orizzontalmente per tutti i campi"><table class="board-table"><caption>Schede di ${escapeHTML(state.board.name)} · ${cards.length} risultati</caption><thead><tr><th scope="col">Scheda</th><th scope="col">Lista</th><th scope="col">Traguardo</th><th scope="col">Priorità</th><th scope="col">Scadenza</th><th scope="col">Stima (min)</th><th scope="col">Tempo totale (min)</th>${fields.map((field) => ui`<th scope="col">${escapeHTML(field.name)}</th>`).join('')}<th scope="col">Modifica</th></tr></thead><tbody>${cards.map(row).join('') || ui`<tr><td colspan="${columns}">Nessuna scheda con questi filtri.</td></tr>`}${hiddenEditor ? renderTableEditor(editor,columns,true):''}</tbody></table></div>`;
+}
+
+/* Table drafts are separate from the full card editor and scoped to their
+ * account, board and card. Polling and filters may rebuild the table, but never
+ * change a draft's values or its original concurrency version. */
+function tableCanWrite(board = state.board) {
+  const session = state.auth, authenticated = session?.enabled === false || (session?.enabled === true && !!session.user && ['admin','member'].includes(session.user.role));
+  return !!(authenticated && board?.id && !board.deleted_at && board.readonly === false && ['admin','member'].includes(board.role));
+}
+function tableCard(board,cardId) {
+  for (const column of board?.columns || []) {
+    if (column.deleted_at) continue;
+    const card = (column.cards || []).find(item => Number(item.id) === Number(cardId) && !item.deleted_at);
+    if (card) return card;
+  }
+  return null;
+}
+function tableDraftKey(cardId,boardId = state.board?.id,owner = sessionOwner()) { return `table-draft.${owner}.${Number(boardId)}.${Number(cardId)}`; }
+function tableReadDraft(cardId) {
+  if (!state.auth || (state.auth.enabled && !state.auth.user) || typeof stored !== 'function') return null;
+  const raw = stored(tableDraftKey(cardId));
+  if (!raw || raw.length > 20000) return null;
+  try {
+    const draft = JSON.parse(raw), values = draft.values;
+    if (draft.schema !== 1 || !Number.isSafeInteger(draft.version) || draft.version < 1 || !Number.isFinite(draft.updated_at) || Date.now()-draft.updated_at > 30*86400000 || !values || !['title','priority','due_date','estimate_minutes'].every(key => typeof values[key] === 'string')) return null;
+    return {...draft,values:{title:values.title,priority:values.priority,due_date:values.due_date,estimate_minutes:values.estimate_minutes},raw};
+  } catch { return null; }
+}
+function tableValues(card) { return {title:String(card.title ?? ''),priority:String(card.priority || 'normal'),due_date:String(card.due_date || ''),estimate_minutes:String(card.estimate_minutes ?? 0)}; }
+function tableEditorForBoard() {
+  const editor = state.tableEditor;
+  return editor && !editor.complete && state.auth && !(state.auth.enabled && !state.auth.user) && editor.owner === sessionOwner() && editor.boardId === Number(state.board?.id) ? editor:null;
+}
+function tablePersist(editor) {
+  if (!editor || editor.owner !== sessionOwner()) return;
+  const key = tableDraftKey(editor.cardId,editor.boardId,editor.owner), existing = stored(key);
+  // Do not overwrite a newer draft from another tab, or remove it on success.
+  if (existing !== editor.writtenRaw) { editor.storageConflict = true; return; }
+  const raw = JSON.stringify({schema:1,version:editor.version,values:editor.values,updated_at:Date.now(),pending:!!editor.pending});
+  remember(key,raw);
+  editor.storageUnavailable = stored(key) !== raw;
+  if (!editor.storageUnavailable) editor.writtenRaw = raw;
+}
+function tableDiscardOwned(editor) {
+  const key = tableDraftKey(editor.cardId,editor.boardId,editor.owner);
+  if (stored(key) === editor.writtenRaw) forget(key);
+}
+function tableContext(editor) { return {session:sessionContext(),panel:state.panelSequence || 0,sequence:editor.sequence}; }
+function tableCurrent(editor,context) {
+  return state.tableEditor === editor && tableEditorForBoard() === editor && sessionCurrent(context.session) && state.view === 'table' && !state.loading && (state.panelSequence || 0) === context.panel && editor.sequence === context.sequence;
+}
+function tableRender(editor,context) { if (!context || tableCurrent(editor,context)) renderBoard(); }
+async function tableRefreshSavedBoard(editor,context) {
+  let loadSequence = state.loadSequence;
+  const tableSequence = state.tableSequence;
+  const current = () => sessionCurrent(context.session) && Number(state.board?.id) === editor.boardId && state.view === 'table' && !state.loading && (state.panelSequence || 0) === context.panel && state.loadSequence === loadSequence && state.tableSequence === tableSequence && !state.tableEditor;
+  if (!current()) return;
+  // A poll already in flight must not replace the newer post-save snapshot.
+  loadSequence = ++state.loadSequence;
+  try {
+    const result = await api(`/api/boards/${editor.boardId}?summary=1${state.archived || state.archivedBoards ? '&include_archived=1':''}`);
+    if (!current()) return;
+    const board = result.board || result;
+    if (Number(board.id) !== editor.boardId) throw new Error(tr('Riga salvata. Aggiorna la bacheca per vedere i dati più recenti.'));
+    board.columns = board.columns || []; board.columns.forEach(column => { column.cards = column.cards || []; });
+    state.board = board; state.loadError = false;
+    if (typeof renderHeader === 'function') renderHeader();
+    renderBoard();
+  } catch (error) { if (current() && !error.staleSession) toast(tr('Riga salvata. Aggiorna la bacheca per vedere i dati più recenti.'),true); }
+}
+function tableRestoreFocus(editor) {
+  const focused = document.activeElement, form = focused?.closest?.('[data-table-editor]');
+  if (!editor || !form || Number(form.dataset.tableEditor) !== editor.token || typeof queueMicrotask !== 'function') return;
+  const id = focused.id, start = focused.selectionStart, end = focused.selectionEnd, context = tableContext(editor);
+  queueMicrotask(() => {
+    if (!tableCurrent(editor,context)) return;
+    if (document.activeElement && document.activeElement !== focused && document.activeElement !== document.body) return;
+    const target = document.getElementById(id);
+    if (!target || target.disabled) return;
+    target.focus({preventScroll:true});
+    if (typeof start === 'number' && typeof target.setSelectionRange === 'function') target.setSelectionRange(start,end);
+  });
+}
+function tableEditorProblems(editor) {
+  const errors = {}, values = editor.values;
+  if (!values.title.trim() || Array.from(values.title.trim()).length > 300) errors.title = tr('Inserisci un titolo da 1 a 300 caratteri.');
+  if (!['low','normal','high','urgent'].includes(values.priority)) errors.priority = tr('Seleziona una priorità valida.');
+  if (values.due_date && (!productivity.validDate(values.due_date) || values.due_date < '0001-01-01')) errors.due_date = tr('Inserisci una data valida.');
+  if (!/^\d+$/.test(values.estimate_minutes) || !Number.isSafeInteger(Number(values.estimate_minutes)) || Number(values.estimate_minutes) > 100000) errors.estimate_minutes = tr('Inserisci un numero intero di minuti da 0 a 100000.');
+  return errors;
+}
+function renderTableEditor(editor,columns,hidden = false) {
+  const card = tableCard(state.board,editor.cardId), changed = !!card && Number(card.version) !== editor.version;
+  if (changed) editor.conflict = true;
+  const unavailable = !card || editor.unavailable, forbidden = !tableCanWrite() || editor.forbidden;
+  const disabled = editor.busy || forbidden || unavailable || state.saving || state.loading;
+  const field = (name,label,type = 'text',attributes = '') => {
+    const id = `table-${editor.token}-${name}`, error = editor.errors?.[name];
+    return ui`<label class="table-editor-field" for="${id}"><span>${escapeHTML(label)}</span><input id="${id}" name="${name}" type="${type}" value="${escapeHTML(editor.values[name])}" ${attributes} ${disabled ? 'disabled':''} aria-describedby="${id}-error" ${error ? 'aria-invalid="true"':''}><span id="${id}-error" class="form-error">${escapeHTML(error || '')}</span></label>`;
+  };
+  const priorityId = `table-${editor.token}-priority`;
+  return ui`<tr class="table-editor-row"><td colspan="${columns}"><form data-table-editor="${editor.token}" novalidate aria-busy="${!!editor.busy}" aria-labelledby="table-${editor.token}-heading"><h3 id="table-${editor.token}-heading">Modifica riga</h3>${hidden ? ui`<p class="helper-text">La riga è nascosta dai filtri o non è presente nei dati attuali. La bozza resta disponibile.</p>`:''}<p class="helper-text">Solo Salva invia le modifiche. Annulla chiude l’editor e conserva la bozza su questo dispositivo.</p><div class="table-editor-fields">${field('title',tr('Titolo'),'text','required')}
+  <label class="table-editor-field" for="${priorityId}"><span>Priorità</span><select id="${priorityId}" name="priority" ${disabled ? 'disabled':''} aria-describedby="${priorityId}-error" ${editor.errors?.priority ? 'aria-invalid="true"':''}>${Object.entries(priorities).map(([value,label]) => ui`<option value="${escapeHTML(value)}" ${value === editor.values.priority ? 'selected':''}>${escapeHTML(label)}</option>`).join('')}</select><span id="${priorityId}-error" class="form-error">${escapeHTML(editor.errors?.priority || '')}</span></label>
+  ${field('due_date',tr('Scadenza'),'date','min="0001-01-01" max="9999-12-31"')}${field('estimate_minutes',tr('Stima (min)'),'number','required min="0" max="100000" step="1"')}</div>
+  ${forbidden ? ui`<p class="form-error" role="alert">Non hai più il permesso di modificare questa riga. La bozza è conservata.</p>`:''}${unavailable ? ui`<p class="form-error" role="alert">La scheda non è disponibile in questa bacheca. La bozza è conservata.</p>`:''}
+  ${editor.conflict ? ui`<p class="form-error" role="alert">La versione sul server è cambiata. La bozza è conservata: confrontala prima di ricaricare.</p>`:''}${editor.pending ? ui`<p class="form-error" role="alert">L’esito del salvataggio è da verificare. Ricarica esplicitamente la versione corrente prima di salvare ancora.</p>`:''}${editor.storageConflict ? ui`<p class="form-error" role="alert">Un’altra scheda del browser ha aggiornato la bozza locale. I valori di questo editor restano in memoria.</p>`:''}${editor.storageUnavailable ? ui`<p class="form-error" role="alert">Il browser non può conservare la bozza sul dispositivo. I valori restano in memoria finché questa pagina rimane aperta.</p>`:''}
+  <p class="form-error" role="alert">${escapeHTML(editor.error || '')}</p><div class="table-editor-actions"><button class="button primary" type="submit" ${disabled || editor.conflict || editor.pending ? 'disabled':''}>Salva</button><button class="button secondary" type="button" data-table-cancel="${editor.token}" ${editor.busy ? 'disabled':''}>Annulla</button><button class="button secondary" type="button" data-table-reload="${editor.token}" ${editor.busy || state.saving || state.loading ? 'disabled':''}>Ricarica versione corrente</button></div></form></td></tr>`;
+}
+function tableBeginEdit(cardId) {
+  if (state.view !== 'table' || !tableCanWrite() || state.saving || state.loading || tableEditorForBoard()?.busy) return;
+  const card = tableCard(state.board,cardId);
+  if (!card || !Number.isSafeInteger(card.version) || card.version < 1) return;
+  const previous = tableEditorForBoard(); if (previous) tablePersist(previous);
+  const retained = state.tableDraftEditors?.get(tableDraftKey(cardId));
+  if (retained && !retained.complete) { state.tableEditor = retained; renderBoard(); document.getElementById(`table-${retained.token}-title`)?.focus(); return; }
+  const draft = tableReadDraft(cardId), token = state.tableSequence = (state.tableSequence || 0)+1;
+  state.tableEditor = {token,sequence:0,owner:sessionOwner(),boardId:Number(state.board.id),cardId:Number(cardId),version:draft?.version || card.version,values:draft?.values || tableValues(card),writtenRaw:draft?.raw || stored(tableDraftKey(cardId)),pending:!!draft?.pending,conflict:!!draft && draft.version !== card.version,errors:{}};
+  if (!state.tableDraftEditors) state.tableDraftEditors = new Map();
+  state.tableDraftEditors.set(tableDraftKey(cardId),state.tableEditor);
+  tablePersist(state.tableEditor); renderBoard();
+  document.getElementById(`table-${token}-title`)?.focus();
+}
+function tableCaptureInput(input) {
+  const editor = tableEditorForBoard(), form = input.closest?.('[data-table-editor]');
+  if (!editor || !form || Number(form.dataset.tableEditor) !== editor.token || editor.busy || state.view !== 'table' || !tableCanWrite() || !Object.hasOwn(editor.values,input.name)) return;
+  editor.values[input.name] = input.value; delete editor.errors[input.name]; tablePersist(editor);
+}
+function tableComposition(input,active) {
+  const editor = tableEditorForBoard(), form = input.closest?.('[data-table-editor]');
+  if (!editor || !form || Number(form.dataset.tableEditor) !== editor.token) return;
+  editor.composing = active;
+  if (!active) tableCaptureInput(input);
+}
+function tableCancel(token) {
+  const editor = tableEditorForBoard(); if (!editor || editor.busy || editor.token !== Number(token)) return;
+  tablePersist(editor); state.tableEditor = null; renderBoard();
+  document.querySelector(`[data-table-edit="${editor.cardId}"]`)?.focus();
+}
+async function tableFreshCard(editor,context) {
+  const result = await api(`/api/boards/${editor.boardId}?summary=1&include_archived=1`);
+  if (!tableCurrent(editor,context)) return null;
+  const board = result.board || result;
+  if (Number(board.id) !== editor.boardId || !tableCanWrite(board)) {
+    editor.forbidden = true;
+    throw new APIError(tr('Non hai più il permesso di modificare questa riga. La bozza è conservata.'),403);
+  }
+  const card = tableCard(board,editor.cardId);
+  if (!card || !Number.isSafeInteger(card.version) || card.version < 1) {
+    editor.unavailable = true;
+    throw new APIError(tr('La scheda non è disponibile in questa bacheca. La bozza è conservata.'),404);
+  }
+  return card;
+}
+async function tableSave(token) {
+  const editor = tableEditorForBoard();
+  if (!editor || editor.token !== Number(token) || editor.busy || editor.composing || editor.conflict || editor.pending || !tableCanWrite() || editor.forbidden || editor.unavailable || state.saving || state.loading || state.view !== 'table') return;
+  editor.errors = tableEditorProblems(editor);
+  if (Object.keys(editor.errors).length) { renderBoard(); document.getElementById(`table-${editor.token}-${Object.keys(editor.errors)[0]}`)?.focus(); return; }
+  editor.busy = true; editor.error = ''; editor.sequence++; const context = tableContext(editor); tablePersist(editor); tableRender(editor,context);
+  let committed = false;
+  try {
+    const card = await tableFreshCard(editor,context); if (!card || !tableCurrent(editor,context)) return;
+    if (card.version !== editor.version) throw new APIError(tr('La versione sul server è cambiata. La bozza è conservata: confrontala prima di ricaricare.'),412);
+    if (!tableCanWrite() || state.saving || state.loading) return;
+    const body = {title:editor.values.title.trim(),priority:editor.values.priority,due_date:editor.values.due_date,estimate_minutes:Number(editor.values.estimate_minutes)};
+    editor.pending = true; tablePersist(editor);
+    await api(`/api/cards/${editor.cardId}`,'PATCH',body,{version:editor.version}); committed = true;
+    // A confirmed write may remove only the raw draft this editor owns. It
+    // must not refresh a different board, panel or account after navigation.
+    tableDiscardOwned(editor); editor.complete = true;
+  } catch (error) {
+    if (!tableCurrent(editor,context) || error.staleSession) return;
+    if (error.status >= 400 && error.status < 500) editor.pending = false;
+    if (error.status === 412) editor.conflict = true;
+    if (error.status === 403 || error.status === 401) editor.forbidden = true;
+    if (error.status === 404) editor.unavailable = true;
+    editor.error = error.message; tablePersist(editor);
+  } finally {
+    const current = tableCurrent(editor,context); editor.busy = false;
+    if (committed && state.tableEditor === editor && sessionCurrent(context.session) && state.board?.id === editor.boardId && state.view === 'table' && !state.loading && (state.panelSequence || 0) === context.panel) {
+      state.tableEditor = null; renderBoard();
+      await tableRefreshSavedBoard(editor,context);
+    } else if (current) tableRender(editor,context);
+  }
+}
+async function tableReload(token) {
+  const editor = tableEditorForBoard();
+  if (!editor || editor.token !== Number(token) || editor.busy || state.saving || state.loading || state.view !== 'table') return;
+  if (!confirm(tr('Ricaricare la versione corrente? I valori di questa bozza saranno sostituiti solo dopo una lettura riuscita.'))) return;
+  editor.busy = true; editor.sequence++; const context = tableContext(editor); editor.error = ''; tableRender(editor,context);
+  try {
+    const card = await tableFreshCard(editor,context); if (!card || !tableCurrent(editor,context)) return;
+    tableDiscardOwned(editor);
+    editor.version = card.version; editor.values = tableValues(card); editor.errors = {}; editor.pending = false; editor.conflict = false; editor.forbidden = false; editor.unavailable = false; editor.storageConflict = false;
+    if (!stored(tableDraftKey(editor.cardId,editor.boardId,editor.owner))) editor.writtenRaw = '';
+    // Update just the visible card from the authorized snapshot. Other board
+    // contents retain the normal refresh/polling lifecycle.
+    const existing = tableCard(state.board,editor.cardId); if (existing) Object.assign(existing,card);
+    tablePersist(editor);
+  } catch (error) {
+    if (!tableCurrent(editor,context) || error.staleSession) return;
+    if (error.status === 403 || error.status === 401) editor.forbidden = true;
+    if (error.status === 404) editor.unavailable = true;
+    editor.error = error.message;
+  } finally { editor.busy = false; tableRender(editor,context); }
 }
 function planningTabs(current) { return ui`<nav class="panel-tabs" aria-label="Pianificazione">${[['overview',tr('Traguardi')],['fields',tr('Campi')],['guidelines',tr('Linee guida')],['workload',tr('Carico')]].map(([id,label]) => ui`<button type="button" class="button ${id === current ? 'primary':'secondary'}" data-planning-tab="${id}" ${id === current ? 'aria-current="page"':''}>${label}</button>`).join('')}</nav>`; }
 async function showPlanning(tab = 'overview') {
@@ -281,13 +550,15 @@ document.addEventListener('submit',(event) => {
 document.addEventListener('change',(event) => {
   const input = event.target;
   if (input.id === 'milestone-filter') { state.milestone = input.value; renderBoard(); }
-  if (input.id === 'custom-filter-key') { state.customKey = input.value; renderBoard(); }
+  if (input.id === 'custom-filter-key') { state.customKey = input.value; state.customOp = ''; renderPlanningFilters(); renderBoard(); }
+  if (input.id === 'custom-filter-op') { state.customOp = input.value; renderPlanningFilters(); renderBoard(); }
+  if (input.id === 'custom-filter-value' && input.tagName === 'SELECT') { state.customQuery = input.value; renderPlanningFilters(); renderBoard(); }
   if (input.id === 'field-type') $('field-options-label').hidden = input.value !== 'select';
   if (input.id === 'comments-author') renderComments();
   if (input.id === 'worklog-deleted' && state.cardEditor?.id) loadWorklogs(state.cardEditor.id);
 });
 document.addEventListener('input',(event) => {
   if (event.target.id === 'reply-body') saveReplyDraft();
-  if (event.target.id === 'custom-filter-value') { state.customQuery = event.target.value; renderBoard(); }
+  if (event.target.id === 'custom-filter-value') { state.customQuery = event.target.value; renderPlanningFilters(); renderBoard(); }
   if (event.target.id === 'comments-query') renderComments();
 });

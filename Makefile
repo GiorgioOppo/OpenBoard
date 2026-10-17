@@ -48,6 +48,12 @@ test-frontend:
 	$(NODE) tests/test_workflows.js
 	$(NODE) tests/test_experience.js
 	$(NODE) tests/test_capacity_ui.js
+	$(NODE) tests/test_importers.js
+	$(NODE) tests/test_import_ui.js
+	$(NODE) tests/test_editable_table.js
+	$(NODE) tests/test_field_filters.js
+	$(NODE) tests/test_field_filter_ui.js
+	$(NODE) tests/test_content_search_ui.js
 test-cloud: build/openboard
 	OPENBOARD_CLOUD_TEST=1 python3 -m unittest discover -s tests -p 'test_cloud.py' -v
 test-security:

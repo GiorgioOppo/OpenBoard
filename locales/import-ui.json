@@ -1,0 +1,290 @@
+{
+  "Avvisi di conversione": [
+    "Conversion warnings",
+    "Avertissements de conversion",
+    "Avisos de conversión",
+    "Konvertierungshinweise",
+    "转换提示",
+    "変換に関する注意事項"
+  ],
+  "Bacheca importata": [
+    "Imported board",
+    "Tableau importé",
+    "Tablero importado",
+    "Importiertes Board",
+    "已导入的看板",
+    "インポートしたボード"
+  ],
+  "Bacheca importata.": [
+    "Board imported.",
+    "Tableau importé.",
+    "Tablero importado.",
+    "Board importiert.",
+    "看板已导入。",
+    "ボードをインポートしました。"
+  ],
+  "CSV": [
+    "CSV",
+    "CSV",
+    "CSV",
+    "CSV",
+    "CSV",
+    "CSV"
+  ],
+  "Descrizione": [
+    "Description",
+    "Description",
+    "Descripción",
+    "Beschreibung",
+    "描述",
+    "説明"
+  ],
+  "File da importare (massimo 2 MiB)": [
+    "File to import (maximum 2 MiB)",
+    "Fichier à importer (maximum 2 Mio)",
+    "Archivo para importar (máximo 2 MiB)",
+    "Zu importierende Datei (maximal 2 MiB)",
+    "要导入的文件（最大 2 MiB）",
+    "インポートするファイル（最大 2 MiB）"
+  ],
+  "Formato del file": [
+    "File format",
+    "Format du fichier",
+    "Formato del archivo",
+    "Dateiformat",
+    "文件格式",
+    "ファイル形式"
+  ],
+  "Il file non contiene JSON valido.": [
+    "The file does not contain valid JSON.",
+    "Le fichier ne contient pas de JSON valide.",
+    "El archivo no contiene JSON válido.",
+    "Die Datei enthält kein gültiges JSON.",
+    "文件不包含有效的 JSON。",
+    "ファイルに有効な JSON が含まれていません。"
+  ],
+  "Il file non contiene testo UTF-8 valido.": [
+    "The file does not contain valid UTF-8 text.",
+    "Le fichier ne contient pas de texte UTF-8 valide.",
+    "El archivo no contiene texto UTF-8 válido.",
+    "Die Datei enthält keinen gültigen UTF-8-Text.",
+    "文件不包含有效的 UTF-8 文本。",
+    "ファイルに有効な UTF-8 テキストが含まれていません。"
+  ],
+  "Il file supera il limite di 2 MB.": [
+    "The file exceeds the 2 MB limit.",
+    "Le fichier dépasse la limite de 2 Mo.",
+    "El archivo supera el límite de 2 MB.",
+    "Die Datei überschreitet das Limit von 2 MB.",
+    "文件超过 2 MB 限制。",
+    "ファイルが 2 MB の上限を超えています。"
+  ],
+  "Importa come nuova bacheca": [
+    "Import as a new board",
+    "Importer comme nouveau tableau",
+    "Importar como nuevo tablero",
+    "Als neues Board importieren",
+    "导入为新看板",
+    "新しいボードとしてインポート"
+  ],
+  "Importa una bacheca": [
+    "Import a board",
+    "Importer un tableau",
+    "Importar un tablero",
+    "Board importieren",
+    "导入看板",
+    "ボードをインポート"
+  ],
+  "Importate": [
+    "Imported",
+    "Importées",
+    "Importadas",
+    "Importiert",
+    "已导入",
+    "インポート済み"
+  ],
+  "Impossibile leggere il file selezionato.": [
+    "Unable to read the selected file.",
+    "Impossible de lire le fichier sélectionné.",
+    "No se puede leer el archivo seleccionado.",
+    "Die ausgewählte Datei kann nicht gelesen werden.",
+    "无法读取所选文件。",
+    "選択したファイルを読み取れません。"
+  ],
+  "La conversione richiede al massimo 100 liste e 10000 schede.": [
+    "Conversion allows at most 100 lists and 10000 cards.",
+    "La conversion autorise au maximum 100 listes et 10000 cartes.",
+    "La conversión permite un máximo de 100 listas y 10000 tarjetas.",
+    "Die Konvertierung erlaubt höchstens 100 Listen und 10000 Karten.",
+    "转换最多允许 100 个列表和 10000 张卡片。",
+    "変換できるのは最大 100 個のリストと 10000 枚のカードです。"
+  ],
+  "La prima riga contiene intestazioni": [
+    "The first row contains headers",
+    "La première ligne contient les en-têtes",
+    "La primera fila contiene encabezados",
+    "Die erste Zeile enthält Spaltenüberschriften",
+    "第一行包含表头",
+    "最初の行は見出しです"
+  ],
+  "Lista": [
+    "List",
+    "Liste",
+    "Lista",
+    "Liste",
+    "列表",
+    "リスト"
+  ],
+  "L’importazione crea una nuova bacheca dopo la conferma. Seleziona il formato e controlla l’anteprima.": [
+    "Import creates a new board after confirmation. Select the format and review the preview.",
+    "L’importation crée un nouveau tableau après confirmation. Sélectionnez le format et vérifiez l’aperçu.",
+    "La importación crea un tablero nuevo tras la confirmación. Selecciona el formato y revisa la vista previa.",
+    "Der Import erstellt nach Bestätigung ein neues Board. Format wählen und Vorschau prüfen.",
+    "确认后将导入为新看板。请选择格式并检查预览。",
+    "確認後に新しいボードが作成されます。形式を選択し、プレビューを確認してください。"
+  ],
+  "Nome della nuova bacheca": [
+    "New board name",
+    "Nom du nouveau tableau",
+    "Nombre del nuevo tablero",
+    "Name des neuen Boards",
+    "新看板名称",
+    "新しいボード名"
+  ],
+  "Non importare": [
+    "Do not import",
+    "Ne pas importer",
+    "No importar",
+    "Nicht importieren",
+    "不导入",
+    "インポートしない"
+  ],
+  "Ogni riga crea una scheda. Seleziona le colonne da importare e prepara l’anteprima.": [
+    "Each row creates a card. Select the columns to import and prepare the preview.",
+    "Chaque ligne crée une carte. Sélectionnez les colonnes à importer et préparez l’aperçu.",
+    "Cada fila crea una tarjeta. Selecciona las columnas para importar y prepara la vista previa.",
+    "Jede Zeile erstellt eine Karte. Zu importierende Spalten wählen und Vorschau vorbereiten.",
+    "每行创建一张卡片。请选择要导入的列并准备预览。",
+    "各行からカードが作成されます。インポートする列を選択し、プレビューを準備してください。"
+  ],
+  "OpenBoard JSON": [
+    "OpenBoard JSON",
+    "JSON OpenBoard",
+    "JSON de OpenBoard",
+    "OpenBoard-JSON",
+    "OpenBoard JSON",
+    "OpenBoard JSON"
+  ],
+  "Prepara anteprima CSV": [
+    "Prepare CSV preview",
+    "Préparer l’aperçu CSV",
+    "Preparar vista previa CSV",
+    "CSV-Vorschau vorbereiten",
+    "准备 CSV 预览",
+    "CSV プレビューを準備"
+  ],
+  "Priorità (low, normal, high, urgent)": [
+    "Priority (low, normal, high, urgent)",
+    "Priorité (low, normal, high, urgent)",
+    "Prioridad (low, normal, high, urgent)",
+    "Priorität (low, normal, high, urgent)",
+    "优先级（low、normal、high、urgent）",
+    "優先度（low、normal、high、urgent）"
+  ],
+  "Punto e virgola": [
+    "Semicolon",
+    "Point-virgule",
+    "Punto y coma",
+    "Semikolon",
+    "分号",
+    "セミコロン"
+  ],
+  "Responsabile (testo)": [
+    "Assignee (text)",
+    "Responsable (texte)",
+    "Responsable (texto)",
+    "Verantwortliche Person (Text)",
+    "负责人（文本）",
+    "担当者（テキスト）"
+  ],
+  "Scadenza (YYYY-MM-DD)": [
+    "Due date (YYYY-MM-DD)",
+    "Échéance (YYYY-MM-DD)",
+    "Vencimiento (YYYY-MM-DD)",
+    "Fälligkeitsdatum (YYYY-MM-DD)",
+    "截止日期（YYYY-MM-DD）",
+    "期限（YYYY-MM-DD）"
+  ],
+  "Separatore CSV": [
+    "CSV delimiter",
+    "Séparateur CSV",
+    "Separador CSV",
+    "CSV-Trennzeichen",
+    "CSV 分隔符",
+    "CSV の区切り文字"
+  ],
+  "Serve un’esportazione OpenBoard in formato versione 2.": [
+    "An OpenBoard version 2 export is required.",
+    "Une exportation OpenBoard au format version 2 est requise.",
+    "Se requiere una exportación OpenBoard en formato versión 2.",
+    "Ein OpenBoard-Export im Format Version 2 ist erforderlich.",
+    "需要 OpenBoard 版本 2 格式的导出文件。",
+    "OpenBoard のバージョン 2 形式のエクスポートが必要です。"
+  ],
+  "Stima in minuti": [
+    "Estimate in minutes",
+    "Estimation en minutes",
+    "Estimación en minutos",
+    "Schätzung in Minuten",
+    "估算分钟数",
+    "見積もり（分）"
+  ],
+  "Titolo (obbligatorio)": [
+    "Title (required)",
+    "Titre (obligatoire)",
+    "Título (obligatorio)",
+    "Titel (erforderlich)",
+    "标题（必填）",
+    "タイトル（必須）"
+  ],
+  "Trello JSON": [
+    "Trello JSON",
+    "JSON Trello",
+    "JSON de Trello",
+    "Trello-JSON",
+    "Trello JSON",
+    "Trello JSON"
+  ],
+  "Virgola": [
+    "Comma",
+    "Virgule",
+    "Coma",
+    "Komma",
+    "逗号",
+    "コンマ"
+  ],
+  "{0} elementi checklist · {1} schede archiviate · {2} schede completate": [
+    "{0} checklist items · {1} archived cards · {2} completed cards",
+    "{0} éléments de checklist · {1} cartes archivées · {2} cartes terminées",
+    "{0} elementos de verificación · {1} tarjetas archivadas · {2} tarjetas completadas",
+    "{0} Checklisten-Einträge · {1} archivierte Karten · {2} abgeschlossene Karten",
+    "{0} 个检查清单项 · {1} 张已归档卡片 · {2} 张已完成卡片",
+    "チェックリスト {0} 項目 · アーカイブ済み {1} 枚 · 完了済み {2} 枚"
+  ],
+  "{0} righe · {1} colonne CSV": [
+    "{0} rows · {1} CSV columns",
+    "{0} lignes · {1} colonnes CSV",
+    "{0} filas · {1} columnas CSV",
+    "{0} Zeilen · {1} CSV-Spalten",
+    "{0} 行 · {1} 个 CSV 列",
+    "{0} 行 · CSV {1} 列"
+  ],
+  "{1} liste · {2} schede · {3} campi personalizzati · {4} traguardi": [
+    "{1} lists · {2} cards · {3} custom fields · {4} milestones",
+    "{1} listes · {2} cartes · {3} champs personnalisés · {4} jalons",
+    "{1} listas · {2} tarjetas · {3} campos personalizados · {4} hitos",
+    "{1} Listen · {2} Karten · {3} benutzerdefinierte Felder · {4} Meilensteine",
+    "{1} 个列表 · {2} 张卡片 · {3} 个自定义字段 · {4} 个里程碑",
+    "リスト {1} 件 · カード {2} 枚 · カスタムフィールド {3} 件 · マイルストーン {4} 件"
+  ]
+}

@@ -31,7 +31,35 @@ Full card responses and card summaries include `custom_values`, an object with s
 
 Updates are partial merges: omitted fields retain their values and `null` removes a value. `If-Match: <version>` protects against concurrent writes and returns `412` if the version has changed. Only active keys may be submitted; values of deleted fields remain stored and become visible again when the definition is restored. Omit these values when changing another card property.
 
-`GET /api/boards/:id/field-search?key=approved&value=false` searches for an exact typed value among the board's active cards and returns `{cards:[...]}`. The `value` parameter is URL-encoded JSON: a string requires quotation marks, for example `%22Italia%22`. Equivalent integer and real numbers match. HTTP query-length limits still apply.
+### Typed field search (unreleased)
+
+`GET /api/boards/:id/field-search?key=approved&value=false` retains the original exact typed comparison. The development branch adds operators, flat combinations and pagination, returning `{cards:[...],next_cursor}`. Card entries are summaries. This read operation requires current board access; observers may use it. Missing/deleted boards and revoked access return `404` before field validation.
+
+For a single condition, use `key`, optional `op` (default `eq`) and `value`. The value is URL-encoded JSON: a string requires quotation marks, for example `%22Italia%22`; booleans and numbers are `false` and `12.5`, not quoted strings. Only active definitions are searchable. Type coercion is not performed, except that equivalent integer and real numbers match.
+
+| Operator | Supported types and behavior |
+| --- | --- |
+| `eq`, `ne` | All field types; exact typed equality or inequality. A select equality value must be an existing option. `ne` excludes missing and null values. |
+| `contains` | Text and select fields; literal, case-sensitive substring matching. The search substring need not be a complete select option. |
+| `gt`, `gte`, `lt`, `lte` | Numbers and valid calendar dates of the definition's type. |
+| `is_set`, `is_unset` | All types; omit `value` entirely. Missing keys and JSON null are unset; `false`, `0` and `""` are set. |
+
+`eq` with JSON `null` matches an explicitly stored null, not an absent key. Normal updates remove null-valued keys, so this mainly concerns older stored data. `ne` with null matches set, non-null values. Numeric values must be finite and within ±10¹²; text/date/select validation follows the field definition.
+
+For 1–10 conditions, send a URL-encoded `filters` JSON array and `match=all` (default) or `match=any`. Do not combine this form with `key`, `op` or `value`. Conditions are flat objects containing only `key`, `op` and, when required, `value`; nested groups, unknown properties, duplicate JSON keys and unknown/deleted fields return `400`.
+
+```json
+[
+  {"key":"cost","op":"gte","value":100},
+  {"key":"approved","op":"eq","value":true}
+]
+```
+
+For example, URL-encode that array as the `filters` value in `/api/boards/7/field-search?filters=...&match=all&limit=30`. The decoded `filters` value is limited to 2047 UTF-8 bytes, and HTTP query-length limits still apply. Missing values match `is_unset`; they do not satisfy equality or ordering conditions inside an `all` combination.
+
+Results exclude cards, lists and boards in the trash. Archived cards/boards are excluded unless `include_archived=1`. `limit` defaults to 200 and accepts 1–200. Results are ordered by descending card ID; `before` is a positive decimal card ID excluded from the next page. Use `next_cursor` as `before` with unchanged filters and archive selection; `null` ends pagination. Authorization and live ancestry are rechecked for each request. Invalid/duplicate pagination options return `400`.
+
+The board toolbar exposes one selected custom field and a type-appropriate operator/value control, alongside the existing free-text filter. It filters the board data already loaded by the interface. The 10-condition `all`/`any` form is an API capability; the toolbar is not a multiple-condition builder.
 
 ## Milestones
 

@@ -74,6 +74,30 @@
   }
   function fieldCell(value) { return escape(fieldText(value)); }
   function fieldMatches(value, query) { return value !== null && value !== undefined && fieldText(value).toLocaleLowerCase(locale()).includes(String(query).trim().toLocaleLowerCase(locale())); }
+  // Exact typed semantics shared with the field-search API. Text matching is
+  // case-sensitive. Missing/null values are unset; explicit null equality
+  // retains the legacy API behavior.
+  function fieldMatchesAdvanced(value, field, condition) {
+    if (!field || field.deleted_at || !['text','number','date','boolean','select'].includes(field.type) || !condition || typeof condition !== 'object' || Array.isArray(condition) || Object.keys(condition).some(key => !['key','op','value'].includes(key))) return false;
+    const {op, value: target} = condition, supported = ['eq','ne','contains','gt','gte','lt','lte','is_set','is_unset'];
+    if (!supported.includes(op)) return false;
+    const present = value !== null && value !== undefined, hasTarget = Object.hasOwn(condition,'value');
+    if (op === 'is_set' || op === 'is_unset') return !hasTarget && (op === 'is_set' ? present : !present);
+    if (!hasTarget || target === undefined) return false;
+    const equality = op === 'eq' || op === 'ne';
+    const textValid = item => typeof item === 'string' && !item.includes('\0') && [...item].length <= 2000 && !/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(item);
+    const typed = item => field.type === 'number' ? typeof item === 'number' && Number.isFinite(item) && Math.abs(item) <= 1e12 : field.type === 'boolean' ? typeof item === 'boolean' : field.type === 'date' ? typeof item === 'string' && validDate(item) && item >= '0001-01-01' : field.type === 'select' ? typeof item === 'string' && Array.isArray(field.options) && field.options.includes(item) : field.type === 'text' && textValid(item);
+    if (target === null) return equality && (op === 'eq' ? value === null : present && typed(value));
+    if (op === 'contains') return ['text','select'].includes(field.type) && textValid(target) && typeof value === 'string' && value.includes(target);
+    if (!typed(target)) return false;
+    if (op === 'eq') return present && typed(value) && value === target;
+    if (op === 'ne') return present && typed(value) && value !== target;
+    if (!['number','date'].includes(field.type) || !present || !typed(value)) return false;
+    if (op === 'gt') return value > target;
+    if (op === 'gte') return value >= target;
+    if (op === 'lt') return value < target;
+    return value <= target;
+  }
   function worklogCSV(rows) {
     return '\uFEFF'+[['ID',tr('Giorno'),tr('Autore'),tr('Bacheca'),tr('Scheda'),tr('Minuti'),tr('Nota')],...rows.map((row) => [row.id,row.date,row.author,row.board_name,row.card_title,row.minutes,row.note])].map((row) => row.map(csvCell).join(',')).join('\r\n')+'\r\n';
   }
@@ -171,7 +195,7 @@
     }
     return {key,publish,receive};
   }
-  const helpers = {safeURL,markdown,csvCell,csv,icsText,calendar,foldLine,dateText,validDate,shouldDiscardDraft,fieldValue,fieldText,planningPayload,fieldCell,fieldMatches,worklogCSV,storageLabel,catalog,graphemes,initials,composing,navigateCards,listCardDrafts,removeOwnedDraft,calendarPeriod,tabSessionBridge};
+  const helpers = {safeURL,markdown,csvCell,csv,icsText,calendar,foldLine,dateText,validDate,shouldDiscardDraft,fieldValue,fieldText,planningPayload,fieldCell,fieldMatches,fieldMatchesAdvanced,worklogCSV,storageLabel,catalog,graphemes,initials,composing,navigateCards,listCardDrafts,removeOwnedDraft,calendarPeriod,tabSessionBridge};
   if (typeof module !== 'undefined' && module.exports) module.exports = helpers;
   root.OpenBoardProductivity = helpers;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -1,0 +1,16 @@
+{
+  "Testo da cercare": ["Search text", "Texte à rechercher", "Texto de búsqueda", "Suchtext", "搜索文本", "検索テキスト"],
+  "Contenuti": ["Content", "Contenu", "Contenido", "Inhalte", "内容", "コンテンツ"],
+  "Tutti i contenuti collaborativi": ["All collaborative content", "Tout le contenu collaboratif", "Todo el contenido colaborativo", "Alle gemeinsamen Inhalte", "所有协作内容", "すべての共同作業コンテンツ"],
+  "Commenti e risposte": ["Comments and replies", "Commentaires et réponses", "Comentarios y respuestas", "Kommentare und Antworten", "评论和回复", "コメントと返信"],
+  "Richieste e risposte ai moduli": ["Requests and form responses", "Demandes et réponses aux formulaires", "Solicitudes y respuestas a formularios", "Anfragen und Formularantworten", "请求和表单回复", "リクエストとフォーム回答"],
+  "Note delle richieste": ["Request notes", "Notes des demandes", "Notas de solicitudes", "Notizen zu Anfragen", "请求备注", "リクエストのメモ"],
+  "Moduli interni": ["Internal forms", "Formulaires internes", "Formularios internos", "Interne Formulare", "内部表单", "内部フォーム"],
+  "Nessun contenuto trovato.": ["No content found.", "Aucun contenu trouvé.", "No se ha encontrado contenido.", "Keine Inhalte gefunden.", "未找到内容。", "コンテンツが見つかりません。"],
+  "Nota della richiesta": ["Request note", "Note de la demande", "Nota de la solicitud", "Notiz zur Anfrage", "请求备注", "リクエストのメモ"],
+  "Richiesta": ["Request", "Demande", "Solicitud", "Anfrage", "请求", "リクエスト"],
+  "Modulo": ["Form", "Formulaire", "Formulario", "Formular", "表单", "フォーム"],
+  "Tipo di contenuto da cercare non valido.": ["Invalid search content type.", "Type de contenu à rechercher non valide.", "Tipo de contenido de búsqueda no válido.", "Ungültiger Inhaltstyp für die Suche.", "搜索内容类型无效。", "検索するコンテンツの種類が無効です。"],
+  "Cursore di ricerca non valido.": ["Invalid search cursor.", "Curseur de recherche non valide.", "Cursor de búsqueda no válido.", "Ungültiger Suchcursor.", "搜索游标无效。", "検索カーソルが無効です。"],
+  "Filtro archivio non valido.": ["Invalid archive filter.", "Filtre d’archivage non valide.", "Filtro de archivo no válido.", "Ungültiger Archivfilter.", "归档筛选条件无效。", "アーカイブフィルターが無効です。"]
+}

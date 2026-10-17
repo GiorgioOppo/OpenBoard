@@ -1034,6 +1034,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "启动计时器",
     "タイマーを開始"
   ],
+  "Avvisi di conversione": [
+    "Conversion warnings",
+    "Avertissements de conversion",
+    "Avisos de conversión",
+    "Konvertierungshinweise",
+    "转换提示",
+    "変換に関する注意事項"
+  ],
   "Azione collettiva non valida.": [
     "Invalid bulk action.",
     "Action groupée non valide.",
@@ -1314,6 +1322,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "解码后的字节数",
     "デコード後のバイト数"
   ],
+  "CSV": [
+    "CSV",
+    "CSV",
+    "CSV",
+    "CSV",
+    "CSV",
+    "CSV"
+  ],
   "CSV completo scaricato (massimo 1000 righe).": [
     "Complete CSV downloaded (up to 1,000 rows).",
     "CSV complet téléchargé (1 000 lignes maximum).",
@@ -1329,6 +1345,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Vollständige CSV-Datei mit für Tabellenkalkulationen geschützten Zellen heruntergeladen.",
     "已下载完整 CSV，单元格已做电子表格安全处理。",
     "表計算ソフト向けにセルを保護した完全な CSV をダウンロードしました。"
+  ],
+  "CSV non valido: controlla virgolette, righe e separatore.": [
+    "Invalid CSV: check quotes, rows and delimiter.",
+    "CSV invalide : vérifiez les guillemets, les lignes et le séparateur.",
+    "CSV no válido: comprueba las comillas, las filas y el separador.",
+    "Ungültige CSV-Datei: Anführungszeichen, Zeilen und Trennzeichen prüfen.",
+    "CSV 无效：请检查引号、行和分隔符。",
+    "CSV が無効です。引用符、行、区切り文字を確認してください。"
   ],
   "CSV scaricato.": [
     "CSV downloaded.",
@@ -1434,6 +1458,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "此看板的自定义字段或里程碑无效。",
     "このボードのカスタム項目またはマイルストーンが無効です。"
   ],
+  "Campi personalizzati, copertine, integrazioni e impostazioni Trello non vengono importati.": [
+    "Trello custom fields, covers, integrations and settings are not imported.",
+    "Les champs personnalisés, couvertures, intégrations et paramètres Trello ne sont pas importés.",
+    "No se importan los campos personalizados, las portadas, las integraciones ni la configuración de Trello.",
+    "Benutzerdefinierte Trello-Felder, Titelbilder, Integrationen und Einstellungen werden nicht importiert.",
+    "不导入 Trello 自定义字段、封面、集成和设置。",
+    "Trello のカスタムフィールド、カバー、連携、設定はインポートされません。"
+  ],
   "Campo": [
     "Field",
     "Champ",
@@ -1497,6 +1529,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Feld in den Papierkorb verschoben",
     "字段已移到回收站",
     "項目をゴミ箱に移動"
+  ],
+  "Campo non disponibile": [
+    "Field unavailable",
+    "Champ indisponible",
+    "Campo no disponible",
+    "Feld nicht verfügbar",
+    "字段不可用",
+    "フィールドを利用できません"
   ],
   "Campo non trovato.": [
     "Field not found.",
@@ -2074,6 +2114,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "评论",
     "コメント"
   ],
+  "Commenti e risposte": [
+    "Comments and replies",
+    "Commentaires et réponses",
+    "Comentarios y respuestas",
+    "Kommentare und Antworten",
+    "评论和回复",
+    "コメントと返信"
+  ],
   "Commenti in evidenza": [
     "Pinned comments",
     "Commentaires épinglés",
@@ -2081,6 +2129,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Angeheftete Kommentare",
     "置顶评论",
     "固定したコメント"
+  ],
+  "Commenti, attività e cronologia Trello non vengono importati.": [
+    "Trello comments, activity and history are not imported.",
+    "Les commentaires, l’activité et l’historique Trello ne sont pas importés.",
+    "No se importan los comentarios, la actividad ni el historial de Trello.",
+    "Trello-Kommentare, Aktivitäten und Verlauf werden nicht importiert.",
+    "不导入 Trello 评论、活动和历史记录。",
+    "Trello のコメント、アクティビティ、履歴はインポートされません。"
   ],
   "Commento": [
     "Comment",
@@ -2370,6 +2426,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "请检查连接 · 本地草稿已保留",
     "接続を確認 · ローカルの下書きを保存済み"
   ],
+  "Contenuti": [
+    "Content",
+    "Contenu",
+    "Contenido",
+    "Inhalte",
+    "内容",
+    "コンテンツ"
+  ],
   "Contesto della revisione": [
     "Review context",
     "Contexte de la révision",
@@ -2377,6 +2441,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Review-Kontext",
     "审阅背景",
     "レビューの背景"
+  ],
+  "Contiene esattamente": [
+    "Contains exact text",
+    "Contient le texte exact",
+    "Contiene el texto exacto",
+    "Enthält genauen Text",
+    "包含精确文本",
+    "指定した文字列を含む"
   ],
   "Contiene…": [
     "Contains…",
@@ -2618,6 +2690,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "请求历史记录",
     "リクエストの履歴"
   ],
+  "Cursore di ricerca non valido.": [
+    "Invalid search cursor.",
+    "Curseur de recherche non valide.",
+    "Cursor de búsqueda no válido.",
+    "Ungültiger Suchcursor.",
+    "搜索游标无效。",
+    "検索カーソルが無効です。"
+  ],
   "Cursore positivo e limite da 1 a 100 richiesti.": [
     "A positive cursor and a limit from 1 to 100 are required.",
     "Un curseur positif et une limite de 1 à 100 sont requis.",
@@ -2690,6 +2770,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "参考日期",
     "基準日"
   ],
+  "Data importata non valida.": [
+    "Invalid imported date.",
+    "Date importée invalide.",
+    "Fecha importada no válida.",
+    "Ungültiges importiertes Datum.",
+    "导入的日期无效。",
+    "インポートする日付が無効です。"
+  ],
   "Database SQLite locale": [
     "Local SQLite database",
     "Base de données SQLite locale",
@@ -2721,6 +2809,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Datenbank vorübergehend nicht verfügbar. Versuchen Sie es erneut.",
     "数据库暂时不可用。请重试。",
     "データベースを一時的に利用できません。再試行してください。"
+  ],
+  "Dati Trello non validi o esportazione incompleta.": [
+    "Invalid Trello data or incomplete export.",
+    "Données Trello invalides ou export incomplet.",
+    "Datos de Trello no válidos o exportación incompleta.",
+    "Ungültige Trello-Daten oder unvollständiger Export.",
+    "Trello 数据无效或导出不完整。",
+    "Trello データが無効、またはエクスポートが不完全です。"
   ],
   "Dati della bacheca non validi.": [
     "Invalid board data.",
@@ -3073,6 +3169,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Diskussion und Antworten",
     "讨论与回复",
     "スレッドと返信"
+  ],
+  "Diverso da": [
+    "Does not equal",
+    "Différent de",
+    "Distinto de",
+    "Ist ungleich",
+    "不等于",
+    "等しくない"
   ],
   "Domani": [
     "Tomorrow",
@@ -3602,6 +3706,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "WAL 文件",
     "WAL ファイル"
   ],
+  "File da importare (massimo 2 MiB)": [
+    "File to import (maximum 2 MiB)",
+    "Fichier à importer (maximum 2 Mio)",
+    "Archivo para importar (máximo 2 MiB)",
+    "Zu importierende Datei (maximal 2 MiB)",
+    "要导入的文件（最大 2 MiB）",
+    "インポートするファイル（最大 2 MiB）"
+  ],
   "File database": [
     "Database file",
     "Fichier de base de données",
@@ -3633,6 +3745,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ungültig: CSV-Filter.",
     "CSV 筛选条件无效。",
     "CSV フィルターが無効です。"
+  ],
+  "Filtri avanzati non validi.": [
+    "Invalid advanced filters.",
+    "Filtres avancés non valides.",
+    "Filtros avanzados no válidos.",
+    "Ungültige erweiterte Filter.",
+    "高级筛选条件无效。",
+    "詳細フィルターが無効です。"
   ],
   "Filtri delle schede non validi.": [
     "Invalid card filters.",
@@ -3706,6 +3826,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "筛选",
     "フィルター"
   ],
+  "Filtro archivio non valido.": [
+    "Invalid archive filter.",
+    "Filtre d’archivage non valide.",
+    "Filtro de archivo no válido.",
+    "Ungültiger Archivfilter.",
+    "归档筛选条件无效。",
+    "アーカイブフィルターが無効です。"
+  ],
   "Filtro eliminato.": [
     "Filter deleted.",
     "Filtre supprimé.",
@@ -3753,6 +3881,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ende",
     "结束",
     "終了"
+  ],
+  "Formato del file": [
+    "File format",
+    "Format du fichier",
+    "Formato del archivo",
+    "Dateiformat",
+    "文件格式",
+    "ファイル形式"
   ],
   "Formato di importazione non valido: usa OpenBoard versione 2.": [
     "Invalid import format: use OpenBoard version 2.",
@@ -3833,6 +3969,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Konten erfordern den Serverstart mit --auth.",
     "使用账户需要通过 --auth 启动服务器。",
     "アカウントを使うには --auth を指定してサーバーを起動してください。"
+  ],
+  "Gli allegati Trello non vengono scaricati né importati.": [
+    "Trello attachments are neither downloaded nor imported.",
+    "Les pièces jointes Trello ne sont ni téléchargées ni importées.",
+    "Los archivos adjuntos de Trello no se descargan ni se importan.",
+    "Trello-Anhänge werden weder heruntergeladen noch importiert.",
+    "不下载或导入 Trello 附件。",
+    "Trello の添付ファイルはダウンロードもインポートもされません。"
   ],
   "Gli assegnatari devono essere utenti attivi della bacheca.": [
     "Assignees must be active board users.",
@@ -3922,6 +4066,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "只有管理员可以查看已删除的表单。",
     "削除済みフォームは管理者のみ表示できます。"
   ],
+  "I nomi dei membri sono testo descrittivo: account, ruoli e assegnazioni non vengono creati.": [
+    "Member names are descriptive text: accounts, roles and assignments are not created.",
+    "Les noms des membres sont du texte descriptif : aucun compte, rôle ou affectation n’est créé.",
+    "Los nombres de los miembros son texto descriptivo: no se crean cuentas, roles ni asignaciones.",
+    "Mitgliedsnamen sind beschreibender Text; Konten, Rollen und Zuweisungen werden nicht erstellt.",
+    "成员姓名作为描述文本保留，不创建账户、角色或分配关系。",
+    "メンバー名は説明用のテキストです。アカウント、役割、担当割り当ては作成されません。"
+  ],
   "I report personali richiedono un account.": [
     "Personal reports require an account.",
     "Les rapports personnels nécessitent un compte.",
@@ -3937,6 +4089,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Berichte speichern persönliche Filter. Ergebnisse werden bei jedem Öffnen mit deinen aktuellen Berechtigungen neu berechnet.",
     "报告保存个人筛选条件。每次打开时都会根据当前权限重新计算结果。",
     "レポートには個人のフィルターが保存され、開くたびに現在の権限で結果を再計算します。"
+  ],
+  "I responsabili CSV sono testo descrittivo e non creano assegnazioni o account.": [
+    "CSV assignees are descriptive text and do not create assignments or accounts.",
+    "Les responsables CSV sont du texte descriptif et ne créent aucune affectation ni aucun compte.",
+    "Los responsables del CSV son texto descriptivo y no crean asignaciones ni cuentas.",
+    "CSV-Verantwortliche sind beschreibender Text und erstellen keine Zuweisungen oder Konten.",
+    "CSV 负责人作为描述文本保留，不创建分配关系或账户。",
+    "CSV の担当者は説明用のテキストであり、担当割り当てやアカウントは作成されません。"
   ],
   "I valori sono conservati anche quando un campo è nel cestino. La chiave e il tipo restano stabili.": [
     "Values are retained when a field is in trash. Its key and type remain unchanged.",
@@ -3962,6 +4122,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Idempotency-Key 已用于其他请求正文。",
     "Idempotency-Key は異なるリクエスト本文ですでに使用されています。"
   ],
+  "Identificativi Trello duplicati o riferimenti mancanti.": [
+    "Duplicate Trello IDs or missing references.",
+    "Identifiants Trello en double ou références manquantes.",
+    "Identificadores de Trello duplicados o referencias ausentes.",
+    "Doppelte Trello-IDs oder fehlende Verweise.",
+    "Trello 标识符重复或引用缺失。",
+    "Trello ID の重複、または参照の欠落があります。"
+  ],
   "If-Match deve contenere una versione positiva.": [
     "If-Match must contain a positive version number.",
     "If-Match doit contenir un numéro de version positif.",
@@ -3986,6 +4154,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "CSV 包含一页结果。{0}",
     "CSV には1ページ分の結果が含まれます。{0}"
   ],
+  "Il CSV non contiene schede da importare.": [
+    "The CSV contains no cards to import.",
+    "Le CSV ne contient aucune carte à importer.",
+    "El CSV no contiene tarjetas para importar.",
+    "Die CSV-Datei enthält keine zu importierenden Karten.",
+    "CSV 中没有可导入的卡片。",
+    "CSV にインポートするカードがありません。"
+  ],
   "Il CSV restituito è incompleto. Restringi l’esportazione.": [
     "The returned CSV is incomplete. Narrow the export.",
     "Le CSV reçu est incomplet. Réduisez la portée de l'exportation.",
@@ -3993,6 +4169,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Die CSV-Datei ist unvollständig. Begrenzen Sie den Export.",
     "返回的 CSV 不完整。请缩小导出范围。",
     "返された CSV は不完全です。エクスポートの範囲を絞ってください。"
+  ],
+  "Il CSV viene importato come testo: le formule non vengono eseguite.": [
+    "CSV is imported as text: formulas are not executed.",
+    "Le CSV est importé comme texte : les formules ne sont pas exécutées.",
+    "El CSV se importa como texto: las fórmulas no se ejecutan.",
+    "CSV wird als Text importiert; Formeln werden nicht ausgeführt.",
+    "CSV 作为文本导入，不执行公式。",
+    "CSV はテキストとしてインポートされ、数式は実行されません。"
   ],
   "Il backend espone soltanto API.": [
     "The backend serves APIs only.",
@@ -4002,6 +4186,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "后端仅提供 API。",
     "バックエンドは API のみを提供します。"
   ],
+  "Il browser non può conservare la bozza sul dispositivo. I valori restano in memoria finché questa pagina rimane aperta.": [
+    "The browser cannot keep the draft on this device. The values remain in memory while this page stays open.",
+    "Le navigateur ne peut pas conserver le brouillon sur cet appareil. Les valeurs restent en mémoire tant que cette page reste ouverte.",
+    "El navegador no puede conservar el borrador en este dispositivo. Los valores permanecen en memoria mientras esta página siga abierta.",
+    "Der Browser kann den Entwurf auf diesem Gerät nicht speichern. Die Werte bleiben im Arbeitsspeicher, solange diese Seite geöffnet bleibt.",
+    "浏览器无法在此设备上保存草稿。只要此页面保持打开，输入的值就会保留在内存中。",
+    "ブラウザーでこの端末に下書きを保存できません。このページを開いている間は、値がメモリーに保持されます。"
+  ],
   "Il campo bookmarked deve essere booleano.": [
     "The bookmarked field must be a boolean.",
     "Le champ bookmarked doit être un booléen.",
@@ -4009,6 +4201,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Das Feld bookmarked muss ein boolescher Wert sein.",
     "bookmarked 字段必须为布尔值。",
     "bookmarked 項目は真偽値である必要があります。"
+  ],
+  "Il campo del filtro non è più disponibile.": [
+    "The filter field is no longer available.",
+    "Le champ du filtre n’est plus disponible.",
+    "El campo del filtro ya no está disponible.",
+    "Das Filterfeld ist nicht mehr verfügbar.",
+    "筛选字段已不可用。",
+    "フィルターのフィールドは利用できなくなりました。"
   ],
   "Il campo language è consentito solo alla creazione della bacheca.": [
     "The language field is only allowed when creating a board.",
@@ -4106,6 +4306,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "请求正文必须是有效的 JSON 对象。",
     "本文は有効な JSON オブジェクトである必要があります。"
   ],
+  "Il file contiene caratteri Unicode non validi.": [
+    "The file contains invalid Unicode characters.",
+    "Le fichier contient des caractères Unicode invalides.",
+    "El archivo contiene caracteres Unicode no válidos.",
+    "Die Datei enthält ungültige Unicode-Zeichen.",
+    "文件包含无效的 Unicode 字符。",
+    "ファイルに無効な Unicode 文字が含まれています。"
+  ],
   "Il file deve contenere da 1 byte a 1 MiB.": [
     "The file must be between 1 byte and 1 MiB.",
     "Le fichier doit contenir entre 1 octet et 1 Mio.",
@@ -4122,6 +4330,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "文件不包含有效的 JSON。",
     "ファイルに有効な JSON が含まれていません。"
   ],
+  "Il file non contiene testo UTF-8 valido.": [
+    "The file does not contain valid UTF-8 text.",
+    "Le fichier ne contient pas de texte UTF-8 valide.",
+    "El archivo no contiene texto UTF-8 válido.",
+    "Die Datei enthält keinen gültigen UTF-8-Text.",
+    "文件不包含有效的 UTF-8 文本。",
+    "ファイルに有効な UTF-8 テキストが含まれていません。"
+  ],
   "Il file supera il limite di 2 MB.": [
     "The file exceeds the 2 MB limit.",
     "Le fichier dépasse la limite de 2 Mo.",
@@ -4129,6 +4345,30 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Die Datei überschreitet das Limit von 2 MB.",
     "文件超过 2 MB 限制。",
     "ファイルが 2 MB の上限を超えています。"
+  ],
+  "Il file supera il limite di 2 MiB.": [
+    "The file exceeds the 2 MiB limit.",
+    "Le fichier dépasse la limite de 2 Mio.",
+    "El archivo supera el límite de 2 MiB.",
+    "Die Datei überschreitet die Grenze von 2 MiB.",
+    "文件超过 2 MiB 限制。",
+    "ファイルが 2 MiB の上限を超えています。"
+  ],
+  "Il filtro distingue maiuscole e minuscole.": [
+    "The filter is case-sensitive.",
+    "Le filtre distingue les majuscules et les minuscules.",
+    "El filtro distingue mayúsculas y minúsculas.",
+    "Der Filter unterscheidet Groß- und Kleinschreibung.",
+    "筛选条件区分大小写。",
+    "フィルターでは大文字と小文字を区別します。"
+  ],
+  "Il filtro richiede un valore valido per il tipo di campo.": [
+    "The filter requires a valid value for the field type.",
+    "Le filtre nécessite une valeur valide pour le type de champ.",
+    "El filtro requiere un valor válido para el tipo de campo.",
+    "Der Filter erfordert einen gültigen Wert für den Feldtyp.",
+    "筛选条件需要符合字段类型的有效值。",
+    "フィルターにはフィールドの型に合った有効な値が必要です。"
   ],
   "Il lavoro in tutte le bacheche": [
     "Work across all boards",
@@ -4330,6 +4570,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "导入为新看板",
     "新しいボードとしてインポート"
   ],
+  "Importa una bacheca": [
+    "Import a board",
+    "Importer un tableau",
+    "Importar un tablero",
+    "Board importieren",
+    "导入看板",
+    "ボードをインポート"
+  ],
   "Importa una bacheca JSON": [
     "Import a JSON board",
     "Importer un tableau JSON",
@@ -4337,6 +4585,30 @@ globalThis.OpenBoardLocales = Object.freeze({
     "JSON-Board importieren",
     "导入 JSON 看板",
     "JSON ボードをインポート"
+  ],
+  "Importate": [
+    "Imported",
+    "Importées",
+    "Importadas",
+    "Importiert",
+    "已导入",
+    "インポート済み"
+  ],
+  "Importazione CSV": [
+    "CSV import",
+    "Import CSV",
+    "Importación CSV",
+    "CSV-Import",
+    "CSV 导入",
+    "CSV インポート"
+  ],
+  "Impossibile leggere il file selezionato.": [
+    "Unable to read the selected file.",
+    "Impossible de lire le fichier sélectionné.",
+    "No se puede leer el archivo seleccionado.",
+    "Die ausgewählte Datei kann nicht gelesen werden.",
+    "无法读取所选文件。",
+    "選択したファイルを読み取れません。"
   ],
   "Impossibile salvare la bacheca.": [
     "Unable to save the board.",
@@ -4385,6 +4657,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Fälligkeit schnell festlegen",
     "快速设置截止日期",
     "期限を簡単に設定"
+  ],
+  "Impostato": [
+    "Is set",
+    "Est défini",
+    "Está establecido",
+    "Ist gesetzt",
+    "已设置",
+    "設定済み"
   ],
   "In attesa": [
     "Pending",
@@ -4562,6 +4842,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "请输入有限数值。",
     "有限の数値を入力してください。"
   ],
+  "Inserisci un numero intero di minuti da 0 a 100000.": [
+    "Enter a whole number of minutes from 0 to 100000.",
+    "Saisissez un nombre entier de minutes compris entre 0 et 100000.",
+    "Introduce un número entero de minutos entre 0 y 100000.",
+    "Gib eine ganze Anzahl von Minuten zwischen 0 und 100000 ein.",
+    "请输入 0 到 100000 之间的整数分钟数。",
+    "0 から 100000 までの整数で分数を入力してください。"
+  ],
   "Inserisci un numero valido.": [
     "Enter a valid number.",
     "Saisissez un nombre valide.",
@@ -4569,6 +4857,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Geben Sie eine gültige Zahl ein.",
     "请输入有效数字。",
     "有効な数値を入力してください。"
+  ],
+  "Inserisci un titolo da 1 a 300 caratteri.": [
+    "Enter a title with 1 to 300 characters.",
+    "Saisissez un titre de 1 à 300 caractères.",
+    "Introduce un título de entre 1 y 300 caracteres.",
+    "Gib einen Titel mit 1 bis 300 Zeichen ein.",
+    "请输入 1 到 300 个字符的标题。",
+    "1～300 文字のタイトルを入力してください。"
   ],
   "Inserisci una data valida.": [
     "Enter a valid date.",
@@ -4762,6 +5058,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "容量设置需要具有写入权限的活跃成员。",
     "稼働時間の設定には書き込み権限を持つ有効なメンバーが必要です。"
   ],
+  "La checklist richiede al massimo 100 elementi per scheda.": [
+    "A checklist allows at most 100 items per card.",
+    "Une checklist autorise au maximum 100 éléments par carte.",
+    "Una lista de verificación permite un máximo de 100 elementos por tarjeta.",
+    "Eine Checkliste erlaubt höchstens 100 Einträge pro Karte.",
+    "每张卡片的检查清单最多允许 100 项。",
+    "チェックリストはカードごとに最大 100 項目です。"
+  ],
   "La colonna di destinazione non è attiva.": [
     "The destination column is not active.",
     "La colonne de destination n'est pas active.",
@@ -4778,6 +5082,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "初始设置已完成。",
     "初期設定はすでに完了しています。"
   ],
+  "La conversione richiede al massimo 100 liste e 10000 schede.": [
+    "Conversion allows at most 100 lists and 10000 cards.",
+    "La conversion autorise au maximum 100 listes et 10000 cartes.",
+    "La conversión permite un máximo de 100 listas y 10000 tarjetas.",
+    "Die Konvertierung erlaubt höchstens 100 Listen und 10000 Karten.",
+    "转换最多允许 100 个列表和 10000 张卡片。",
+    "変換できるのは最大 100 個のリストと 10000 枚のカードです。"
+  ],
   "La copia richiede almeno un revisore attivo diverso dal nuovo richiedente.": [
     "Copying requires at least one active reviewer other than the new requester.",
     "La copie nécessite au moins un réviseur actif autre que le nouveau demandeur.",
@@ -4785,6 +5097,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Zum Kopieren ist mindestens ein aktiver Prüfer erforderlich, der nicht der neue Antragsteller ist.",
     "复制至少需要一位不同于新请求者的活跃评审人。",
     "複製には新しい申請者以外に少なくとも 1 人の有効なレビュアーが必要です。"
+  ],
+  "La data Trello conserva il giorno UTC; orario e promemoria non vengono importati.": [
+    "Trello dates retain the UTC day; times and reminders are not imported.",
+    "Les dates Trello conservent le jour UTC ; les heures et les rappels ne sont pas importés.",
+    "Las fechas de Trello conservan el día UTC; no se importan las horas ni los recordatorios.",
+    "Trello-Daten behalten den UTC-Kalendertag; Uhrzeiten und Erinnerungen werden nicht importiert.",
+    "Trello 日期保留 UTC 日期，不导入时间和提醒。",
+    "Trello の日付は UTC の日付を保持します。時刻とリマインダーはインポートされません。"
   ],
   "La data di inizio deve precedere la scadenza.": [
     "The start date must be before the due date.",
@@ -4874,6 +5194,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "当前密码不正确。",
     "現在のパスワードが正しくありません。"
   ],
+  "La prima riga contiene intestazioni": [
+    "The first row contains headers",
+    "La première ligne contient les en-têtes",
+    "La primera fila contiene encabezados",
+    "Die erste Zeile enthält Spaltenüberschriften",
+    "第一行包含表头",
+    "最初の行は見出しです"
+  ],
   "La revisione è già annullata.": [
     "The review is already canceled.",
     "La révision est déjà annulée.",
@@ -4905,6 +5233,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Die Anfrage betrifft die auf dem Server gespeicherte Kartenversion. Der Kartenentwurf bleibt im Editor.",
     "请求针对服务器上保存的卡片版本。卡片草稿保留在编辑器中。",
     "依頼の対象はサーバーに保存したカードのバージョンです。下書きはエディターに残ります。"
+  ],
+  "La riga è nascosta dai filtri o non è presente nei dati attuali. La bozza resta disponibile.": [
+    "The row is hidden by filters or missing from the current data. Your draft remains available.",
+    "La ligne est masquée par les filtres ou absente des données actuelles. Votre brouillon reste disponible.",
+    "La fila está oculta por los filtros o no aparece en los datos actuales. El borrador sigue disponible.",
+    "Die Zeile wird durch Filter ausgeblendet oder fehlt in den aktuellen Daten. Dein Entwurf bleibt verfügbar.",
+    "此行被筛选条件隐藏或不在当前数据中。草稿仍然保留。",
+    "この行はフィルターで非表示になっているか、現在のデータにありません。下書きは保持されています。"
   ],
   "La rimozione della fotografia non accetta campi aggiuntivi.": [
     "Deleting a snapshot does not accept additional fields.",
@@ -4962,6 +5298,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "已创建的卡片已被删除。",
     "作成したカードは削除されました。"
   ],
+  "La scheda non è disponibile in questa bacheca. La bozza è conservata.": [
+    "The card is not available on this board. Your draft has been kept.",
+    "La carte n’est pas disponible sur ce tableau. Votre brouillon est conservé.",
+    "La tarjeta no está disponible en este tablero. Se ha conservado el borrador.",
+    "Die Karte ist auf diesem Board nicht verfügbar. Dein Entwurf bleibt erhalten.",
+    "此看板上无法访问该卡片。草稿已保留。",
+    "このボードではカードを利用できません。下書きは保持されています。"
+  ],
   "La tua bozza resta aperta nell’editor. Confronta i contenuti, poi correggi la bozza prima di salvare.": [
     "Your draft stays open in the editor. Compare the content, then revise your draft before saving.",
     "Votre brouillon reste ouvert dans l’éditeur. Comparez les contenus, puis corrigez le brouillon avant d’enregistrer.",
@@ -4986,6 +5330,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "你的工作周",
     "自分の作業週"
   ],
+  "La versione sul server è cambiata. La bozza è conservata: confrontala prima di ricaricare.": [
+    "The server version has changed. Your draft has been kept: compare it before reloading.",
+    "La version sur le serveur a changé. Votre brouillon est conservé : comparez-le avant de recharger.",
+    "La versión del servidor ha cambiado. Se ha conservado el borrador: compáralo antes de volver a cargar.",
+    "Die Version auf dem Server hat sich geändert. Dein Entwurf bleibt erhalten: Vergleiche ihn vor dem Neuladen.",
+    "服务器上的版本已更改。草稿已保留，请比较后再重新加载。",
+    "サーバーのバージョンが変更されました。下書きは保持されています。再読み込みする前に内容を比較してください。"
+  ],
   "Lascia vuoto per usare le risposte originali": [
     "Leave blank to use the original answers",
     "Laisser vide pour utiliser les réponses originales",
@@ -5002,6 +5354,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "薰衣草紫",
     "ラベンダー"
   ],
+  "Le checklist Trello sono unite in una checklist; i nomi sono conservati nel testo.": [
+    "Trello checklists are merged into one checklist; their names are kept in the text.",
+    "Les checklists Trello sont fusionnées en une seule ; leurs noms sont conservés dans le texte.",
+    "Las listas de verificación de Trello se combinan en una; sus nombres se conservan en el texto.",
+    "Trello-Checklisten werden zusammengeführt; ihre Namen bleiben im Text erhalten.",
+    "Trello 检查清单将合并为一个清单，名称保留在文本中。",
+    "Trello のチェックリストは一つに統合され、名前はテキスト内に保持されます。"
+  ],
+  "Le colonne CSV non mappate non vengono importate.": [
+    "Unmapped CSV columns are not imported.",
+    "Les colonnes CSV sans correspondance ne sont pas importées.",
+    "No se importan las columnas CSV sin asignar.",
+    "Nicht zugeordnete CSV-Spalten werden nicht importiert.",
+    "不导入未映射的 CSV 列。",
+    "対応付けのない CSV 列はインポートされません。"
+  ],
   "Le dipendenze devono appartenere alla stessa bacheca.": [
     "Dependencies must belong to the same board.",
     "Les dépendances doivent appartenir au même tableau.",
@@ -5010,6 +5378,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "依赖项必须属于同一看板。",
     "依存先は同じボードに属している必要があります。"
   ],
+  "Le etichette Trello sono conservate nella descrizione; colori e filtri delle etichette non vengono ricreati.": [
+    "Trello labels are kept in the description; label colors and filters are not recreated.",
+    "Les étiquettes Trello sont conservées dans la description ; leurs couleurs et filtres ne sont pas recréés.",
+    "Las etiquetas de Trello se conservan en la descripción; no se recrean sus colores ni filtros.",
+    "Trello-Labels bleiben in der Beschreibung erhalten; Farben und Filter werden nicht neu erstellt.",
+    "Trello 标签保留在描述中，不重新创建标签颜色和筛选器。",
+    "Trello のラベルは説明内に保持されます。ラベルの色とフィルターは再作成されません。"
+  ],
   "Le grandi idee iniziano qui.": [
     "Great ideas start here.",
     "Les grandes idées commencent ici.",
@@ -5017,6 +5393,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Große Ideen beginnen hier.",
     "伟大创意，从这里开始。",
     "大きなアイデアはここから。"
+  ],
+  "Le intestazioni CSV devono essere non vuote e univoche.": [
+    "CSV headers must be nonempty and unique.",
+    "Les en-têtes CSV doivent être non vides et uniques.",
+    "Los encabezados CSV no pueden estar vacíos ni repetidos.",
+    "CSV-Spaltenüberschriften müssen ausgefüllt und eindeutig sein.",
+    "CSV 表头不得为空或重复。",
+    "CSV の見出しは空欄や重複を含めないでください。"
+  ],
+  "Le liste Trello archiviate restano presenti; le loro schede sono importate come archiviate.": [
+    "Archived Trello lists remain present; their cards are imported as archived cards.",
+    "Les listes Trello archivées restent présentes ; leurs cartes sont importées comme cartes archivées.",
+    "Las listas archivadas de Trello siguen presentes; sus tarjetas se importan como archivadas.",
+    "Archivierte Trello-Listen bleiben vorhanden; ihre Karten werden als archivierte Karten importiert.",
+    "已归档的 Trello 列表仍会保留，其中的卡片将作为已归档卡片导入。",
+    "アーカイブ済み Trello リストは保持され、そのカードはアーカイブ済みとしてインポートされます。"
   ],
   "Le mie revisioni": [
     "My reviews",
@@ -5514,6 +5906,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "账户已更改。请重新打开此视图。",
     "アカウントが変更されました。この画面を開き直してください。"
   ],
+  "L’esito del salvataggio è da verificare. Ricarica esplicitamente la versione corrente prima di salvare ancora.": [
+    "The save result needs to be checked. Explicitly reload the current version before saving again.",
+    "Le résultat de l’enregistrement doit être vérifié. Rechargez explicitement la version actuelle avant d’enregistrer à nouveau.",
+    "Hay que comprobar el resultado del guardado. Vuelve a cargar la versión actual antes de guardar de nuevo.",
+    "Das Ergebnis des Speicherns muss geprüft werden. Lade die aktuelle Version ausdrücklich neu, bevor du erneut speicherst.",
+    "需要确认保存结果。请先手动重新加载当前版本，然后再保存。",
+    "保存結果の確認が必要です。再度保存する前に、現在のバージョンを明示的に再読み込みしてください。"
+  ],
+  "L’importazione crea una nuova bacheca dopo la conferma. Seleziona il formato e controlla l’anteprima.": [
+    "Import creates a new board after confirmation. Select the format and review the preview.",
+    "L’importation crée un nouveau tableau après confirmation. Sélectionnez le format et vérifiez l’aperçu.",
+    "La importación crea un tablero nuevo tras la confirmación. Selecciona el formato y revisa la vista previa.",
+    "Der Import erstellt nach Bestätigung ein neues Board. Format wählen und Vorschau prüfen.",
+    "确认后将导入为新看板。请选择格式并检查预览。",
+    "確認後に新しいボードが作成されます。形式を選択し、プレビューを確認してください。"
+  ],
   "M su una scheda": [
     "M on a card",
     "M sur une carte",
@@ -5529,6 +5937,30 @@ globalThis.OpenBoardLocales = Object.freeze({
     "LISTE BEARBEITEN",
     "编辑列表",
     "リストを編集"
+  ],
+  "Maggiore di": [
+    "Greater than",
+    "Supérieur à",
+    "Mayor que",
+    "Größer als",
+    "大于",
+    "より大きい"
+  ],
+  "Maggiore o uguale a": [
+    "Greater than or equal to",
+    "Supérieur ou égal à",
+    "Mayor o igual que",
+    "Größer oder gleich",
+    "大于或等于",
+    "以上"
+  ],
+  "Mappatura CSV non valida: seleziona il titolo e indici distinti.": [
+    "Invalid CSV mapping: select a title column and distinct indices.",
+    "Correspondance CSV invalide : sélectionnez un titre et des indices distincts.",
+    "Asignación CSV no válida: selecciona el título e índices distintos.",
+    "Ungültige CSV-Zuordnung: Titelspalte und unterschiedliche Indizes wählen.",
+    "CSV 映射无效：请选择标题列和不同的列索引。",
+    "CSV の対応付けが無効です。タイトル列と重複しない列番号を選択してください。"
   ],
   "Marketing": [
     "Marketing",
@@ -5721,6 +6153,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Erforderlicher freier Mindestspeicherplatz",
     "所需的最小可用空间",
     "必要な最小空き容量"
+  ],
+  "Minore di": [
+    "Less than",
+    "Inférieur à",
+    "Menor que",
+    "Kleiner als",
+    "小于",
+    "より小さい"
+  ],
+  "Minore o uguale a": [
+    "Less than or equal to",
+    "Inférieur ou égal à",
+    "Menor o igual que",
+    "Kleiner oder gleich",
+    "小于或等于",
+    "以下"
   ],
   "Minuti": [
     "Minutes",
@@ -5986,6 +6434,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "编辑请求",
     "依頼を編集"
   ],
+  "Modifica riga": [
+    "Edit row",
+    "Modifier la ligne",
+    "Editar fila",
+    "Zeile bearbeiten",
+    "编辑行",
+    "行を編集"
+  ],
   "Modifica risposte": [
     "Edit answers",
     "Modifier les réponses",
@@ -6065,6 +6521,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Formulare und Anfragen",
     "表单与请求",
     "フォームとリクエスト"
+  ],
+  "Moduli interni": [
+    "Internal forms",
+    "Formulaires internes",
+    "Formularios internos",
+    "Interne Formulare",
+    "内部表单",
+    "内部フォーム"
+  ],
+  "Modulo": [
+    "Form",
+    "Formulaire",
+    "Formulario",
+    "Formular",
+    "表单",
+    "フォーム"
   ],
   "Modulo creato": [
     "Form created",
@@ -6265,6 +6737,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Keine Kommentare entsprechen diesen Filtern.",
     "没有符合这些条件的评论。",
     "この条件に一致するコメントはありません。"
+  ],
+  "Nessun contenuto trovato.": [
+    "No content found.",
+    "Aucun contenu trouvé.",
+    "No se ha encontrado contenido.",
+    "Keine Inhalte gefunden.",
+    "未找到内容。",
+    "コンテンツが見つかりません。"
   ],
   "Nessun contesto aggiuntivo.": [
     "No additional context.",
@@ -6602,6 +7082,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "列表名称",
     "リスト名"
   ],
+  "Nome della nuova bacheca": [
+    "New board name",
+    "Nom du nouveau tableau",
+    "Nombre del nuevo tablero",
+    "Name des neuen Boards",
+    "新看板名称",
+    "新しいボード名"
+  ],
   "Nome e origine del modello obbligatori.": [
     "Template name and source required.",
     "Nom et source du modèle obligatoires.",
@@ -6746,6 +7234,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "你没有执行此操作的权限。",
     "この操作を実行する権限がありません。"
   ],
+  "Non hai più il permesso di modificare questa riga. La bozza è conservata.": [
+    "You no longer have permission to edit this row. Your draft has been kept.",
+    "Vous n’avez plus l’autorisation de modifier cette ligne. Votre brouillon est conservé.",
+    "Ya no tienes permiso para editar esta fila. Se ha conservado el borrador.",
+    "Du hast keine Berechtigung mehr, diese Zeile zu bearbeiten. Dein Entwurf bleibt erhalten.",
+    "你已无权编辑此行。草稿已保留。",
+    "この行を編集する権限がなくなりました。下書きは保持されています。"
+  ],
   "Non hai schede assegnate. Apri una scheda e seleziona il tuo account in Membri assegnati.": [
     "You have no assigned cards. Open a card and select your account under Assigned members.",
     "Aucune carte ne vous est attribuée. Ouvrez une carte et sélectionnez votre compte dans Membres attribués.",
@@ -6753,6 +7249,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Dir sind keine Karten zugewiesen. Öffne eine Karte und wähle dein Konto unter Zugewiesene Mitglieder.",
     "你没有被分配的卡片。请打开一张卡片，在“已分配成员”中选择你的账户。",
     "割り当てられたカードはありません。カードを開き、「割り当てられたメンバー」で自分のアカウントを選択してください。"
+  ],
+  "Non importare": [
+    "Do not import",
+    "Ne pas importer",
+    "No importar",
+    "Nicht importieren",
+    "不导入",
+    "インポートしない"
   ],
   "Non impostato": [
     "Not set",
@@ -6850,6 +7354,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "工作备注",
     "作業メモ"
   ],
+  "Nota della richiesta": [
+    "Request note",
+    "Note de la demande",
+    "Nota de la solicitud",
+    "Notiz zur Anfrage",
+    "请求备注",
+    "リクエストのメモ"
+  ],
   "Nota per il richiedente": [
     "Note to the requester",
     "Note pour le demandeur",
@@ -6857,6 +7369,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Notiz an die anfragende Person",
     "给申请人的备注",
     "依頼者へのメモ"
+  ],
+  "Note delle richieste": [
+    "Request notes",
+    "Notes des demandes",
+    "Notas de solicitudes",
+    "Notizen zu Anfragen",
+    "请求备注",
+    "リクエストのメモ"
   ],
   "Notifica letta.": [
     "Notification marked as read.",
@@ -7026,6 +7546,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "为每个阶段命名。",
     "それぞれの段階に名前を。"
   ],
+  "Ogni riga crea una scheda. Seleziona le colonne da importare e prepara l’anteprima.": [
+    "Each row creates a card. Select the columns to import and prepare the preview.",
+    "Chaque ligne crée une carte. Sélectionnez les colonnes à importer et préparez l’aperçu.",
+    "Cada fila crea una tarjeta. Selecciona las columnas para importar y prepara la vista previa.",
+    "Jede Zeile erstellt eine Karte. Zu importierende Spalten wählen und Vorschau vorbereiten.",
+    "每行创建一张卡片。请选择要导入的列并准备预览。",
+    "各行からカードが作成されます。インポートする列を選択し、プレビューを準備してください。"
+  ],
   "Ogni riga è un’osservazione salvata nel giorno UTC indicato. Non vengono ricostruiti dati per i giorni senza osservazioni. Un nuovo salvataggio aggiorna l’osservazione di oggi.": [
     "Each row is an observation saved on the specified UTC day. Days without observations are not reconstructed. Saving again updates today's observation.",
     "Chaque ligne est une observation enregistrée le jour UTC indiqué. Les jours sans observations ne sont pas reconstitués. Un nouvel enregistrement met à jour l'observation du jour.",
@@ -7058,6 +7586,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "OpenBoard",
     "OpenBoard"
   ],
+  "OpenBoard JSON": [
+    "OpenBoard JSON",
+    "JSON OpenBoard",
+    "JSON de OpenBoard",
+    "OpenBoard-JSON",
+    "OpenBoard JSON",
+    "OpenBoard JSON"
+  ],
   "OpenBoard · Il tuo lavoro, in ordine": [
     "OpenBoard · Your work, organized",
     "OpenBoard · Votre travail, bien organisé",
@@ -7081,6 +7617,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "OpenBoard, Startseite",
     "OpenBoard，首页",
     "OpenBoard、ホーム"
+  ],
+  "Operatore": [
+    "Operator",
+    "Opérateur",
+    "Operador",
+    "Operator",
+    "运算符",
+    "演算子"
   ],
   "Operazione": [
     "Operation",
@@ -7586,6 +8130,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "无法更新收藏。请重试。",
     "お気に入りを更新できませんでした。再試行してください。"
   ],
+  "Prepara anteprima CSV": [
+    "Prepare CSV preview",
+    "Préparer l’aperçu CSV",
+    "Preparar vista previa CSV",
+    "CSV-Vorschau vorbereiten",
+    "准备 CSV 预览",
+    "CSV プレビューを準備"
+  ],
   "Prepariamo il tuo spazio…": [
     "Preparing your workspace…",
     "Préparation de votre espace…",
@@ -7625,6 +8177,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Priorität",
     "优先级",
     "優先度"
+  ],
+  "Priorità (low, normal, high, urgent)": [
+    "Priority (low, normal, high, urgent)",
+    "Priorité (low, normal, high, urgent)",
+    "Prioridad (low, normal, high, urgent)",
+    "Priorität (low, normal, high, urgent)",
+    "优先级（low、normal、high、urgent）",
+    "優先度（low、normal、high、urgent）"
   ],
   "Priorità…": [
     "Priority…",
@@ -7681,6 +8241,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Veröffentlicht",
     "已发布",
     "公開中"
+  ],
+  "Punto e virgola": [
+    "Semicolon",
+    "Point-virgule",
+    "Punto y coma",
+    "Semikolon",
+    "分号",
+    "セミコロン"
   ],
   "Puoi attivare soltanto uno sprint pianificato.": [
     "Only a planned sprint can be activated.",
@@ -8050,6 +8618,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "负责人",
     "担当者"
   ],
+  "Responsabile (testo)": [
+    "Assignee (text)",
+    "Responsable (texte)",
+    "Responsable (texto)",
+    "Verantwortliche Person (Text)",
+    "负责人（文本）",
+    "担当者（テキスト）"
+  ],
   "Responsabile: {2} · Scadenza: {3} · Priorità: {4}": [
     "Assignee: {2} · Due: {3} · Priority: {4}",
     "Responsable : {2} · Échéance : {3} · Priorité : {4}",
@@ -8306,6 +8882,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "重新打开此请求并重置投票？",
     "依頼を再開し、投票をリセットしますか？"
   ],
+  "Ricarica versione corrente": [
+    "Reload current version",
+    "Recharger la version actuelle",
+    "Volver a cargar la versión actual",
+    "Aktuelle Version neu laden",
+    "重新加载当前版本",
+    "現在のバージョンを再読み込み"
+  ],
+  "Ricaricare la versione corrente? I valori di questa bozza saranno sostituiti solo dopo una lettura riuscita.": [
+    "Reload the current version? The values in this draft will be replaced only after a successful read.",
+    "Recharger la version actuelle ? Les valeurs de ce brouillon seront remplacées uniquement après une lecture réussie.",
+    "¿Volver a cargar la versión actual? Los valores de este borrador solo se sustituirán cuando la lectura se complete correctamente.",
+    "Aktuelle Version neu laden? Die Werte dieses Entwurfs werden erst nach einem erfolgreichen Abruf ersetzt.",
+    "重新加载当前版本？只有成功读取后，才会替换此草稿中的值。",
+    "現在のバージョンを再読み込みしますか？読み込みが成功した場合のみ、この下書きの値を置き換えます。"
+  ],
   "Ricerca": [
     "Research",
     "Recherche",
@@ -8337,6 +8929,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Alle Boards durchsuchen",
     "搜索所有看板",
     "すべてのボードを検索"
+  ],
+  "Ricerca libera": [
+    "Free-text search",
+    "Recherche libre",
+    "Búsqueda libre",
+    "Freitextsuche",
+    "自由文本搜索",
+    "自由テキスト検索"
   ],
   "Ricerca nella bacheca": [
     "Search board",
@@ -8409,6 +9009,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Review anfordern",
     "请求审阅",
     "レビューを依頼"
+  ],
+  "Richiesta": [
+    "Request",
+    "Demande",
+    "Solicitud",
+    "Anfrage",
+    "请求",
+    "リクエスト"
   ],
   "Richiesta HTTP non valida.": [
     "Invalid HTTP request.",
@@ -8610,6 +9218,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "看板请求",
     "ボードのリクエスト"
   ],
+  "Richieste e risposte ai moduli": [
+    "Requests and form responses",
+    "Demandes et réponses aux formulaires",
+    "Solicitudes y respuestas a formularios",
+    "Anfragen und Formularantworten",
+    "请求和表单回复",
+    "リクエストとフォーム回答"
+  ],
   "Riepilogo": [
     "Summary",
     "Résumé",
@@ -8641,6 +9257,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Abgelehnt",
     "已拒绝",
     "却下済み"
+  ],
+  "Riga salvata. Aggiorna la bacheca per vedere i dati più recenti.": [
+    "Row saved. Refresh the board to see the latest data.",
+    "Ligne enregistrée. Actualisez le tableau pour voir les dernières données.",
+    "Fila guardada. Actualiza el tablero para ver los datos más recientes.",
+    "Zeile gespeichert. Aktualisiere das Board, um die neuesten Daten zu sehen.",
+    "行已保存。请刷新看板以查看最新数据。",
+    "行を保存しました。最新のデータを表示するには、ボードを更新してください。"
   ],
   "Rileggi versione dal server": [
     "Reload version from server",
@@ -8705,6 +9329,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Fortsetzen",
     "继续",
     "再開"
+  ],
+  "Riprendi bozza": [
+    "Resume draft",
+    "Reprendre le brouillon",
+    "Continuar el borrador",
+    "Entwurf fortsetzen",
+    "继续编辑草稿",
+    "下書きを再開"
   ],
   "Ripristina": [
     "Restore",
@@ -9226,6 +9858,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "截止日期",
     "期限"
   ],
+  "Scadenza (YYYY-MM-DD)": [
+    "Due date (YYYY-MM-DD)",
+    "Échéance (YYYY-MM-DD)",
+    "Vencimiento (YYYY-MM-DD)",
+    "Fälligkeitsdatum (YYYY-MM-DD)",
+    "截止日期（YYYY-MM-DD）",
+    "期限（YYYY-MM-DD）"
+  ],
   "Scadenza al": [
     "Due before",
     "Échéance jusqu’au",
@@ -9377,6 +10017,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Wähle einen Namen für die Liste.",
     "请为列表命名。",
     "リストの名前を入力してください。"
+  ],
+  "Scegli un valore": [
+    "Choose a value",
+    "Choisir une valeur",
+    "Elige un valor",
+    "Wert auswählen",
+    "选择一个值",
+    "値を選択"
   ],
   "Scegli uno Sprint e da 1 a 100 schede.": [
     "Choose a sprint and 1 to 100 cards.",
@@ -9866,6 +10514,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "请选择有效的目标列。",
     "有効な追加先の列を選択してください。"
   ],
+  "Seleziona una priorità valida.": [
+    "Select a valid priority.",
+    "Sélectionnez une priorité valide.",
+    "Selecciona una prioridad válida.",
+    "Wähle eine gültige Priorität aus.",
+    "请选择有效的优先级。",
+    "有効な優先度を選択してください。"
+  ],
   "Seleziona un’esportazione OpenBoard versione 2. L’importazione crea una nuova bacheca.": [
     "Select an OpenBoard version 2 export. Importing creates a new board.",
     "Sélectionnez une exportation OpenBoard version 2. L’importation crée un nouveau tableau.",
@@ -9897,6 +10553,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ohne Fälligkeitsdatum",
     "无截止日期",
     "期限なし"
+  ],
+  "Separatore CSV": [
+    "CSV delimiter",
+    "Séparateur CSV",
+    "Separador CSV",
+    "CSV-Trennzeichen",
+    "CSV 分隔符",
+    "CSV の区切り文字"
   ],
   "Serve un’esportazione OpenBoard in formato versione 2.": [
     "An OpenBoard version 2 export is required.",
@@ -9977,6 +10641,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ungültig: Woche.",
     "周无效。",
     "週が無効です。"
+  ],
+  "Solo Salva invia le modifiche. Annulla chiude l’editor e conserva la bozza su questo dispositivo.": [
+    "Only Save sends changes. Cancel closes the editor and keeps the draft on this device.",
+    "Seul Enregistrer envoie les modifications. Annuler ferme l’éditeur et conserve le brouillon sur cet appareil.",
+    "Solo Guardar envía los cambios. Cancelar cierra el editor y conserva el borrador en este dispositivo.",
+    "Nur Speichern sendet Änderungen. Abbrechen schließt den Editor und behält den Entwurf auf diesem Gerät.",
+    "只有“保存”才会提交更改。“取消”会关闭编辑器，并在此设备上保留草稿。",
+    "「保存」のみが変更を送信します。「キャンセル」は編集画面を閉じ、この端末に下書きを保持します。"
   ],
   "Solo gli amministratori della bacheca gestiscono i moduli.": [
     "Only board administrators can manage forms.",
@@ -10690,6 +11362,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "任务 {6} 的文本",
     "タスク {6} のテキスト"
   ],
+  "Testo da cercare": [
+    "Search text",
+    "Texte à rechercher",
+    "Texto de búsqueda",
+    "Suchtext",
+    "搜索文本",
+    "検索テキスト"
+  ],
   "Testo della nota non valido.": [
     "Invalid note text.",
     "Non valide : texte de la note.",
@@ -10738,6 +11418,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "字段类型无效。",
     "項目の種類が無効です。"
   ],
+  "Tipo di contenuto da cercare non valido.": [
+    "Invalid search content type.",
+    "Type de contenu à rechercher non valide.",
+    "Tipo de contenido de búsqueda no válido.",
+    "Ungültiger Inhaltstyp für die Suche.",
+    "搜索内容类型无效。",
+    "検索するコンテンツの種類が無効です。"
+  ],
   "Titolo": [
     "Title",
     "Titre",
@@ -10745,6 +11433,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Titel",
     "标题",
     "タイトル"
+  ],
+  "Titolo (obbligatorio)": [
+    "Title (required)",
+    "Titre (obligatoire)",
+    "Título (obligatorio)",
+    "Titel (erforderlich)",
+    "标题（必填）",
+    "タイトル（必須）"
   ],
   "Titolo della richiesta": [
     "Request title",
@@ -10986,6 +11682,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "里程碑…",
     "マイルストーン…"
   ],
+  "Trello JSON": [
+    "Trello JSON",
+    "JSON Trello",
+    "JSON de Trello",
+    "Trello-JSON",
+    "Trello JSON",
+    "Trello JSON"
+  ],
   "Troppe richieste. Attendi e riprova.": [
     "Too many requests. Wait and try again.",
     "Trop de requêtes. Patientez et réessayez.",
@@ -11050,6 +11754,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "全部",
     "すべて"
   ],
+  "Tutti i contenuti collaborativi": [
+    "All collaborative content",
+    "Tout le contenu collaboratif",
+    "Todo el contenido colaborativo",
+    "Alle gemeinsamen Inhalte",
+    "所有协作内容",
+    "すべての共同作業コンテンツ"
+  ],
   "Tutti i revisori": [
     "All reviewers",
     "Tous les réviseurs",
@@ -11090,6 +11802,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "当前 UTC 日期",
     "現在の UTC 日付"
   ],
+  "Uguale a": [
+    "Equals",
+    "Égal à",
+    "Igual a",
+    "Ist gleich",
+    "等于",
+    "等しい"
+  ],
   "Ultima attività: {2}": [
     "Last activity: {2}",
     "Dernière activité : {2}",
@@ -11105,6 +11825,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Zuletzt aktualisiert: {0}",
     "上次更新：{0}",
     "最終更新：{0}"
+  ],
+  "Un campo importato non è valido o supera i limiti consentiti.": [
+    "An imported field is invalid or exceeds the allowed limits.",
+    "Un champ importé est invalide ou dépasse les limites autorisées.",
+    "Un campo importado no es válido o supera los límites permitidos.",
+    "Ein importiertes Feld ist ungültig oder überschreitet die zulässigen Grenzen.",
+    "导入字段无效或超出允许的限制。",
+    "インポートするフィールドが無効、または許容範囲を超えています。"
   ],
   "Un membro": [
     "A member",
@@ -11177,6 +11905,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Eine Karte wurde geändert: Keine Änderungen angewendet.",
     "某张卡片已被修改：未应用任何更改。",
     "カードが変更されています。変更は適用されていません。"
+  ],
+  "Un’altra scheda del browser ha aggiornato la bozza locale. I valori di questo editor restano in memoria.": [
+    "Another browser tab has updated the local draft. The values in this editor remain in memory.",
+    "Un autre onglet du navigateur a mis à jour le brouillon local. Les valeurs de cet éditeur restent en mémoire.",
+    "Otra pestaña del navegador ha actualizado el borrador local. Los valores de este editor se mantienen en memoria.",
+    "Ein anderer Browser-Tab hat den lokalen Entwurf aktualisiert. Die Werte dieses Editors bleiben im Arbeitsspeicher.",
+    "另一个浏览器标签页更新了本地草稿。此编辑器中的值仍保留在内存中。",
+    "別のブラウザータブでローカルの下書きが更新されました。この編集画面の値はメモリーに保持されています。"
   ],
   "Un’idea che merita spazio": [
     "An idea worth making room for",
@@ -11354,6 +12090,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "值",
     "値"
   ],
+  "Valore CSV non valido per priorità o stima.": [
+    "Invalid CSV priority or estimate value.",
+    "Valeur CSV de priorité ou d’estimation invalide.",
+    "Valor CSV de prioridad o estimación no válido.",
+    "Ungültiger CSV-Wert für Priorität oder Schätzung.",
+    "CSV 中的优先级或估算值无效。",
+    "CSV の優先度または見積もり値が無効です。"
+  ],
   "Valore JSON non valido.": [
     "Invalid json value.",
     "Non valide : valeur json.",
@@ -11449,6 +12193,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Serverversion: {6}. Durch Bestätigen bleibt dein Entwurfstext erhalten, damit du ihn manuell zusammenführen kannst.",
     "服务器版本：{6}。确认后将保留草稿文本，以便手动完成合并。",
     "サーバーのバージョン：{6}。確認すると下書きのテキストが保持され、手動で統合を完成できます。"
+  ],
+  "Virgola": [
+    "Comma",
+    "Virgule",
+    "Coma",
+    "Komma",
+    "逗号",
+    "コンマ"
   ],
   "Vista a colonne": [
     "Column view",
@@ -11746,6 +12498,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "{1} 张卡片中的 {0} 张",
     "{1} 枚中 {0} 枚のカード"
   ],
+  "{0} elementi checklist · {1} schede archiviate · {2} schede completate": [
+    "{0} checklist items · {1} archived cards · {2} completed cards",
+    "{0} éléments de checklist · {1} cartes archivées · {2} cartes terminées",
+    "{0} elementos de verificación · {1} tarjetas archivadas · {2} tarjetas completadas",
+    "{0} Checklisten-Einträge · {1} archivierte Karten · {2} abgeschlossene Karten",
+    "{0} 个检查清单项 · {1} 张已归档卡片 · {2} 张已完成卡片",
+    "チェックリスト {0} 項目 · アーカイブ済み {1} 枚 · 完了済み {2} 枚"
+  ],
   "{0} min manuali + {1} min registrati = {2} min totali": [
     "{0} manual min + {1} logged min = {2} total min",
     "{0} min manuelles + {1} min enregistrées = {2} min au total",
@@ -11761,6 +12521,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "{0} Minuten",
     "{0} 分钟",
     "{0} 分"
+  ],
+  "{0} righe · {1} colonne CSV": [
+    "{0} rows · {1} CSV columns",
+    "{0} lignes · {1} colonnes CSV",
+    "{0} filas · {1} columnas CSV",
+    "{0} Zeilen · {1} CSV-Spalten",
+    "{0} 行 · {1} 个 CSV 列",
+    "{0} 行 · CSV {1} 列"
   ],
   "{0} schede": [
     "{0} cards",

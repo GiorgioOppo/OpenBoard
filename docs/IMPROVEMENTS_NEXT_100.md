@@ -6,7 +6,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 
 | ID | Improvement | Status | Evidence or remaining work |
 | --- | --- | --- | --- |
-| 1 | Incremental SQL/JSON persistence | Partial | Changed-row publication and Mongo document verification implemented; offline tracker tests pass. Real cloud regressions await disposable PostgreSQL/MongoDB. |
+| 1 | Incremental SQL/JSON persistence | Implemented | Changed-row publication and Mongo document verification; offline tracker and real disposable SQL/Mongo regressions passed in CI at `5688602`. Full hydration and the global lock remain separate pending items. |
 | 2 | Concurrent external reads | Pending | The global external-store lock remains. |
 | 3 | More granular write locks | Pending | Requires a consistency design covering cross-board/global operations. |
 | 4 | Incremental cache reconstruction | Pending | Stale caches still load complete snapshots. |
@@ -21,8 +21,8 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 13 | Paginated global search | Implemented | Stable ID cursor, permissions before pagination, frontend load-more and stale-response tests. Legacy ordering remains available. |
 | 14 | Unicode-aware search | Pending | Existing SQLite `lower` behavior remains. |
 | 15 | Full-text relevance ranking | Pending | No new search index/ranking engine. |
-| 16 | Search collaborative content | Pending | Comments, discussions and intake answers are not in core search. |
-| 17 | Advanced custom-field filters | Pending | Existing exact-match filters remain. |
+| 16 | Search collaborative content | Implemented | Dedicated content API searches cards, comments/replies, requests/answer values/notes and forms; live ACL/ancestry before typed cursor pagination, escaped excerpts and guarded UI navigation. Nine HTTP regressions and a frontend race/escaping suite. Unicode linguistic search and relevance ranking remain IDs 14–15. |
+| 17 | Advanced custom-field filters | Implemented | Typed operators, set/unset, 1–10 flat all/any API conditions and ID pagination; toolbar exposes one typed condition while preserving free search. Six HTTP regressions and two frontend suites. |
 | 18 | S3-compatible attachment storage | Pending | Requires storage, authorization and backup integration. |
 | 19 | Binary/resumable attachments | Pending | Existing JSON/base64 transfer remains. |
 | 20 | Large asynchronous exports | Pending | Existing export bounds remain. |
@@ -52,8 +52,8 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 44 | Scoped service accounts | Pending | No integration-token authentication implemented. |
 | 45 | Signed webhooks | Pending | No outgoing event delivery implemented. |
 | 46 | Webhook retries/history | Pending | Depends on webhook delivery and durable jobs. |
-| 47 | Native Trello import | Pending | Existing OpenBoard-format import remains. |
-| 48 | CSV import | Pending | No column-mapping import workflow implemented. |
+| 47 | Native Trello import | Implemented | Bounded local single-board JSON conversion, checklist/date/archive handling and explicit omission warnings; preview/confirmation uses the authenticated atomic OpenBoard import. Attachments/history/custom fields and broader API export shapes are unsupported; no Trello sign-in or synchronization. Converter, UI and authenticated round-trip tests. |
+| 48 | CSV import | Implemented | UTF-8 comma/semicolon files, quoted multiline cells, optional headers, explicit column mapping, validation/counts/warnings and atomic confirmation. Seven supported card/list fields; formulas remain literal text. Converter, UI and authenticated rollback/round-trip tests. |
 | 49 | GitHub synchronization | Pending | No connector implemented or account access requested. |
 | 50 | Complete portable board bundle | Pending | Full instance backup remains the complete transfer mechanism. |
 | 51 | Automation editor | Pending | No rule engine implemented. |
@@ -82,7 +82,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 74 | Compensating undo | Pending | No mutation undo command implemented. |
 | 75 | Command palette | Implemented | Contextual actions, filtering, current permission checks and keyboard shortcut; `test_experience.js`. |
 | 76 | Monthly/weekly calendar | Implemented | Agenda/month/week, period navigation, localized dates, filters and card opening. |
-| 77 | Editable table | Pending | Existing table remains read-only. |
+| 77 | Editable table | Implemented | Explicit row Save for title, priority, due date and estimate; original If-Match, fresh permission checks, owner-isolated drafts, conflict/ambiguous-write recovery and guarded refresh. Actual renderer/handler/API-client tests; other properties use their existing editors. |
 | 78 | Personal draft center | Partial | Card drafts supported with owner isolation and server ACL check; review/comment/intake drafts remain in their editors. |
 | 79 | Offline snapshots | Pending | No authorized offline cache implemented. |
 | 80 | Browser-tab coordination | Implemented | Logout through BroadcastChannel/storage fallback, no credentials in messages, pending responses invalidated. |
@@ -103,7 +103,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 95 | Full restore verification | Partial | Disposable restore/check command implemented; real SQL/Mongo/NPM round trip remains unexecuted locally. |
 | 96 | Exact-image local vulnerability scans | Pending | No new scan executed; historical inventories are unchanged. |
 | 97 | Pin all Docker bases | Implemented | Debian/backend and Nginx/frontend OCI indexes pinned; database/proxy/toolchain pins retained. |
-| 98 | Full cloud suite in CI | Partial | Isolated orchestration added; candidate workflow/container execution remains unverified locally. |
+| 98 | Full cloud suite in CI | Implemented | CI at `5688602` passed the complete disposable cloud suite, migrations/outage, encrypted fixture recovery, image and five-service routing checks without skipped cloud tests. This is not evidence for later local changes. |
 | 99 | Browser end-to-end matrix | Pending | Node helper/interaction suites do not replace real browser E2E. |
 | 100 | Verifiable official distributions | Pending | No signed registry release, multiarch runtime matrix or release SBOM produced. |
 
@@ -118,7 +118,7 @@ make test-docs
 python3 scripts/benchmark.py --boards 5 --cards 100 --requests 1000 --concurrency 8
 ```
 
-`scripts/test-cloud-stack.py` and `scripts/restore-check.py` require Docker and use fresh isolated resources. They must not be represented as passing until executed. The [testing guide](TESTING.md) and [deployment guide](DEPLOYMENT.md) describe the supported boundaries and backup procedures.
+`scripts/test-cloud-stack.py` and `scripts/restore-check.py` require Docker and use fresh isolated resources. Results must identify the tested commit; passing earlier CI does not verify a later candidate. The [testing guide](TESTING.md) and [deployment guide](DEPLOYMENT.md) describe the supported boundaries and backup procedures.
 
 ## Local verification — 17 October 2026
 
@@ -129,4 +129,19 @@ python3 scripts/benchmark.py --boards 5 --cards 100 --requests 1000 --concurrenc
 - A local Gitleaks scan of 209 publishable source files reported zero findings; ignored environment files and private Git backups were not included.
 - Real PostgreSQL/MongoDB, container images, complete Docker recovery, fresh CVE scans, browser E2E and a complete WCAG/native-language review were not executed. These results were recorded before Git publication; no deployment or release was performed.
 
-Current ledger: **12 implemented, 15 partial, 73 pending**. The requested 100-item implementation remains incomplete.
+## Subsequent CI evidence — 17 October 2026
+
+[Run 39020804975](https://github.com/GiorgioOppo/OpenBoard/actions/runs/39020804975) at `56886022035c5f0a0b1c3229e012a1e6c8e32d44` completed successfully: documentation/secrets, macOS, Ubuntu and container jobs. It exercised real disposable PostgreSQL/MongoDB, migration/outage regressions, encrypted generated-fixture recovery, five-service startup and proxy/static routing. This closes the target-service verification gaps for IDs 1 and 98. The recovery fixture does not establish a complete maintenance capture or a functional restoration of an existing NPM installation; IDs 93–95 remain partial.
+
+## Collaborative search, typed filters, imports and table — 17 October 2026
+
+IDs 16, 17, 47, 48 and 77 are implemented on the development branch. Their contracts and conversion boundaries are documented in the [API reference](API.md), [field API](API_PIANIFICAZIONE.md) and [user guide](USER_GUIDE.md). No migration or schema version change is required; the backend remains API-only and conversion happens in the separate static frontend.
+
+- Native discovery with the external-storage drivers ran **311 tests: 285 passed, 26 optional integrations skipped**, normally (74.135 seconds) and with ASan/UBSan (98.646 seconds).
+- The new HTTP regressions cover current permissions, revoked access, live ancestry, archive selection, stable pagination, typed values, literal matching, conversion round trips and atomic rollback. Frontend checks cover escaping, account/panel/navigation races, mapping, UTF-8 rejection, optimistic versions and retained drafts.
+- All 13 frontend suites pass, including source/catalogue coverage in seven locales. Documentation links/fences, Actionlint and the NPM limiter tests pass.
+- Gitleaks scanned 228 publishable source files and reported zero findings; ignored private environment files and Git backups were excluded from the snapshot. This is not a new dependency vulnerability scan.
+- Local HTTP checks serve the new importer asset through the development frontend. Container/static-proxy tests are wired to check that asset on the next CI run; they remain skipped locally. Browser interaction tests use VM/DOM adapters, not a real-browser E2E matrix.
+- This feature block has local verification only; it has not been exercised against real PostgreSQL/MongoDB. The earlier CI evidence above applies only to `5688602`. No existing installation or credentials were used.
+
+Current ledger: **19 implemented, 13 partial, 68 pending**. The requested 100-item implementation remains incomplete.

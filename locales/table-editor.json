@@ -1,0 +1,130 @@
+{
+  "Il browser non può conservare la bozza sul dispositivo. I valori restano in memoria finché questa pagina rimane aperta.": [
+    "The browser cannot keep the draft on this device. The values remain in memory while this page stays open.",
+    "Le navigateur ne peut pas conserver le brouillon sur cet appareil. Les valeurs restent en mémoire tant que cette page reste ouverte.",
+    "El navegador no puede conservar el borrador en este dispositivo. Los valores permanecen en memoria mientras esta página siga abierta.",
+    "Der Browser kann den Entwurf auf diesem Gerät nicht speichern. Die Werte bleiben im Arbeitsspeicher, solange diese Seite geöffnet bleibt.",
+    "浏览器无法在此设备上保存草稿。只要此页面保持打开，输入的值就会保留在内存中。",
+    "ブラウザーでこの端末に下書きを保存できません。このページを開いている間は、値がメモリーに保持されます。"
+  ],
+  "Inserisci un numero intero di minuti da 0 a 100000.": [
+    "Enter a whole number of minutes from 0 to 100000.",
+    "Saisissez un nombre entier de minutes compris entre 0 et 100000.",
+    "Introduce un número entero de minutos entre 0 y 100000.",
+    "Gib eine ganze Anzahl von Minuten zwischen 0 und 100000 ein.",
+    "请输入 0 到 100000 之间的整数分钟数。",
+    "0 から 100000 までの整数で分数を入力してください。"
+  ],
+  "Inserisci un titolo da 1 a 300 caratteri.": [
+    "Enter a title with 1 to 300 characters.",
+    "Saisissez un titre de 1 à 300 caractères.",
+    "Introduce un título de entre 1 y 300 caracteres.",
+    "Gib einen Titel mit 1 bis 300 Zeichen ein.",
+    "请输入 1 到 300 个字符的标题。",
+    "1～300 文字のタイトルを入力してください。"
+  ],
+  "La riga è nascosta dai filtri o non è presente nei dati attuali. La bozza resta disponibile.": [
+    "The row is hidden by filters or missing from the current data. Your draft remains available.",
+    "La ligne est masquée par les filtres ou absente des données actuelles. Votre brouillon reste disponible.",
+    "La fila está oculta por los filtros o no aparece en los datos actuales. El borrador sigue disponible.",
+    "Die Zeile wird durch Filter ausgeblendet oder fehlt in den aktuellen Daten. Dein Entwurf bleibt verfügbar.",
+    "此行被筛选条件隐藏或不在当前数据中。草稿仍然保留。",
+    "この行はフィルターで非表示になっているか、現在のデータにありません。下書きは保持されています。"
+  ],
+  "La scheda non è disponibile in questa bacheca. La bozza è conservata.": [
+    "The card is not available on this board. Your draft has been kept.",
+    "La carte n’est pas disponible sur ce tableau. Votre brouillon est conservé.",
+    "La tarjeta no está disponible en este tablero. Se ha conservado el borrador.",
+    "Die Karte ist auf diesem Board nicht verfügbar. Dein Entwurf bleibt erhalten.",
+    "此看板上无法访问该卡片。草稿已保留。",
+    "このボードではカードを利用できません。下書きは保持されています。"
+  ],
+  "La versione sul server è cambiata. La bozza è conservata: confrontala prima di ricaricare.": [
+    "The server version has changed. Your draft has been kept: compare it before reloading.",
+    "La version sur le serveur a changé. Votre brouillon est conservé : comparez-le avant de recharger.",
+    "La versión del servidor ha cambiado. Se ha conservado el borrador: compáralo antes de volver a cargar.",
+    "Die Version auf dem Server hat sich geändert. Dein Entwurf bleibt erhalten: Vergleiche ihn vor dem Neuladen.",
+    "服务器上的版本已更改。草稿已保留，请比较后再重新加载。",
+    "サーバーのバージョンが変更されました。下書きは保持されています。再読み込みする前に内容を比較してください。"
+  ],
+  "L’esito del salvataggio è da verificare. Ricarica esplicitamente la versione corrente prima di salvare ancora.": [
+    "The save result needs to be checked. Explicitly reload the current version before saving again.",
+    "Le résultat de l’enregistrement doit être vérifié. Rechargez explicitement la version actuelle avant d’enregistrer à nouveau.",
+    "Hay que comprobar el resultado del guardado. Vuelve a cargar la versión actual antes de guardar de nuevo.",
+    "Das Ergebnis des Speicherns muss geprüft werden. Lade die aktuelle Version ausdrücklich neu, bevor du erneut speicherst.",
+    "需要确认保存结果。请先手动重新加载当前版本，然后再保存。",
+    "保存結果の確認が必要です。再度保存する前に、現在のバージョンを明示的に再読み込みしてください。"
+  ],
+  "Modifica riga": [
+    "Edit row",
+    "Modifier la ligne",
+    "Editar fila",
+    "Zeile bearbeiten",
+    "编辑行",
+    "行を編集"
+  ],
+  "Non hai più il permesso di modificare questa riga. La bozza è conservata.": [
+    "You no longer have permission to edit this row. Your draft has been kept.",
+    "Vous n’avez plus l’autorisation de modifier cette ligne. Votre brouillon est conservé.",
+    "Ya no tienes permiso para editar esta fila. Se ha conservado el borrador.",
+    "Du hast keine Berechtigung mehr, diese Zeile zu bearbeiten. Dein Entwurf bleibt erhalten.",
+    "你已无权编辑此行。草稿已保留。",
+    "この行を編集する権限がなくなりました。下書きは保持されています。"
+  ],
+  "Ricarica versione corrente": [
+    "Reload current version",
+    "Recharger la version actuelle",
+    "Volver a cargar la versión actual",
+    "Aktuelle Version neu laden",
+    "重新加载当前版本",
+    "現在のバージョンを再読み込み"
+  ],
+  "Ricaricare la versione corrente? I valori di questa bozza saranno sostituiti solo dopo una lettura riuscita.": [
+    "Reload the current version? The values in this draft will be replaced only after a successful read.",
+    "Recharger la version actuelle ? Les valeurs de ce brouillon seront remplacées uniquement après une lecture réussie.",
+    "¿Volver a cargar la versión actual? Los valores de este borrador solo se sustituirán cuando la lectura se complete correctamente.",
+    "Aktuelle Version neu laden? Die Werte dieses Entwurfs werden erst nach einem erfolgreichen Abruf ersetzt.",
+    "重新加载当前版本？只有成功读取后，才会替换此草稿中的值。",
+    "現在のバージョンを再読み込みしますか？読み込みが成功した場合のみ、この下書きの値を置き換えます。"
+  ],
+  "Riga salvata. Aggiorna la bacheca per vedere i dati più recenti.": [
+    "Row saved. Refresh the board to see the latest data.",
+    "Ligne enregistrée. Actualisez le tableau pour voir les dernières données.",
+    "Fila guardada. Actualiza el tablero para ver los datos más recientes.",
+    "Zeile gespeichert. Aktualisiere das Board, um die neuesten Daten zu sehen.",
+    "行已保存。请刷新看板以查看最新数据。",
+    "行を保存しました。最新のデータを表示するには、ボードを更新してください。"
+  ],
+  "Riprendi bozza": [
+    "Resume draft",
+    "Reprendre le brouillon",
+    "Continuar el borrador",
+    "Entwurf fortsetzen",
+    "继续编辑草稿",
+    "下書きを再開"
+  ],
+  "Seleziona una priorità valida.": [
+    "Select a valid priority.",
+    "Sélectionnez une priorité valide.",
+    "Selecciona una prioridad válida.",
+    "Wähle eine gültige Priorität aus.",
+    "请选择有效的优先级。",
+    "有効な優先度を選択してください。"
+  ],
+  "Solo Salva invia le modifiche. Annulla chiude l’editor e conserva la bozza su questo dispositivo.": [
+    "Only Save sends changes. Cancel closes the editor and keeps the draft on this device.",
+    "Seul Enregistrer envoie les modifications. Annuler ferme l’éditeur et conserve le brouillon sur cet appareil.",
+    "Solo Guardar envía los cambios. Cancelar cierra el editor y conserva el borrador en este dispositivo.",
+    "Nur Speichern sendet Änderungen. Abbrechen schließt den Editor und behält den Entwurf auf diesem Gerät.",
+    "只有“保存”才会提交更改。“取消”会关闭编辑器，并在此设备上保留草稿。",
+    "「保存」のみが変更を送信します。「キャンセル」は編集画面を閉じ、この端末に下書きを保持します。"
+  ],
+  "Un’altra scheda del browser ha aggiornato la bozza locale. I valori di questo editor restano in memoria.": [
+    "Another browser tab has updated the local draft. The values in this editor remain in memory.",
+    "Un autre onglet du navigateur a mis à jour le brouillon local. Les valeurs de cet éditeur restent en mémoire.",
+    "Otra pestaña del navegador ha actualizado el borrador local. Los valores de este editor se mantienen en memoria.",
+    "Ein anderer Browser-Tab hat den lokalen Entwurf aktualisiert. Die Werte dieses Editors bleiben im Arbeitsspeicher.",
+    "另一个浏览器标签页更新了本地草稿。此编辑器中的值仍保留在内存中。",
+    "別のブラウザータブでローカルの下書きが更新されました。この編集画面の値はメモリーに保持されています。"
+  ]
+}

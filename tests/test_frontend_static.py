@@ -59,7 +59,7 @@ class FrontendStatic(unittest.TestCase):
         for name, mime in [('app.js', 'javascript'), ('i18n.js', 'javascript'), ('locales.js', 'javascript'), ('planning.js', 'javascript'),
                            ('enterprise.js', 'javascript'), ('enterprise.css', 'text/css'),
                            ('workflows.js', 'javascript'), ('workflows.css', 'text/css'),
-                           ('productivity.js', 'javascript'), ('styles.css', 'text/css'),
+                           ('productivity.js', 'javascript'), ('importers.js', 'javascript'), ('styles.css', 'text/css'),
                            ('favicon.svg', 'image/svg+xml')]:
             with self.subTest(asset=name):
                 status, headers, body = self.request('/'+name)

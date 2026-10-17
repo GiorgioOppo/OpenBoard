@@ -1,0 +1,210 @@
+{
+  "CSV non valido: controlla virgolette, righe e separatore.": [
+    "Invalid CSV: check quotes, rows and delimiter.",
+    "CSV invalide : vérifiez les guillemets, les lignes et le séparateur.",
+    "CSV no válido: comprueba las comillas, las filas y el separador.",
+    "Ungültige CSV-Datei: Anführungszeichen, Zeilen und Trennzeichen prüfen.",
+    "CSV 无效：请检查引号、行和分隔符。",
+    "CSV が無効です。引用符、行、区切り文字を確認してください。"
+  ],
+  "Campi personalizzati, copertine, integrazioni e impostazioni Trello non vengono importati.": [
+    "Trello custom fields, covers, integrations and settings are not imported.",
+    "Les champs personnalisés, couvertures, intégrations et paramètres Trello ne sont pas importés.",
+    "No se importan los campos personalizados, las portadas, las integraciones ni la configuración de Trello.",
+    "Benutzerdefinierte Trello-Felder, Titelbilder, Integrationen und Einstellungen werden nicht importiert.",
+    "不导入 Trello 自定义字段、封面、集成和设置。",
+    "Trello のカスタムフィールド、カバー、連携、設定はインポートされません。"
+  ],
+  "Commenti, attività e cronologia Trello non vengono importati.": [
+    "Trello comments, activity and history are not imported.",
+    "Les commentaires, l’activité et l’historique Trello ne sont pas importés.",
+    "No se importan los comentarios, la actividad ni el historial de Trello.",
+    "Trello-Kommentare, Aktivitäten und Verlauf werden nicht importiert.",
+    "不导入 Trello 评论、活动和历史记录。",
+    "Trello のコメント、アクティビティ、履歴はインポートされません。"
+  ],
+  "Data importata non valida.": [
+    "Invalid imported date.",
+    "Date importée invalide.",
+    "Fecha importada no válida.",
+    "Ungültiges importiertes Datum.",
+    "导入的日期无效。",
+    "インポートする日付が無効です。"
+  ],
+  "Dati Trello non validi o esportazione incompleta.": [
+    "Invalid Trello data or incomplete export.",
+    "Données Trello invalides ou export incomplet.",
+    "Datos de Trello no válidos o exportación incompleta.",
+    "Ungültige Trello-Daten oder unvollständiger Export.",
+    "Trello 数据无效或导出不完整。",
+    "Trello データが無効、またはエクスポートが不完全です。"
+  ],
+  "Gli allegati Trello non vengono scaricati né importati.": [
+    "Trello attachments are neither downloaded nor imported.",
+    "Les pièces jointes Trello ne sont ni téléchargées ni importées.",
+    "Los archivos adjuntos de Trello no se descargan ni se importan.",
+    "Trello-Anhänge werden weder heruntergeladen noch importiert.",
+    "不下载或导入 Trello 附件。",
+    "Trello の添付ファイルはダウンロードもインポートもされません。"
+  ],
+  "I nomi dei membri sono testo descrittivo: account, ruoli e assegnazioni non vengono creati.": [
+    "Member names are descriptive text: accounts, roles and assignments are not created.",
+    "Les noms des membres sont du texte descriptif : aucun compte, rôle ou affectation n’est créé.",
+    "Los nombres de los miembros son texto descriptivo: no se crean cuentas, roles ni asignaciones.",
+    "Mitgliedsnamen sind beschreibender Text; Konten, Rollen und Zuweisungen werden nicht erstellt.",
+    "成员姓名作为描述文本保留，不创建账户、角色或分配关系。",
+    "メンバー名は説明用のテキストです。アカウント、役割、担当割り当ては作成されません。"
+  ],
+  "I responsabili CSV sono testo descrittivo e non creano assegnazioni o account.": [
+    "CSV assignees are descriptive text and do not create assignments or accounts.",
+    "Les responsables CSV sont du texte descriptif et ne créent aucune affectation ni aucun compte.",
+    "Los responsables del CSV son texto descriptivo y no crean asignaciones ni cuentas.",
+    "CSV-Verantwortliche sind beschreibender Text und erstellen keine Zuweisungen oder Konten.",
+    "CSV 负责人作为描述文本保留，不创建分配关系或账户。",
+    "CSV の担当者は説明用のテキストであり、担当割り当てやアカウントは作成されません。"
+  ],
+  "Identificativi Trello duplicati o riferimenti mancanti.": [
+    "Duplicate Trello IDs or missing references.",
+    "Identifiants Trello en double ou références manquantes.",
+    "Identificadores de Trello duplicados o referencias ausentes.",
+    "Doppelte Trello-IDs oder fehlende Verweise.",
+    "Trello 标识符重复或引用缺失。",
+    "Trello ID の重複、または参照の欠落があります。"
+  ],
+  "Il CSV non contiene schede da importare.": [
+    "The CSV contains no cards to import.",
+    "Le CSV ne contient aucune carte à importer.",
+    "El CSV no contiene tarjetas para importar.",
+    "Die CSV-Datei enthält keine zu importierenden Karten.",
+    "CSV 中没有可导入的卡片。",
+    "CSV にインポートするカードがありません。"
+  ],
+  "Il CSV viene importato come testo: le formule non vengono eseguite.": [
+    "CSV is imported as text: formulas are not executed.",
+    "Le CSV est importé comme texte : les formules ne sont pas exécutées.",
+    "El CSV se importa como texto: las fórmulas no se ejecutan.",
+    "CSV wird als Text importiert; Formeln werden nicht ausgeführt.",
+    "CSV 作为文本导入，不执行公式。",
+    "CSV はテキストとしてインポートされ、数式は実行されません。"
+  ],
+  "Il file contiene caratteri Unicode non validi.": [
+    "The file contains invalid Unicode characters.",
+    "Le fichier contient des caractères Unicode invalides.",
+    "El archivo contiene caracteres Unicode no válidos.",
+    "Die Datei enthält ungültige Unicode-Zeichen.",
+    "文件包含无效的 Unicode 字符。",
+    "ファイルに無効な Unicode 文字が含まれています。"
+  ],
+  "Il file supera il limite di 2 MiB.": [
+    "The file exceeds the 2 MiB limit.",
+    "Le fichier dépasse la limite de 2 Mio.",
+    "El archivo supera el límite de 2 MiB.",
+    "Die Datei überschreitet die Grenze von 2 MiB.",
+    "文件超过 2 MiB 限制。",
+    "ファイルが 2 MiB の上限を超えています。"
+  ],
+  "Importate": [
+    "Imported",
+    "Importées",
+    "Importadas",
+    "Importiert",
+    "已导入",
+    "インポート済み"
+  ],
+  "Importazione CSV": [
+    "CSV import",
+    "Import CSV",
+    "Importación CSV",
+    "CSV-Import",
+    "CSV 导入",
+    "CSV インポート"
+  ],
+  "La checklist richiede al massimo 100 elementi per scheda.": [
+    "A checklist allows at most 100 items per card.",
+    "Une checklist autorise au maximum 100 éléments par carte.",
+    "Una lista de verificación permite un máximo de 100 elementos por tarjeta.",
+    "Eine Checkliste erlaubt höchstens 100 Einträge pro Karte.",
+    "每张卡片的检查清单最多允许 100 项。",
+    "チェックリストはカードごとに最大 100 項目です。"
+  ],
+  "La conversione richiede al massimo 100 liste e 10000 schede.": [
+    "Conversion allows at most 100 lists and 10000 cards.",
+    "La conversion autorise au maximum 100 listes et 10000 cartes.",
+    "La conversión permite un máximo de 100 listas y 10000 tarjetas.",
+    "Die Konvertierung erlaubt höchstens 100 Listen und 10000 Karten.",
+    "转换最多允许 100 个列表和 10000 张卡片。",
+    "変換できるのは最大 100 個のリストと 10000 枚のカードです。"
+  ],
+  "La data Trello conserva il giorno UTC; orario e promemoria non vengono importati.": [
+    "Trello dates retain the UTC day; times and reminders are not imported.",
+    "Les dates Trello conservent le jour UTC ; les heures et les rappels ne sont pas importés.",
+    "Las fechas de Trello conservan el día UTC; no se importan las horas ni los recordatorios.",
+    "Trello-Daten behalten den UTC-Kalendertag; Uhrzeiten und Erinnerungen werden nicht importiert.",
+    "Trello 日期保留 UTC 日期，不导入时间和提醒。",
+    "Trello の日付は UTC の日付を保持します。時刻とリマインダーはインポートされません。"
+  ],
+  "Le checklist Trello sono unite in una checklist; i nomi sono conservati nel testo.": [
+    "Trello checklists are merged into one checklist; their names are kept in the text.",
+    "Les checklists Trello sont fusionnées en une seule ; leurs noms sont conservés dans le texte.",
+    "Las listas de verificación de Trello se combinan en una; sus nombres se conservan en el texto.",
+    "Trello-Checklisten werden zusammengeführt; ihre Namen bleiben im Text erhalten.",
+    "Trello 检查清单将合并为一个清单，名称保留在文本中。",
+    "Trello のチェックリストは一つに統合され、名前はテキスト内に保持されます。"
+  ],
+  "Le colonne CSV non mappate non vengono importate.": [
+    "Unmapped CSV columns are not imported.",
+    "Les colonnes CSV sans correspondance ne sont pas importées.",
+    "No se importan las columnas CSV sin asignar.",
+    "Nicht zugeordnete CSV-Spalten werden nicht importiert.",
+    "不导入未映射的 CSV 列。",
+    "対応付けのない CSV 列はインポートされません。"
+  ],
+  "Le etichette Trello sono conservate nella descrizione; colori e filtri delle etichette non vengono ricreati.": [
+    "Trello labels are kept in the description; label colors and filters are not recreated.",
+    "Les étiquettes Trello sont conservées dans la description ; leurs couleurs et filtres ne sont pas recréés.",
+    "Las etiquetas de Trello se conservan en la descripción; no se recrean sus colores ni filtros.",
+    "Trello-Labels bleiben in der Beschreibung erhalten; Farben und Filter werden nicht neu erstellt.",
+    "Trello 标签保留在描述中，不重新创建标签颜色和筛选器。",
+    "Trello のラベルは説明内に保持されます。ラベルの色とフィルターは再作成されません。"
+  ],
+  "Le intestazioni CSV devono essere non vuote e univoche.": [
+    "CSV headers must be nonempty and unique.",
+    "Les en-têtes CSV doivent être non vides et uniques.",
+    "Los encabezados CSV no pueden estar vacíos ni repetidos.",
+    "CSV-Spaltenüberschriften müssen ausgefüllt und eindeutig sein.",
+    "CSV 表头不得为空或重复。",
+    "CSV の見出しは空欄や重複を含めないでください。"
+  ],
+  "Le liste Trello archiviate restano presenti; le loro schede sono importate come archiviate.": [
+    "Archived Trello lists remain present; their cards are imported as archived cards.",
+    "Les listes Trello archivées restent présentes ; leurs cartes sont importées comme cartes archivées.",
+    "Las listas archivadas de Trello siguen presentes; sus tarjetas se importan como archivadas.",
+    "Archivierte Trello-Listen bleiben vorhanden; ihre Karten werden als archivierte Karten importiert.",
+    "已归档的 Trello 列表仍会保留，其中的卡片将作为已归档卡片导入。",
+    "アーカイブ済み Trello リストは保持され、そのカードはアーカイブ済みとしてインポートされます。"
+  ],
+  "Mappatura CSV non valida: seleziona il titolo e indici distinti.": [
+    "Invalid CSV mapping: select a title column and distinct indices.",
+    "Correspondance CSV invalide : sélectionnez un titre et des indices distincts.",
+    "Asignación CSV no válida: selecciona el título e índices distintos.",
+    "Ungültige CSV-Zuordnung: Titelspalte und unterschiedliche Indizes wählen.",
+    "CSV 映射无效：请选择标题列和不同的列索引。",
+    "CSV の対応付けが無効です。タイトル列と重複しない列番号を選択してください。"
+  ],
+  "Un campo importato non è valido o supera i limiti consentiti.": [
+    "An imported field is invalid or exceeds the allowed limits.",
+    "Un champ importé est invalide ou dépasse les limites autorisées.",
+    "Un campo importado no es válido o supera los límites permitidos.",
+    "Ein importiertes Feld ist ungültig oder überschreitet die zulässigen Grenzen.",
+    "导入字段无效或超出允许的限制。",
+    "インポートするフィールドが無効、または許容範囲を超えています。"
+  ],
+  "Valore CSV non valido per priorità o stima.": [
+    "Invalid CSV priority or estimate value.",
+    "Valeur CSV de priorité ou d’estimation invalide.",
+    "Valor CSV de prioridad o estimación no válido.",
+    "Ungültiger CSV-Wert für Priorität oder Schätzung.",
+    "CSV 中的优先级或估算值无效。",
+    "CSV の優先度または見積もり値が無効です。"
+  ]
+}

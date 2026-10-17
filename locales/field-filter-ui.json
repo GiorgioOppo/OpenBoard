@@ -1,0 +1,122 @@
+{
+  "Ricerca libera": [
+    "Free-text search",
+    "Recherche libre",
+    "Búsqueda libre",
+    "Freitextsuche",
+    "自由文本搜索",
+    "自由テキスト検索"
+  ],
+  "Uguale a": [
+    "Equals",
+    "Égal à",
+    "Igual a",
+    "Ist gleich",
+    "等于",
+    "等しい"
+  ],
+  "Diverso da": [
+    "Does not equal",
+    "Différent de",
+    "Distinto de",
+    "Ist ungleich",
+    "不等于",
+    "等しくない"
+  ],
+  "Contiene esattamente": [
+    "Contains exact text",
+    "Contient le texte exact",
+    "Contiene el texto exacto",
+    "Enthält genauen Text",
+    "包含精确文本",
+    "指定した文字列を含む"
+  ],
+  "Maggiore di": [
+    "Greater than",
+    "Supérieur à",
+    "Mayor que",
+    "Größer als",
+    "大于",
+    "より大きい"
+  ],
+  "Maggiore o uguale a": [
+    "Greater than or equal to",
+    "Supérieur ou égal à",
+    "Mayor o igual que",
+    "Größer oder gleich",
+    "大于或等于",
+    "以上"
+  ],
+  "Minore di": [
+    "Less than",
+    "Inférieur à",
+    "Menor que",
+    "Kleiner als",
+    "小于",
+    "より小さい"
+  ],
+  "Minore o uguale a": [
+    "Less than or equal to",
+    "Inférieur ou égal à",
+    "Menor o igual que",
+    "Kleiner oder gleich",
+    "小于或等于",
+    "以下"
+  ],
+  "Impostato": [
+    "Is set",
+    "Est défini",
+    "Está establecido",
+    "Ist gesetzt",
+    "已设置",
+    "設定済み"
+  ],
+  "Operatore": [
+    "Operator",
+    "Opérateur",
+    "Operador",
+    "Operator",
+    "运算符",
+    "演算子"
+  ],
+  "Scegli un valore": [
+    "Choose a value",
+    "Choisir une valeur",
+    "Elige un valor",
+    "Wert auswählen",
+    "选择一个值",
+    "値を選択"
+  ],
+  "Campo non disponibile": [
+    "Field unavailable",
+    "Champ indisponible",
+    "Campo no disponible",
+    "Feld nicht verfügbar",
+    "字段不可用",
+    "フィールドを利用できません"
+  ],
+  "Il campo del filtro non è più disponibile.": [
+    "The filter field is no longer available.",
+    "Le champ du filtre n’est plus disponible.",
+    "El campo del filtro ya no está disponible.",
+    "Das Filterfeld ist nicht mehr verfügbar.",
+    "筛选字段已不可用。",
+    "フィルターのフィールドは利用できなくなりました。"
+  ],
+  "Il filtro richiede un valore valido per il tipo di campo.": [
+    "The filter requires a valid value for the field type.",
+    "Le filtre nécessite une valeur valide pour le type de champ.",
+    "El filtro requiere un valor válido para el tipo de campo.",
+    "Der Filter erfordert einen gültigen Wert für den Feldtyp.",
+    "筛选条件需要符合字段类型的有效值。",
+    "フィルターにはフィールドの型に合った有効な値が必要です。"
+  ],
+  "Il filtro distingue maiuscole e minuscole.": [
+    "The filter is case-sensitive.",
+    "Le filtre distingue les majuscules et les minuscules.",
+    "El filtro distingue mayúsculas y minúsculas.",
+    "Der Filter unterscheidet Groß- und Kleinschreibung.",
+    "筛选条件区分大小写。",
+    "フィルターでは大文字と小文字を区別します。"
+  ]
+}

@@ -10,6 +10,7 @@
 #include "sprints.h"
 #include "teamwork.h"
 #include "storage.h"
+#include "search.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -2427,39 +2428,192 @@ static Response custom_values_api(Request *r, int64_t id, bool get) {
     record_event(r, resource_board("cards", id, false), "fields_updated", "cards", id, "");
     return mutation_success(200, "cards", id);
 }
+/* A filter is a flat, typed condition. Every SQL value is bound; operators
+ * only select fixed branches below, never SQL text or a JSON path. */
+static bool valid_field_filter(int64_t board, const char *filter) {
+    if (!valid_object(filter))
+        return false;
+    char *key = NULL, *op = NULL;
+    bool valid = json_string(filter, "key", &key, 40) == 1 && valid_plan_key(key) &&
+                 json_string(filter, "op", &op, 12) == 1;
+    const char *const operators[] = {"eq", "ne", "contains", "gt", "gte", "lt", "lte",
+                                     "is_set", "is_unset"};
+    if (!valid || !one_of(op, operators, COUNT_OF(operators))) {
+        ob_free(key);
+        ob_free(op);
+        return false;
+    }
+    sqlite3_stmt *s = prepare("SELECT NOT EXISTS(SELECT 1 FROM json_each(?1) WHERE "
+                              "key NOT IN('key','op','value')),json_type(?1,'$.value'),"
+                              "json_extract(?1,'$.value'),f.type,f.options FROM custom_fields f "
+                              "WHERE f.board_id=?2 AND f.key=?3 AND f.deleted_at IS NULL");
+    bind_text(s, 1, filter);
+    sqlite3_bind_int64(s, 2, board);
+    bind_text(s, 3, key);
+    valid = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
+    if (valid) {
+        const char *type = (const char *)sqlite3_column_text(s, 1),
+                   *value = (const char *)sqlite3_column_text(s, 2),
+                   *expected = (const char *)sqlite3_column_text(s, 3);
+        bool presence = !strcmp(op, "is_set") || !strcmp(op, "is_unset"),
+             equality = !strcmp(op, "eq") || !strcmp(op, "ne"),
+             contains = !strcmp(op, "contains");
+        if (presence)
+            valid = type == NULL;
+        else if (!type)
+            valid = false;
+        else if (!strcmp(type, "null"))
+            valid = equality;
+        else if (contains)
+            valid = (!strcmp(expected, "text") || !strcmp(expected, "select")) &&
+                    !strcmp(type, "text") && custom_text_valid(value, sqlite3_column_bytes(s, 2));
+        else if (!strcmp(expected, "number"))
+            valid = (!strcmp(type, "integer") || !strcmp(type, "real")) &&
+                    sqlite3_column_double(s, 2) >= -1e12 && sqlite3_column_double(s, 2) <= 1e12;
+        else if (!strcmp(expected, "date"))
+            valid = !strcmp(type, "text") && value && sqlite3_column_bytes(s, 2) == 10 &&
+                    strlen(value) == 10 && valid_date(value);
+        else if (!equality)
+            valid = false;
+        else if (!strcmp(expected, "text"))
+            valid = !strcmp(type, "text") && custom_text_valid(value, sqlite3_column_bytes(s, 2));
+        else if (!strcmp(expected, "boolean"))
+            valid = !strcmp(type, "true") || !strcmp(type, "false");
+        else {
+            valid = !strcmp(type, "text") && value &&
+                    strlen(value) == (size_t)sqlite3_column_bytes(s, 2) && valid_utf8(value, strlen(value));
+            if (valid) {
+                sqlite3_stmt *option = prepare("SELECT 1 FROM json_each(?1) WHERE type='text' AND value=?2");
+                bind_text(option, 1, (const char *)sqlite3_column_text(s, 4));
+                bind_text(option, 2, value);
+                valid = sqlite3_step(option) == SQLITE_ROW;
+                sqlite3_finalize(option);
+            }
+        }
+    }
+    sqlite3_finalize(s);
+    ob_free(key);
+    ob_free(op);
+    return valid;
+}
 static Response field_search(Request *r, int64_t board) {
     if (!accessible(r, "boards", board, false, false))
         return error_response(404, "Bacheca non trovata.");
-    char key[164], value[8192];
-    if (!query_value(r, "key", key, sizeof key) || !valid_plan_key(key) ||
-        !query_value(r, "value", value, sizeof value))
-        return error_response(400, "Chiave e valore JSON richiesti.");
-    sqlite3_stmt *s = prepare("SELECT json_valid(?1)");
-    bind_text(s, 1, value);
+    char key[164], value[8192], op[32], filters_text[2048], match[32],
+         limit_text[32], cursor_text[32];
+    int has_key = ob_query(r, "key", key, sizeof key),
+        has_value = ob_query(r, "value", value, sizeof value),
+        has_op = ob_query(r, "op", op, sizeof op),
+        has_filters = ob_query(r, "filters", filters_text, sizeof filters_text),
+        has_match = ob_query(r, "match", match, sizeof match),
+        has_limit = ob_query(r, "limit", limit_text, sizeof limit_text),
+        has_cursor = ob_query(r, "before", cursor_text, sizeof cursor_text);
+    int64_t limit = has_limit == 1 ? parse_id(limit_text) : 200,
+            before = has_cursor == 1 ? parse_id(cursor_text) : 0;
+    if (has_limit < 0 || has_cursor < 0 || limit < 1 || limit > 200 ||
+        (has_cursor == 1 && before < 1))
+        return error_response(400, "Paginazione non valida: limit 1–200 e before positivo.");
+    if (has_key < 0 || has_value < 0 || has_op < 0 || has_filters < 0 || has_match < 0 ||
+        (has_match && strcmp(match, "all") && strcmp(match, "any")) ||
+        (has_filters && (has_key || has_value || has_op)))
+        return error_response(400, "Filtri avanzati non validi.");
+    sqlite3_stmt *s = NULL;
+    char *filters = NULL;
+    if (has_filters) {
+        s = prepare("SELECT json_valid(?1)");
+        bind_text(s, 1, filters_text);
+        bool valid = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
+        sqlite3_finalize(s);
+        if (!valid)
+            return error_response(400, "Filtri avanzati non validi.");
+        filters = copy_string(filters_text);
+    } else {
+        if (!has_key || !valid_plan_key(key))
+            return error_response(400, "Chiave e valore JSON richiesti.");
+        if (!has_op)
+            strcpy(op, "eq");
+        bool presence = !strcmp(op, "is_set") || !strcmp(op, "is_unset");
+        if ((presence && has_value) || (!presence && !has_value))
+            return error_response(400, "Filtri avanzati non validi.");
+        s = prepare("SELECT json_valid(?1)");
+        bind_text(s, 1, has_value ? value : "null");
+        bool valid = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
+        sqlite3_finalize(s);
+        if (!valid)
+            return error_response(400, "Valore JSON non valido.");
+        s = prepare(presence ? "SELECT json_array(json_object('key',?1,'op',?2))"
+                             : "SELECT json_array(json_object('key',?1,'op',?2,'value',json(?3)))");
+        bind_text(s, 1, key);
+        bind_text(s, 2, op);
+        if (!presence)
+            bind_text(s, 3, value);
+        if (sqlite3_step(s) != SQLITE_ROW)
+            db_die("Filtri non disponibili");
+        filters = copy_string((const char *)sqlite3_column_text(s, 0));
+        sqlite3_finalize(s);
+    }
+    s = prepare("SELECT json_type(?1)='array' AND json_array_length(?1) BETWEEN 1 AND 10 "
+                "AND NOT EXISTS(SELECT 1 FROM json_each(?1) WHERE type<>'object')");
+    bind_text(s, 1, filters);
     bool valid = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
     sqlite3_finalize(s);
-    if (!valid)
-        return error_response(400, "Valore JSON non valido.");
-    s = prepare("SELECT json_object(?1,json(?2))");
-    bind_text(s, 1, key);
-    bind_text(s, 2, value);
-    sqlite3_step(s);
-    char *check = copy_string((const char *)sqlite3_column_text(s, 0));
-    sqlite3_finalize(s);
-    valid = valid_custom_values(board, check);
-    ob_free(check);
-    if (!valid)
-        return error_response(400, "Campo o valore non valido.");
-    s = prepare("SELECT json_object('cards',json((SELECT "
-                "json_group_array(json(k.summary)) FROM ob_card_objects k JOIN columns c "
-                "ON c.id=k.column_id WHERE c.board_id=?1 AND c.deleted_at IS NULL AND "
-                "k.deleted_at IS NULL AND k.archived=0 AND EXISTS(SELECT 1 FROM "
-                "json_each(k.custom_values) j WHERE j.key=?2 AND (j.type=json_type(?3) "
-                "OR(j.type IN('integer','real') AND json_type(?3) IN('integer','real'))) "
-                "AND j.value IS json_extract(?3,'$')))))");
+    if (valid) {
+        s = prepare("SELECT value FROM json_each(?1)");
+        bind_text(s, 1, filters);
+        int rc;
+        while ((rc = sqlite3_step(s)) == SQLITE_ROW) {
+            if (!valid_field_filter(board, (const char *)sqlite3_column_text(s, 0))) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid && rc != SQLITE_DONE)
+            db_die("Filtri non disponibili");
+        sqlite3_finalize(s);
+    }
+    if (!valid) {
+        ob_free(filters);
+        return error_response(400, "Filtri avanzati non validi.");
+    }
+    s = prepare("WITH filters AS(SELECT json_extract(value,'$.key') field_key,"
+                "json_extract(value,'$.op') op,json_type(value,'$.value') target_type,"
+                "json_extract(value,'$.value') target_value FROM json_each(?2)),"
+                "matched AS(SELECT k.id,k.summary FROM ob_card_objects k JOIN columns c ON "
+                "c.id=k.column_id JOIN boards b ON b.id=c.board_id WHERE b.id=?1 AND "
+                "b.deleted_at IS NULL AND c.deleted_at IS NULL AND k.deleted_at IS NULL "
+                "AND (ob_archived() OR(k.archived=0 AND b.archived=0)) AND "
+                "(?5=0 OR k.id<?5) AND (SELECT CASE WHEN ?3 THEN max(hit) ELSE min(hit) END "
+                "FROM(SELECT coalesce(CASE f.op "
+                "WHEN 'is_set' THEN j.key IS NOT NULL AND j.type<>'null' "
+                "WHEN 'is_unset' THEN j.key IS NULL OR j.type='null' "
+                "WHEN 'eq' THEN j.key IS NOT NULL AND (j.type=f.target_type OR "
+                "(j.type IN('integer','real') AND f.target_type IN('integer','real'))) "
+                "AND j.value IS f.target_value "
+                "WHEN 'ne' THEN j.key IS NOT NULL AND j.type<>'null' AND "
+                "(f.target_type='null' OR j.type=f.target_type OR(j.type IN('integer','real') "
+                "AND f.target_type IN('integer','real'))) AND NOT "
+                "((j.type=f.target_type OR(j.type IN('integer','real') AND "
+                "f.target_type IN('integer','real'))) AND j.value IS f.target_value) "
+                "WHEN 'contains' THEN j.type='text' AND instr(j.value,f.target_value)>0 "
+                "WHEN 'gt' THEN (j.type=f.target_type OR(j.type IN('integer','real') AND "
+                "f.target_type IN('integer','real'))) AND j.value>f.target_value "
+                "WHEN 'gte' THEN (j.type=f.target_type OR(j.type IN('integer','real') AND "
+                "f.target_type IN('integer','real'))) AND j.value>=f.target_value "
+                "WHEN 'lt' THEN (j.type=f.target_type OR(j.type IN('integer','real') AND "
+                "f.target_type IN('integer','real'))) AND j.value<f.target_value "
+                "WHEN 'lte' THEN (j.type=f.target_type OR(j.type IN('integer','real') AND "
+                "f.target_type IN('integer','real'))) AND j.value<=f.target_value ELSE 0 END,0) hit "
+                "FROM filters f LEFT JOIN json_each(k.custom_values) j ON j.key=f.field_key)) "
+                "ORDER BY k.id DESC LIMIT ?4+1),page AS(SELECT * FROM matched ORDER BY id DESC "
+                "LIMIT ?4) SELECT json_object('cards',json((SELECT json_group_array(json(summary)) "
+                "FROM page)),'next_cursor',CASE WHEN (SELECT count(*) FROM matched)>?4 THEN "
+                "(SELECT min(id) FROM page) ELSE NULL END)");
     sqlite3_bind_int64(s, 1, board);
-    bind_text(s, 2, key);
-    bind_text(s, 3, value);
+    bind_text(s, 2, filters);
+    sqlite3_bind_int(s, 3, has_match && !strcmp(match, "any"));
+    sqlite3_bind_int64(s, 4, limit);
+    sqlite3_bind_int64(s, 5, before);
+    ob_free(filters);
     Response out = sqlite3_step(s) == SQLITE_ROW
                        ? json_response(200, (const char *)sqlite3_column_text(s, 0))
                        : error_response(503, "Ricerca campi non disponibile.");
@@ -3276,6 +3430,8 @@ static Response route_domain(Request *r) {
         return get ? my_tasks(r) : error_response(405, "Metodo non consentito.");
     if (!strcmp(r->path, "/api/trash"))
         return get ? trash_api() : error_response(405, "Metodo non consentito.");
+    if (!strcmp(r->path, "/api/search/content"))
+        return get ? ob_content_search(r) : error_response(405, "Metodo non consentito.");
     if (!strcmp(r->path, "/api/search"))
         return get ? search_api(r) : error_response(405, "Metodo non consentito.");
     if (!strcmp(r->path, "/api/import"))

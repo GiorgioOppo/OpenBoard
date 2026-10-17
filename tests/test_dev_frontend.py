@@ -94,7 +94,7 @@ class DevelopmentFrontend(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(body, (ROOT/'web/index.html').read_bytes())
         self.assertIn(('X-Frame-Options', 'DENY'), headers)
-        for path in ['/app.js', '/i18n.js', '/locales.js', '/planning.js', '/productivity.js', '/styles.css', '/enterprise.js', '/enterprise.css', '/workflows.js', '/workflows.css']:
+        for path in ['/app.js', '/i18n.js', '/locales.js', '/planning.js', '/productivity.js', '/importers.js', '/styles.css', '/enterprise.js', '/enterprise.css', '/workflows.js', '/workflows.css']:
             self.assertEqual(self.request(path)[0], 200)
         for path in ['/missing.js', '/.env', '/src/server.c', '/data/cache.db', '/../Dockerfile']:
             self.assertEqual(self.request(path)[0], 404)

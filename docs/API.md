@@ -2,6 +2,8 @@
 
 This reference describes the core API supported by the current release. Additional endpoints are documented in [productivity](API_PRODUTTIVITA.md), [collaboration and accounts](API_COLLABORAZIONE.md), [custom fields and milestones](API_PIANIFICAZIONE.md), [time tracking and conversations](API_TEAMWORK.md), [reviews and approvals](API_REVISIONI.md), [portfolio and personal reports](API_PORTFOLIO.md), [sprints and capacity](API_SPRINT.md), and [forms and requests](API_RICHIESTE.md). Configuration, separate databases, and metrics are covered in the [deployment guide](DEPLOYMENT.md).
 
+Sections marked **unreleased** describe the development branch, not the immutable published `v0.6.1` source snapshot.
+
 The API uses the same origin as the interface: by default, `http://127.0.0.1:8090` in development or `http://openboard.localhost` with Compose. The backend serves APIs only and returns `404` for HTML, CSS, JavaScript, and every non-API path. The native server listens on loopback; the container explicitly sets `--bind 0.0.0.0` on a private network. `--public-url https://board.example.com` configures the public host and origin used behind a reverse proxy. Nginx Proxy Manager terminates TLS.
 
 ## HTTP conventions
@@ -216,6 +218,7 @@ The client must read `/api/cards/:id` to open and edit full detail.
 | DELETE | `/api/comments/:id` | Author or global administrator, with board write access; local users without accounts may delete local comments |
 | GET | `/api/boards/:id/activity` | `{"events":[{"id":1,"action":"updated","entity_type":"cards","entity_id":123,"title":"…","actor":"Alex","actor_id":1,"created_at":"…"}]}` |
 | GET | `/api/search?q=text` | `{"cards":[{"id":123,"title":"…","board_id":1,"board_name":"…","column_title":"…","priority":"normal","due_date":""}]}` |
+| GET | `/api/search/content?q=text` | Unreleased collaborative search: `{items:[...],next_cursor}` with typed result keys; see below |
 | GET | `/api/boards/:id/stats` | Statistics for non-deleted, unarchived cards in active columns |
 
 In explicit `--no-auth` mode, comments have `author_id: 0` and `author: "Locale"`. The body is text; the server does not interpret it as HTML. The canonical local-author value remains language-independent.
@@ -226,7 +229,33 @@ Search requires nonempty `q` of up to 200 Unicode characters, encoded in the que
 
 The unreleased paginated form is `GET /api/search?q=text&limit=30&before=123`. `limit` is 1–200; omitting it when `before` is supplied uses 30. `before` is a positive card ID, excluded from the next page. Supplying either option selects descending immutable-ID ordering and returns `{cards,next_cursor}`. `next_cursor` is the last returned ID when more authorized matches exist, otherwise `null`. Keep query/archive filters unchanged between pages. ACLs apply before pagination and are rechecked on every page. Calls without either pagination option retain the legacy ordering and response shape. Invalid or duplicate pagination parameters return `400`.
 
-Example statistics:
+### Collaborative content search (unreleased)
+
+`GET /api/search/content?q=launch&kind=all&limit=1` searches card titles, descriptions and descriptive assignee text; comment and reply bodies; request titles and scalar answer values; request notes; and form names/descriptions. It does not search JSON answer keys, attachment contents, checklist items or custom fields. Use [typed field search](API_PIANIFICAZIONE.md#typed-field-search-unreleased) for custom values.
+
+```json
+{
+  "items": [{
+    "kind": "comment", "id": 42, "key": "1:42",
+    "board_id": 7, "board_name": "Website launch", "title": "Homepage copy",
+    "snippet": "Ready for launch review", "context": "In progress",
+    "card_id": 11, "request_id": null, "form_id": null
+  }],
+  "next_cursor": "1:42"
+}
+```
+
+`q` must contain non-whitespace text and at most 200 Unicode characters. `kind` is `all` (default), `card`, `comment`, `request`, `request_note` or `form`. `limit` defaults to 30 and accepts 1–200. `include_archived=1` includes archived boards and cards; `0` or omission excludes them. Invalid or duplicate supported parameters return `400`; unsupported methods return `405`.
+
+Each item has a plain-text `snippet` of at most 240 characters. The title describes the card, request or form containing the match. `context` is the list title for cards/comments, the form name for requests/notes, or an empty string for forms. Nullable navigation IDs identify the containing resource. Replies use the `comment` kind.
+
+Ordering is fixed by kind rank (`card=0`, `comment=1`, `request=2`, `request_note=3`, `form=4`), then descending immutable ID within each kind; it is not relevance or update-time ordering. Numeric IDs can overlap between kinds: use the full `key` to identify a result. Pass `next_cursor` unchanged as the URL-encoded `cursor` on the next request, keeping query, kind and archive filters unchanged. The cursor has the form `rank:positive-id`; it is `null` when there are no further matches. New insertions do not shift previously traversed positions, but results are not a frozen snapshot and can disappear after edits or access changes.
+
+Current board permissions and non-deleted ancestry apply before the page limit and on every page. Observers can search content they may read. Explicit account-free local mode searches cards/comments but excludes forms, requests and request notes, which require an account. Substring matching uses SQLite `lower()` with its default ASCII case conversion; this is neither full-text indexing nor complete Unicode linguistic search. Responses use `Cache-Control: no-store`, and snippets must be rendered as text rather than HTML.
+
+### Board statistics
+
+Example response from `/api/boards/:id/stats`:
 
 ```json
 {
@@ -340,7 +369,17 @@ The export contains non-deleted columns and full detail for their non-deleted ca
 
 Import always creates a new board; it does not update or replace the source. It generates new IDs, timestamps, and revisions, and rebuilds ordering from arrays, ignoring old `position` and `column_id` values. It preserves supported functional fields, including archive state, completion, checklist, estimates, labels, and WIP limits. The importer applies WIP limits after loading cards, allowing a board already above its limit to be restored without losing work. The exported favorite reflects the requesting user and is applied to the new owner.
 
-The operation is atomic: if any column or card is invalid, no part of the new board is retained. Success returns `201 {"ok":true,"id":…, "version":…}`. Direct import of Trello JSON is not implemented.
+The operation is atomic: if any column or card is invalid, no part of the new board is retained. Success returns `201 {"ok":true,"id":…, "version":…}`. The endpoint accepts OpenBoard JSON only; it does not accept raw Trello exports or CSV.
+
+### Browser conversion from Trello JSON and CSV (unreleased)
+
+The frontend's static `web/importers.js` module converts a selected local file into the same OpenBoard version 2 object before calling `/api/import`. It does not contact Trello, download referenced resources, execute CSV formulas or create accounts. Conversion and preview cause no server mutation; only explicit confirmation submits the converted object with the normal session, CSRF and idempotency protections. The server independently validates the entire result and applies the same atomic import transaction. See the [user workflow and conversion limits](USER_GUIDE.md#importing-a-board-unreleased).
+
+Both input and serialized converted output must fit 2 MiB. Conversion permits at most 100 lists, 10,000 cards and 100 combined checklist items per card, subject to the existing Unicode field limits. File decoding rejects invalid UTF-8. Duplicate list/card/checklist identifiers, inconsistent checklist/label references and unsupported nested checklist shapes fail conversion rather than producing a partial board.
+
+Trello conversion supports one board with `id`, `name`, `lists[]` and `cards[]`, plus optional board-level `checklists[]`, `members[]` and `labels[]`. It preserves supported titles/descriptions, stable position order, start/due calendar dates, completion and archive state. Multiple checklists become one checklist with group names retained in item text and the description. Labels become description text, without recreating OpenBoard label colors or filters. Member names become descriptive assignee text, without creating accounts, memberships or actual card assignments. Timestamp dates retain their UTC calendar day; time and reminders are omitted. Archived lists remain lists and their cards become archived. Comments, activity/history, attachments, custom fields, covers, integrations and other Trello settings are not imported. Expanded per-card nested checklist API responses are not supported.
+
+CSV supports comma or semicolon separators, optional headers, a UTF-8 BOM, quoted/escaped fields, multiline cells and CRLF/LF/CR line endings. All rows must have the same width, up to 100 CSV columns. Headers, when enabled, must be nonempty and unique ignoring surrounding whitespace and case. Map distinct zero-based source indices to `title` (required), `list`, `description`, `due_date`, `priority`, `assignee` and `estimate_minutes`. Each data row creates one card; list names group rows in first-seen order, with a default list for empty/unmapped values. Dates use `YYYY-MM-DD`; priorities are `low`, `normal`, `high` or `urgent`; estimates are whole minutes from 0 to 100000. Unmapped columns are omitted with a warning. Assignees remain descriptive text. Formula-like cell contents remain literal strings.
 
 For a complete local SQLite copy, use `./build/openboard --db data/openboard.db --backup /path/to/backup.db`; this performs a consistent backup through the SQLite API and exits. For PostgreSQL/MongoDB, use the full application backup procedure in the [deployment guide](DEPLOYMENT.md). Database restoration is an administrative operation, separate from `/api/import`.
 

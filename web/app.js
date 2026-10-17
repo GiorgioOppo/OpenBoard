@@ -73,7 +73,7 @@ function setSession(session,{renewed = false} = {}) {
     saveDraft();
     ['card-dialog','board-dialog','column-dialog','move-dialog','panel-dialog'].forEach((id) => { if ($(id)?.open) closeDialog(id,{force:true,navigate:false}); });
     state.board = null; state.boards = []; state.cardEditor = null; state.boardEditor = null; state.columnEditor = null;
-    state.selectedCards.clear(); state.selectionMode = false; state.importData = null; state.conflictVersion = null;
+    state.selectedCards.clear(); state.selectionMode = false; state.importData = null; state.importSource = null; state.importContext = null; state.importKey = null; state.conflictVersion = null;
     state.draftCenter = null; state.commandActions = []; state.globalSearch = null;
   }
   if (renewed || changedOwner || session?.csrf !== state.auth?.csrf || session?.user?.role !== state.auth?.user?.role) invalidateSession();
@@ -226,7 +226,7 @@ function matches(card) {
   return (!query || text.includes(query)) && (!state.label || cardLabels(card).includes(state.label)) &&
     (!state.assignee || (state.assignee === '__none' ? !assignmentNames(card).length : assignmentNames(card).includes(state.assignee))) &&
     (!state.priority || (card.priority || 'normal') === state.priority) &&
-    (!state.milestone || card.milestone_key === state.milestone) && (!state.customKey || productivity.fieldMatches(card.custom_values?.[state.customKey],state.customQuery || '')) &&
+    (!state.milestone || card.milestone_key === state.milestone) && (!state.customKey || customFilterMatches(card)) &&
     (!state.status || (state.status === 'blocked' ? !!card.blocked_reason : state.status === 'completed' ? card.completed : state.status === 'overdue' ? overdue(card) : !card.completed));
 }
 function sorted(cards) {
@@ -391,7 +391,7 @@ async function refreshBoard() { if (state.board) await selectBoard(state.board.i
 async function refreshBoards() { const context = sessionContext(); const result = await api(`/api/boards${state.archivedBoards ? '?include_archived=1' : ''}`); if (!sessionCurrent(context)) return; state.boards = result.boards || []; renderSidebar(); }
 function clearFilters(render = true) {
   ['query','label','assignee','priority','status'].forEach((key) => { state[key] = ''; }); state.sort = 'manual';
-  state.milestone = ''; state.customKey = ''; state.customQuery = ''; renderPlanningFilters();
+  state.milestone = ''; state.customKey = ''; state.customQuery = ''; state.customOp = ''; renderPlanningFilters();
   $('search-input').value = ''; ['label','assignee','priority','status'].forEach((key) => { $(`${key}-filter`).value = ''; }); $('sort-filter').value = 'manual';
   if (render) renderBoard();
 }
@@ -609,29 +609,130 @@ async function showTrash() {
   },'trash');
 }
 function showImport() {
+  if (state.saving || !canCreateBoard()) return;
   state.importSequence = (state.importSequence || 0)+1;
-  state.importData = null; state.importKey = null;
-  panel(tr('Importa una bacheca JSON'),ui`<p>Seleziona un’esportazione OpenBoard versione 2. L’importazione crea una nuova bacheca.</p><label class="field-label" for="import-file">File JSON (massimo 2 MB)</label><input id="import-file" type="file" accept=".json,application/json"><div id="import-preview"></div><p id="panel-error" class="form-error" role="alert"></p>`,'import');
+  state.importData = null; state.importKey = null; state.importSource = null; state.importContext = null;
+  panel(tr('Importa una bacheca'),ui`<p>L’importazione crea una nuova bacheca dopo la conferma. Seleziona il formato e controlla l’anteprima.</p><label class="field-label" for="import-format">Formato del file</label><select id="import-format" data-product-create><option value="openboard">OpenBoard JSON</option><option value="trello">Trello JSON</option><option value="csv">CSV</option></select><label class="field-label" for="import-file">File da importare (massimo 2 MiB)</label><input id="import-file" type="file" accept=".json,application/json" data-product-create><div id="csv-import-options" hidden><label class="field-label" for="csv-import-name">Nome della nuova bacheca</label><input id="csv-import-name" maxlength="200" required value="${escapeHTML(tr('Bacheca importata'))}" data-product-create><label class="field-label" for="csv-import-delimiter">Separatore CSV</label><select id="csv-import-delimiter" data-product-create><option value=",">Virgola</option><option value=";">Punto e virgola</option></select><label><input id="csv-import-header" type="checkbox" checked data-product-create> La prima riga contiene intestazioni</label><div id="csv-import-mapping"></div></div><div id="import-preview" aria-live="polite"></div><p id="panel-error" class="form-error" role="alert"></p>`,'import');
+  updateBusy();
+}
+function importFormat() { return $('import-format')?.value || 'openboard'; }
+function importCurrent(context) {
+  return !!context && sessionCurrent(context) && context.sequence === state.importSequence &&
+    context.panelSequence === state.panelSequence && state.panel === 'import' &&
+    $('panel-dialog').open && !!$('import-preview') && canCreateBoard();
+}
+function clearImportPreview() {
+  state.importData = null; state.importKey = null; state.importContext = null;
+  if ($('import-preview')) $('import-preview').innerHTML = '';
+  if ($('panel-error')) $('panel-error').textContent = '';
+}
+function changeImportFormat() {
+  if (state.saving || state.panel !== 'import' || !canCreateBoard()) return;
+  state.importSequence = (state.importSequence || 0)+1;
+  clearImportPreview(); state.importSource = null;
+  $('import-file').value = '';
+  $('import-file').accept = importFormat() === 'csv' ? '.csv,text/csv' : '.json,application/json';
+  $('csv-import-options').hidden = importFormat() !== 'csv';
+  $('csv-import-mapping').innerHTML = '';
+  updateBusy();
+}
+function importCSVOptions() {
+  const mapping = {};
+  for (const key of OpenBoardImporters.fields) {
+    const value = $('csv-map-'+key)?.value;
+    if (value !== undefined && value !== '') mapping[key] = Number(value);
+  }
+  return {name:$('csv-import-name').value,delimiter:$('csv-import-delimiter').value || ',',
+    header:$('csv-import-header').checked,mapping,defaultList:tr('Importate')};
+}
+function renderCSVMapping() {
+  clearImportPreview(); $('csv-import-mapping').innerHTML = '';
+  const source = state.importSource;
+  if (!source || source.format !== 'csv' || !importCurrent(source.context)) return;
+  try {
+    const options = {delimiter:$('csv-import-delimiter').value || ',',header:$('csv-import-header').checked};
+    const csv = OpenBoardImporters.inspectCSV(source.text,options);
+    const names = {title:tr('Titolo (obbligatorio)'),list:tr('Lista'),description:tr('Descrizione'),
+      due_date:tr('Scadenza (YYYY-MM-DD)'),priority:tr('Priorità (low, normal, high, urgent)'),
+      assignee:tr('Responsabile (testo)'),estimate_minutes:tr('Stima in minuti')};
+    $('csv-import-mapping').innerHTML = ui`<p>Ogni riga crea una scheda. Seleziona le colonne da importare e prepara l’anteprima.</p><p>${csv.rowCount} righe · ${csv.width} colonne CSV</p>${OpenBoardImporters.fields.map(key=>ui`<label class="field-label" for="csv-map-${key}">${escapeHTML(names[key])}</label><select id="csv-map-${key}" data-import-mapping="${key}" data-product-create><option value="">Non importare</option>${csv.headers.map((header,index)=>ui`<option value="${index}" ${key === 'title' && index === 0 ? 'selected' : ''}>${index+1}: ${escapeHTML(header)}</option>`).join('')}</select>`).join('')}<button id="prepare-csv-import" class="button secondary" type="button" data-product-create>Prepara anteprima CSV</button>`;
+    updateBusy();
+  } catch (error) { if (importCurrent(source.context)) $('panel-error').textContent = tr(error.message); }
+}
+function importPreview(result,context) {
+  if (!importCurrent(context)) return;
+  const data = result.data;
+  if (!data || data.format !== 'openboard' || data.version !== 2 || !data.board ||
+      typeof data.board !== 'object' || Array.isArray(data.board) || !Array.isArray(data.board.columns))
+    throw new Error(tr('Serve un’esportazione OpenBoard in formato versione 2.'));
+  if (new TextEncoder().encode(JSON.stringify(data)).length > 2*1024*1024) throw new Error(tr('Il file supera il limite di 2 MB.'));
+  const cards = data.board.columns.reduce((sum,column) => sum+(Array.isArray(column?.cards) ? column.cards.length : 0),0);
+  if (data.board.columns.length>100 || cards>10000) throw new Error(tr('La conversione richiede al massimo 100 liste e 10000 schede.'));
+  const same = state.importData && JSON.stringify(state.importData) === JSON.stringify(data);
+  state.importKey = same && state.importKey ? state.importKey:uuid();
+  state.importData = data; state.importContext = context;
+  const fields = Array.isArray(data.board.custom_fields) ? data.board.custom_fields.filter(field=>field && !field.deleted_at).length:0;
+  const milestones = Array.isArray(data.board.milestones) ? data.board.milestones.filter(item=>item && !item.deleted_at).length:0;
+  const counts = result.counts;
+  const warnings = Array.isArray(result.warnings) ? result.warnings:[];
+  $('import-preview').innerHTML = ui`<div class="notice"><div><h3>${escapeHTML(data.board.name || tr('Bacheca importata'))}</h3><p>${data.board.columns.length} liste · ${cards} schede · ${fields} campi personalizzati · ${milestones} traguardi</p><p>${escapeHTML(data.board.description || '')}</p>${counts ? ui`<p>${counts.checklistItems} elementi checklist · ${counts.archivedCards} schede archiviate · ${counts.completedCards} schede completate</p>` : ''}${warnings.length ? ui`<h4>Avvisi di conversione</h4><ul>${warnings.map(warning=>ui`<li>${escapeHTML(tr(warning))}</li>`).join('')}</ul>` : ''}</div></div><button id="confirm-import" class="button primary" type="button" data-write>Importa come nuova bacheca</button>`;
+  updateBusy();
+}
+function prepareCSVImport() {
+  const source = state.importSource;
+  if (state.saving || !source || source.format !== 'csv' || importFormat() !== 'csv' || !importCurrent(source.context)) return;
+  $('panel-error').textContent = '';
+  try { importPreview(OpenBoardImporters.parseCSV(source.text,importCSVOptions()),source.context); }
+  catch (error) { if (importCurrent(source.context)) { clearImportPreview(); $('panel-error').textContent = tr(error.message); } }
+}
+function confirmImport() {
+  const context = state.importContext, data = state.importData, key = state.importKey;
+  if (state.saving || state.loading || !data || !key || !importCurrent(context)) return;
+  return perform(() => committed(async () => {
+    if (!importCurrent(context) || data !== state.importData || key !== state.importKey) throw sessionChangedError();
+    try { return await api('/api/import','POST',data,{key}); }
+    catch (error) { if (!importCurrent(context)) throw sessionChangedError(); throw error; }
+  },async (result) => {
+    const current = importCurrent(context);
+    if (current) { closeDialog('panel-dialog',{force:true}); state.importSource = null; state.importData = null; state.importContext = null; state.importKey = null; }
+    const navigation = current ? {panel:state.panelSequence,load:state.loadSequence,file:state.importSequence}:null;
+    const selectedId = result?.id ?? result?.board?.id;
+    await refreshBoards();
+    if (navigation && sessionCurrent(context) && !state.loading && canCreateBoard() &&
+        navigation.panel === state.panelSequence && navigation.load === state.loadSequence &&
+        navigation.file === state.importSequence && Number.isSafeInteger(selectedId) && selectedId>0)
+      await selectBoard(selectedId,{quiet:true});
+  },tr('Bacheca importata.')),'','panel-error');
 }
 async function previewImport(file) {
+  if (state.saving || state.panel !== 'import' || !$('panel-dialog').open || !canCreateBoard()) return;
   const sequence = state.importSequence = (state.importSequence || 0)+1;
-  $('panel-error').textContent = ''; $('import-preview').innerHTML = ''; state.importData = null;
+  const context = {...sessionContext(),sequence,panelSequence:state.panelSequence};
+  const format = importFormat();
+  clearImportPreview(); state.importSource = null; $('csv-import-mapping').innerHTML = '';
   if (!file) return;
   try {
     if (file.size > 2*1024*1024) throw new Error(tr('Il file supera il limite di 2 MB.'));
-    const data = JSON.parse(await file.text());
-    if (sequence !== state.importSequence || state.panel !== 'import' || !$('panel-dialog').open || !$('import-preview')) return;
-    if (data.format !== 'openboard' || data.version !== 2 || !data.board || !Array.isArray(data.board.columns)) throw new Error(tr('Serve un’esportazione OpenBoard in formato versione 2.'));
-    const cards = data.board.columns.reduce((sum,column) => sum+(Array.isArray(column.cards) ? column.cards.length : 0),0);
-    state.importData = data; state.importKey = uuid();
-    $('import-preview').innerHTML = ui`<div class="notice"><div><h3>${escapeHTML(data.board.name || tr('Bacheca importata'))}</h3><p>${data.board.columns.length} liste · ${cards} schede · ${(data.board.custom_fields || []).filter((field) => !field.deleted_at).length} campi personalizzati · ${(data.board.milestones || []).filter((item) => !item.deleted_at).length} traguardi</p><p>${escapeHTML(data.board.description || '')}</p></div></div><button id="confirm-import" class="button primary" type="button" data-write>Importa come nuova bacheca</button>`;
-    updateBusy();
-  } catch (error) { if (sequence === state.importSequence && state.panel === 'import' && $('panel-error')) $('panel-error').textContent = error instanceof SyntaxError ? tr('Il file non contiene JSON valido.') : error.message; }
+    let buffer;
+    try { buffer = await file.arrayBuffer(); }
+    catch { throw new Error(tr('Impossibile leggere il file selezionato.')); }
+    if (!importCurrent(context)) return;
+    if (buffer.byteLength>2*1024*1024) throw new Error(tr('Il file supera il limite di 2 MB.'));
+    let text;
+    try { text = new TextDecoder('utf-8',{fatal:true}).decode(buffer); }
+    catch { throw new Error(tr('Il file non contiene testo UTF-8 valido.')); }
+    state.importSource = {text,format,context};
+    if (format === 'csv') renderCSVMapping();
+    else {
+      const data = JSON.parse(text.replace(/^\uFEFF/,''));
+      importPreview(format === 'trello' ? OpenBoardImporters.parseTrello(data):{data},context);
+    }
+  } catch (error) { if (importCurrent(context) && $('panel-error')) { clearImportPreview(); state.importSource = null; $('panel-error').textContent = error instanceof SyntaxError ? tr('Il file non contiene JSON valido.') : tr(error.message); } }
 }
 function showGlobalSearch() {
   ++globalSearchSequence; clearTimeout(searchTimer);
   state.globalSearch=null;
-  panel(tr('Ricerca in tutte le bacheche'),ui`<label class="field-label" for="global-query">Titolo o descrizione della scheda</label><input id="global-query" type="search" maxlength="200" placeholder="Cerca nel workspace…"><div id="global-results" aria-live="polite"></div>`,'search');
+  panel(tr('Ricerca in tutte le bacheche'),ui`<label class="field-label" for="global-query">Testo da cercare</label><input id="global-query" type="search" maxlength="200" placeholder="Cerca nel workspace…"><label class="field-label" for="global-kind">Contenuti</label><select id="global-kind"><option value="cards">Schede</option><option value="all">Tutti i contenuti collaborativi</option><option value="comment">Commenti e risposte</option><option value="request">Richieste e risposte ai moduli</option><option value="request_note">Note delle richieste</option><option value="form">Moduli interni</option></select><div id="global-results" aria-live="polite"></div>`,'search');
   $('global-query').focus();
 }
 let globalSearchSequence = 0;
@@ -640,20 +741,22 @@ async function globalSearch(query,append=false) {
   query=query.trim();
   const context = sessionContext();
   const previous=state.globalSearch;
-  if (append && (!previous || previous.query!==query || previous.loading || !previous.next || !sessionCurrent(previous.context))) return;
+  const kind=$('global-kind')?.value || 'cards',content=kind!=='cards';
+  if (append && (!previous || previous.query!==query || previous.kind!==kind || previous.loading || !previous.next || !sessionCurrent(previous.context))) return;
   const sequence = ++globalSearchSequence;
   if (!query) { state.globalSearch=null;$('global-results').innerHTML = ui`<p>Scrivi per cercare le schede a cui hai accesso.</p>`; return; }
-  const search=state.globalSearch={query,context,cards:append ? [...previous.cards]:[],next:append ? previous.next:null,loading:true};
+  const search=state.globalSearch={query,kind,content,context,cards:append ? [...previous.cards]:[],next:append ? previous.next:null,loading:true};
   if(append){$('global-more')?.setAttribute('aria-disabled','true');$('global-more')?.setAttribute('aria-busy','true');}
   else $('global-results').innerHTML=ui`<p class="helper-text">Caricamento…</p>`;
   try {
-    const result = await api(`/api/search?q=${encodeURIComponent(query)}&limit=30${append ? '&before='+search.next:''}`);
+    const result = await api(content ? `/api/search/content?q=${encodeURIComponent(query)}&kind=${encodeURIComponent(kind)}&limit=30${append ? '&cursor='+encodeURIComponent(search.next):''}` : `/api/search?q=${encodeURIComponent(query)}&limit=30${append ? '&before='+search.next:''}`);
     if (!sessionCurrent(context) || sequence !== globalSearchSequence || state.panel !== 'search' || !$('panel-dialog').open || state.globalSearch!==search) return;
-    const known=new Set(search.cards.map(card=>card.id));
-    const firstNew=(result.cards || []).find(card=>!known.has(card.id))?.id;
-    for(const card of result.cards || [])if(!known.has(card.id)){search.cards.push(card);known.add(card.id);}
-    search.next=Number.isSafeInteger(result.next_cursor) && result.next_cursor>0 ? result.next_cursor:null;
-    search.loading=false;renderGlobalSearch(firstNew);
+    const key=item=>content ? item.key:item.id,items=content ? result.items || []:result.cards || [];
+    const known=new Set(search.cards.map(key));
+    const firstNew=items.find(item=>!known.has(key(item)));
+    for(const item of items)if(!known.has(key(item))){search.cards.push(item);known.add(key(item));}
+    search.next=content ? (typeof result.next_cursor==='string' && /^[0-4]:[1-9]\d{0,18}$/.test(result.next_cursor) ? result.next_cursor:null) : (Number.isSafeInteger(result.next_cursor) && result.next_cursor>0 ? result.next_cursor:null);
+    search.loading=false;renderGlobalSearch(firstNew ? key(firstNew):null);
   } catch (error) {
     if (sessionCurrent(context) && !error.staleSession && sequence === globalSearchSequence && state.panel==='search' && state.globalSearch===search) {
       search.loading=false;
@@ -665,11 +768,37 @@ function renderGlobalSearch(firstNewId=null) {
   const search=state.globalSearch;
   if(!search || !sessionCurrent(search.context) || state.panel!=='search')return;
   const moreFocused=document.activeElement?.id==='global-more';
-  const focusedCard=document.activeElement?.dataset?.searchCard;
-  $('global-results').innerHTML = search.cards.map((card) => ui`<button type="button" class="search-result" data-search-card="${Number(card.id)}" data-search-board="${Number(card.board_id)}"><strong>${escapeHTML(card.title)}</strong><span>${escapeHTML(card.board_name)} / ${escapeHTML(card.column_title)} · ${escapeHTML(priorities[card.priority] || tr('Normale'))}${card.due_date ? ' · '+escapeHTML(card.due_date) : ''}</span></button>`).join('') || ui`<p>Nessuna scheda trovata.</p>`;
+  const focusedCard=search.content ? document.activeElement?.dataset?.searchContent:document.activeElement?.dataset?.searchCard;
+  $('global-results').innerHTML = search.cards.map((card) => search.content ? contentSearchRow(card) : ui`<button type="button" class="search-result" data-search-card="${Number(card.id)}" data-search-board="${Number(card.board_id)}"><strong>${escapeHTML(card.title)}</strong><span>${escapeHTML(card.board_name)} / ${escapeHTML(card.column_title)} · ${escapeHTML(priorities[card.priority] || tr('Normale'))}${card.due_date ? ' · '+escapeHTML(card.due_date) : ''}</span></button>`).join('') || ui`<p>Nessun contenuto trovato.</p>`;
   if(search.next)$('global-results').innerHTML+=ui`<button type="button" class="button secondary" id="global-more">Carica altri</button>`;
-  if(moreFocused){const target=search.next ? $('global-more'):$('global-results').querySelector(`[data-search-card="${Number(firstNewId)}"]`) || $('global-query');target?.focus();}
-  else if(focusedCard)$('global-results').querySelector(`[data-search-card="${Number(focusedCard)}"]`)?.focus();
+  const selector=key=>search.content && /^[0-4]:[1-9]\d{0,18}$/.test(String(key)) ? `[data-search-content="${key}"]`:`[data-search-card="${Number(key)}"]`;
+  if(moreFocused){const target=search.next ? $('global-more'):$('global-results').querySelector(selector(firstNewId)) || $('global-query');target?.focus();}
+  else if(focusedCard)$('global-results').querySelector(selector(focusedCard))?.focus();
+}
+function contentSearchRow(item) {
+  const kinds={card:tr('Scheda'),comment:tr('Commento'),request:tr('Richiesta'),request_note:tr('Nota della richiesta'),form:tr('Modulo')};
+  if(!Object.hasOwn(kinds,item.kind) || !/^[0-4]:[1-9]\d{0,18}$/.test(item.key))return '';
+  return ui`<button type="button" class="search-result" data-search-content="${escapeHTML(item.key)}"><strong>${escapeHTML(item.title)}</strong><span>${escapeHTML(kinds[item.kind])} · ${escapeHTML(item.board_name)}${item.context ? ' / '+escapeHTML(item.context):''}</span><span class="search-snippet">${escapeHTML(item.snippet || '')}</span></button>`;
+}
+async function openContentSearchResult(key) {
+  const search=state.globalSearch,context=sessionContext();
+  const item=search?.content && search.cards.find(row=>row.key===key);
+  if(!item || !sessionCurrent(search.context) || !closeEditors())return;
+  if(!Number.isSafeInteger(item.board_id) || item.board_id<1)return;
+  closeDialog('panel-dialog');
+  const sequence=state.panelSequence;
+  try {
+    const selection=selectBoard(item.board_id),loadSequence=state.loadSequence;
+    await selection;
+    const current=()=>sessionCurrent(context) && !state.loading && !state.loadError && state.loadSequence===loadSequence && state.board?.id===item.board_id && state.panelSequence===sequence;
+    if(!current())return;
+    if(item.kind==='card' || item.kind==='comment') {
+      if(!Number.isSafeInteger(item.card_id) || item.card_id<1)return;
+      await openCard(item.card_id);
+      if(item.kind==='comment' && current() && state.cardEditor?.id===item.card_id)await showThread(item.id);
+    } else if(item.kind==='form')await workflows.showForm(item.form_id);
+    else await workflows.showRequest(item.request_id);
+  } catch(error) { if(sessionCurrent(context) && !error.staleSession)toast(error.message,true); }
 }
 function showMove() {
   const editor = state.cardEditor;
@@ -752,6 +881,7 @@ document.addEventListener('click',async (event) => {
     if (!confirm(tr('Rimuovere questo membro dalla bacheca?'))) return;
     perform(() => committed(() => api(`/api/boards/${state.board.id}/members/${Number(target.dataset.removeMember)}`,'DELETE'),showMembers,tr('Membro rimosso.')),'','panel-error'); return;
   }
+  if (target.dataset.searchContent) { await openContentSearchResult(target.dataset.searchContent); return; }
   if (target.dataset.searchCard) {
     if (!closeEditors()) return;
     closeDialog('panel-dialog');
@@ -799,8 +929,8 @@ document.addEventListener('click',async (event) => {
     }
     case 'archive-board':
       if (state.board) perform(() => committed(() => api(`/api/boards/${state.board.id}`,'PATCH',{archived:!state.board.archived},{version:state.board.version}),async () => { state.archivedBoards = true; await refreshBoards(); await refreshBoard(); },state.board.archived ? tr('Bacheca ripristinata dall’archivio.') : tr('Bacheca archiviata.'))); break;
-    case 'confirm-import':
-      if (state.importData) perform(() => committed(() => api('/api/import','POST',state.importData,{key:state.importKey}),async (result) => { closeDialog('panel-dialog',{force:true}); await refreshBoards(); await selectBoard(result.id || result.board?.id,{quiet:true}); },tr('Bacheca importata.')),'','panel-error'); break;
+    case 'prepare-csv-import': prepareCSVImport(); break;
+    case 'confirm-import': await confirmImport(); break;
     case 'logout':
       if (!closeEditors()) break;
       perform(async () => { invalidateSession(); await api('/api/auth/logout','POST',{}); sessionTabs.publish(); closeDialog('panel-dialog',{force:true}); setSession(await api('/api/auth/session')); state.board = null; state.boards = []; renderSidebar(); renderHeader(); renderBoard(); showAuth(false); }); break;
@@ -852,12 +982,17 @@ $('card-form').addEventListener('input',saveDraft);
 $('card-form').addEventListener('change',saveDraft);
 $('move-column').addEventListener('change',updateMovePosition);
 document.addEventListener('input',(event) => {
+  if (state.panel === 'import' && !state.saving && (event.target.id === 'csv-import-name' || event.target.dataset.importMapping !== undefined)) clearImportPreview();
   if (event.target.id === 'global-query') { clearTimeout(searchTimer);++globalSearchSequence;state.globalSearch=null;if(!productivity.composing(event))searchTimer = setTimeout(() => globalSearch(event.target.value),250); }
 });
 document.addEventListener('change',(event) => {
+  if(event.target.id==='global-kind') { clearTimeout(searchTimer);++globalSearchSequence;state.globalSearch=null;globalSearch($('global-query').value); }
   if (event.target.id === 'theme-setting') { document.documentElement.dataset.theme = event.target.value; remember('theme',event.target.value); }
   if (event.target.id === 'density-setting') { document.documentElement.dataset.density = event.target.value; remember('density',event.target.value); }
   if (event.target.id === 'import-file') previewImport(event.target.files[0]);
+  if (event.target.id === 'import-format') changeImportFormat();
+  if (state.panel === 'import' && !state.saving && ['csv-import-delimiter','csv-import-header'].includes(event.target.id)) renderCSVMapping();
+  if (state.panel === 'import' && !state.saving && (event.target.id === 'csv-import-name' || event.target.dataset.importMapping !== undefined)) clearImportPreview();
 });
 $('auth-form').addEventListener('submit',async (event) => {
   event.preventDefault();
@@ -1576,3 +1711,23 @@ document.addEventListener('click',event=>{
   if(target.hasAttribute('data-show-storage'))showStorageCapacity();
   if(target.id==='storage-refresh')refreshStorageCapacity();
 });
+
+/* Delegated table controls survive filtering and background refreshes. */
+document.addEventListener('click',event=>{
+  const target=event.target.closest('button');if(!target || target.disabled)return;
+  if(target.hasAttribute('data-table-edit'))tableBeginEdit(Number(target.dataset.tableEdit));
+  if(target.hasAttribute('data-table-cancel'))tableCancel(Number(target.dataset.tableCancel));
+  if(target.hasAttribute('data-table-reload'))tableReload(Number(target.dataset.tableReload));
+});
+document.addEventListener('input',event=>{if(event.target.closest?.('[data-table-editor]'))tableCaptureInput(event.target);});
+document.addEventListener('change',event=>{if(event.target.closest?.('[data-table-editor]'))tableCaptureInput(event.target);});
+document.addEventListener('compositionstart',event=>{if(event.target.closest?.('[data-table-editor]'))tableComposition(event.target,true);});
+document.addEventListener('compositionend',event=>{if(event.target.closest?.('[data-table-editor]'))tableComposition(event.target,false);});
+document.addEventListener('submit',event=>{
+  const form=event.target;if(!form.hasAttribute('data-table-editor'))return;
+  event.preventDefault();
+  if(productivity.composing(event))return;
+  for(const input of form.querySelectorAll('input,select'))tableCaptureInput(input);
+  tableSave(Number(form.dataset.tableEditor));
+});
+/* End delegated table controls. */
