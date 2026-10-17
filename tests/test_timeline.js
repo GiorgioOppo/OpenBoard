@@ -89,15 +89,60 @@ test('UTC geometry is independent of local DST and timezone',()=>{
   assert.equal(results[0],results[1]);assert.equal(results[1],results[2]);
 });
 
+test('static CSP-compatible grid classes cover every bounded day and grid line exactly',()=>{
+  const css=fs.readFileSync(path.join(__dirname,'../web/styles.css'),'utf8');
+  const definitions=(name,pattern)=>[...css.matchAll(new RegExp('\\.timeline-'+name+'-(\\d+)\\s*\\{([^}]+)\\}','g'))].map(match=>{
+    const index=Number(match[1]);assert.match(match[2],pattern(index),'class '+name+'-'+index);return index;
+  });
+  assert.deepEqual(definitions('days',index=>new RegExp('^ --timeline-days:'+index+';grid-template-columns:repeat\\('+index+',minmax\\(0,1fr\\)\\); $')),Array.from({length:31},(_,index)=>index+1));
+  assert.deepEqual(definitions('start',index=>new RegExp('^ grid-column-start:'+index+'; $')),Array.from({length:31},(_,index)=>index+1));
+  assert.deepEqual(definitions('end',index=>new RegExp('^ grid-column-end:'+index+'; $')),Array.from({length:31},(_,index)=>index+2));
+  assert.match(css,/\.timeline-track\s*\{[^}]*display:grid;[^}]*align-items:center;/);
+  assert.match(css,/\.timeline-anchor\s*\{[^}]*justify-self:center;/);
+  assert(!/\bstyle\s*=/.test(code),'renderer must not emit inline style attributes');
+});
+
+test('grid geometry stays within real days across all month sizes, week windows and year limits',()=>{
+  let lastDay32=false;
+  for(const anchor of ['0001-01-01','0004-02-29','1900-02-28','2000-02-29','2028-04-30','2028-12-31','9999-12-31']) {
+    for(const mode of ['week','month']) {
+      const window=timeline.period(mode,anchor),cards=[];
+      for(const day of window.days) {
+        cards.push(card(cards.length+1,{start_date:day,due_date:day}));
+        cards.push(card(cards.length+1,{start_date:day}));
+        cards.push(card(cards.length+1,{due_date:day}));
+      }
+      cards.push(card(cards.length+1,{start_date:'0001-01-01',due_date:'9999-12-31'}));
+      const value=timeline.model(board(cards),{mode,anchor});
+      assert(value.window.days.length>=1&&value.window.days.length<=31);
+      for(const row of value.scheduled.items) {
+        assert(Number.isInteger(row.gridStart)&&row.gridStart>=1&&row.gridStart<=value.window.days.length);
+        assert(Number.isInteger(row.gridEnd)&&row.gridEnd>row.gridStart&&row.gridEnd<=value.window.days.length+1);
+        assert.equal(row.gridStart,Math.max(row.from,window.first)-window.first+1);
+        assert.equal(row.gridEnd,Math.min(row.to,window.last)-window.first+2);
+        if(row.kind!=='range')assert.equal(row.gridEnd,row.gridStart+1,'partial date uses one cell');
+        lastDay32 ||= row.gridEnd===32;
+      }
+      const html=timeline.render(value);
+      assert(!/\bstyle\s*=/i.test(html));assert(!/<style\b/i.test(html));
+      for(const match of html.matchAll(/timeline-(days|start|end)-(\d+)/g)) {
+        const number=Number(match[2]);assert(number>= (match[1]==='end'?2:1));assert(number<= (match[1]==='end'?32:31));
+      }
+      assert(html.includes('timeline-days-'+window.days.length));
+    }
+  }
+  assert(lastDay32,'day31 spans through static end line32');
+});
+
 test('real ranges, partial anchors, invalid pairs and undated cards keep distinct semantics',()=>{
   const cards=[card(1,{start_date:'2028-01-31',due_date:'2028-02-02'}),card(2,{start_date:'2028-02-03'}),
     card(3,{due_date:'2028-02-04'}),card(4),card(5,{start_date:'2028-03-01'}),
     card(6,{start_date:'2028-02-10',due_date:'2028-02-09'}),card(7,{due_date:'2028-02-31'})];
   const value=timeline.model(board(cards),options);
   assert.deepEqual(value.scheduled.items.map(row=>row.kind),['range','start','due']);
-  assert.equal(value.scheduled.items[0].clipped,true);assert.equal(value.scheduled.items[0].width,2/29*100);
-  assert.equal(value.scheduled.items[1].width,0);assert.equal(value.scheduled.items[1].from,value.scheduled.items[1].to);
-  assert.equal(value.scheduled.items[2].width,0);assert.equal(value.outside,1);
+  assert.equal(value.scheduled.items[0].clipped,true);assert.deepEqual([value.scheduled.items[0].gridStart,value.scheduled.items[0].gridEnd],[1,3]);
+  assert.equal(value.scheduled.items[1].gridEnd-value.scheduled.items[1].gridStart,1);assert.equal(value.scheduled.items[1].from,value.scheduled.items[1].to);
+  assert.equal(value.scheduled.items[2].gridEnd-value.scheduled.items[2].gridStart,1);assert.equal(value.outside,1);
   assert.deepEqual(value.undated.items.map(row=>row.kind),['undated','invalid','invalid']);
   const html=timeline.render(value);assert.match(html,/Solo inizio:/);assert.match(html,/Solo scadenza:/);assert.match(html,/Date non valide/);
 });
