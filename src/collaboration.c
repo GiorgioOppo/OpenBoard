@@ -3,6 +3,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "collaboration.h"
 #include "auth.h"
+#include "storage.h"
 #include <ctype.h>
 #include <limits.h>
 #include <openssl/crypto.h>
@@ -298,13 +299,13 @@ static bool mime_valid(const char *mime) {
       return false;
   return true;
 }
-static bool attachment_quota(int64_t card, int64_t added) {
+static int attachment_quota(int64_t card, int64_t added) {
   sqlite3_stmt *s =
       prepare("SELECT count(*)<10 AND coalesce(sum(size),0)+?2<=5242880 FROM "
               "attachments WHERE card_id=?1 AND deleted_at IS NULL");
   sqlite3_bind_int64(s, 1, card);
   sqlite3_bind_int64(s, 2, added);
-  bool ok = sqlite3_step(s) == SQLITE_ROW && sqlite3_column_int(s, 0);
+  int ok = sqlite3_step(s) == SQLITE_ROW ? !!sqlite3_column_int(s, 0) : -1;
   sqlite3_finalize(s);
   return ok;
 }
@@ -334,12 +335,21 @@ static Response attachments(Request *r, int64_t card, bool upload) {
     return error_response(
         400, "Nome, MIME o base64 non valido; massimo 1 MiB per file.");
   }
-  if (!attachment_quota(card, size)) {
+  int card_admission = attachment_quota(card, size);
+  if (card_admission != 1) {
     ob_free(name);
     ob_free(mime);
     ob_free(data);
-    return error_response(
+    return card_admission < 0 ? unavailable() : error_response(
         409, "Limite della scheda: 10 file attivi e 5 MiB totali.");
+  }
+  int admission = ob_storage_attachment_admission(size);
+  if (admission != 1) {
+    ob_free(name);
+    ob_free(mime);
+    ob_free(data);
+    return admission < 0 ? unavailable() : error_response(
+        409, "Limite allegati dell'installazione raggiunto, inclusi i file nel cestino.");
   }
   sqlite3_stmt *s = prepare(
       "INSERT INTO attachments(card_id,author_id,name,mime,data_base64,size) "
@@ -386,9 +396,12 @@ static Response attachment(Request *r, int64_t id, bool get, bool restore) {
     return success(200, id);
   if (!restore && deleted)
     return success(200, id);
-  if (restore && !attachment_quota(card, size))
-    return error_response(
-        409, "Limite della scheda: 10 file attivi e 5 MiB totali.");
+  if (restore) {
+    int admission = attachment_quota(card, size);
+    if (admission != 1)
+      return admission < 0 ? unavailable() : error_response(
+          409, "Limite della scheda: 10 file attivi e 5 MiB totali.");
+  }
   s = prepare(
       restore ? "UPDATE attachments SET deleted_at=NULL WHERE id=?1"
               : "UPDATE attachments SET "

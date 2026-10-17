@@ -2,5 +2,6 @@
 #define OPENBOARD_REVIEWS_H
 #include "openboard.h"
 void reviews_schema(sqlite3 *connection);
+void reviews_install_content_guard(sqlite3 *connection);
 bool reviews_handle(Request *request, Response *response);
 #endif

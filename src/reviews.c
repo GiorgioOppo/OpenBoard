@@ -8,6 +8,31 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Additive, layout-neutral protection for existing schema-7 installations.
+ * The guard is disabled together with all other triggers during cloud replay.
+ * Ordering, workflow state and time logging do not change reviewed content. */
+void reviews_install_content_guard(sqlite3 *connection) {
+  const char *sql =
+      "CREATE TRIGGER IF NOT EXISTS review_card_content_changed AFTER UPDATE OF "
+      "title,description,checklist,custom_values,reference_url ON cards WHEN "
+      "NEW.title IS NOT OLD.title OR NEW.description IS NOT OLD.description OR "
+      "NEW.checklist IS NOT OLD.checklist OR NEW.custom_values IS NOT OLD.custom_values OR "
+      "NEW.reference_url IS NOT OLD.reference_url BEGIN "
+      "INSERT INTO review_events(review_id,actor,action,note) "
+      "SELECT r.id,'Sistema','review_content_changed',"
+      "'Il contenuto della scheda è cambiato; è necessaria una nuova revisione.' "
+      "FROM reviews r WHERE r.card_id=NEW.id AND EXISTS(SELECT 1 FROM review_votes v "
+      "WHERE v.review_id=r.id) AND (SELECT count(*) FROM review_events e "
+      "WHERE e.review_id=r.id)<10000;"
+      "UPDATE reviews SET version=version+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') "
+      "WHERE card_id=NEW.id AND EXISTS(SELECT 1 FROM review_votes v WHERE v.review_id=reviews.id);"
+      "DELETE FROM review_votes WHERE review_id IN(SELECT id FROM reviews WHERE card_id=NEW.id);END;";
+  if (sqlite3_exec(connection, sql, NULL, NULL, NULL) != SQLITE_OK) {
+    fputs("Review content protection unavailable.\n", stderr);
+    exit(EXIT_FAILURE);
+  }
+}
+
 void reviews_schema(sqlite3 *connection) {
   const char *schema[] = {
       "CREATE TABLE reviews(id INTEGER PRIMARY KEY AUTOINCREMENT,card_id "

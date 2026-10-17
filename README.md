@@ -6,7 +6,7 @@
 
 A self-hosted kanban and team collaboration application with a **C backend** and a **plain HTML, CSS and JavaScript frontend**. Plan work on boards, organize sprints, review cards and manage internal requests. OpenBoard is inspired by Trello and is an independent project, unaffiliated with Trello or Atlassian.
 
-**Status: 0.6.1 early preview.** Suitable for evaluation and pilot installations. Storage currently serializes requests and saves complete snapshots; capacity and high availability have not been established for enterprise workloads. See [known limitations](docs/ROADMAP.md#current-limitations) and the [security review](docs/SECURITY_REMEDIATION_2026-10-16.md).
+**Status: 0.6.1 early preview, with unreleased changes on the development branch.** Suitable for evaluation and pilot installations. External storage serializes requests; development changes publish modified rows incrementally, while initial import and stale-cache reconstruction retain complete snapshots. Capacity and high availability have not been established for enterprise workloads. See [known limitations](docs/ROADMAP.md#current-limitations), the [security review](docs/SECURITY_REMEDIATION_2026-10-16.md) and the [next 100 improvements ledger](docs/IMPROVEMENTS_NEXT_100.md). The published `v0.6.1` tag retains its original implementation.
 
 ![OpenBoard kanban board in English](docs/preview-language-en.png)
 

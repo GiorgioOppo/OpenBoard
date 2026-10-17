@@ -219,6 +219,113 @@ class CloudPersistence(unittest.TestCase):
         created = self.api('POST', '/api/boards', {'name':self.name}, expected=201)
         return self.api('GET', f'/api/boards/{created["id"]}')
 
+    def test_incremental_publication_preserves_unrelated_sql_rows_and_documents(self):
+        board = self.new_board()
+        column = board['columns'][0]['id']
+        changed = self.api('POST', f'/api/columns/{column}/cards',
+                           {'title': self.name + '-changed'}, expected=201)['id']
+        untouched = self.api('POST', f'/api/columns/{column}/cards',
+                             {'title': self.name + '-untouched',
+                              'checklist': [{'id': 'keep', 'text': self.name, 'done': False}]},
+                             expected=201)['id']
+        original_row = self.stores.sql(
+            f'SELECT ctid::text,xmin::text,checklist__doc FROM ob_cards WHERE id={untouched}')
+        self.api('PATCH', f'/api/cards/{changed}',
+                 {'title': self.name + '-updated',
+                  'checklist': [{'id': 'new', 'text': self.name + '-new', 'done': True}]})
+        self.assertEqual(self.stores.sql(
+            f'SELECT ctid::text,xmin::text,checklist__doc FROM ob_cards WHERE id={untouched}'), original_row)
+        comment = self.api('POST', f'/api/cards/{changed}/comments',
+                           {'body': self.name + '-comment'}, expected=201)['id']
+        self.api('DELETE', f'/api/comments/{comment}')
+        self.assertEqual(self.stores.sql(f'SELECT id FROM ob_comments WHERE id={comment}'), [])
+        self.assertEqual(self.stores.sql(
+            f'SELECT ctid::text,xmin::text,checklist__doc FROM ob_cards WHERE id={untouched}'), original_row)
+        reference = original_row[0][2]
+        document = self.stores.command({'find': 'documents', 'filter': {'_id': reference},
+                                       'limit': 1})['cursor']['firstBatch'][0]
+        self.assertEqual(document['value'], [{'id': 'keep', 'text': self.name, 'done': False}])
+
+    def test_incremental_writes_from_two_replicas_keep_all_independent_updates(self):
+        board = self.new_board()
+        column = board['columns'][0]['id']
+        cards = [self.api('POST', f'/api/columns/{column}/cards',
+                          {'title': self.name + f'-{i}'}, expected=201)['id'] for i in range(5)]
+        untouched = self.stores.sql(f'SELECT ctid::text,xmin::text FROM ob_cards WHERE id={cards[-1]}')
+        second = self.start()
+
+        def update(index):
+            return self.request(self.first if index % 2 else second, 'PATCH',
+                                f'/api/cards/{cards[index]}', {'title': self.name + f'-updated-{index}'})[0]
+
+        with ThreadPoolExecutor(max_workers=4) as workers:
+            self.assertEqual(list(workers.map(update, range(4))), [200] * 4)
+        for index, card in enumerate(cards[:-1]):
+            self.assertEqual(self.api('GET', f'/api/cards/{card}', port=second)['title'],
+                             self.name + f'-updated-{index}')
+        self.assertEqual(self.stores.sql(
+            f'SELECT ctid::text,xmin::text FROM ob_cards WHERE id={cards[-1]}'), untouched)
+
+    def test_incremental_sql_failure_rolls_back_publication_and_invalidates_cache(self):
+        board = self.new_board()
+        card = self.api('POST', f'/api/columns/{board["columns"][0]["id"]}/cards',
+                        {'title': self.name}, expected=201)['id']
+        original = self.api('GET', f'/api/cards/{card}')
+        row = self.stores.sql(f'SELECT title,checklist__doc FROM ob_cards WHERE id={card}')
+        epoch = self.stores.sql('SELECT epoch FROM ob_store')
+        function = 'cloud_failure_' + uuid.uuid4().hex
+        trigger = function + '_trigger'
+        self.stores.sql(f"CREATE FUNCTION {function}() RETURNS trigger LANGUAGE plpgsql AS $$ "
+                        f"BEGIN IF NEW.id={card} AND NEW.title='injected-failure' THEN "
+                        "RAISE EXCEPTION 'disposable publication failure'; END IF; RETURN NEW; END $$; "
+                        f'CREATE TRIGGER {trigger} BEFORE INSERT OR UPDATE ON ob_cards '
+                        f'FOR EACH ROW EXECUTE FUNCTION {function}(); SELECT 1')
+        try:
+            self.api('PATCH', f'/api/cards/{card}',
+                     {'title': 'injected-failure',
+                      'checklist': [{'id': 'failed', 'text': self.name, 'done': False}]}, expected=503)
+            self.assertEqual(self.stores.sql(f'SELECT title,checklist__doc FROM ob_cards WHERE id={card}'), row)
+            self.assertEqual(self.stores.sql('SELECT epoch FROM ob_store'), epoch)
+            self.assertEqual(self.api('GET', f'/api/cards/{card}'), original)
+            recovered = self.start()
+            self.assertEqual(self.api('GET', f'/api/cards/{card}', port=recovered), original)
+        finally:
+            self.stores.sql(f'DROP TRIGGER IF EXISTS {trigger} ON ob_cards; '
+                            f'DROP FUNCTION IF EXISTS {function}(); SELECT 1')
+        self.api('PATCH', f'/api/cards/{card}', {'title': self.name + '-retry'})
+        self.assertEqual(self.api('GET', f'/api/cards/{card}')['title'], self.name + '-retry')
+
+    def test_existing_document_corruption_rejects_rehydration_and_publication(self):
+        board = self.new_board()
+        checklist = [{'id': 'integrity', 'text': self.name, 'done': False}]
+        card = self.api('POST', f'/api/columns/{board["columns"][0]["id"]}/cards',
+                        {'title': self.name, 'checklist': checklist}, expected=201)['id']
+        reference = self.stores.sql(f'SELECT checklist__doc FROM ob_cards WHERE id={card}')[0][0]
+        epoch = self.stores.sql('SELECT epoch FROM ob_store')
+        environment = clean_environment()
+        environment.update({k: os.environ[k] for k in ('OPENBOARD_POSTGRES_URL', 'OPENBOARD_MONGODB_URI')})
+        for field, invalid, original in [('kind', 'altered.kind', 'cards.checklist'),
+                                          ('value', [{'tampered': True}], checklist)]:
+            with self.subTest(field=field):
+                update = {'update': 'documents', 'updates': [{'q': {'_id': reference},
+                          'u': {'$set': {field: invalid}}}]}
+                self.stores.command(update)
+                try:
+                    result = subprocess.run([str(BINARY), '--db',
+                        str(Path(self.temp.name) / f'corrupt-{field}.db'), '--no-demo',
+                        '--backup', str(Path(self.temp.name) / f'rejected-{field}.db')],
+                        env=environment, capture_output=True, timeout=25)
+                    self.assertNotEqual(result.returncode, 0)
+                    # The warm cache must not publish references to a document
+                    # merely because $setOnInsert accepts its existing ID.
+                    self.api('PATCH', f'/api/cards/{card}', {'title': self.name + '-rejected'}, expected=503)
+                    self.assertEqual(self.stores.sql('SELECT epoch FROM ob_store'), epoch)
+                    self.assertEqual(self.stores.sql(f'SELECT title FROM ob_cards WHERE id={card}'), [[self.name]])
+                finally:
+                    self.stores.command({'update': 'documents', 'updates': [{'q': {'_id': reference},
+                                         'u': {'$set': {field: original}}}]})
+                self.assertEqual(self.api('GET', f'/api/cards/{card}')['title'], self.name)
+
     def authenticate(self, port=None, username='cloud.admin'):
         port = port or self.start('--auth')
         credentials = {'username': username, 'password': 'Cloud-test-password-1016!'}

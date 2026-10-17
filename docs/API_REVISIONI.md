@@ -50,6 +50,8 @@ Removing a member does not reduce the number of required approvals: an `all` req
 
 `overdue` is true when the due date precedes the current UTC date and status is `pending` or `changes_requested`. An approved or cancelled request is not overdue for counting purposes.
 
+Unreleased content protection clears existing votes when the card's title, description, checklist, custom values or reference URL changes. The same transaction increments affected review versions and records `review_content_changed` history (subject to the existing event limit). This also prevents votes on trashed/cancelled reviews becoming valid after restoration. Assigning the same stored content or changing only ordering, workflow status or logged time does not invalidate votes. Review versions still govern concurrent voting; approvals do not automatically block card completion.
+
 ## Creation and details
 
 Creation example:

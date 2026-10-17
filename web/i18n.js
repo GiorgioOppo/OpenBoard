@@ -24,6 +24,11 @@
   });
   const escape = (value) => String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const keyOf = (value) => decode(value).trim().replace(/\s+/g,' ');
+  function pseudoText(value) {
+    const accents={a:'à',e:'ë',i:'ï',o:'ô',u:'ü',A:'À',E:'Ë',I:'Ï',O:'Ô',U:'Ü'};
+    const text=String(value);
+    return '⟦'+text.split(/(\{[\w]+\})/g).map(part=>/^\{[\w]+\}$/.test(part) ? part:part.replace(/[aeiouAEIOU]/g,char=>accents[char])).join('')+' ···⟧';
+  }
   function create(options={}) {
     const catalog=options.catalog || {};
     let locale=normalize(options.locale);
@@ -34,7 +39,7 @@
       if(!key)return source;
       const entry=own(catalog,key) ? catalog[key]:null;
       const translated=locale==='it' ? key:entry?.[codes.indexOf(locale)] || entry?.[0] || key;
-      return source.match(/^\s*/)[0]+translated+source.match(/\s*$/)[0];
+      return source.match(/^\s*/)[0]+(options.pseudo ? pseudoText(translated):translated)+source.match(/\s*$/)[0];
     };
     function t(source,...values) {
       if(Array.isArray(source) && own(source,'raw')) {
@@ -96,7 +101,7 @@
   try {stored=root.localStorage.getItem('openboard.language');} catch { /* Preferences are optional. */ }
   const requested=new URLSearchParams(root.location.search).get('lang');
   const preferences=root.navigator?.languages?.length ? root.navigator.languages:[root.navigator?.language];
-  const api=create({catalog:root.OpenBoardLocales,locale:normalize(requested) || stored,preferences});
+  const api=create({catalog:root.OpenBoardLocales,locale:normalize(requested) || stored,preferences,pseudo:new URLSearchParams(root.location.search).get('pseudo')==='1'});
   root.OpenBoardI18n=api;root.tr=api.t;root.ui=api.html;
   function initialize() {
     const document=root.document;

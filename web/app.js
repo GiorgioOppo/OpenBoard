@@ -74,9 +74,15 @@ function setSession(session,{renewed = false} = {}) {
     ['card-dialog','board-dialog','column-dialog','move-dialog','panel-dialog'].forEach((id) => { if ($(id)?.open) closeDialog(id,{force:true,navigate:false}); });
     state.board = null; state.boards = []; state.cardEditor = null; state.boardEditor = null; state.columnEditor = null;
     state.selectedCards.clear(); state.selectionMode = false; state.importData = null; state.conflictVersion = null;
+    state.draftCenter = null; state.commandActions = []; state.globalSearch = null;
   }
   if (renewed || changedOwner || session?.csrf !== state.auth?.csrf || session?.user?.role !== state.auth?.user?.role) invalidateSession();
   state.auth = session;
+  if(state.panel==='storage-capacity' && !canInspectStorage()) {
+    state.panel=null;state.panelSequence=(state.panelSequence || 0)+1;
+    if($('panel-dialog').open)closeDialog('panel-dialog',{force:true,navigate:false});
+    $('panel-body').innerHTML='';
+  }
   if (clearView) { clearFilters(false); $('panel-body').innerHTML = ''; renderSidebar(); renderHeader(); renderBoard(); }
 }
 function sessionChangedError() { const error = new APIError(tr('L’account è cambiato. Riapri questa vista.')); error.staleSession = true; return error; }
@@ -174,7 +180,7 @@ async function committed(write, refresh, message) {
 function allCards() { return state.board?.columns.flatMap((column) => column.cards) || []; }
 function assignmentNames(card) { return [...new Set([card.assignee,...(card.assignees || []).map((user) => user.name)].filter(Boolean))]; }
 function assignees() { return [...new Set(allCards().flatMap(assignmentNames))].sort((a,b) => a.localeCompare(b,OpenBoardI18n.locale)); }
-function initials(name) { return String(name).trim().split(/\s+/).slice(0,2).map((part) => part.charAt(0)).join('').toLocaleUpperCase(OpenBoardI18n.locale); }
+function initials(name) { return productivity.initials(name,OpenBoardI18n.locale); }
 function avatar(name) { return ui`<span class="avatar a-${Math.max(assignees().indexOf(name),0)%5}" title="${escapeHTML(name)}" aria-label="${escapeHTML(name)}">${escapeHTML(initials(name))}</span>`; }
 function roleLabel(role) { return ({admin:tr('Amministratore'),member:tr('Membro'),observer:tr('Osservatore')})[role] || role || ''; }
 function coverLabel(cover) { return ({sage:tr('Salvia'),peach:tr('Pesca'),lavender:tr('Lavanda'),blue:tr('Blu')})[cover] || cover; }
@@ -270,7 +276,7 @@ function renderColumn(column) {
 function renderList() {
   return ui`<div class="list-view"><div class="list-header"><span>Scheda</span><span>Etichette e priorità</span><span>Scadenza</span><span>Responsabile</span></div>${state.board.columns.map((column) => ui`<div class="list-group-title"><span class="column-dot"></span>${escapeHTML(column.title)}<span>${sorted(column.cards).length}</span><button class="icon-button tiny" type="button" data-add-card="${Number(column.id)}" aria-label="Aggiungi scheda in ${escapeHTML(column.title)}" data-write>${icon('plus')}</button></div>${sorted(column.cards).map((card) => ui`<article class="list-row ${card.completed ? 'completed' : ''}" data-card-id="${Number(card.id)}" tabindex="${state.selectionMode ? -1 : 0}" role="${state.selectionMode ? 'group' : 'button'}" aria-label="${state.selectionMode ? tr('Scheda') : tr('Apri scheda')}: ${escapeHTML(card.title)}"><div class="list-row-title">${selectionCheckbox(card)}${completionButton(card)}<h3>${escapeHTML(card.title)}</h3></div><div class="card-tags">${labelBadges(card)}${priorityBadge(card)}${blockedBadge(card)}</div><div>${dueDate(card) || '—'}</div><div class="list-assignee">${assignmentNames(card).length ? `${avatar(assignmentNames(card)[0])}${escapeHTML(assignmentNames(card).join(', '))}` : tr('Non assegnata')}</div></article>`).join('')}`).join('')}<div class="list-add-row"><button class="add-column-button" type="button" data-add-column data-write>${icon('plus')}Aggiungi una lista</button></div></div>`;
 }
-function renderCalendar() {
+function renderCalendarAgenda() {
   const cards = allCards().filter(matches);
   const dates = [...new Set(cards.map((card) => card.due_date || ''))].sort((a,b) => (a || '9999').localeCompare(b || '9999'));
   return ui`<div class="calendar-view">${dates.length ? dates.map((date) => ui`<section class="calendar-day"><h2>${date ? escapeHTML(new Date(`${date}T12:00:00`).toLocaleDateString(OpenBoardI18n.locale,{weekday:'long',day:'numeric',month:'long',year:'numeric'})) : tr('Senza scadenza')}</h2>${cards.filter((card) => (card.due_date || '') === date).map(renderCard).join('')}</section>`).join('') : ui`<p>Nessuna scheda con questi filtri.</p>`}</div>`;
@@ -287,6 +293,7 @@ async function renderStats() {
   } catch (error) { if (sessionCurrent(context) && !error.staleSession && state.view === 'stats' && state.board?.id === boardId) $('board-canvas').innerHTML = ui`<div class="canvas-message"><h2>Statistiche non disponibili</h2><p>${escapeHTML(error.message)}</p></div>`; }
 }
 function renderBoard() {
+  const focusedCard = document.activeElement?.closest?.('[data-card-id]')?.dataset.cardId;
   if (!state.board) $('board-canvas').innerHTML = ui`<div class="canvas-message"><span class="message-icon">${icon('spark')}</span><h2>Le grandi idee iniziano qui.</h2><p>Crea una bacheca per organizzare il lavoro del team.</p><button class="button primary" type="button" data-create-board data-write>${icon('plus')}Crea una bacheca</button></div>`;
   else if (state.view === 'stats') { $('board-canvas').innerHTML = ui`<div class="initial-loading"><span class="spinner"></span>Calcolo statistiche…</div>`; renderStats(); }
   else if (state.view === 'calendar') $('board-canvas').innerHTML = renderCalendar();
@@ -294,6 +301,7 @@ function renderBoard() {
   else if (state.view === 'list') $('board-canvas').innerHTML = renderList();
   else $('board-canvas').innerHTML = ui`<div class="kanban-board">${state.board.columns.map(renderColumn).join('')}<button class="add-column-button" type="button" data-add-column data-write>${icon('plus')}Aggiungi una lista</button></div>`;
   updateSelection(); updateFilters(); updateBusy();
+  if (focusedCard) $('board-canvas').querySelector(`[data-card-id="${Number(focusedCard)}"]`)?.focus({preventScroll:true});
 }
 function route(boardId, cardId = null, replace = false) {
   const hash = boardId ? `#board/${Number(boardId)}${cardId ? '/card/'+Number(cardId) : ''}` : '#';
@@ -391,7 +399,7 @@ function closeMenus() { document.querySelectorAll('.dropdown[open]').forEach((de
 const dialogFocus = new Map();
 function openDialog(id) {
   closeMenus();
-  if (!$(id).open) { dialogFocus.set(id,document.activeElement); $(id).showModal(); }
+  if (!$(id).open) { for(const form of $(id).querySelectorAll('form'))clearFormErrors(form);dialogFocus.set(id,document.activeElement); $(id).showModal(); }
   updateBusy();
 }
 function cardData() {
@@ -488,7 +496,7 @@ async function openCard(cardId, columnId, {navigate = true} = {}) {
     if (cardId) { const result = await api(`/api/cards/${Number(cardId)}`); card = result.card || result; }
     if (sequence !== state.cardSequence || state.board?.id !== boardId || state.loadSequence !== boardLoadSequence || state.loading || state.saving) return;
     if (card && !state.board.columns.some((column) => column.id === card.column_id)) throw new APIError(tr('Questa scheda appartiene a un’altra bacheca. Aprila dalla ricerca globale.'));
-    state.cardEditor = {id:card?.id || null,version:card?.version,cover:card?.cover || '',checklist:[],archived:!!card?.archived,pending:null,persistedMilestone:card?.milestone_key || ''};
+    const editor=state.cardEditor = {id:card?.id || null,version:card?.version,cover:card?.cover || '',checklist:[],archived:!!card?.archived,pending:null,persistedMilestone:card?.milestone_key || ''};
     $('card-form').reset();
     $('card-dialog-context').textContent = card ? tr('DETTAGLI DELLA SCHEDA') : tr('UNA NUOVA IDEA');
     $('card-column').innerHTML = state.board.columns.map((column) => ui`<option value="${Number(column.id)}">${escapeHTML(column.title)}</option>`).join('');
@@ -506,6 +514,7 @@ async function openCard(cardId, columnId, {navigate = true} = {}) {
     if (navigate && cardId) route(state.board.id,cardId);
     loadProductivityCard(cardId,boardId,sequence);
     if (cardId) loadComments(cardId);
+    return editor;
   } catch (error) { if (!error.staleSession) toast(error.message,true); }
 }
 function boardData() { return {name:$('board-name').value.trim(),description:$('board-description-input').value.trim(),color:$('board-color').value}; }
@@ -574,7 +583,7 @@ function showAuth(setup) {
 }
 function showAccount() {
   const user = state.auth?.user;
-  panel(tr('Account e preferenze'),ui`<p>${user ? ui`<strong>${escapeHTML(user.name)}</strong> · ${escapeHTML(user.username)} · ${escapeHTML(roleLabel(user.role))}` : tr('Modalità locale: autenticazione disattivata sul server.')}</p><div class="preferences"><label class="field-label" for="theme-setting">Tema</label><select id="theme-setting"><option value="light">Chiaro</option><option value="dark">Scuro</option></select><label class="field-label" for="density-setting">Densità delle schede</label><select id="density-setting"><option value="comfortable">Comoda</option><option value="compact">Compatta</option></select></div>${user ? ui`<form id="profile-form"><h3>Il tuo profilo</h3><label class="field-label" for="profile-name">Nome visualizzato</label><input id="profile-name" required maxlength="100" value="${escapeHTML(user.name)}"><button class="button secondary" type="submit">Salva nome</button></form><button id="manage-sessions" class="button secondary" type="button">Sessioni attive</button><form id="password-form"><h3>Cambia password</h3><label class="field-label" for="current-password">Password attuale</label><input id="current-password" type="password" required autocomplete="current-password"><label class="field-label" for="new-password">Nuova password (almeno 12 caratteri)</label><input id="new-password" type="password" required minlength="12" maxlength="256" autocomplete="new-password"><button class="button secondary" type="submit">Aggiorna password</button></form>${user.role === 'admin' ? ui`<button id="manage-users" class="button secondary" type="button">Gestisci utenti</button>` : ''}<button id="logout" class="button danger-subtle" type="button">Esci dall’account</button>` : ''}<p id="panel-error" class="form-error" role="alert"></p>`,'account');
+  panel(tr('Account e preferenze'),ui`<p>${user ? ui`<strong>${escapeHTML(user.name)}</strong> · ${escapeHTML(user.username)} · ${escapeHTML(roleLabel(user.role))}` : tr('Modalità locale: autenticazione disattivata sul server.')}</p><div class="personal-tools"><button type="button" class="button secondary" data-show-drafts>Bozze delle schede</button><button type="button" class="button secondary" data-show-commands>Comandi</button>${canInspectStorage() ? ui`<button type="button" class="button secondary" data-show-storage>Capacità e conservazione</button>` : ''}</div><div class="preferences"><label class="field-label" for="theme-setting">Tema</label><select id="theme-setting"><option value="light">Chiaro</option><option value="dark">Scuro</option></select><label class="field-label" for="density-setting">Densità delle schede</label><select id="density-setting"><option value="comfortable">Comoda</option><option value="compact">Compatta</option></select></div>${user ? ui`<form id="profile-form"><h3>Il tuo profilo</h3><label class="field-label" for="profile-name">Nome visualizzato</label><input id="profile-name" required maxlength="100" value="${escapeHTML(user.name)}"><button class="button secondary" type="submit">Salva nome</button></form><button id="manage-sessions" class="button secondary" type="button">Sessioni attive</button><form id="password-form"><h3>Cambia password</h3><label class="field-label" for="current-password">Password attuale</label><input id="current-password" type="password" required autocomplete="current-password"><label class="field-label" for="new-password">Nuova password (almeno 12 caratteri)</label><input id="new-password" type="password" required minlength="12" maxlength="256" autocomplete="new-password"><button class="button secondary" type="submit">Aggiorna password</button></form>${user.role === 'admin' ? ui`<button id="manage-users" class="button secondary" type="button">Gestisci utenti</button>` : ''}<button id="logout" class="button danger-subtle" type="button">Esci dall’account</button>` : ''}<p id="panel-error" class="form-error" role="alert"></p>`,'account');
   $('theme-setting').value = stored('theme','light'); $('density-setting').value = stored('density','comfortable');
 }
 async function showUsers() {
@@ -621,20 +630,46 @@ async function previewImport(file) {
 }
 function showGlobalSearch() {
   ++globalSearchSequence; clearTimeout(searchTimer);
+  state.globalSearch=null;
   panel(tr('Ricerca in tutte le bacheche'),ui`<label class="field-label" for="global-query">Titolo o descrizione della scheda</label><input id="global-query" type="search" maxlength="200" placeholder="Cerca nel workspace…"><div id="global-results" aria-live="polite"></div>`,'search');
   $('global-query').focus();
 }
 let globalSearchSequence = 0;
-async function globalSearch(query) {
+async function globalSearch(query,append=false) {
   if (state.panel !== 'search' || !$('global-results') || !$('panel-dialog').open) return;
+  query=query.trim();
   const context = sessionContext();
+  const previous=state.globalSearch;
+  if (append && (!previous || previous.query!==query || previous.loading || !previous.next || !sessionCurrent(previous.context))) return;
   const sequence = ++globalSearchSequence;
-  if (!query.trim()) { $('global-results').innerHTML = ui`<p>Scrivi per cercare le schede a cui hai accesso.</p>`; return; }
+  if (!query) { state.globalSearch=null;$('global-results').innerHTML = ui`<p>Scrivi per cercare le schede a cui hai accesso.</p>`; return; }
+  const search=state.globalSearch={query,context,cards:append ? [...previous.cards]:[],next:append ? previous.next:null,loading:true};
+  if(append){$('global-more')?.setAttribute('aria-disabled','true');$('global-more')?.setAttribute('aria-busy','true');}
+  else $('global-results').innerHTML=ui`<p class="helper-text">Caricamento…</p>`;
   try {
-    const result = await api(`/api/search?q=${encodeURIComponent(query.trim())}`);
-    if (!sessionCurrent(context) || sequence !== globalSearchSequence || state.panel !== 'search') return;
-    $('global-results').innerHTML = (result.cards || []).map((card) => ui`<button type="button" class="search-result" data-search-card="${Number(card.id)}" data-search-board="${Number(card.board_id)}"><strong>${escapeHTML(card.title)}</strong><span>${escapeHTML(card.board_name)} / ${escapeHTML(card.column_title)} · ${escapeHTML(priorities[card.priority] || tr('Normale'))}${card.due_date ? ' · '+escapeHTML(card.due_date) : ''}</span></button>`).join('') || ui`<p>Nessuna scheda trovata.</p>`;
-  } catch (error) { if (sessionCurrent(context) && !error.staleSession && sequence === globalSearchSequence && $('global-results')) $('global-results').textContent = error.message; }
+    const result = await api(`/api/search?q=${encodeURIComponent(query)}&limit=30${append ? '&before='+search.next:''}`);
+    if (!sessionCurrent(context) || sequence !== globalSearchSequence || state.panel !== 'search' || !$('panel-dialog').open || state.globalSearch!==search) return;
+    const known=new Set(search.cards.map(card=>card.id));
+    const firstNew=(result.cards || []).find(card=>!known.has(card.id))?.id;
+    for(const card of result.cards || [])if(!known.has(card.id)){search.cards.push(card);known.add(card.id);}
+    search.next=Number.isSafeInteger(result.next_cursor) && result.next_cursor>0 ? result.next_cursor:null;
+    search.loading=false;renderGlobalSearch(firstNew);
+  } catch (error) {
+    if (sessionCurrent(context) && !error.staleSession && sequence === globalSearchSequence && state.panel==='search' && state.globalSearch===search) {
+      search.loading=false;
+      if(append){renderGlobalSearch();toast(error.message,true);}else $('global-results').textContent=error.message;
+    }
+  }
+}
+function renderGlobalSearch(firstNewId=null) {
+  const search=state.globalSearch;
+  if(!search || !sessionCurrent(search.context) || state.panel!=='search')return;
+  const moreFocused=document.activeElement?.id==='global-more';
+  const focusedCard=document.activeElement?.dataset?.searchCard;
+  $('global-results').innerHTML = search.cards.map((card) => ui`<button type="button" class="search-result" data-search-card="${Number(card.id)}" data-search-board="${Number(card.board_id)}"><strong>${escapeHTML(card.title)}</strong><span>${escapeHTML(card.board_name)} / ${escapeHTML(card.column_title)} · ${escapeHTML(priorities[card.priority] || tr('Normale'))}${card.due_date ? ' · '+escapeHTML(card.due_date) : ''}</span></button>`).join('') || ui`<p>Nessuna scheda trovata.</p>`;
+  if(search.next)$('global-results').innerHTML+=ui`<button type="button" class="button secondary" id="global-more">Carica altri</button>`;
+  if(moreFocused){const target=search.next ? $('global-more'):$('global-results').querySelector(`[data-search-card="${Number(firstNewId)}"]`) || $('global-query');target?.focus();}
+  else if(focusedCard)$('global-results').querySelector(`[data-search-card="${Number(focusedCard)}"]`)?.focus();
 }
 function showMove() {
   const editor = state.cardEditor;
@@ -768,10 +803,11 @@ document.addEventListener('click',async (event) => {
       if (state.importData) perform(() => committed(() => api('/api/import','POST',state.importData,{key:state.importKey}),async (result) => { closeDialog('panel-dialog',{force:true}); await refreshBoards(); await selectBoard(result.id || result.board?.id,{quiet:true}); },tr('Bacheca importata.')),'','panel-error'); break;
     case 'logout':
       if (!closeEditors()) break;
-      perform(async () => { invalidateSession(); await api('/api/auth/logout','POST',{}); closeDialog('panel-dialog',{force:true}); setSession(await api('/api/auth/session')); state.board = null; state.boards = []; renderSidebar(); renderHeader(); renderBoard(); showAuth(false); }); break;
+      perform(async () => { invalidateSession(); await api('/api/auth/logout','POST',{}); sessionTabs.publish(); closeDialog('panel-dialog',{force:true}); setSession(await api('/api/auth/session')); state.board = null; state.boards = []; renderSidebar(); renderHeader(); renderBoard(); showAuth(false); }); break;
   }
 });
 document.addEventListener('keydown',(event) => {
+  if (productivity.composing(event)) return;
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); if (!document.querySelector('dialog[open]')) $('search-input').focus(); }
   if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('[data-card-id]')) { event.preventDefault(); openCard(event.target.dataset.cardId); }
   if (event.key.toLowerCase() === 'm' && event.target.matches('[data-card-id]') && canWrite()) { event.preventDefault(); openCard(event.target.dataset.cardId).then(showMove); }
@@ -811,12 +847,12 @@ $('checklist-items').addEventListener('change',(event) => {
   }
 });
 $('add-checklist-item').addEventListener('click',addChecklistItem);
-$('checklist-new').addEventListener('keydown',(event) => { if (event.key === 'Enter') { event.preventDefault(); addChecklistItem(); } });
+$('checklist-new').addEventListener('keydown',(event) => { if (event.key === 'Enter' && !productivity.composing(event)) { event.preventDefault(); addChecklistItem(); } });
 $('card-form').addEventListener('input',saveDraft);
 $('card-form').addEventListener('change',saveDraft);
 $('move-column').addEventListener('change',updateMovePosition);
 document.addEventListener('input',(event) => {
-  if (event.target.id === 'global-query') { clearTimeout(searchTimer); searchTimer = setTimeout(() => globalSearch(event.target.value),250); }
+  if (event.target.id === 'global-query') { clearTimeout(searchTimer);++globalSearchSequence;state.globalSearch=null;if(!productivity.composing(event))searchTimer = setTimeout(() => globalSearch(event.target.value),250); }
 });
 document.addEventListener('change',(event) => {
   if (event.target.id === 'theme-setting') { document.documentElement.dataset.theme = event.target.value; remember('theme',event.target.value); }
@@ -858,7 +894,7 @@ $('card-form').addEventListener('submit',(event) => {
     return;
   }
   const editor = state.cardEditor; const data = productivity.planningPayload(cardData(),state.board.custom_fields,state.board.milestones,editor.persistedMilestone);
-  if (!data.title) { $('card-form-error').textContent = tr('Dai un titolo alla tua scheda.'); $('card-title').focus(); return; }
+  if (!data.title) { fieldError($('card-title'),tr('Dai un titolo alla tua scheda.')); $('card-title').focus(); return; }
   const key = stableRequest(editor,data); saveDraft();
   perform(() => committed(async () => {
     editor.pendingAmbiguous = true; saveDraft();
@@ -882,7 +918,7 @@ $('delete-card').addEventListener('click',() => {
 });
 $('board-form').addEventListener('submit',(event) => {
   event.preventDefault(); const data = boardData();
-  if (!data.name) { $('board-form-error').textContent = tr('Scegli un nome per la bacheca.'); return; }
+  if (!data.name) { fieldError($('board-name'),tr('Scegli un nome per la bacheca.')); $('board-name').focus(); return; }
   const editor = state.boardEditor; state.boardRequest = state.boardRequest || {};
   if(!editor)data.language=OpenBoardI18n.locale;
   perform(() => committed(async () => {
@@ -1224,7 +1260,7 @@ async function exportProductivity(kind) {
     toast(csv ? tr('CSV completo scaricato con celle protette per i fogli di calcolo.') : tr('Calendario scaricato con scadenze e date di inizio.'));
   });
 }
-function showShortcuts() { panel(tr('Scorciatoie da tastiera'),ui`<dl class="shortcuts"><dt>⌘ / Ctrl + K</dt><dd>Vai alla ricerca della bacheca</dd><dt>N</dt><dd>Nuova scheda</dd><dt>F</dt><dd>Ricerca nella bacheca</dd><dt>G</dt><dd>Ricerca globale</dd><dt>?</dt><dd>Mostra questa guida</dd><dt>Invio / Spazio su una scheda</dt><dd>Apri scheda</dd><dt>M su una scheda</dt><dd>Apri e sposta scheda</dd><dt>Esc</dt><dd>Chiudi il pannello o editor (con conferma per bozze)</dd></dl><p>Le scorciatoie N, F, G e ? funzionano quando non stai scrivendo e non ci sono finestre aperte.</p>`,'shortcuts'); }
+function showShortcuts() { panel(tr('Scorciatoie da tastiera'),ui`<dl class="shortcuts"><dt>⌘ / Ctrl + K</dt><dd>Vai alla ricerca della bacheca</dd><dt>⌘ / Ctrl + Shift + P</dt><dd>Comandi</dd><dt>N</dt><dd>Nuova scheda</dd><dt>F</dt><dd>Ricerca nella bacheca</dd><dt>G</dt><dd>Ricerca globale</dd><dt>?</dt><dd>Mostra questa guida</dd><dt>Invio / Spazio su una scheda</dt><dd>Apri scheda</dd><dt>M su una scheda</dt><dd>Apri e sposta scheda</dd><dt>↑ ↓ ← → / Home / End</dt><dd>Naviga fra le schede; Ctrl + Home / End va alla prima o ultima scheda.</dd><dt>Esc</dt><dd>Chiudi il pannello o editor (con conferma per bozze)</dd></dl><p>Le scorciatoie N, F, G e ? funzionano quando non stai scrivendo e non ci sono finestre aperte.</p>`,'shortcuts'); }
 
 document.addEventListener('click',async (event) => {
   const target = event.target.closest('button'); if (!target || target.disabled) return;
@@ -1305,6 +1341,7 @@ document.addEventListener('submit',(event) => {
   else if (form.id === 'edit-comment-form') { const cardId = Number(form.dataset.card); perform(() => committed(() => api(`/api/comments/${Number(form.dataset.comment)}`,'PATCH',{body:$('edit-comment-body').value.trim()},{version:Number(form.dataset.version)}),async () => { closeDialog('panel-dialog',{force:true}); if (state.cardEditor?.id === cardId) await loadComments(cardId); },tr('Commento aggiornato.')),'','panel-error'); }
 });
 document.addEventListener('keydown',(event) => {
+  if (productivity.composing(event)) return;
   if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.target.closest('input,textarea,select,[contenteditable="true"]') || document.querySelector('dialog[open]')) return;
   if (event.key === '?') { event.preventDefault(); showShortcuts(); }
   else if (event.key.toLowerCase() === 'n' && canWrite()) { event.preventDefault(); openCard(); }
@@ -1325,3 +1362,217 @@ document.addEventListener('openboard:languagechange',(event) => {
   }
 });
 document.addEventListener('DOMContentLoaded',loadInitial,{once:true});
+
+/* Personal browser tools. Storage and tab messages never grant authorization. */
+function localDrafts() {
+  const owner=sessionOwner();
+  try { return productivity.listCardDrafts(localStorage,owner); } catch { return []; }
+}
+function showDraftCenter() {
+  if (state.saving || (state.auth?.enabled && !state.auth.user) || !closeEditors()) return;
+  saveDraft();
+  const context=sessionContext();
+  state.draftCenter={context,items:localDrafts()};
+  panel(tr('Bozze delle schede'),ui`<p>Bozze locali delle schede per questo account. La riapertura verifica i permessi sul server. Le bozze di revisioni, commenti e moduli restano nei rispettivi editor.</p><div class="draft-center">${state.draftCenter.items.map((item,index)=>ui`<article class="draft-row"><div><strong>${escapeHTML(item.title || tr('Nuova scheda'))}</strong><time>${escapeHTML(formatDate(new Date(item.updatedAt).toISOString()))}</time><span>${item.cardId ? tr('Scheda esistente'):tr('Nuova scheda')}</span></div><button type="button" class="button secondary" data-draft-resume="${index}">Riprendi</button><button type="button" class="button danger-subtle" data-draft-discard="${index}">Scarta</button></article>`).join('') || ui`<p>Nessuna bozza di scheda disponibile.</p>`}</div><p id="panel-error" class="form-error" role="alert"></p>`,'draft-center');
+}
+async function resumeCardDraft(index) {
+  const center=state.draftCenter,item=center?.items[index];
+  if (!item || !sessionCurrent(center.context) || !closeEditors()) return;
+  // Rehydrate the current authorized board and card, then use the existing
+  // recovery action rather than trusting board/card data found in local storage.
+  closeDialog('panel-dialog',{force:true});
+  await selectBoard(item.boardId,{reset:false,quiet:true});
+  if (!sessionCurrent(center.context) || state.board?.id!==item.boardId) return;
+  const editor=await openCard(item.cardId);
+  if (!editor || !sessionCurrent(center.context) || state.board?.id!==item.boardId || state.cardEditor!==editor || editor.id!==item.cardId || !$('card-dialog').open) return;
+  $('recover-draft').click();
+}
+let tabChannel;
+try { if (typeof BroadcastChannel==='function') tabChannel=new BroadcastChannel('openboard.session-events.v1'); } catch { /* Storage fallback below. */ }
+let tabStorage;
+try { tabStorage=localStorage; } catch { /* Browser storage can be disabled. */ }
+const sessionTabs=productivity.tabSessionBridge({storage:tabStorage,channel:tabChannel,id:uuid,onLogout() {
+  if (!state.auth?.user) return;
+  saveDraft(); invalidateSession();
+  setSession({enabled:true,setup_required:false,user:null,csrf:''});
+  state.draftCenter=null;state.commandActions=[];
+  showAuth(false);
+  toast(tr('Disconnessione da un’altra scheda del browser. Accedi di nuovo.'),true);
+}});
+if (tabChannel) tabChannel.onmessage=event=>sessionTabs.receive(event.data);
+window.addEventListener('storage',event=>{if(event.key===sessionTabs.key && event.newValue)sessionTabs.receive(event.newValue);});
+
+function calendarControls(mode,anchor) {
+  return ui`<div class="calendar-controls" role="group" aria-label="Periodo del calendario">${mode==='agenda' ? '':ui`<button type="button" class="button secondary" data-calendar-shift="-1" aria-label="Periodo precedente">←</button><button type="button" class="button secondary" data-calendar-today>Oggi</button><button type="button" class="button secondary" data-calendar-shift="1" aria-label="Periodo successivo">→</button><label>Data di riferimento<input id="calendar-anchor" type="date" min="0001-01-01" max="9999-12-31" value="${anchor}"></label>`}${[['agenda',tr('Agenda')],['month',tr('Mese')],['week',tr('Settimana')]].map(([value,label])=>ui`<button type="button" class="button secondary" data-calendar-mode="${value}" aria-pressed="${mode===value}">${label}</button>`).join('')}</div>`;
+}
+function refreshCalendarControl(selector) {
+  renderBoard();$('board-canvas').querySelector(selector)?.focus({preventScroll:true});
+}
+function renderCalendar() {
+  const mode=['month','week'].includes(state.calendarMode) ? state.calendarMode:'agenda';
+  const anchor=state.calendarAnchor || todayISO();
+  if (mode==='agenda') return calendarControls(mode,anchor)+renderCalendarAgenda();
+  const period=productivity.calendarPeriod(mode,anchor),cards=allCards().filter(matches);
+  const title=mode==='month' ? new Intl.DateTimeFormat(OpenBoardI18n.locale,{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(period.anchor+'T12:00:00Z')):period.days.filter(Boolean).filter((day,index,days)=>index===0 || index===days.length-1).map(productivity.dateText).join(' – ');
+  const weekdays=period.days.slice(0,7).map(day=>day ? new Intl.DateTimeFormat(OpenBoardI18n.locale,{weekday:'short',timeZone:'UTC'}).format(new Date(day+'T12:00:00Z')):'');
+  return calendarControls(mode,anchor)+ui`<h2 class="calendar-heading">${escapeHTML(title)}</h2><div class="calendar-grid-scroll" tabindex="0" role="region" aria-label="Calendario schede"><div class="calendar-grid">${weekdays.map(day=>ui`<div class="calendar-weekday">${escapeHTML(day)}</div>`).join('')}${period.days.map(day=>day ? ui`<section class="calendar-cell ${day.slice(0,7)!==period.anchor.slice(0,7) ? 'outside-period':''}"><h3><time datetime="${day}">${escapeHTML(productivity.dateText(day))}</time></h3>${cards.filter(card=>card.due_date===day).map(renderCard).join('')}</section>`:ui`<div aria-hidden="true"></div>`).join('')}</div></div><section class="calendar-undated"><h2>Senza scadenza</h2>${cards.filter(card=>!card.due_date).map(renderCard).join('')}</section>`;
+}
+function commandActions() {
+  const signedIn=!state.auth?.enabled || !!state.auth.user;
+  if (!signedIn) return [];
+  return [
+    {id:'drafts',name:tr('Bozze delle schede'),run:showDraftCenter},
+    {id:'search',name:tr('Ricerca in tutte le bacheche'),run:showGlobalSearch},
+    {id:'account',name:tr('Il tuo profilo'),run:showAccount},
+    {id:'shortcuts',name:tr('Scorciatoie da tastiera'),run:showShortcuts},
+    ...(canCreateBoard() ? [{id:'board',name:tr('Nuova bacheca'),run:()=>openBoardEditor()}]:[]),
+    ...(state.board ? [{id:'calendar',name:tr('Calendario'),run:()=>{state.view='calendar';remember('view','calendar');renderBoard();}},{id:'table',name:tr('Tabella'),run:()=>{state.view='table';remember('view','table');renderBoard();}}]:[]),
+    ...(state.board?.columns.length && canWrite() ? [{id:'card',name:tr('Nuova scheda'),run:()=>openCard()}]:[])
+  ];
+}
+function showCommandPalette() {
+  if (state.saving || !closeEditors()) return;
+  state.commandContext=sessionContext();state.commandActions=commandActions();
+  panel(tr('Comandi'),ui`<label class="field-label" for="command-query">Cerca comandi</label><input id="command-query" type="search" autocomplete="off"><div id="command-results"></div>`,'commands');
+  renderCommands('');$('command-query').focus();
+}
+function renderCommands(query) {
+  if (state.panel!=='commands' || !sessionCurrent(state.commandContext)) return;
+  const needle=query.trim().toLocaleLowerCase(OpenBoardI18n.locale);
+  $('command-results').innerHTML=(state.commandActions || []).filter(item=>item.name.toLocaleLowerCase(OpenBoardI18n.locale).includes(needle)).map(item=>ui`<button type="button" class="command-option button secondary" data-command="${item.id}">${escapeHTML(item.name)}</button>`).join('') || ui`<p>Nessun comando disponibile.</p>`;
+}
+function fieldError(input,message) {
+  if (!input?.form) return;
+  if (!input.id) input.id=`field-${uuid()}`;
+  const id=input.id+'-validation';
+  let error=$(id);
+  if (!error) { error=document.createElement('span');error.id=id;error.className='field-validation';input.insertAdjacentElement('afterend',error); }
+  error.textContent=message;
+  input.setAttribute('aria-invalid','true');
+  const descriptions=new Set((input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));descriptions.add(id);
+  input.setAttribute('aria-describedby',[...descriptions].join(' '));
+}
+function clearFieldError(input) {
+  if (!input?.id) return;
+  const id=input.id+'-validation';$(id)?.remove();input.removeAttribute('aria-invalid');
+  const descriptions=(input.getAttribute('aria-describedby') || '').split(/\s+/).filter(value=>value && value!==id);
+  if(descriptions.length)input.setAttribute('aria-describedby',descriptions.join(' '));else input.removeAttribute('aria-describedby');
+}
+function clearFormErrors(form) {
+  if(!form)return;
+  for(const input of form.elements)clearFieldError(input);
+  form.querySelector('.validation-summary')?.remove();
+}
+function showFormErrors(form) {
+  if (!form) return;
+  const invalid=[...form.elements].filter(input=>input.willValidate && !input.validity.valid);
+  let summary=form.querySelector('.validation-summary');
+  if (!invalid.length) { summary?.remove();return; }
+  if (!summary) { summary=document.createElement('div');summary.className='validation-summary';summary.setAttribute('role','alert');form.prepend(summary); }
+  invalid.forEach(input=>fieldError(input,input.validationMessage));
+  summary.innerHTML=ui`<p>Controlla i campi indicati.</p><ul>${invalid.map(input=>ui`<li><button class="subtle-button" type="button" data-error-field="${escapeHTML(input.id)}">${escapeHTML(input.labels?.[0]?.textContent?.trim() || input.name || tr('Campo'))}: ${escapeHTML(input.validationMessage)}</button></li>`).join('')}</ul>`;
+}
+document.addEventListener('invalid',event=>{fieldError(event.target,event.target.validationMessage);showFormErrors(event.target.form);},true);
+document.addEventListener('reset',event=>clearFormErrors(event.target),true);
+document.addEventListener('input',event=>{if(event.target.validity?.valid){clearFieldError(event.target);if(event.target.form?.querySelector('.validation-summary'))showFormErrors(event.target.form);}if(event.target.id==='command-query' && !productivity.composing(event))renderCommands(event.target.value);});
+document.addEventListener('compositionend',event=>{if(event.target.id==='command-query')renderCommands(event.target.value);if(event.target.id==='global-query')globalSearch(event.target.value);});
+document.addEventListener('click',event=>{
+  const target=event.target.closest('button');if(!target || target.disabled)return;
+  if(target.id==='drafts-nav' || target.hasAttribute('data-show-drafts'))showDraftCenter();
+  if(target.id==='commands-nav' || target.hasAttribute('data-show-commands'))showCommandPalette();
+  if(target.id==='global-more' && state.globalSearch?.query===$('global-query').value.trim())globalSearch(state.globalSearch.query,true);
+  if(target.dataset.errorField)$(target.dataset.errorField)?.focus();
+  if(target.dataset.draftResume!==undefined)resumeCardDraft(Number(target.dataset.draftResume)).catch(error=>{if(!error.staleSession)toast(error.message,true);});
+  if(target.dataset.draftDiscard!==undefined){const center=state.draftCenter,item=center?.items[Number(target.dataset.draftDiscard)];if(item && sessionCurrent(center.context)){const removed=productivity.removeOwnedDraft(tabStorage,item,sessionOwner());if(!removed)toast(tr('La bozza è cambiata. Aggiorna l’elenco prima di eliminarla.'),true);showDraftCenter();}}
+  if(target.dataset.command){if(state.panel!=='commands' || !sessionCurrent(state.commandContext))return;const action=commandActions().find(item=>item.id===target.dataset.command);if(action){closeDialog('panel-dialog',{force:true});action.run();}}
+  if(target.dataset.calendarMode && ['agenda','month','week'].includes(target.dataset.calendarMode)){state.calendarMode=target.dataset.calendarMode;refreshCalendarControl(`[data-calendar-mode="${target.dataset.calendarMode}"]`);}
+  if(target.dataset.calendarShift && ['-1','1'].includes(target.dataset.calendarShift)){state.calendarAnchor=productivity.calendarPeriod(state.calendarMode==='week' ? 'week':'month',state.calendarAnchor || todayISO(),Number(target.dataset.calendarShift)).anchor;refreshCalendarControl(`[data-calendar-shift="${target.dataset.calendarShift}"]`);}
+  if(target.hasAttribute('data-calendar-today')){state.calendarAnchor=todayISO();refreshCalendarControl('[data-calendar-today]');}
+});
+document.addEventListener('change',event=>{if(event.target.id==='calendar-anchor' && productivity.validDate(event.target.value) && event.target.value>='0001-01-01'){state.calendarAnchor=event.target.value;refreshCalendarControl('#calendar-anchor');}});
+document.addEventListener('keydown',event=>{
+  if(productivity.composing(event))return;
+  if((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase()==='p'){event.preventDefault();if(!document.querySelector('dialog[open]'))showCommandPalette();return;}
+  if(event.target.id==='command-query' && event.key==='ArrowDown'){event.preventDefault();$('command-results').querySelector('button')?.focus();return;}
+  const card=event.target.matches?.('[data-card-id]') ? event.target:null;
+  if(!card || event.altKey || event.metaKey || !['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+  const groups=[...$('board-canvas').querySelectorAll('.column-cards')].map(column=>[...column.querySelectorAll('[data-card-id]')].map(node=>node.dataset.cardId));
+  if(!groups.length)groups.push([...$('board-canvas').querySelectorAll('[data-card-id]')].map(node=>node.dataset.cardId));
+  const id=productivity.navigateCards(groups,card.dataset.cardId,event.key,event.ctrlKey);
+  if(id!==null){event.preventDefault();$('board-canvas').querySelector(`[data-card-id="${Number(id)}"]`)?.focus();}
+});
+
+/* Administrator-only capacity measurements. Refresh is explicit; no data is
+ * cached in browser storage and late replies cannot populate another panel. */
+function canInspectStorage() {
+  return state.auth?.enabled===false || (state.auth?.enabled===true && state.auth.user?.role==='admin');
+}
+function storageCount(value) {
+  return Number.isSafeInteger(value) && value>=0 ? OpenBoardI18n.number(value):tr('Non disponibile');
+}
+function storageBytes(value) {
+  if(!Number.isSafeInteger(value) || value<0)return tr('Non disponibile');
+  if(value<1024)return new Intl.NumberFormat(OpenBoardI18n.locale,{style:'unit',unit:'byte',unitDisplay:'short',maximumFractionDigits:0}).format(value);
+  const units=[tr('KiB'),tr('MiB'),tr('GiB'),tr('TiB'),tr('PiB')];let amount=value/1024,index=0;
+  while(amount>=1024 && index<units.length-1){amount/=1024;index++;}
+  return OpenBoardI18n.number(amount,{maximumFractionDigits:2})+' '+units[index];
+}
+function storageBytesCell(value) {
+  const exact=Number.isSafeInteger(value) && value>=0 ? new Intl.NumberFormat(OpenBoardI18n.locale,{style:'unit',unit:'byte',unitDisplay:'short',maximumFractionDigits:0}).format(value):tr('Non disponibile');
+  return ui`<span title="${escapeHTML(exact)}">${escapeHTML(storageBytes(value))}</span>`;
+}
+function renderStorageCapacity(result) {
+  const attachments=result?.attachments || {},cache=result?.cache || {},history=result?.history || {};
+  const number=value=>escapeHTML(storageCount(value)),bytes=storageBytesCell;
+  const unlimited=()=>escapeHTML(tr('Illimitato'));
+  const limit=(value,formatter)=>value===0 ? unlimited():formatter(value);
+  const remaining=(value,maximum,formatter)=>maximum===0 ? unlimited():formatter(value);
+  const row=(label,value)=>ui`<tr><th scope="row">${escapeHTML(label)}</th><td>${value}</td></tr>`;
+  const pair=(label,group)=>ui`<tr><th scope="row">${escapeHTML(label)}</th><td>${number(group?.files)}</td><td>${bytes(group?.bytes)}</td></tr>`;
+  const boolean=value=>escapeHTML(value===true ? tr('Sì'):value===false ? tr('No'):tr('Non disponibile'));
+  const external=result?.storage_mode==='postgresql+mongodb';
+  return ui`<p><strong>Archivio:</strong> ${escapeHTML(productivity.storageLabel(result?.storage_mode) || tr('Non disponibile'))}</p>
+    ${attachments.over_limit===true ? ui`<p class="capacity-warning" role="alert">Quota totale degli allegati superata. I dati conservati restano inclusi nel conteggio.</p>`:''}
+    <div class="capacity-table-scroll"><table class="capacity-table"><caption>Allegati conservati</caption><thead><tr><th scope="col">Stato</th><th scope="col">File</th><th scope="col">Byte decodificati</th></tr></thead><tbody>
+    ${pair(tr('Attivi'),attachments.active)}${pair(tr('Nel cestino o con antenati eliminati'),attachments.trashed)}${pair(tr('Totale conservato'),attachments.total)}
+    <tr><th scope="row">Limite totale</th><td>${limit(attachments.limits?.files,number)}</td><td>${limit(attachments.limits?.bytes,bytes)}</td></tr>
+    <tr><th scope="row">Residuo della quota</th><td>${remaining(attachments.remaining?.files,attachments.limits?.files,number)}</td><td>${remaining(attachments.remaining?.bytes,attachments.limits?.bytes,bytes)}</td></tr></tbody></table></div>
+    <p>Le quote includono tutti gli allegati trattenuti, anche nel cestino o sotto schede, liste e bacheche eliminate. Eliminare o ripristinare non libera la quota totale.</p>
+    <p>Il totale misura i byte decodificati degli allegati. Non comprende cronologia, replay, indici, WAL, backup o lo spazio fisico complessivo.</p>
+    <div class="capacity-table-scroll"><table class="capacity-table"><caption>Database SQLite locale</caption><tbody>
+    ${row(tr('File database'),bytes(cache.database_bytes))}${row(tr('Dimensione logica del database'),bytes(cache.logical_database_bytes))}${row(tr('File WAL'),bytes(cache.wal_bytes))}${row(tr('File SHM'),bytes(cache.shm_bytes))}${row(tr('Pagine libere nel database'),bytes(cache.freelist_bytes))}${row(tr('Spazio disponibile sul filesystem'),bytes(cache.filesystem_available_bytes))}
+    ${row(tr('Minimo libero richiesto'),cache.minimum_free_bytes===0 ? escapeHTML(tr('Disattivato')):bytes(cache.minimum_free_bytes))}${row(tr('Massimo database configurato'),limit(cache.maximum_database_bytes,bytes))}${row(tr('Misurazione disponibile'),boolean(cache.measurement_available))}${row(tr('Controllo capacità superato'),boolean(cache.capacity_ok))}</tbody></table></div>
+    ${external ? ui`<p>In modalità PostgreSQL + MongoDB queste misure riguardano la cache SQLite locale. Le dimensioni fisiche dei database esterni e i documenti MongoDB orfani non sono misurati.</p>`:''}
+    <p>Le pagine libere sono riutilizzabili da SQLite: non sono spazio libero del filesystem.</p>
+    <div class="capacity-table-scroll"><table class="capacity-table"><caption>Cronologia e replay</caption><tbody>
+    ${row(tr('Attività'),number(history.activity_rows))}${row(tr('Commenti'),number(history.comments_rows))}${row(tr('Eventi revisioni'),number(history.review_events_rows))}${row(tr('Eventi Sprint'),number(history.sprint_events_rows))}${row(tr('Eventi richieste'),number(history.intake_events_rows))}${row(tr('Record di idempotenza'),number(history.idempotency_rows))}${row(tr('Corpi richieste idempotenti'),bytes(history.idempotency_request_bytes))}${row(tr('Corpi risposte idempotenti'),bytes(history.idempotency_response_bytes))}</tbody></table></div>
+    <p>Il pannello è di sola lettura. La gestione della conservazione dei dati resta un’operazione separata.</p>`;
+}
+async function showStorageCapacity() {
+  if(!canInspectStorage() || state.saving || !closeEditors())return;
+  panel(tr('Capacità e conservazione'),ui`<button id="storage-refresh" type="button" class="button secondary">Aggiorna misure</button><p id="storage-status" role="status" aria-live="polite"></p><div id="storage-content"></div><p id="storage-error" class="form-error" role="alert"></p>`,'storage-capacity');
+  await refreshStorageCapacity();
+}
+async function refreshStorageCapacity() {
+  if(!canInspectStorage() || state.panel!=='storage-capacity' || !$('panel-dialog').open)return;
+  const context=sessionContext(),panelSequence=state.panelSequence,sequence=state.storageSequence=(state.storageSequence || 0)+1;
+  const current=()=>canInspectStorage() && sessionCurrent(context) && state.panel==='storage-capacity' && state.panelSequence===panelSequence && state.storageSequence===sequence && $('panel-dialog').open;
+  $('storage-refresh').disabled=true;$('storage-content').setAttribute('aria-busy','true');$('storage-status').textContent=tr('Caricamento…');$('storage-error').textContent='';
+  try {
+    const result=await api('/api/admin/storage');
+    if(!current())return;
+    $('storage-content').innerHTML=renderStorageCapacity(result);
+    $('storage-status').textContent=tr`Ultimo aggiornamento: ${formatDate(new Date().toISOString())}`;
+  } catch(error) {
+    if(!current() || error.staleSession)return;
+    if(error.status===401 || error.status===403)$('storage-content').innerHTML='';
+    $('storage-error').textContent=error.message;$('storage-status').textContent=tr('Misure non aggiornate.');
+  } finally {
+    if(current()){$('storage-refresh').disabled=false;$('storage-content').setAttribute('aria-busy','false');}
+  }
+}
+document.addEventListener('click',event=>{
+  const target=event.target.closest('button');if(!target || target.disabled)return;
+  if(target.hasAttribute('data-show-storage'))showStorageCapacity();
+  if(target.id==='storage-refresh')refreshStorageCapacity();
+});

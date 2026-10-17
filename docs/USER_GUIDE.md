@@ -12,6 +12,8 @@ OpenBoard organizes work into boards, lists and cards. Start with a small board 
 
 Labels may vary with the selected language.
 
+The unreleased interface adds a command palette (`Ctrl`/`Command` + `Shift` + `P`), monthly/weekly calendar navigation and a personal center for saved card drafts. Open these through the account panel; drafts still require current server access when reopened. Arrow keys and Home/End navigate card controls. Signing out in one tab also invalidates the interface in the account's other tabs. `?pseudo=1` is a developer text-expansion mode; it does not translate user content or add a supported language.
+
 ## Accounts and permissions
 
 Global account roles and board memberships are separate. A board's display label does not make its data anonymously accessible.
@@ -32,6 +34,8 @@ Use the account menu to change your display name, update your password or revoke
 ## Everyday collaboration
 
 Cards support multiple assignees, checklist items, comments and replies, reactions, dependencies, attachments and time entries. Dependencies reject cycles. Use the card's activity history for context. Supported attachments are limited to 10 active files per card, 1 MiB each and 5 MiB total. Internal notifications are available in OpenBoard; do not assume email or push delivery.
+
+In unreleased builds, administrators can open **Account → Capacity and retention** and explicitly refresh the installation inventory. Optional installation limits count decoded attachment bytes and all retained files, including trash. Deleting a file into trash does not free this quota. A quota rejection preserves existing files; restoring them does not consume the quota a second time. The panel also displays local cache measurements and history counts. Unknown measurements are shown as unavailable. These values do not measure total PostgreSQL/MongoDB disk usage or unused MongoDB documents.
 
 Search, filters, favorites and personal bookmarks help find work. Board JSON, CSV and iCalendar exports serve different uses. A board export does not include every account or collaboration record and is not an instance backup; administrators should use the [full backup procedure](DEPLOYMENT.md#full-backup).
 

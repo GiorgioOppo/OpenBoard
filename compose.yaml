@@ -11,7 +11,7 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     tmpfs:
-      - /tmp:rw,noexec,nosuid,size=256m,uid=10001,gid=10001,mode=0700
+      - "/tmp:rw,noexec,nosuid,size=${OPENBOARD_CACHE_TMPFS_SIZE:-256m},uid=10001,gid=10001,mode=0700"
     expose: ["8080"]
     environment:
       OPENBOARD_BIND: "0.0.0.0"
@@ -20,6 +20,10 @@ services:
       OPENBOARD_AUTH: "true"
       OPENBOARD_NO_DEMO: "true"
       OPENBOARD_WORKERS: "8"
+      OPENBOARD_ATTACHMENT_LIMIT_BYTES: ${OPENBOARD_ATTACHMENT_LIMIT_BYTES:-0}
+      OPENBOARD_ATTACHMENT_LIMIT_FILES: ${OPENBOARD_ATTACHMENT_LIMIT_FILES:-0}
+      OPENBOARD_CACHE_MAX_BYTES: ${OPENBOARD_CACHE_MAX_BYTES:-0}
+      OPENBOARD_CACHE_MIN_FREE_BYTES: ${OPENBOARD_CACHE_MIN_FREE_BYTES:-0}
       OPENBOARD_PUBLIC_URL: ${OPENBOARD_PUBLIC_URL:-http://openboard.localhost}
       OPENBOARD_TRUSTED_PROXY: ${OPENBOARD_PROXY_IP:-172.30.240.2}
       OPENBOARD_POSTGRES_URL: postgresql://openboard:${POSTGRES_APP_PASSWORD:?Run python3 scripts/init-env.py}@postgres:5432/openboard?connect_timeout=10

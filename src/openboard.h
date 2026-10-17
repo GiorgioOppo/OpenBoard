@@ -32,6 +32,9 @@ typedef struct {
   const char *db_path, *public_url, *backup_path, *bind_address, *trusted_proxy;
   bool auth_enabled, no_demo, quiet;
   int busy_timeout_ms, body_limit;
+  int idempotency_ttl;
+  int64_t attachment_limit_bytes, attachment_limit_files;
+  int64_t cache_max_bytes, cache_min_free_bytes;
   bool integrity_check, checkpoint, diagnostics;
 } OBConfig;
 

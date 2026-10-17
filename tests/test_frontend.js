@@ -140,7 +140,7 @@ assert(!vm.runInContext('labelBadges({})',labelContext).includes('<img'));
     state:{auth:session(1),authGeneration:0,loadSequence:0,cardSequence:0,panelSequence:0,selectedCards:new Map(),
       board:{id:7,name:'Account A'},boards:[{id:7}],cardEditor:{id:31,version:4},view:'stats',loading:false,saving:false},
     Map,Number,JSON,Date,AbortController,setTimeout,clearTimeout,$:node,escapeHTML:(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])),uuid:()=>`key-${requests.length}`,
-    updateBusy(){},toast(message){errors.push(message);},clearFilters(){},route(){},refreshWatchState(){},
+    sessionTabs:{publish(){}},updateBusy(){},toast(message){errors.push(message);},clearFilters(){},route(){},refreshWatchState(){},
     renderSidebar(){},renderHeader(){},renderBoard(){renders.push({owner:context.state.auth?.user?.id,name:context.state.board?.name});},
     showLoadError(error){errors.push(error.message);},closeEditors:()=>true,closeDialog(id){node(id).open=false;},showAuth(){authPrompts++;},
     loadInitial:async()=>{},editorDirty:()=>true,readDraft:()=>null,pendingWorklog:()=>({}),

@@ -161,6 +161,7 @@ class OpenBoardPlanning(unittest.TestCase):
                 DROP TRIGGER review_membership_removed;
                 DROP TRIGGER review_membership_role;
                 DROP TRIGGER review_user_eligibility;
+                DROP TRIGGER review_card_content_changed;
                 DROP TABLE custom_fields; DROP TABLE milestones; DROP TABLE worklogs;
                 DROP TABLE comment_reactions; DROP TABLE card_bookmarks;
                 DROP TABLE review_events; DROP TABLE review_votes;

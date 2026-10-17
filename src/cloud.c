@@ -3,6 +3,8 @@
  * write depends on that file. SPDX-License-Identifier: MIT */
 #define _POSIX_C_SOURCE 200809L
 #include "cloud.h"
+#include "storage.h"
+#include "telemetry.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,6 +90,17 @@ static int64_t cache_epoch = -1;
 static bool mongoc_started, bootstrapped;
 static _Thread_local bool request_active;
 static DocMemo *memo;
+/* Count confirmed SQL row insertions only after the enclosing publication
+ * commits. The adapter mutex already serializes publication; TLS also keeps
+ * direct offline fixture calls independent of other threads. */
+static _Thread_local uint64_t publication_rows;
+
+static void store_lock(void) {
+  uint64_t start = ob_telemetry_now_ns();
+  pthread_mutex_lock(&store_mutex);
+  ob_telemetry_storage_record(OB_TELEMETRY_STORE_MUTEX,
+                              ob_telemetry_elapsed_ns(start), true, 0);
+}
 
 static void buffer_add(Buffer *b, const char *format, ...) {
   if (b->failed)
@@ -299,6 +312,94 @@ static int inspect_schema(sqlite3 *cache) {
   local_schema = scalar(cache, "PRAGMA user_version");
   return rc == SQLITE_DONE && local_schema > 0 ? 0 : -1;
 }
+/* Changes are collected in TEMP tables on the connection performing a request.
+ * Unlike update hooks, trigger records participate in the user's transaction:
+ * a failed domain operation rolls them back along with its data. Composite and
+ * changed primary keys are retained; tables without a usable primary key (in
+ * particular sqlite_sequence) use a bounded table-level fallback. */
+static int primary_count(const Table *t) {
+  int count = 0;
+  for (int i = 0; i < t->count; i++)
+    if (t->columns[i].primary) {
+      if (t->columns[i].affinity != SQLITE_INTEGER &&
+          t->columns[i].affinity != SQLITE_TEXT)
+        return 0;
+      count++;
+    }
+  return count < 100 ? count : 0;
+}
+static void append_change_key(Buffer *sql, const Table *t,
+                              const char *row) {
+  int count = primary_count(t);
+  if (!count) {
+    buffer_add(sql, "''");
+    return;
+  }
+  buffer_add(sql, "json_array(");
+  for (int order = 1; order <= count; order++)
+    for (int i = 0; i < t->count; i++)
+      if (t->columns[i].primary == order)
+        buffer_add(sql, "%s%s.\"%s\"", order > 1 ? "," : "", row,
+                   t->columns[i].name);
+  buffer_add(sql, ")");
+}
+static int set_change_tracking(sqlite3 *cache, bool enabled) {
+  int installed = scalar(cache, "SELECT count(*) FROM sqlite_temp_schema "
+                                "WHERE type='table' AND name='ob_cloud_tracking'");
+  if (installed < 0)
+    return -1;
+  return installed ? cache_command(cache, enabled
+                  ? "UPDATE temp.ob_cloud_tracking SET enabled=1"
+                  : "UPDATE temp.ob_cloud_tracking SET enabled=0") : 0;
+}
+static int install_change_tracker(sqlite3 *cache) {
+  int installed = scalar(cache, "SELECT count(*) FROM sqlite_temp_schema "
+                                "WHERE type='table' AND name='ob_cloud_changes'");
+  if (installed < 0)
+    return -1;
+  if (installed)
+    return set_change_tracking(cache, true) ||
+           cache_command(cache, "DELETE FROM temp.ob_cloud_changes") ? -1 : 0;
+  if (cache_command(cache, "SAVEPOINT ob_cloud_tracker"))
+    return -1;
+  if (cache_command(cache,
+                    "CREATE TEMP TABLE ob_cloud_changes(table_id INTEGER NOT "
+                    "NULL,key TEXT NOT NULL,PRIMARY KEY(table_id,key)) WITHOUT ROWID;"
+                    "CREATE TEMP TABLE ob_cloud_tracking(enabled INTEGER NOT NULL);"
+                    "INSERT INTO temp.ob_cloud_tracking VALUES(1)"))
+    goto failed;
+  static const char *events[] = {"INSERT", "UPDATE", "DELETE"};
+  for (int ti = 0; ti < table_count; ti++)
+    /* SQLite forbids triggers on its own sequence table. It is small and is
+     * copied once per publication after ordinary rows have been processed. */
+    if (strcmp(tables[ti].name, "sqlite_sequence"))
+    for (int event = 0; event < 3; event++) {
+      const Table *t = &tables[ti];
+      Buffer sql = {0};
+      buffer_add(&sql, "CREATE TEMP TRIGGER ob_cloud_track_%d_%d AFTER %s "
+                       "ON main.\"%s\" WHEN (SELECT enabled FROM ob_cloud_tracking)=1 "
+                       "BEGIN ", ti, event, events[event], t->name);
+      if (event != 0) {
+        buffer_add(&sql, "INSERT OR IGNORE INTO ob_cloud_changes VALUES(%d,", ti);
+        append_change_key(&sql, t, "OLD");
+        buffer_add(&sql, ");");
+      }
+      if (event != 2) {
+        buffer_add(&sql, "INSERT OR IGNORE INTO ob_cloud_changes VALUES(%d,", ti);
+        append_change_key(&sql, t, "NEW");
+        buffer_add(&sql, ");");
+      }
+      buffer_add(&sql, "END");
+      int rc = sql.failed ? -1 : cache_command(cache, sql.data);
+      free(sql.data);
+      if (rc)
+        goto failed;
+    }
+  return cache_command(cache, "RELEASE ob_cloud_tracker");
+failed:
+  cache_command(cache, "ROLLBACK TO ob_cloud_tracker;RELEASE ob_cloud_tracker");
+  return -1;
+}
 static int connect_postgres(void) {
   if (postgres && PQstatus(postgres) == CONNECTION_OK)
     return 0;
@@ -381,6 +482,7 @@ static int connect_mongo(void) {
   return mongo_ping();
 }
 static int advisory_lock(void) {
+  uint64_t start = ob_telemetry_now_ns();
   PGresult *r = PQexec(postgres, "SELECT pg_advisory_lock(" CLOUD_LOCK ")");
   bool ok = r && PQresultStatus(r) == PGRES_TUPLES_OK;
   PQclear(r);
@@ -392,6 +494,8 @@ static int advisory_lock(void) {
     postgres = NULL;
     cache_epoch = -1;
   }
+  ob_telemetry_storage_record(OB_TELEMETRY_POSTGRES_LOCK,
+                              ob_telemetry_elapsed_ns(start), ok, 0);
   return ok ? 0 : -1;
 }
 static void advisory_unlock(void) {
@@ -630,6 +734,46 @@ done:
   free(index);
   return ok;
 }
+static bool document_text_is(const bson_t *document, const char *field,
+                             const char *expected) {
+  bson_iter_t value;
+  uint32_t length;
+  if (!bson_iter_init_find(&value, document, field) ||
+      !BSON_ITER_HOLDS_UTF8(&value))
+    return false;
+  const char *text = bson_iter_utf8(&value, &length);
+  return length == strlen(expected) && !memcmp(text, expected, length);
+}
+/* Both representations must agree. Checking only raw would leave a modified
+ * typed value unnoticed by any future consumer of MongoDB's JSON projection. */
+static const char *validate_document(sqlite3 *cache, const Table *t,
+                                     const Column *c, const char *key,
+                                     const bson_t *document) {
+  char kind[MAX_IDENTIFIER * 2 + 2], actual[65];
+  snprintf(kind, sizeof kind, "%s.%s", t->name, c->name);
+  bson_iter_t raw, value;
+  uint32_t length;
+  if (!document_text_is(document, "_id", key) ||
+      !document_text_is(document, "kind", kind) ||
+      !bson_iter_init_find(&raw, document, "raw") ||
+      !BSON_ITER_HOLDS_UTF8(&raw) ||
+      !bson_iter_init_find(&value, document, "value"))
+    return NULL;
+  const char *source = bson_iter_utf8(&raw, &length);
+  if (strlen(source) != length || digest(kind, source, actual) ||
+      strcmp(actual, key))
+    return NULL;
+  bson_t expected = BSON_INITIALIZER, stored = BSON_INITIALIZER;
+  bool ok = (c->string_document ? BSON_APPEND_UTF8(&expected, "value", source)
+                               : append_json_value(cache, &expected, source)) &&
+            BSON_APPEND_VALUE(&stored, "value", bson_iter_value(&value)) &&
+            bson_equal(&expected, &stored);
+  bson_destroy(&expected);
+  bson_destroy(&stored);
+  return ok ? source : NULL;
+}
+static const char *document_get(sqlite3 *cache, const Table *t,
+                                const Column *c, const char *key);
 static int document_put(sqlite3 *cache, const Table *t, const Column *c,
                         const char *raw, char key[65]) {
   char kind[MAX_IDENTIFIER * 2 + 2];
@@ -662,12 +806,19 @@ static int document_put(sqlite3 *cache, const Table *t, const Column *c,
   bson_destroy(&filter);
   bson_destroy(&update);
   bson_destroy(&opts);
-  return ok && !memo_add(key, raw) ? 0 : -1;
+  /* A content-addressed ID may already exist. Verify it instead of assuming
+   * that a successful $setOnInsert proves the old document is intact. */
+  const char *stored = ok ? document_get(cache, t, c, key) : NULL;
+  return stored && !strcmp(stored, raw) ? 0 : -1;
 }
-static const char *document_get(const Table *t, const Column *c,
+static const char *document_get(sqlite3 *cache, const Table *t, const Column *c,
                                 const char *key) {
   if (strlen(key) != 64)
     return NULL;
+  for (int i = 0; i < 64; i++)
+    if (!((key[i] >= '0' && key[i] <= '9') ||
+          (key[i] >= 'a' && key[i] <= 'f')))
+      return NULL;
   DocMemo *existing = memo_find(key);
   if (existing)
     return existing->raw;
@@ -678,15 +829,9 @@ static const char *document_get(const Table *t, const Column *c,
       mongoc_collection_find_with_opts(documents, &filter, &opts, NULL);
   const bson_t *document;
   const char *raw = NULL;
-  bson_iter_t value;
-  if (mongoc_cursor_next(cursor, &document) &&
-      bson_iter_init_find(&value, document, "raw") &&
-      BSON_ITER_HOLDS_UTF8(&value)) {
-    const char *source = bson_iter_utf8(&value, NULL);
-    char kind[MAX_IDENTIFIER * 2 + 2], actual[65];
-    snprintf(kind, sizeof kind, "%s.%s", t->name, c->name);
-    if (!digest(kind, source, actual) && !strcmp(actual, key) &&
-        !memo_add(key, source))
+  if (mongoc_cursor_next(cursor, &document)) {
+    const char *source = validate_document(cache, t, c, key, document);
+    if (source && !memo_add(key, source))
       raw = memo->raw;
   }
   mongoc_cursor_destroy(cursor);
@@ -715,6 +860,35 @@ static Buffer insert_sql(const Table *t, bool pg) {
   buffer_add(&b, ")");
   return b;
 }
+static int publish_row(sqlite3 *cache, const Table *t, const char *insert,
+                        sqlite3_stmt *row) {
+  const char *values[MAX_COLUMNS] = {0};
+  int formats[MAX_COLUMNS] = {0}, lengths[MAX_COLUMNS] = {0};
+  char hashes[MAX_COLUMNS][65];
+  for (int i = 0; i < t->count; i++) {
+    const Column *c = &t->columns[i];
+    if (sqlite3_column_type(row, i) == SQLITE_NULL)
+      continue;
+    if (c->json) {
+      const char *raw = (const char *)sqlite3_column_text(row, i);
+      if (!raw || document_put(cache, t, c, raw, hashes[i]))
+        return -1;
+      values[i] = hashes[i];
+    } else if (c->affinity == SQLITE_BLOB) {
+      values[i] = (const char *)sqlite3_column_blob(row, i);
+      lengths[i] = sqlite3_column_bytes(row, i);
+      formats[i] = 1;
+    } else
+      values[i] = (const char *)sqlite3_column_text(row, i);
+  }
+  PGresult *r = PQexecParams(postgres, insert, t->count, NULL, values,
+                             lengths, formats, 0);
+  bool ok = r && PQresultStatus(r) == PGRES_COMMAND_OK;
+  PQclear(r);
+  if (ok)
+    publication_rows++;
+  return ok ? 0 : -1;
+}
 static int publish_table(sqlite3 *cache, const Table *t) {
   Buffer select = select_sql(t, false), insert = insert_sql(t, true);
   sqlite3_stmt *rows = NULL;
@@ -723,34 +897,9 @@ static int publish_table(sqlite3 *cache, const Table *t) {
       sqlite3_prepare_v2(cache, select.data, -1, &rows, NULL) != SQLITE_OK)
     goto done;
   int step;
-  while ((step = sqlite3_step(rows)) == SQLITE_ROW) {
-    const char *values[MAX_COLUMNS] = {0};
-    int formats[MAX_COLUMNS] = {0}, lengths[MAX_COLUMNS] = {0};
-    char hashes[MAX_COLUMNS][65];
-    for (int i = 0; i < t->count; i++) {
-      const Column *c = &t->columns[i];
-      int type = sqlite3_column_type(rows, i);
-      if (type == SQLITE_NULL)
-        continue;
-      if (c->json) {
-        const char *raw = (const char *)sqlite3_column_text(rows, i);
-        if (!raw || document_put(cache, t, c, raw, hashes[i]))
-          goto done;
-        values[i] = hashes[i];
-      } else if (c->affinity == SQLITE_BLOB) {
-        values[i] = (const char *)sqlite3_column_blob(rows, i);
-        lengths[i] = sqlite3_column_bytes(rows, i);
-        formats[i] = 1;
-      } else
-        values[i] = (const char *)sqlite3_column_text(rows, i);
-    }
-    PGresult *r = PQexecParams(postgres, insert.data, t->count, NULL, values,
-                               lengths, formats, 0);
-    bool ok = r && PQresultStatus(r) == PGRES_COMMAND_OK;
-    PQclear(r);
-    if (!ok)
+  while ((step = sqlite3_step(rows)) == SQLITE_ROW)
+    if (publish_row(cache, t, insert.data, rows))
       goto done;
-  }
   rc = step == SQLITE_DONE ? 0 : -1;
 done:
   sqlite3_finalize(rows);
@@ -758,22 +907,109 @@ done:
   free(insert.data);
   return rc;
 }
+static int publish_changed_table(sqlite3 *cache, int ti) {
+  const Table *t = &tables[ti];
+  int count = primary_count(t);
+  if (!count) {
+    char sql[160];
+    snprintf(sql, sizeof sql, "DELETE FROM \"%s\"", t->pg_name);
+    return pg_command(sql) || publish_table(cache, t) ? -1 : 0;
+  }
+  Buffer keys = {0}, remove = {0}, select = select_sql(t, false),
+         insert = insert_sql(t, true);
+  sqlite3_stmt *changed = NULL, *current = NULL;
+  int rc = -1;
+  buffer_add(&keys, "SELECT ");
+  for (int order = 1; order <= count; order++)
+    buffer_add(&keys, "%sjson_extract(key,'$[%d]')", order > 1 ? "," : "", order - 1);
+  buffer_add(&keys, " FROM temp.ob_cloud_changes WHERE table_id=%d ORDER BY key", ti);
+  buffer_add(&remove, "DELETE FROM \"%s\" WHERE ", t->pg_name);
+  buffer_add(&select, " WHERE ");
+  for (int order = 1; order <= count; order++)
+    for (int i = 0; i < t->count; i++)
+      if (t->columns[i].primary == order) {
+        buffer_add(&remove, "%s\"%s\" IS NOT DISTINCT FROM $%d",
+                   order > 1 ? " AND " : "", t->columns[i].pg_name, order);
+        buffer_add(&select, "%s\"%s\" IS ?%d", order > 1 ? " AND " : "",
+                   t->columns[i].name, order);
+      }
+  if (keys.failed || remove.failed || select.failed || insert.failed ||
+      sqlite3_prepare_v2(cache, keys.data, -1, &changed, NULL) != SQLITE_OK ||
+      sqlite3_prepare_v2(cache, select.data, -1, &current, NULL) != SQLITE_OK)
+    goto done;
+  int step;
+  while ((step = sqlite3_step(changed)) == SQLITE_ROW) {
+    const char *values[MAX_COLUMNS] = {0};
+    sqlite3_reset(current);
+    sqlite3_clear_bindings(current);
+    for (int i = 0; i < count; i++) {
+      if (sqlite3_column_type(changed, i) != SQLITE_NULL)
+        values[i] = (const char *)sqlite3_column_text(changed, i);
+      if (sqlite3_bind_value(current, i + 1, sqlite3_column_value(changed, i)) != SQLITE_OK)
+        goto done;
+    }
+    PGresult *removed = PQexecParams(postgres, remove.data, count, NULL,
+                                      values, NULL, NULL, 0);
+    bool ok = removed && PQresultStatus(removed) == PGRES_COMMAND_OK;
+    PQclear(removed);
+    if (!ok)
+      goto done;
+    int found = sqlite3_step(current);
+    if (found == SQLITE_ROW) {
+      if (publish_row(cache, t, insert.data, current) ||
+          sqlite3_step(current) != SQLITE_DONE)
+        goto done;
+    } else if (found != SQLITE_DONE)
+      goto done;
+  }
+  rc = step == SQLITE_DONE ? 0 : -1;
+done:
+  sqlite3_finalize(changed);
+  sqlite3_finalize(current);
+  free(keys.data);
+  free(remove.data);
+  free(select.data);
+  free(insert.data);
+  return rc;
+}
+static int publish_changes(sqlite3 *cache) {
+  sqlite3_stmt *changed = NULL;
+  if (sqlite3_prepare_v2(cache, "SELECT DISTINCT table_id FROM temp.ob_cloud_changes "
+                                "ORDER BY table_id", -1, &changed, NULL) != SQLITE_OK)
+    return -1;
+  int step, rc = -1;
+  while ((step = sqlite3_step(changed)) == SQLITE_ROW) {
+    int ti = sqlite3_column_int(changed, 0);
+    if (ti < 0 || ti >= table_count || publish_changed_table(cache, ti))
+      goto done;
+  }
+  if (step != SQLITE_DONE)
+    goto done;
+  for (int ti = 0; ti < table_count; ti++)
+    if (!strcmp(tables[ti].name, "sqlite_sequence") &&
+        publish_changed_table(cache, ti))
+      goto done;
+  rc = 0;
+done:
+  sqlite3_finalize(changed);
+  return rc;
+}
 /* Documents are immutable and acknowledged before the relational transaction
  * publishes their references. A crash can leave unused documents, never a
  * committed relational reference to a document still being written. */
-static int publish_snapshot(sqlite3 *cache, bool initial) {
+static int publish_snapshot_unmeasured(sqlite3 *cache, bool initial) {
   if (sqlite3_get_autocommit(cache) == 0 || mongo_ping() || pg_command("BEGIN"))
     return -1;
   if (initial && create_layout())
     goto failed;
-  for (int i = 0; i < table_count; i++) {
-    char sql[160];
-    snprintf(sql, sizeof sql, "DELETE FROM \"%s\"", tables[i].pg_name);
-    if (pg_command(sql))
-      goto failed;
-  }
-  for (int i = 0; i < table_count; i++)
-    if (publish_table(cache, &tables[i]))
+  if (initial) {
+    for (int i = 0; i < table_count; i++) {
+      char sql[160];
+      snprintf(sql, sizeof sql, "DELETE FROM \"%s\"", tables[i].pg_name);
+      if (pg_command(sql) || publish_table(cache, &tables[i]))
+        goto failed;
+    }
+  } else if (publish_changes(cache))
       goto failed;
   char sql[320];
   if (initial)
@@ -794,6 +1030,17 @@ failed:
   pg_command("ROLLBACK");
   cache_epoch = -1;
   return -1;
+}
+static int publish_snapshot(sqlite3 *cache, bool initial) {
+  uint64_t start = ob_telemetry_now_ns();
+  uint64_t previous = publication_rows;
+  publication_rows = 0;
+  int result = publish_snapshot_unmeasured(cache, initial);
+  uint64_t rows = result ? 0 : publication_rows;
+  publication_rows = previous;
+  ob_telemetry_storage_record(OB_TELEMETRY_PUBLISH,
+                              ob_telemetry_elapsed_ns(start), result == 0, rows);
+  return result;
 }
 static int hydrate_table(sqlite3 *cache, const Table *t) {
   Buffer select = select_sql(t, true), insert = insert_sql(t, false);
@@ -817,7 +1064,7 @@ static int hydrate_table(sqlite3 *cache, const Table *t) {
       const char *value = PQgetvalue(rows, row, i);
       int bound;
       if (c->json) {
-        value = document_get(t, c, value);
+        value = document_get(cache, t, c, value);
         if (!value)
           goto done;
         bound = sqlite3_bind_text(s, i + 1, value, -1, SQLITE_TRANSIENT);
@@ -863,18 +1110,27 @@ done:
 }
 /* Replay must not fire notification/timestamp triggers, or a cache rebuild
  * would change data. SQLite exposes an engine-level trigger switch for this. */
-static int hydrate_snapshot(sqlite3 *cache, int64_t epoch) {
+static int hydrate_snapshot_unmeasured(sqlite3 *cache, int64_t epoch) {
+  if (!ob_storage_cache_write_allowed())
+    return -1;
   if (sqlite3_get_autocommit(cache) == 0)
+    return -1;
+  /* SQLITE_DBCONFIG_ENABLE_TRIGGER affects main triggers, not TEMP triggers. */
+  if (set_change_tracking(cache, false))
     return -1;
   int previous_triggers = 1;
   if (sqlite3_db_config(cache, SQLITE_DBCONFIG_ENABLE_TRIGGER, -1,
                         &previous_triggers) != SQLITE_OK ||
       sqlite3_db_config(cache, SQLITE_DBCONFIG_ENABLE_TRIGGER, 0, NULL) !=
-          SQLITE_OK)
+          SQLITE_OK) {
+    set_change_tracking(cache, true);
     return -1;
+  }
   int rc = -1;
   if (cache_command(cache, "PRAGMA foreign_keys=OFF;BEGIN IMMEDIATE"))
     goto done;
+  if (!ob_storage_cache_write_allowed())
+    goto rollback;
   for (int i = 0; i < table_count; i++) {
     char sql[160];
     snprintf(sql, sizeof sql, "DELETE FROM \"%s\"", tables[i].name);
@@ -913,10 +1169,20 @@ done:
   cache_command(cache, "PRAGMA foreign_keys=ON");
   sqlite3_db_config(cache, SQLITE_DBCONFIG_ENABLE_TRIGGER, previous_triggers,
                     NULL);
+  if (set_change_tracking(cache, true))
+    rc = -1;
   if (rc)
     cache_epoch = -1;
   return rc;
 }
+static int hydrate_snapshot(sqlite3 *cache, int64_t epoch) {
+  uint64_t start = ob_telemetry_now_ns();
+  int result = hydrate_snapshot_unmeasured(cache, epoch);
+  ob_telemetry_storage_record(OB_TELEMETRY_HYDRATE,
+                              ob_telemetry_elapsed_ns(start), result == 0, 0);
+  return result;
+}
+
 /* Schemas 6 and 7 only add tables. Keep old rows and document references
  * intact, and publish the new layout under the same advisory lock used by
  * requests. Older processes subsequently fail their version check instead of
@@ -949,7 +1215,7 @@ failed:
 int cloud_bootstrap(sqlite3 *cache) {
   if (!cloud_enabled())
     return 0;
-  pthread_mutex_lock(&store_mutex);
+  store_lock();
   int rc = -1;
   bool locked = false;
   const char *pg = getenv("OPENBOARD_POSTGRES_URL"),
@@ -1006,13 +1272,14 @@ int cloud_request_begin(sqlite3 *cache) {
     return 0;
   if (request_active)
     return -1;
-  pthread_mutex_lock(&store_mutex);
+  store_lock();
   if (!bootstrapped || connect_postgres() || advisory_lock())
     goto failed;
   int64_t epoch;
   int version;
   if (read_epoch(&epoch, &version) || version != local_schema ||
-      (epoch != cache_epoch && hydrate_snapshot(cache, epoch))) {
+      (epoch != cache_epoch && hydrate_snapshot(cache, epoch)) ||
+      install_change_tracker(cache)) {
     advisory_unlock();
     goto failed;
   }
@@ -1054,14 +1321,14 @@ int cloud_ready(void) {
     return 0;
   bool acquire = !request_active;
   if (acquire)
-    pthread_mutex_lock(&store_mutex);
+    store_lock();
   int rc = bootstrapped && !connect_postgres() && !mongo_ping() ? 0 : -1;
   if (acquire)
     pthread_mutex_unlock(&store_mutex);
   return rc;
 }
 void cloud_shutdown(void) {
-  pthread_mutex_lock(&store_mutex);
+  store_lock();
   clear_memo();
   free(tables);
   tables = NULL;

@@ -1,0 +1,362 @@
+{
+  "Aggiorna misure": [
+    "Refresh measurements",
+    "Actualiser les mesures",
+    "Actualizar mediciones",
+    "Messwerte aktualisieren",
+    "刷新测量数据",
+    "測定値を更新"
+  ],
+  "Allegati conservati": [
+    "Retained attachments",
+    "Pièces jointes conservées",
+    "Archivos adjuntos conservados",
+    "Aufbewahrte Anhänge",
+    "保留的附件",
+    "保持されている添付ファイル"
+  ],
+  "Archivio:": [
+    "Storage:",
+    "Stockage :",
+    "Almacenamiento:",
+    "Speicher:",
+    "存储：",
+    "ストレージ："
+  ],
+  "Attivi": [
+    "Active",
+    "Actifs",
+    "Activos",
+    "Aktiv",
+    "未删除",
+    "有効"
+  ],
+  "Byte decodificati": [
+    "Decoded bytes",
+    "Octets décodés",
+    "Bytes decodificados",
+    "Dekodierte Bytes",
+    "解码后的字节数",
+    "デコード後のバイト数"
+  ],
+  "Capacità e conservazione": [
+    "Capacity and retention",
+    "Capacité et conservation",
+    "Capacidad y conservación",
+    "Kapazität und Aufbewahrung",
+    "容量与数据保留",
+    "容量とデータ保持"
+  ],
+  "Controllo capacità superato": [
+    "Capacity check passed",
+    "Contrôle de capacité réussi",
+    "Comprobación de capacidad superada",
+    "Kapazitätsprüfung bestanden",
+    "容量检查通过",
+    "容量チェックに合格"
+  ],
+  "Corpi richieste idempotenti": [
+    "Idempotent request bodies",
+    "Corps des requêtes idempotentes",
+    "Cuerpos de solicitudes idempotentes",
+    "Inhalte idempotenter Anfragen",
+    "幂等请求正文",
+    "冪等リクエストの本文"
+  ],
+  "Corpi risposte idempotenti": [
+    "Idempotent response bodies",
+    "Corps des réponses idempotentes",
+    "Cuerpos de respuestas idempotentes",
+    "Inhalte idempotenter Antworten",
+    "幂等响应正文",
+    "冪等レスポンスの本文"
+  ],
+  "Cronologia e replay": [
+    "History and replay",
+    "Historique et rejeu",
+    "Historial y reproducción",
+    "Verlauf und Wiederholung",
+    "历史记录与重放",
+    "履歴とリプレイ"
+  ],
+  "Database SQLite locale": [
+    "Local SQLite database",
+    "Base de données SQLite locale",
+    "Base de datos SQLite local",
+    "Lokale SQLite-Datenbank",
+    "本地 SQLite 数据库",
+    "ローカルの SQLite データベース"
+  ],
+  "Disattivato": [
+    "Disabled",
+    "Désactivé",
+    "Desactivado",
+    "Deaktiviert",
+    "已禁用",
+    "無効"
+  ],
+  "Eventi Sprint": [
+    "Sprint events",
+    "Événements de Sprint",
+    "Eventos de Sprint",
+    "Sprint-Ereignisse",
+    "Sprint 事件",
+    "Sprint イベント"
+  ],
+  "Eventi revisioni": [
+    "Review events",
+    "Événements de revue",
+    "Eventos de revisión",
+    "Review-Ereignisse",
+    "评审事件",
+    "レビューイベント"
+  ],
+  "Eventi richieste": [
+    "Request events",
+    "Événements de demande",
+    "Eventos de solicitudes",
+    "Anfrageereignisse",
+    "请求事件",
+    "リクエストイベント"
+  ],
+  "File": [
+    "Files",
+    "Fichiers",
+    "Archivos",
+    "Dateien",
+    "文件数",
+    "ファイル数"
+  ],
+  "File SHM": [
+    "SHM file",
+    "Fichier SHM",
+    "Archivo SHM",
+    "SHM-Datei",
+    "SHM 文件",
+    "SHM ファイル"
+  ],
+  "File WAL": [
+    "WAL file",
+    "Fichier WAL",
+    "Archivo WAL",
+    "WAL-Datei",
+    "WAL 文件",
+    "WAL ファイル"
+  ],
+  "File database": [
+    "Database file",
+    "Fichier de base de données",
+    "Archivo de base de datos",
+    "Datenbankdatei",
+    "数据库文件",
+    "データベースファイル"
+  ],
+  "GiB": [
+    "GiB",
+    "GiB",
+    "GiB",
+    "GiB",
+    "GiB",
+    "GiB"
+  ],
+  "Il pannello è di sola lettura. La gestione della conservazione dei dati resta un’operazione separata.": [
+    "This panel is read-only. Managing data retention remains a separate operation.",
+    "Ce panneau est en lecture seule. La gestion de la conservation des données reste une opération distincte.",
+    "Este panel es de solo lectura. La gestión de la conservación de datos sigue siendo una operación independiente.",
+    "Dieses Panel ist schreibgeschützt. Die Verwaltung der Datenaufbewahrung bleibt ein separater Vorgang.",
+    "此面板为只读。数据保留管理仍需单独操作。",
+    "このパネルは読み取り専用です。データの保持管理は別の操作として行います。"
+  ],
+  "Il totale misura i byte decodificati degli allegati. Non comprende cronologia, replay, indici, WAL, backup o lo spazio fisico complessivo.": [
+    "The total measures decoded attachment bytes. It excludes history, replay, indexes, WAL, backups and overall physical storage usage.",
+    "Le total mesure les octets décodés des pièces jointes. Il exclut l’historique, le rejeu, les index, le WAL, les sauvegardes et l’espace physique total utilisé.",
+    "El total mide los bytes decodificados de los archivos adjuntos. No incluye el historial, la reproducción, los índices, el WAL, las copias de seguridad ni el espacio físico total utilizado.",
+    "Die Summe misst die dekodierten Bytes der Anhänge. Verlauf, Wiederholung, Indizes, WAL, Backups und der gesamte physische Speicherverbrauch sind darin nicht enthalten.",
+    "总量按附件解码后的字节数计算，不包含历史记录、重放数据、索引、WAL、备份或整体物理存储占用。",
+    "合計は添付ファイルのデコード後のバイト数を示します。履歴、リプレイ、インデックス、WAL、バックアップ、物理ストレージ全体の使用量は含みません。"
+  ],
+  "Illimitato": [
+    "Unlimited",
+    "Illimité",
+    "Sin límite",
+    "Unbegrenzt",
+    "无限制",
+    "無制限"
+  ],
+  "In modalità PostgreSQL + MongoDB queste misure riguardano la cache SQLite locale. Le dimensioni fisiche dei database esterni e i documenti MongoDB orfani non sono misurati.": [
+    "In PostgreSQL + MongoDB mode, these measurements apply to the local SQLite cache. The physical sizes of the external databases and orphaned MongoDB documents are not measured.",
+    "En mode PostgreSQL + MongoDB, ces mesures concernent le cache SQLite local. La taille physique des bases de données externes et les documents MongoDB orphelins ne sont pas mesurés.",
+    "En el modo PostgreSQL + MongoDB, estas mediciones corresponden a la caché SQLite local. No se miden los tamaños físicos de las bases de datos externas ni los documentos huérfanos de MongoDB.",
+    "Im Modus PostgreSQL + MongoDB beziehen sich diese Messwerte auf den lokalen SQLite-Cache. Die physischen Größen der externen Datenbanken und verwaiste MongoDB-Dokumente werden nicht gemessen.",
+    "在 PostgreSQL + MongoDB 模式下，这些测量数据仅针对本地 SQLite 缓存。外部数据库的物理大小和 MongoDB 孤立文档均不在测量范围内。",
+    "PostgreSQL + MongoDB モードでは、これらの測定値はローカルの SQLite キャッシュを対象とします。外部データベースの物理サイズや MongoDB の孤立ドキュメントは測定していません。"
+  ],
+  "KiB": [
+    "KiB",
+    "KiB",
+    "KiB",
+    "KiB",
+    "KiB",
+    "KiB"
+  ],
+  "Le pagine libere sono riutilizzabili da SQLite: non sono spazio libero del filesystem.": [
+    "Free pages can be reused by SQLite; they are not free space on the filesystem.",
+    "Les pages libres sont réutilisables par SQLite ; elles ne constituent pas de l’espace libre sur le système de fichiers.",
+    "SQLite puede reutilizar las páginas libres; no son espacio libre del sistema de archivos.",
+    "Freie Seiten können von SQLite wiederverwendet werden; sie sind kein freier Speicherplatz im Dateisystem.",
+    "空闲页可由 SQLite 重复使用，并不等同于文件系统的可用空间。",
+    "空きページは SQLite が再利用できる領域であり、ファイルシステムの空き容量ではありません。"
+  ],
+  "Le quote includono tutti gli allegati trattenuti, anche nel cestino o sotto schede, liste e bacheche eliminate. Eliminare o ripristinare non libera la quota totale.": [
+    "Quotas include all retained attachments, including those in the trash or under deleted cards, lists and boards. Deleting or restoring items does not free up the total quota.",
+    "Les quotas incluent toutes les pièces jointes conservées, même dans la corbeille ou rattachées à des cartes, listes et tableaux supprimés. Supprimer ou restaurer des éléments ne libère pas de quota total.",
+    "Las cuotas incluyen todos los archivos adjuntos conservados, incluso los que están en la papelera o pertenecen a tarjetas, listas y tableros eliminados. Eliminar o restaurar elementos no libera la cuota total.",
+    "Die Kontingente umfassen alle aufbewahrten Anhänge, auch solche im Papierkorb oder unter gelöschten Karten, Listen und Boards. Löschen oder Wiederherstellen gibt kein Gesamtkontingent frei.",
+    "配额计入所有保留的附件，包括回收站中的附件以及已删除卡片、列表和看板下的附件。删除或恢复项目不会释放总配额。",
+    "クォータには、ゴミ箱内や削除済みのカード、リスト、ボードに属するものを含め、保持されているすべての添付ファイルが計上されます。項目を削除または復元しても、合計クォータの使用量は減りません。"
+  ],
+  "Limite totale": [
+    "Total limit",
+    "Limite totale",
+    "Límite total",
+    "Gesamtlimit",
+    "总上限",
+    "合計上限"
+  ],
+  "Massimo database configurato": [
+    "Configured maximum database size",
+    "Taille maximale de base de données configurée",
+    "Tamaño máximo configurado de la base de datos",
+    "Konfigurierte maximale Datenbankgröße",
+    "已配置的数据库大小上限",
+    "設定されたデータベースの最大サイズ"
+  ],
+  "MiB": [
+    "MiB",
+    "MiB",
+    "MiB",
+    "MiB",
+    "MiB",
+    "MiB"
+  ],
+  "Minimo libero richiesto": [
+    "Minimum required free space",
+    "Espace libre minimal requis",
+    "Espacio libre mínimo requerido",
+    "Erforderlicher freier Mindestspeicherplatz",
+    "所需的最小可用空间",
+    "必要な最小空き容量"
+  ],
+  "Misurazione disponibile": [
+    "Measurement available",
+    "Mesure disponible",
+    "Medición disponible",
+    "Messung verfügbar",
+    "测量数据可用",
+    "測定値を取得可能"
+  ],
+  "Misure non aggiornate.": [
+    "Measurements not refreshed.",
+    "Les mesures n’ont pas été actualisées.",
+    "No se han actualizado las mediciones.",
+    "Messwerte wurden nicht aktualisiert.",
+    "测量数据未刷新。",
+    "測定値は更新されていません。"
+  ],
+  "Nel cestino o con antenati eliminati": [
+    "In trash or under deleted items",
+    "Dans la corbeille ou sous des éléments supprimés",
+    "En la papelera o bajo elementos eliminados",
+    "Im Papierkorb oder unter gelöschten Elementen",
+    "在回收站中或所属上级项目已删除",
+    "ゴミ箱内、または上位の項目が削除済み"
+  ],
+  "Non disponibile": [
+    "Unavailable",
+    "Indisponible",
+    "No disponible",
+    "Nicht verfügbar",
+    "不可用",
+    "利用不可"
+  ],
+  "Pagine libere nel database": [
+    "Free pages in the database",
+    "Pages libres dans la base de données",
+    "Páginas libres en la base de datos",
+    "Freie Seiten in der Datenbank",
+    "数据库中的空闲页",
+    "データベース内の空きページ"
+  ],
+  "PiB": [
+    "PiB",
+    "PiB",
+    "PiB",
+    "PiB",
+    "PiB",
+    "PiB"
+  ],
+  "Quota totale degli allegati superata. I dati conservati restano inclusi nel conteggio.": [
+    "The total attachment quota has been exceeded. Retained data remains included in the count.",
+    "Le quota total des pièces jointes est dépassé. Les données conservées restent incluses dans le décompte.",
+    "Se ha superado la cuota total de archivos adjuntos. Los datos conservados siguen incluidos en el recuento.",
+    "Das Gesamtkontingent für Anhänge wurde überschritten. Aufbewahrte Daten werden weiterhin mitgezählt.",
+    "附件总配额已超出。保留的数据仍计入用量。",
+    "添付ファイルの合計クォータを超えています。保持されているデータは引き続き使用量に計上されます。"
+  ],
+  "Record di idempotenza": [
+    "Idempotency records",
+    "Enregistrements d’idempotence",
+    "Registros de idempotencia",
+    "Idempotenzdatensätze",
+    "幂等记录",
+    "冪等性レコード"
+  ],
+  "Residuo della quota": [
+    "Remaining quota",
+    "Quota restant",
+    "Cuota restante",
+    "Verbleibendes Kontingent",
+    "剩余配额",
+    "クォータの残量"
+  ],
+  "Spazio disponibile sul filesystem": [
+    "Available filesystem space",
+    "Espace disponible sur le système de fichiers",
+    "Espacio disponible en el sistema de archivos",
+    "Verfügbarer Speicherplatz im Dateisystem",
+    "文件系统可用空间",
+    "ファイルシステムの空き容量"
+  ],
+  "TiB": [
+    "TiB",
+    "TiB",
+    "TiB",
+    "TiB",
+    "TiB",
+    "TiB"
+  ],
+  "Totale conservato": [
+    "Total retained",
+    "Total conservé",
+    "Total conservado",
+    "Insgesamt aufbewahrt",
+    "保留总量",
+    "保持されている合計"
+  ],
+  "Ultimo aggiornamento: {0}": [
+    "Last updated: {0}",
+    "Dernière mise à jour : {0}",
+    "Última actualización: {0}",
+    "Zuletzt aktualisiert: {0}",
+    "上次更新：{0}",
+    "最終更新：{0}"
+  ],
+  "Dimensione logica del database": [
+    "Logical database size",
+    "Taille logique de la base de données",
+    "Tamaño lógico de la base de datos",
+    "Logische Datenbankgröße",
+    "数据库逻辑大小",
+    "データベースの論理サイズ"
+  ]
+}

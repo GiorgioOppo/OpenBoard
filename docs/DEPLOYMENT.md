@@ -184,7 +184,11 @@ Before a data operation, the application acquires a PostgreSQL lock shared acros
 
 External storage accepts JSON nesting up to 90 levels and rejects keys containing NUL. Requests exceeding these constraints return `400` before publication. Malformed JSON and literal NUL in request bodies are also request errors; `503` means storage unavailability. The default HTTP body limit is 2 MiB, and JSON requests must use `application/json`.
 
-The current implementation serializes data operations and saves a row snapshot on each change, including authenticated reads that update session `last_seen`. It targets evaluation and small-team pilots. Before a large enterprise workload, measure your real dataset, introduce incremental persistence and plan availability for both databases. More HTTP workers do not make these transactions parallel. The 256 MiB `tmpfs` must hold cache, WAL and temporary files; increase it based on measured use and do not treat it as permanent storage.
+The implementation serializes data operations. Unreleased changes publish only modified primary-key rows and their JSON documents, with a table-level fallback for tables without suitable keys and `sqlite_sequence`. Initial import and stale-cache reconstruction still process complete snapshots. Authenticated session activity is touched at most once per minute, reducing incidental writes without relaxing absolute expiry or revocation checks. It targets evaluation and small-team pilots. Before a large enterprise workload, measure the external-storage dataset and plan availability for both databases. More HTTP workers do not make these transactions parallel. The 256 MiB `tmpfs` must hold cache, WAL and temporary files; increase it based on measured use and do not treat it as permanent storage.
+
+Native and custom container deployments can supply `OPENBOARD_POSTGRES_URL_FILE` and `OPENBOARD_MONGODB_URI_FILE` instead of the corresponding inline variables. Each input must be a nonempty regular file, readable by the backend user, with no group/other permission bits and at most 16 KiB. Final symlinks, embedded NUL/newlines and conflicting inline/file settings are rejected. A single final LF or CRLF is stripped. Mount these files read-only and remove the corresponding inline variable; default Docker secret permissions may need adjustment. Contents never appear in configuration errors. Both storage credentials are still required together. The shipped Compose environment remains compatible with its existing inline settings.
+
+For verified encrypted backups, scheduling and disposable restore checks, see [operations tools](OPERATIONS_TOOLS.md). The original manual recovery procedures below remain available.
 
 ## Upgrade to version 0.6
 
@@ -234,6 +238,24 @@ docker compose up -d --wait app frontend npm
 ```
 
 The bootstrap publishes the file contents only when PostgreSQL storage is empty. If storage is already initialized, external state takes precedence; this command does not overwrite an existing installation. Do not start an empty app against the new storage first, because that initializes it. Restore NPM or recreate its Proxy Host, then verify accounts, cards, custom fields, attachments and time entries. Full backups also restore sessions; revoke them through account administration when the incident requires it.
+
+## Storage quotas and local cache capacity (unreleased)
+
+All new limits default to zero for compatibility. Set them explicitly in a protected environment file; corresponding CLI flags override the environment. Compose passes them to the backend. Restart the backend to change limits.
+
+| Environment variable | CLI flag | Meaning |
+| --- | --- | --- |
+| `OPENBOARD_ATTACHMENT_LIMIT_BYTES` | `--attachment-limit-bytes` | Decoded bytes in all retained attachments; 0 unlimited, maximum 1 TiB |
+| `OPENBOARD_ATTACHMENT_LIMIT_FILES` | `--attachment-limit-files` | All retained attachment rows, including empty files; 0 unlimited, maximum 1 billion |
+| `OPENBOARD_CACHE_MAX_BYTES` | `--cache-max-bytes` | Maximum SQLite main-database pages, rounded down to page size; 0 disabled, maximum 1 TiB |
+| `OPENBOARD_CACHE_MIN_FREE_BYTES` | `--cache-min-free-bytes` | Filesystem space required to admit writes; 0 disabled, maximum 1 PiB |
+| `OPENBOARD_CACHE_TMPFS_SIZE` | Compose only | App `/tmp` size; default `256m`, use a Docker-supported tmpfs size |
+
+The attachment quota covers retained payloads, including direct trash and deleted ancestors. It excludes history, base64/JSON overhead, indexes, WAL, backups and unused MongoDB documents. Lowering it never deletes existing data; new uploads are rejected with `409` while the quota is exceeded. Restore and authorized idempotency replay do not charge it twice. Existing per-card limits also apply.
+
+Leave ample tmpfs headroom for WAL/SHM, temporary allocations, imports and backups. The SQLite page cap is applied to every connection and startup refuses a cap smaller than the existing database; it does not truncate files. A rejected oversized write rolls back. The free-space guard rejects modifying API requests, including login and DELETE, with `503`, and readiness reports unavailable. It is rechecked after lock waits. If a configured measurement fails, admission fails closed. Recover by freeing unrelated space or increasing the limit/capacity; trash operations do not reclaim physical storage. Warm reads can continue, and optional session touches are skipped without extending expiry. External stale-cache reconstruction also checks capacity and can return `503`.
+
+These are admission guardrails, not a reservation or total RAM/WAL limit: free space can change during a write. They do not remove the shared PostgreSQL lock or establish high availability. Use independent container/filesystem/database monitoring as well as the admin inventory and [API metrics](API.md). No domain trash/history purge or MongoDB garbage collector is included. Real Docker/external-store capacity validation remains outstanding.
 
 ## Native deployment and previous configurations
 

@@ -260,7 +260,8 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
         with patch.object(compose, 'json', return_value=result) as request:
             self.assertEqual(compose.diagnostics(), result)
             request.assert_called_once_with(['exec', '-T', 'app', 'env', '-u', 'OPENBOARD_POSTGRES_URL',
-                                             '-u', 'OPENBOARD_MONGODB_URI', '/usr/local/bin/openboard', '--diagnostics'])
+                                         '-u', 'OPENBOARD_MONGODB_URI', '-u', 'OPENBOARD_POSTGRES_URL_FILE',
+                                         '-u', 'OPENBOARD_MONGODB_URI_FILE', '/usr/local/bin/openboard', '--diagnostics'])
         settings = CHECK.configuration(fixture_config())
         paths = []
         def backend(path):

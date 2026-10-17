@@ -6,6 +6,9 @@
 #include "auth.h"
 #include "cloud.h"
 #include "openboard.h"
+#include "secrets.h"
+#include "storage.h"
+#include "telemetry.h"
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
@@ -456,6 +459,7 @@ static Response route(Request *r) {
       return error_response(405, "Metodo non consentito.");
     sqlite3_stmt *statement = NULL;
     bool ready = cloud_ready() == 0 && db &&
+                 ob_storage_cache_write_allowed() &&
                  sqlite3_db_readonly(db, "main") == 0 &&
                  sqlite3_prepare_v2(db, "SELECT count(*) FROM metadata", -1,
                                     &statement, NULL) == SQLITE_OK &&
@@ -502,6 +506,7 @@ static void handle(int fd) {
       peer.sin_family == AF_INET)
     inet_ntop(AF_INET, &peer.sin_addr, request.peer, sizeof request.peer);
   int64_t start = milliseconds();
+  uint64_t telemetry_start = ob_telemetry_now_ns();
   atomic_fetch_add(&metric_requests, 1);
   atomic_fetch_add(&metric_active, 1);
   int status = read_request(fd, &request);
@@ -538,6 +543,7 @@ static void handle(int fd) {
   }
   free(response.body);
   free(request.body);
+  ob_telemetry_http_record(response.status, ob_telemetry_elapsed_ns(telemetry_start));
   atomic_fetch_add(&metric_duration_ms,
                    (unsigned long long)(milliseconds() - start));
   atomic_fetch_sub(&metric_active, 1);
@@ -550,8 +556,8 @@ Response ob_metrics(Request *request) {
   pthread_mutex_lock(&queue_lock);
   int queued = queue_count;
   pthread_mutex_unlock(&queue_lock);
-  char body[2048];
-  snprintf(body, sizeof body,
+  char body[OB_TELEMETRY_BUFFER_SIZE];
+  int written = snprintf(body, sizeof body,
            "# TYPE openboard_http_requests_total "
            "counter\nopenboard_http_requests_total %llu\n"
            "# TYPE openboard_http_errors_total "
@@ -569,6 +575,16 @@ Response ob_metrics(Request *request) {
            atomic_load(&metric_active), queued,
            (unsigned long long)atomic_load(&metric_overloads),
            ob_config.workers);
+  if (written < 0 || (size_t)written >= sizeof body)
+    return error_response(503, "Metriche temporaneamente non disponibili.");
+  size_t used = (size_t)written;
+  size_t extra = ob_telemetry_format(body + used, sizeof body - used);
+  if (!extra)
+    return error_response(503, "Metriche temporaneamente non disponibili.");
+  used += extra;
+  extra = ob_storage_metrics_format(body + used, sizeof body - used);
+  if (!extra)
+    return error_response(503, "Metriche temporaneamente non disponibili.");
   Response result = json_response(200, body);
   result.type = "text/plain; version=0.0.4; charset=utf-8";
   return result;
@@ -615,6 +631,11 @@ static void usage(const char *name) {
       "delle richieste\n",
       OB_VERSION, name);
   puts("  --busy-timeout MS Attesa lock SQLite (1..60000, default 5000)\n"
+       "  --idempotency-ttl N Retention in seconds (0 disables expiration)\n"
+       "  --attachment-limit-bytes N Retained payload quota (0 unlimited)\n"
+       "  --attachment-limit-files N Retained file quota (0 unlimited)\n"
+       "  --cache-max-bytes N SQLite main database cap (0 disabled)\n"
+       "  --cache-min-free-bytes N Write admission reserve (0 disabled)\n"
        "  --trusted-proxy IP Singolo proxy IPv4 che sovrascrive X-Real-IP\n"
        "  --body-limit N    Limite corpo HTTP in byte (4096..2097152)\n"
        "  --integrity-check Controlla il DB esistente, senza migrazioni\n"
@@ -640,9 +661,20 @@ static bool valid_public_url(const char *url) {
 }
 static bool config_number(const char *value, int *out, int min, int max) {
   int64_t n = parse_id(value);
-  if (n < min || n > max)
+  if (n < min || n > max || (n == 0 && (!value || strcmp(value, "0"))))
     return false;
   *out = (int)n;
+  return true;
+}
+static bool config_limit(const char *value, int64_t *out, int64_t max) {
+  if (!value || !*value) return false;
+  for (const char *p = value; *p; p++)
+    if (*p < '0' || *p > '9') return false;
+  errno = 0;
+  char *end = NULL;
+  long long n = strtoll(value, &end, 10);
+  if (errno || !end || *end || n < 0 || n > max) return false;
+  *out = (int64_t)n;
   return true;
 }
 static bool valid_trusted_proxy(const char *value) {
@@ -674,11 +706,21 @@ static bool environment_config(void) {
       {"OPENBOARD_PORT", &ob_config.port, 1, 65535},
       {"OPENBOARD_WORKERS", &ob_config.workers, 1, 32},
       {"OPENBOARD_BUSY_TIMEOUT", &ob_config.busy_timeout_ms, 1, 60000},
+      {"OPENBOARD_IDEMPOTENCY_TTL", &ob_config.idempotency_ttl, 0, 31536000},
       {"OPENBOARD_BODY_LIMIT", &ob_config.body_limit, 4096, OB_BODY_LIMIT}};
   for (size_t i = 0; i < sizeof numbers / sizeof numbers[0]; i++) {
     const char *v = getenv(numbers[i].name);
     if (v && !config_number(v, numbers[i].out, numbers[i].min, numbers[i].max))
       return false;
+  }
+  struct { const char *name; int64_t *out; int64_t max; } limits[] = {
+      {"OPENBOARD_ATTACHMENT_LIMIT_BYTES", &ob_config.attachment_limit_bytes, INT64_C(1099511627776)},
+      {"OPENBOARD_ATTACHMENT_LIMIT_FILES", &ob_config.attachment_limit_files, INT64_C(1000000000)},
+      {"OPENBOARD_CACHE_MAX_BYTES", &ob_config.cache_max_bytes, INT64_C(1099511627776)},
+      {"OPENBOARD_CACHE_MIN_FREE_BYTES", &ob_config.cache_min_free_bytes, INT64_C(1125899906842624)}};
+  for (size_t i = 0; i < sizeof limits / sizeof limits[0]; i++) {
+    const char *v = getenv(limits[i].name);
+    if (v && !config_limit(v, limits[i].out, limits[i].max)) return false;
   }
   const char *v = getenv("OPENBOARD_DB");
   if (v)
@@ -722,12 +764,15 @@ static int maintenance(void) {
     sqlite3_close(connection);
     printf("{\"version\":\"%s\",\"sqlite\":\"%s\",\"openssl\":\"%s\",\"sqlite_"
            "threadsafe\":%d,\"schema_version\":%d,\"auth_enabled\":%s,"
-           "\"workers\":%d,\"busy_timeout_ms\":%d,\"body_limit\":%d,"
-           "\"trusted_proxy\":\"%s\"}\n",
+           "\"workers\":%d,\"busy_timeout_ms\":%d,\"body_limit\":%d,\"idempotency_ttl_seconds\":%d,"
+           "\"attachment_limit_bytes\":%lld,\"attachment_limit_files\":%lld,"
+           "\"cache_max_bytes\":%lld,\"cache_min_free_bytes\":%lld,\"trusted_proxy\":\"%s\"}\n",
            OB_VERSION, sqlite3_libversion(), OpenSSL_version(OPENSSL_VERSION),
            sqlite3_threadsafe(), schema,
            ob_config.auth_enabled ? "true" : "false", ob_config.workers,
-           ob_config.busy_timeout_ms, ob_config.body_limit,
+           ob_config.busy_timeout_ms, ob_config.body_limit, ob_config.idempotency_ttl,
+           (long long)ob_config.attachment_limit_bytes, (long long)ob_config.attachment_limit_files,
+           (long long)ob_config.cache_max_bytes, (long long)ob_config.cache_min_free_bytes,
            ob_config.trusted_proxy ? ob_config.trusted_proxy : "");
     return 0;
   }
@@ -765,6 +810,7 @@ static int maintenance(void) {
   return ok ? 0 : 1;
 }
 int main(int argc, char **argv) {
+  if (ob_load_secret_files()) return 1;
   if (!environment_config()) {
     fputs("Configurazione OPENBOARD_* non valida.\n", stderr);
     return 1;
@@ -835,6 +881,17 @@ int main(int argc, char **argv) {
     } else if (!strcmp(option, "--body-limit")) {
       if (!config_number(value, &ob_config.body_limit, 4096, OB_BODY_LIMIT))
         return 1;
+    } else if (!strcmp(option, "--idempotency-ttl")) {
+      if (!config_number(value, &ob_config.idempotency_ttl, 0, 31536000))
+        return 1;
+    } else if (!strcmp(option, "--attachment-limit-bytes")) {
+      if (!config_limit(value, &ob_config.attachment_limit_bytes, INT64_C(1099511627776))) return 1;
+    } else if (!strcmp(option, "--attachment-limit-files")) {
+      if (!config_limit(value, &ob_config.attachment_limit_files, INT64_C(1000000000))) return 1;
+    } else if (!strcmp(option, "--cache-max-bytes")) {
+      if (!config_limit(value, &ob_config.cache_max_bytes, INT64_C(1099511627776))) return 1;
+    } else if (!strcmp(option, "--cache-min-free-bytes")) {
+      if (!config_limit(value, &ob_config.cache_min_free_bytes, INT64_C(1125899906842624))) return 1;
     } else if (!strcmp(option, "--public-url")) {
       if (!valid_public_url(value)) {
         fputs("Origine pubblica non valida (senza percorso o slash finale).\n",

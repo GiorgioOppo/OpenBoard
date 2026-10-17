@@ -67,6 +67,8 @@ For an anonymous visitor, `user` is `null` and `csrf` is empty. In explicit `--n
 
 Sessions use the `ob_session` cookie with `HttpOnly`, `SameSite=Strict`, and `Path=/`. An HTTPS public URL also enables `Secure`. Sessions last at most 8 hours and expire after 30 minutes of inactivity; an account can have up to 10 sessions. Send the CSRF token returned by the session endpoint in `X-CSRF-Token` for every authenticated write, including logout. Setup and login do not require a previous session. After a `401`, fetch the session again or sign in again.
 
+Unreleased changes coalesce persisted activity timestamps to at most once per minute. As a result, the idle cutoff can occur up to one minute before 30 minutes measured from the last HTTP request. Absolute expiry and current session/role checks still apply to every authenticated request.
+
 Setup, login, and password changes consume a shared per-client allowance of 60 attempts in a fixed monotonic five-minute window. A second allowance permits 10 attempts per client IP and operation key: the normalized username for login, one setup key per client, or the authenticated account ID for password changes. Counters have fixed memory and keyed hashing; collisions may cause an earlier refusal but cannot increase an allowance. There is no global authentication budget shared by every client. A backend `429` includes `Retry-After: 300`.
 
 The client address normally comes from the TCP peer. Only the exact IPv4 peer configured in `OPENBOARD_TRUSTED_PROXY` or `--trusted-proxy` may supply a single numeric `X-Real-IP` address. A trusted peer with a missing, duplicate, or malformed address receives `400`; addresses with ports, zones, or comma-separated lists are invalid. The backend ignores forwarded client identities from other peers and never uses `X-Forwarded-For` or `Forwarded` to choose the client. Compose assigns NPM a static address and configures that exact trusted peer; NPM replaces client-supplied IP headers with the TCP client address. The proxy applies additional authentication and connection limits documented in [SECURITY.md](../SECURITY.md) and the [deployment guide](DEPLOYMENT.md).
@@ -222,6 +224,8 @@ Activity includes creations, updates, moves, archiving, trashing, restores, impo
 
 Search requires nonempty `q` of up to 200 Unicode characters, encoded in the query string. It searches substrings in titles, descriptions, and assignees only on authorized boards. It excludes archived boards and cards unless `include_archived=1`, returns at most 200 cards, and sorts by latest update. It uses SQLite `lower()`: default case conversion covers ASCII and does not provide full Unicode linguistic search.
 
+The unreleased paginated form is `GET /api/search?q=text&limit=30&before=123`. `limit` is 1–200; omitting it when `before` is supplied uses 30. `before` is a positive card ID, excluded from the next page. Supplying either option selects descending immutable-ID ordering and returns `{cards,next_cursor}`. `next_cursor` is the last returned ID when more authorized matches exist, otherwise `null`. Keep query/archive filters unchanged between pages. ACLs apply before pagination and are rechecked on every page. Calls without either pagination option retain the legacy ordering and response shape. Invalid or duplicate pagination parameters return `400`.
+
 Example statistics:
 
 ```json
@@ -270,7 +274,7 @@ Idempotency-Key: create-2026-10-15-001
 
 The key is scoped to the user, path without its query string, and original body. Repeating the same request returns the status and body of the first successful response, with `Idempotency-Replayed: true`, without creating more resources, provided that current authorization still permits the operation. Revoked access or a removed resource can prevent replay; a stored success does not bypass current permissions. Reusing the same key on the same path with a different body returns `409`; differences in whitespace or JSON property order also count as a different body.
 
-The mutation and key record commit in the same transaction. Errors are not stored. Keys persist in the database without automatic expiry: generate a new key for each distinct operation and retain it for retries of the same operation. In explicit `--no-auth` mode, requests share the local identity `0`.
+The mutation and key record commit in the same transaction. Errors are not stored. By default, keys persist without expiry. Unreleased changes support `OPENBOARD_IDEMPOTENCY_TTL` or `--idempotency-ttl N`, in seconds from 0 to 31536000; 0 preserves unlimited retention. Expired records are removed in a domain POST's transaction and cleanup rolls back if the mutation fails. After expiry, repeating a key may execute a new action: operators and integration clients must agree on the retry window. Generate a new key for each distinct operation and retain it for retries of that operation. In explicit `--no-auth` mode, requests share the local identity `0`.
 
 ## Trash and restoration
 
@@ -339,6 +343,27 @@ Import always creates a new board; it does not update or replace the source. It 
 The operation is atomic: if any column or card is invalid, no part of the new board is retained. Success returns `201 {"ok":true,"id":…, "version":…}`. Direct import of Trello JSON is not implemented.
 
 For a complete local SQLite copy, use `./build/openboard --db data/openboard.db --backup /path/to/backup.db`; this performs a consistent backup through the SQLite API and exits. For PostgreSQL/MongoDB, use the full application backup procedure in the [deployment guide](DEPLOYMENT.md). Database restoration is an administrative operation, separate from `/api/import`.
+
+## Storage inventory and metrics (unreleased)
+
+`GET /api/admin/storage` requires a global administrator session (or explicit loopback-only `--no-auth`) and returns `Cache-Control: no-store`. It has no mutation operation. `attachments` contains `active`, `trashed` and `total` objects with `files` and decoded `bytes`, installation `limits`, `remaining` and `over_limit`. Zero limits mean unlimited; unlimited remaining capacity is `null`. All retained files count once, including those hidden by deleted parents; archived files remain active. Per-card limits still apply. Uploads exceeding a configured installation limit return `409` inside the writer transaction; trash does not release quota. Restore and authorized idempotency replay add no retained payload and remain possible when a lowered quota is exceeded.
+
+`cache` includes on-disk main/WAL/SHM byte measurements, `logical_database_bytes` (page count × page size), `freelist_bytes`, `filesystem_available_bytes`, configured `minimum_free_bytes` and `maximum_database_bytes`, and boolean `measurement_available`/`capacity_ok`. Missing measurements are `null`. `history` exposes row counts for activity, comments, reviews, sprints, intake and idempotency, plus retained idempotency request/response bytes. The response contains no filesystem paths, connection strings or user content. `limitations` explicitly identifies logical attachment accounting, unmeasured physical external stores and unmeasured MongoDB orphans. This is not a complete disk-usage quota.
+
+`GET /api/metrics` retains its existing administrator authorization and counters. Additional metrics use a fixed label vocabulary:
+
+| Metric | Meaning |
+| --- | --- |
+| `openboard_http_request_duration_seconds` | Cumulative histogram for completed worker responses, including parsing/transmission, excluding accept-queue wait |
+| `openboard_http_responses_total{class}` | Completed worker responses, classes `2xx`, `3xx`, `4xx`, `5xx` |
+| `openboard_http_rate_limited_total` | Worker responses with status 429 |
+| `openboard_storage_operation_duration_seconds{operation}` | Histogram of `mutex_wait`, `postgres_lock`, `hydrate`, `publish`, including failed attempts |
+| `openboard_storage_operation_errors_total{operation}` | Failed measured adapter operations |
+| `openboard_storage_rows_published_total` | SQL rows inserted/replaced by confirmed publications, including table fallbacks; not bytes/documents or logical user actions |
+| `openboard_cache_*` | Local cache measurements, configured bounds and availability/capacity gauges |
+| `openboard_attachment_limit_bytes`, `openboard_attachment_limit_files` | Configured installation quotas; zero means unlimited |
+
+Queue overflow responses remain in `openboard_http_overloads_total`. Unknown cache size gauges are omitted, with `openboard_cache_measurement_available=0`. New histogram/status families are coherent snapshots; legacy started-request counters need not match completed-response counts during in-flight work. Counters reset on process restart. Paths, identifiers and SQL/JSON content are never metric labels. The metrics endpoint still depends on normal authentication and external-cache refresh; use independent infrastructure monitoring for outages that prevent API access. This does not establish an external-storage capacity or availability guarantee.
 
 ## Errors and operational limits
 

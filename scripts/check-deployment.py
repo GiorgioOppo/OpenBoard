@@ -424,10 +424,11 @@ class Compose:
         # This child process checks transport/auth configuration and the cache
         # read-only. Maintenance diagnostics do not support external storage;
         # its live readiness is checked separately through GET /api/ready.
-        # Only these two child environment variables are removed. The running
+        # Only these four child environment variables are removed. The running
         # application's environment and every other setting remain untouched.
         return self.json(["exec", "-T", "app", "env", "-u", "OPENBOARD_POSTGRES_URL",
-                          "-u", "OPENBOARD_MONGODB_URI", "/usr/local/bin/openboard", "--diagnostics"])
+                          "-u", "OPENBOARD_MONGODB_URI", "-u", "OPENBOARD_POSTGRES_URL_FILE",
+                          "-u", "OPENBOARD_MONGODB_URI_FILE", "/usr/local/bin/openboard", "--diagnostics"])
 
     def running_ports(self):
         bindings = {}

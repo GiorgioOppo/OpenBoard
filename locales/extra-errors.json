@@ -1,4 +1,12 @@
 {
+  "Paginazione non valida: limit 1–200 e before positivo.": [
+    "Invalid pagination: limit must be 1–200 and before must be positive.",
+    "Pagination invalide : limit doit être compris entre 1 et 200 et before doit être positif.",
+    "Paginación no válida: limit debe estar entre 1 y 200 y before debe ser positivo.",
+    "Ungültige Seiteneinteilung: limit muss 1–200 und before positiv sein.",
+    "分页无效：limit 必须为 1–200，before 必须为正数。",
+    "ページ指定が無効です。limit は 1～200、before は正の数を指定してください。"
+  ],
   "Accedi per continuare.": [
     "Sign in to continue.",
     "Connectez-vous pour continuer.",
@@ -454,5 +462,29 @@
     "Die Administratorrolle ist erforderlich.",
     "需要管理员角色。",
     "管理者の役割が必要です。"
+  ],
+  "Metriche temporaneamente non disponibili.": [
+    "Metrics temporarily unavailable.",
+    "Métriques temporairement indisponibles.",
+    "Métricas temporalmente no disponibles.",
+    "Metriken vorübergehend nicht verfügbar.",
+    "指标暂时不可用。",
+    "メトリクスは一時的に利用できません。"
+  ],
+  "Spazio cache insufficiente. Riprova più tardi.": [
+    "Insufficient cache space. Try again later.",
+    "Espace de cache insuffisant. Réessayez plus tard.",
+    "Espacio de caché insuficiente. Vuelve a intentarlo más tarde.",
+    "Nicht genügend Cache-Speicher. Versuche es später erneut.",
+    "缓存空间不足。请稍后重试。",
+    "キャッシュの空き容量が不足しています。後でもう一度お試しください。"
+  ],
+  "Limite allegati dell'installazione raggiunto, inclusi i file nel cestino.": [
+    "Installation attachment limit reached, including trashed files.",
+    "Limite des pièces jointes de l’installation atteinte, y compris les fichiers dans la corbeille.",
+    "Se alcanzó el límite de adjuntos de la instalación, incluidos los archivos de la papelera.",
+    "Anhangslimit der Installation erreicht, einschließlich Dateien im Papierkorb.",
+    "已达到安装实例的附件限制，包括回收站中的文件。",
+    "ゴミ箱のファイルを含め、このインストールの添付ファイル上限に達しました。"
   ]
 }

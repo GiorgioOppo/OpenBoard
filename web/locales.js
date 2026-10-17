@@ -226,6 +226,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "例如：待探索",
     "例：調査すること"
   ],
+  "Agenda": [
+    "Agenda",
+    "Agenda",
+    "Agenda",
+    "Agenda",
+    "日程",
+    "予定一覧"
+  ],
   "Aggiorna": [
     "Refresh",
     "Actualiser",
@@ -249,6 +257,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Daten vom Server aktualisieren",
     "从服务器刷新数据",
     "サーバーのデータを更新"
+  ],
+  "Aggiorna misure": [
+    "Refresh measurements",
+    "Actualiser les mesures",
+    "Actualizar mediciones",
+    "Messwerte aktualisieren",
+    "刷新测量数据",
+    "測定値を更新"
   ],
   "Aggiorna password": [
     "Update password",
@@ -409,6 +425,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Anhänge",
     "附件",
     "添付ファイル"
+  ],
+  "Allegati conservati": [
+    "Retained attachments",
+    "Pièces jointes conservées",
+    "Archivos adjuntos conservados",
+    "Aufbewahrte Anhänge",
+    "保留的附件",
+    "保持されている添付ファイル"
   ],
   "Allegato aggiunto": [
     "Attachment added",
@@ -834,6 +858,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "冲刺存储暂时不可用。",
     "スプリントのストレージを一時的に利用できません。"
   ],
+  "Archivio:": [
+    "Storage:",
+    "Stockage :",
+    "Almacenamiento:",
+    "Speicher:",
+    "存储：",
+    "ストレージ："
+  ],
   "Assegna allo Sprint": [
     "Assign to sprint",
     "Affecter au sprint",
@@ -905,6 +937,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Sprint aktivieren",
     "启动冲刺",
     "スプリントを開始"
+  ],
+  "Attivi": [
+    "Active",
+    "Actifs",
+    "Activos",
+    "Aktiv",
+    "未删除",
+    "有効"
   ],
   "Attività": [
     "Task",
@@ -1242,6 +1282,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "草稿已恢复。检查完成后即可保存。",
     "下書きを復元しました。確認して、準備ができたら保存してください。"
   ],
+  "Bozze delle schede": [
+    "Card drafts",
+    "Brouillons de cartes",
+    "Borradores de tarjetas",
+    "Kartenentwürfe",
+    "卡片草稿",
+    "カードの下書き"
+  ],
+  "Bozze locali delle schede per questo account. La riapertura verifica i permessi sul server. Le bozze di revisioni, commenti e moduli restano nei rispettivi editor.": [
+    "Local card drafts for this account. Reopening checks permissions on the server. Review, comment and form drafts remain in their respective editors.",
+    "Brouillons locaux de cartes pour ce compte. La réouverture vérifie les autorisations sur le serveur. Les brouillons de révisions, de commentaires et de formulaires restent dans leurs éditeurs respectifs.",
+    "Borradores locales de tarjetas de esta cuenta. Al reabrirlos se comprueban los permisos en el servidor. Los borradores de revisiones, comentarios y formularios permanecen en sus respectivos editores.",
+    "Lokale Kartenentwürfe für dieses Konto. Beim erneuten Öffnen werden die Berechtigungen auf dem Server geprüft. Entwürfe für Reviews, Kommentare und Formulare bleiben in den jeweiligen Editoren.",
+    "此账户在本地保存的卡片草稿。重新打开时会在服务器上检查权限。评审、评论和表单的草稿仍保留在各自的编辑器中。",
+    "このアカウントのカードのローカル下書きです。再度開く際にサーバーで権限を確認します。レビュー、コメント、フォームの下書きは、それぞれのエディターに保持されます。"
+  ],
   "Burndown osservato": [
     "Observed burndown",
     "Burndown observé",
@@ -1249,6 +1305,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Erfasster Burndown",
     "实际燃尽情况",
     "記録済みバーンダウン"
+  ],
+  "Byte decodificati": [
+    "Decoded bytes",
+    "Octets décodés",
+    "Bytes decodificados",
+    "Dekodierte Bytes",
+    "解码后的字节数",
+    "デコード後のバイト数"
   ],
   "CSV completo scaricato (massimo 1000 righe).": [
     "Complete CSV downloaded (up to 1,000 rows).",
@@ -1297,6 +1361,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Kalender mit Fälligkeits- und Startdaten heruntergeladen.",
     "已下载包含截止日期和开始日期的日历。",
     "期限と開始日を含むカレンダーをダウンロードしました。"
+  ],
+  "Calendario schede": [
+    "Card calendar",
+    "Calendrier des cartes",
+    "Calendario de tarjetas",
+    "Kartenkalender",
+    "卡片日历",
+    "カードのカレンダー"
   ],
   "Cambia i revisori": [
     "Change reviewers",
@@ -1514,6 +1586,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "容量与工作量",
     "稼働時間と作業量"
   ],
+  "Capacità e conservazione": [
+    "Capacity and retention",
+    "Capacité et conservation",
+    "Capacidad y conservación",
+    "Kapazität und Aufbewahrung",
+    "容量与数据保留",
+    "容量とデータ保持"
+  ],
   "Capacità in minuti di {4}": [
     "Capacity in minutes for {4}",
     "Capacité en minutes de {4}",
@@ -1569,6 +1649,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Weitere Karten laden",
     "加载更多卡片",
     "カードをさらに読み込む"
+  ],
+  "Carica altri": [
+    "Load more",
+    "Charger plus",
+    "Cargar más",
+    "Weitere laden",
+    "加载更多",
+    "さらに読み込む"
   ],
   "Carica altri Sprint": [
     "Load more sprints",
@@ -1705,6 +1793,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Sprints suchen",
     "搜索冲刺",
     "スプリントを検索"
+  ],
+  "Cerca comandi": [
+    "Search commands",
+    "Rechercher des commandes",
+    "Buscar comandos",
+    "Befehle suchen",
+    "搜索命令",
+    "コマンドを検索"
   ],
   "Cerca in questa bacheca…": [
     "Search this board…",
@@ -1961,6 +2057,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Board-Farbe",
     "看板颜色",
     "ボードの色"
+  ],
+  "Comandi": [
+    "Commands",
+    "Commandes",
+    "Comandos",
+    "Befehle",
+    "命令",
+    "コマンド"
   ],
   "Commenti": [
     "Comments",
@@ -2282,6 +2386,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "包含…",
     "次を含む…"
   ],
+  "Controlla i campi indicati.": [
+    "Check the highlighted fields.",
+    "Vérifiez les champs indiqués.",
+    "Comprueba los campos indicados.",
+    "Prüfe die markierten Felder.",
+    "请检查标出的字段。",
+    "表示された項目を確認してください。"
+  ],
+  "Controllo capacità superato": [
+    "Capacity check passed",
+    "Contrôle de capacité réussi",
+    "Comprobación de capacidad superada",
+    "Kapazitätsprüfung bestanden",
+    "容量检查通过",
+    "容量チェックに合格"
+  ],
   "Converti in scheda": [
     "Convert to card",
     "Convertir en carte",
@@ -2321,6 +2441,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Titelbild {0}",
     "{0}封面",
     "{0}のカバー"
+  ],
+  "Corpi richieste idempotenti": [
+    "Idempotent request bodies",
+    "Corps des requêtes idempotentes",
+    "Cuerpos de solicitudes idempotentes",
+    "Inhalte idempotenter Anfragen",
+    "幂等请求正文",
+    "冪等リクエストの本文"
+  ],
+  "Corpi risposte idempotenti": [
+    "Idempotent response bodies",
+    "Corps des réponses idempotentes",
+    "Cuerpos de respuestas idempotentes",
+    "Inhalte idempotenter Antworten",
+    "幂等响应正文",
+    "冪等レスポンスの本文"
   ],
   "Crea Sprint": [
     "Create sprint",
@@ -2466,6 +2602,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "审阅历史",
     "レビュー履歴"
   ],
+  "Cronologia e replay": [
+    "History and replay",
+    "Historique et rejeu",
+    "Historial y reproducción",
+    "Verlauf und Wiederholung",
+    "历史记录与重放",
+    "履歴とリプレイ"
+  ],
   "Cronologia richiesta": [
     "Request history",
     "Historique de la demande",
@@ -2537,6 +2681,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Startdatum",
     "开始日期",
     "開始日"
+  ],
+  "Data di riferimento": [
+    "Reference date",
+    "Date de référence",
+    "Fecha de referencia",
+    "Bezugsdatum",
+    "参考日期",
+    "基準日"
+  ],
+  "Database SQLite locale": [
+    "Local SQLite database",
+    "Base de données SQLite locale",
+    "Base de datos SQLite local",
+    "Lokale SQLite-Datenbank",
+    "本地 SQLite 数据库",
+    "ローカルの SQLite データベース"
   ],
   "Database occupato. Riprova.": [
     "Database busy. Try again.",
@@ -2802,6 +2962,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "让项目初具形态。",
     "プロジェクトを形にしよう。"
   ],
+  "Dimensione logica del database": [
+    "Logical database size",
+    "Taille logique de la base de données",
+    "Tamaño lógico de la base de datos",
+    "Logische Datenbankgröße",
+    "数据库逻辑大小",
+    "データベースの論理サイズ"
+  ],
   "Dipendenza aggiunta": [
     "Dependency added",
     "Dépendance ajoutée",
@@ -2865,6 +3033,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Abzuschließende Abhängigkeiten",
     "待完成依赖",
     "完了が必要な依存関係"
+  ],
+  "Disattivato": [
+    "Disabled",
+    "Désactivé",
+    "Desactivado",
+    "Deaktiviert",
+    "已禁用",
+    "無効"
+  ],
+  "Disconnessione da un’altra scheda del browser. Accedi di nuovo.": [
+    "You signed out in another browser tab. Sign in again.",
+    "Vous vous êtes déconnecté dans un autre onglet du navigateur. Reconnectez-vous.",
+    "Has cerrado sesión en otra pestaña del navegador. Inicia sesión de nuevo.",
+    "Du wurdest in einem anderen Browser-Tab abgemeldet. Melde dich erneut an.",
+    "你已在浏览器的另一个标签页退出登录。请重新登录。",
+    "ブラウザーの別のタブでログアウトしました。もう一度ログインしてください。"
   ],
   "Discussione": [
     "Discussion",
@@ -3314,6 +3498,30 @@ globalThis.OpenBoardLocales = Object.freeze({
     "事件",
     "イベント"
   ],
+  "Eventi Sprint": [
+    "Sprint events",
+    "Événements de Sprint",
+    "Eventos de Sprint",
+    "Sprint-Ereignisse",
+    "Sprint 事件",
+    "Sprint イベント"
+  ],
+  "Eventi revisioni": [
+    "Review events",
+    "Événements de revue",
+    "Eventos de revisión",
+    "Review-Ereignisse",
+    "评审事件",
+    "レビューイベント"
+  ],
+  "Eventi richieste": [
+    "Request events",
+    "Événements de demande",
+    "Eventos de solicitudes",
+    "Anfrageereignisse",
+    "请求事件",
+    "リクエストイベント"
+  ],
   "Evidenza del commento aggiornata.": [
     "Comment pin updated.",
     "Épinglage du commentaire mis à jour.",
@@ -3362,6 +3570,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "已停止",
     "停止中"
   ],
+  "File": [
+    "Files",
+    "Fichiers",
+    "Archivos",
+    "Dateien",
+    "文件数",
+    "ファイル数"
+  ],
   "File JSON (massimo 2 MB)": [
     "JSON file (up to 2 MB)",
     "Fichier JSON (2 Mo maximum)",
@@ -3369,6 +3585,30 @@ globalThis.OpenBoardLocales = Object.freeze({
     "JSON-Datei (maximal 2 MB)",
     "JSON 文件（最大 2 MB）",
     "JSON ファイル（最大 2 MB）"
+  ],
+  "File SHM": [
+    "SHM file",
+    "Fichier SHM",
+    "Archivo SHM",
+    "SHM-Datei",
+    "SHM 文件",
+    "SHM ファイル"
+  ],
+  "File WAL": [
+    "WAL file",
+    "Fichier WAL",
+    "Archivo WAL",
+    "WAL-Datei",
+    "WAL 文件",
+    "WAL ファイル"
+  ],
+  "File database": [
+    "Database file",
+    "Fichier de base de données",
+    "Archivo de base de datos",
+    "Datenbankdatei",
+    "数据库文件",
+    "データベースファイル"
   ],
   "Filtra per etichetta": [
     "Filter by label",
@@ -3553,6 +3793,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Benutzer verwalten",
     "管理用户",
     "ユーザーを管理"
+  ],
+  "GiB": [
+    "GiB",
+    "GiB",
+    "GiB",
+    "GiB",
+    "GiB",
+    "GiB"
   ],
   "Giorno": [
     "Day",
@@ -3962,6 +4210,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "名称不能为空。",
     "名前を空にすることはできません。"
   ],
+  "Il pannello è di sola lettura. La gestione della conservazione dei dati resta un’operazione separata.": [
+    "This panel is read-only. Managing data retention remains a separate operation.",
+    "Ce panneau est en lecture seule. La gestion de la conservation des données reste une opération distincte.",
+    "Este panel es de solo lectura. La gestión de la conservación de datos sigue siendo una operación independiente.",
+    "Dieses Panel ist schreibgeschützt. Die Verwaltung der Datenaufbewahrung bleibt ein separater Vorgang.",
+    "此面板为只读。数据保留管理仍需单独操作。",
+    "このパネルは読み取り専用です。データの保持管理は別の操作として行います。"
+  ],
   "Il prossimo grande progetto inizia da una piccola scheda.": [
     "Your next great project starts with a single card.",
     "Votre prochain grand projet commence par une simple carte.",
@@ -4010,6 +4266,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "搜索文本最多可包含 200 个字符。",
     "検索テキストは最大 200 文字です。"
   ],
+  "Il totale misura i byte decodificati degli allegati. Non comprende cronologia, replay, indici, WAL, backup o lo spazio fisico complessivo.": [
+    "The total measures decoded attachment bytes. It excludes history, replay, indexes, WAL, backups and overall physical storage usage.",
+    "Le total mesure les octets décodés des pièces jointes. Il exclut l’historique, le rejeu, les index, le WAL, les sauvegardes et l’espace physique total utilisé.",
+    "El total mide los bytes decodificados de los archivos adjuntos. No incluye el historial, la reproducción, los índices, el WAL, las copias de seguridad ni el espacio físico total utilizado.",
+    "Die Summe misst die dekodierten Bytes der Anhänge. Verlauf, Wiederholung, Indizes, WAL, Backups und der gesamte physische Speicherverbrauch sind darin nicht enthalten.",
+    "总量按附件解码后的字节数计算，不包含历史记录、重放数据、索引、WAL、备份或整体物理存储占用。",
+    "合計は添付ファイルのデコード後のバイト数を示します。履歴、リプレイ、インデックス、WAL、バックアップ、物理ストレージ全体の使用量は含みません。"
+  ],
   "Il tuo lavoro, condiviso in sicurezza.": [
     "Your work, shared securely.",
     "Votre travail, partagé en toute sécurité.",
@@ -4041,6 +4305,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Dein Arbeitsbereich",
     "你的工作区",
     "ワークスペース"
+  ],
+  "Illimitato": [
+    "Unlimited",
+    "Illimité",
+    "Sin límite",
+    "Unbegrenzt",
+    "无限制",
+    "無制限"
   ],
   "Importa bacheca JSON": [
     "Import JSON board",
@@ -4137,6 +4409,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Angeheftet",
     "已置顶",
     "固定済み"
+  ],
+  "In modalità PostgreSQL + MongoDB queste misure riguardano la cache SQLite locale. Le dimensioni fisiche dei database esterni e i documenti MongoDB orfani non sono misurati.": [
+    "In PostgreSQL + MongoDB mode, these measurements apply to the local SQLite cache. The physical sizes of the external databases and orphaned MongoDB documents are not measured.",
+    "En mode PostgreSQL + MongoDB, ces mesures concernent le cache SQLite local. La taille physique des bases de données externes et les documents MongoDB orphelins ne sont pas mesurés.",
+    "En el modo PostgreSQL + MongoDB, estas mediciones corresponden a la caché SQLite local. No se miden los tamaños físicos de las bases de datos externas ni los documentos huérfanos de MongoDB.",
+    "Im Modus PostgreSQL + MongoDB beziehen sich diese Messwerte auf den lokalen SQLite-Cache. Die physischen Größen der externen Datenbanken und verwaiste MongoDB-Dokumente werden nicht gemessen.",
+    "在 PostgreSQL + MongoDB 模式下，这些测量数据仅针对本地 SQLite 缓存。外部数据库的物理大小和 MongoDB 孤立文档均不在测量范围内。",
+    "PostgreSQL + MongoDB モードでは、これらの測定値はローカルの SQLite キャッシュを対象とします。外部データベースの物理サイズや MongoDB の孤立ドキュメントは測定していません。"
   ],
   "In pausa": [
     "Paused",
@@ -4362,6 +4642,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "不支持的 JSON：最多 90 层，且键名中不能包含 NUL。",
     "サポートされない JSON です。最大 90 階層で、キーに NUL を含めることはできません。"
   ],
+  "KiB": [
+    "KiB",
+    "KiB",
+    "KiB",
+    "KiB",
+    "KiB",
+    "KiB"
+  ],
   "L'importazione richiede un array di massimo 100 liste.": [
     "Import requires an array of up to 100 lists.",
     "L'importation nécessite un tableau de 100 listes maximum.",
@@ -4449,6 +4737,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Der Entwurf basiert auf einer älteren Version. Verwerfen Sie ihn und laden Sie vor dem Speichern die Serverdaten neu.",
     "此草稿基于旧版本。请先丢弃草稿并重新加载服务器数据，再保存。",
     "下書きは以前のバージョンに基づいています。保存する前に破棄してサーバーのデータを再読み込みしてください。"
+  ],
+  "La bozza è cambiata. Aggiorna l’elenco prima di eliminarla.": [
+    "The draft has changed. Refresh the list before deleting it.",
+    "Le brouillon a changé. Actualisez la liste avant de le supprimer.",
+    "El borrador ha cambiado. Actualiza la lista antes de eliminarlo.",
+    "Der Entwurf wurde geändert. Aktualisiere die Liste, bevor du ihn löschst.",
+    "草稿已更改。请刷新列表后再删除。",
+    "下書きが変更されました。削除する前に一覧を更新してください。"
   ],
   "La capacità e tutte le stime sono espresse in minuti per l’intero Sprint. Le stime delle schede assegnate a più persone vengono ripartite dal server.": [
     "Capacity and all estimates are expressed in minutes for the entire sprint. The server divides estimates for cards with multiple assignees.",
@@ -4746,6 +5042,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "我保存的卡片",
     "保存したカード"
   ],
+  "Le pagine libere sono riutilizzabili da SQLite: non sono spazio libero del filesystem.": [
+    "Free pages can be reused by SQLite; they are not free space on the filesystem.",
+    "Les pages libres sont réutilisables par SQLite ; elles ne constituent pas de l’espace libre sur le système de fichiers.",
+    "SQLite puede reutilizar las páginas libres; no son espacio libre del sistema de archivos.",
+    "Freie Seiten können von SQLite wiederverwendet werden; sie sind kein freier Speicherplatz im Dateisystem.",
+    "空闲页可由 SQLite 重复使用，并不等同于文件系统的可用空间。",
+    "空きページは SQLite が再利用できる領域であり、ファイルシステムの空き容量ではありません。"
+  ],
+  "Le quote includono tutti gli allegati trattenuti, anche nel cestino o sotto schede, liste e bacheche eliminate. Eliminare o ripristinare non libera la quota totale.": [
+    "Quotas include all retained attachments, including those in the trash or under deleted cards, lists and boards. Deleting or restoring items does not free up the total quota.",
+    "Les quotas incluent toutes les pièces jointes conservées, même dans la corbeille ou rattachées à des cartes, listes et tableaux supprimés. Supprimer ou restaurer des éléments ne libère pas de quota total.",
+    "Las cuotas incluyen todos los archivos adjuntos conservados, incluso los que están en la papelera o pertenecen a tarjetas, listas y tableros eliminados. Eliminar o restaurar elementos no libera la cuota total.",
+    "Die Kontingente umfassen alle aufbewahrten Anhänge, auch solche im Papierkorb oder unter gelöschten Karten, Listen und Boards. Löschen oder Wiederherstellen gibt kein Gesamtkontingent frei.",
+    "配额计入所有保留的附件，包括回收站中的附件以及已删除卡片、列表和看板下的附件。删除或恢复项目不会释放总配额。",
+    "クォータには、ゴミ箱内や削除済みのカード、リスト、ボードに属するものを含め、保持されているすべての添付ファイルが計上されます。項目を削除または復元しても、合計クォータの使用量は減りません。"
+  ],
   "Le revisioni personali mostrano solo le richieste assegnate al tuo account.": [
     "Personal reviews show only requests assigned to your account.",
     "Les révisions personnelles affichent uniquement les demandes attribuées à votre compte.",
@@ -4849,6 +5161,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "WIP-Limit überschritten: Keine Änderungen angewendet.",
     "超出 WIP 限制：未应用任何更改。",
     "WIP 上限を超えました。変更は適用されていません。"
+  ],
+  "Limite allegati dell'installazione raggiunto, inclusi i file nel cestino.": [
+    "Installation attachment limit reached, including trashed files.",
+    "Limite des pièces jointes de l’installation atteinte, y compris les fichiers dans la corbeille.",
+    "Se alcanzó el límite de adjuntos de la instalación, incluidos los archivos de la papelera.",
+    "Anhangslimit der Installation erreicht, einschließlich Dateien im Papierkorb.",
+    "已达到安装实例的附件限制，包括回收站中的文件。",
+    "ゴミ箱のファイルを含め、このインストールの添付ファイル上限に達しました。"
   ],
   "Limite campi della bacheca raggiunto.": [
     "The board's field limit has been reached.",
@@ -4985,6 +5305,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Limit aktiver Elemente erreicht.",
     "已达到有效项目的数量上限。",
     "有効な項目数の上限に達しました。"
+  ],
+  "Limite totale": [
+    "Total limit",
+    "Limite totale",
+    "Límite total",
+    "Gesamtlimit",
+    "总上限",
+    "合計上限"
   ],
   "Limite traguardi raggiunto.": [
     "Milestone limit reached.",
@@ -5226,6 +5554,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "最多 20 个有效字段。选择字段只能使用此处定义的选项。较早的请求保留原始结构。",
     "有効な項目は最大 20 個です。選択項目にはここで設定した選択肢のみ使えます。以前のリクエストは元の構成を保持します。"
   ],
+  "Massimo database configurato": [
+    "Configured maximum database size",
+    "Taille maximale de base de données configurée",
+    "Tamaño máximo configurado de la base de datos",
+    "Konfigurierte maximale Datenbankgröße",
+    "已配置的数据库大小上限",
+    "設定されたデータベースの最大サイズ"
+  ],
   "Membri assegnati": [
     "Assigned members",
     "Membres attribués",
@@ -5314,6 +5650,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "内存不可用。",
     "メモリを利用できません。"
   ],
+  "Mese": [
+    "Month",
+    "Mois",
+    "Mes",
+    "Monat",
+    "月",
+    "月"
+  ],
   "Metodo non consentito.": [
     "Method not allowed.",
     "Méthode non autorisée.",
@@ -5329,6 +5673,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Metriken sind Administratoren vorbehalten.",
     "指标仅限管理员访问。",
     "メトリクスには管理者のみアクセスできます。"
+  ],
+  "Metriche temporaneamente non disponibili.": [
+    "Metrics temporarily unavailable.",
+    "Métriques temporairement indisponibles.",
+    "Métricas temporalmente no disponibles.",
+    "Metriken vorübergehend nicht verfügbar.",
+    "指标暂时不可用。",
+    "メトリクスは一時的に利用できません。"
   ],
   "Metti in evidenza": [
     "Pin",
@@ -5346,6 +5698,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "暂停",
     "一時停止"
   ],
+  "MiB": [
+    "MiB",
+    "MiB",
+    "MiB",
+    "MiB",
+    "MiB",
+    "MiB"
+  ],
   "Mie attività": [
     "My tasks",
     "Mes tâches",
@@ -5353,6 +5713,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Meine Aufgaben",
     "我的任务",
     "自分のタスク"
+  ],
+  "Minimo libero richiesto": [
+    "Minimum required free space",
+    "Espace libre minimal requis",
+    "Espacio libre mínimo requerido",
+    "Erforderlicher freier Mindestspeicherplatz",
+    "所需的最小可用空间",
+    "必要な最小空き容量"
   ],
   "Minuti": [
     "Minutes",
@@ -5425,6 +5793,22 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ungültig: Minuten, Datum oder Notiz.",
     "分钟数、日期或备注无效。",
     "時間、日付またはメモが無効です。"
+  ],
+  "Misurazione disponibile": [
+    "Measurement available",
+    "Mesure disponible",
+    "Medición disponible",
+    "Messung verfügbar",
+    "测量数据可用",
+    "測定値を取得可能"
+  ],
+  "Misure non aggiornate.": [
+    "Measurements not refreshed.",
+    "Les mesures n’ont pas été actualisées.",
+    "No se han actualizado las mediciones.",
+    "Messwerte wurden nicht aktualisiert.",
+    "测量数据未刷新。",
+    "測定値は更新されていません。"
   ],
   "Modalità locale: autenticazione disattivata sul server.": [
     "Local mode: server authentication is disabled.",
@@ -5826,6 +6210,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "隐藏已归档看板",
     "アーカイブ済みボードを非表示"
   ],
+  "Naviga fra le schede; Ctrl + Home / End va alla prima o ultima scheda.": [
+    "Navigate between cards; Ctrl + Home / End goes to the first or last card.",
+    "Naviguez entre les cartes ; Ctrl + Home / End va à la première ou à la dernière carte.",
+    "Navega entre las tarjetas; Ctrl + Inicio / Fin va a la primera o a la última tarjeta.",
+    "Zwischen Karten navigieren; Strg + Pos1 / Ende springt zur ersten oder letzten Karte.",
+    "在卡片之间导航；Ctrl + Home / End 跳转到第一张或最后一张卡片。",
+    "カード間を移動します。Ctrl + Home / End で最初または最後のカードに移動します。"
+  ],
   "Navigazione principale": [
     "Main navigation",
     "Navigation principale",
@@ -5842,6 +6234,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "在回收站中",
     "ゴミ箱内"
   ],
+  "Nel cestino o con antenati eliminati": [
+    "In trash or under deleted items",
+    "Dans la corbeille ou sous des éléments supprimés",
+    "En la papelera o bajo elementos eliminados",
+    "Im Papierkorb oder unter gelöschten Elementen",
+    "在回收站中或所属上级项目已删除",
+    "ゴミ箱内、または上位の項目が削除済み"
+  ],
   "Nessun allegato.": [
     "No attachments.",
     "Aucune pièce jointe.",
@@ -5849,6 +6249,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Keine Anhänge.",
     "暂无附件。",
     "添付ファイルはありません。"
+  ],
+  "Nessun comando disponibile.": [
+    "No commands available.",
+    "Aucune commande disponible.",
+    "No hay comandos disponibles.",
+    "Keine Befehle verfügbar.",
+    "没有可用的命令。",
+    "使用できるコマンドはありません。"
   ],
   "Nessun commento con questi filtri.": [
     "No comments match these filters.",
@@ -5977,6 +6385,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Keine Aktivität erfasst.",
     "暂无活动记录。",
     "アクティビティはありません。"
+  ],
+  "Nessuna bozza di scheda disponibile.": [
+    "No card drafts available.",
+    "Aucun brouillon de carte disponible.",
+    "No hay borradores de tarjetas disponibles.",
+    "Keine Kartenentwürfe verfügbar.",
+    "没有可用的卡片草稿。",
+    "カードの下書きはありません。"
   ],
   "Nessuna copertina": [
     "No cover",
@@ -6305,6 +6721,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Nicht zugewiesen",
     "未分配",
     "未割り当て"
+  ],
+  "Non disponibile": [
+    "Unavailable",
+    "Indisponible",
+    "No disponible",
+    "Nicht verfügbar",
+    "不可用",
+    "利用不可"
   ],
   "Non hai ancora salvato report.": [
     "You have no saved reports yet.",
@@ -6834,6 +7258,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "分页无效。",
     "ページ指定が無効です。"
   ],
+  "Paginazione non valida: limit 1–200 e before positivo.": [
+    "Invalid pagination: limit must be 1–200 and before must be positive.",
+    "Pagination invalide : limit doit être compris entre 1 et 200 et before doit être positif.",
+    "Paginación no válida: limit debe estar entre 1 y 200 y before debe ser positivo.",
+    "Ungültige Seiteneinteilung: limit muss 1–200 und before positiv sein.",
+    "分页无效：limit 必须为 1–200，before 必须为正数。",
+    "ページ指定が無効です。limit は 1～200、before は正の数を指定してください。"
+  ],
   "Paginazione o filtro non valido.": [
     "Invalid pagination or filter.",
     "Non valide : pagination ou filtre.",
@@ -6841,6 +7273,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Ungültig: Seiteneinteilung oder Filter.",
     "分页或筛选条件无效。",
     "ページ指定またはフィルターが無効です。"
+  ],
+  "Pagine libere nel database": [
+    "Free pages in the database",
+    "Pages libres dans la base de données",
+    "Páginas libres en la base de datos",
+    "Freie Seiten in der Datenbank",
+    "数据库中的空闲页",
+    "データベース内の空きページ"
   ],
   "Panoramica": [
     "Overview",
@@ -6946,6 +7386,30 @@ globalThis.OpenBoardLocales = Object.freeze({
     "未找到路径。",
     "パスが見つかりません。"
   ],
+  "Periodo del calendario": [
+    "Calendar period",
+    "Période du calendrier",
+    "Período del calendario",
+    "Kalenderzeitraum",
+    "日历时段",
+    "カレンダーの期間"
+  ],
+  "Periodo precedente": [
+    "Previous period",
+    "Période précédente",
+    "Período anterior",
+    "Vorheriger Zeitraum",
+    "上一时段",
+    "前の期間"
+  ],
+  "Periodo successivo": [
+    "Next period",
+    "Période suivante",
+    "Período siguiente",
+    "Nächster Zeitraum",
+    "下一时段",
+    "次の期間"
+  ],
   "Permessi del membro aggiornati": [
     "Member permissions updated",
     "Autorisations du membre mises à jour",
@@ -6977,6 +7441,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Pfirsich",
     "蜜桃色",
     "ピーチ"
+  ],
+  "PiB": [
+    "PiB",
+    "PiB",
+    "PiB",
+    "PiB",
+    "PiB",
+    "PiB"
   ],
   "Pianificato": [
     "Planned",
@@ -7338,6 +7810,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "此会话",
     "このセッション"
   ],
+  "Quota totale degli allegati superata. I dati conservati restano inclusi nel conteggio.": [
+    "The total attachment quota has been exceeded. Retained data remains included in the count.",
+    "Le quota total des pièces jointes est dépassé. Les données conservées restent incluses dans le décompte.",
+    "Se ha superado la cuota total de archivos adjuntos. Los datos conservados siguen incluidos en el recuento.",
+    "Das Gesamtkontingent für Anhänge wurde überschritten. Aufbewahrte Daten werden weiterhin mitgezählt.",
+    "附件总配额已超出。保留的数据仍计入用量。",
+    "添付ファイルの合計クォータを超えています。保持されているデータは引き続き使用量に計上されます。"
+  ],
   "Reazione aggiornata.": [
     "Reaction updated.",
     "Réaction mise à jour.",
@@ -7369,6 +7849,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Reaktion entfernt",
     "回应已移除",
     "リアクションを削除"
+  ],
+  "Record di idempotenza": [
+    "Idempotency records",
+    "Enregistrements d’idempotence",
+    "Registros de idempotencia",
+    "Idempotenzdatensätze",
+    "幂等记录",
+    "冪等性レコード"
   ],
   "Recupera": [
     "Recover",
@@ -7537,6 +8025,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Verbleibend (Min.)",
     "剩余（分钟）",
     "残り（分）"
+  ],
+  "Residuo della quota": [
+    "Remaining quota",
+    "Quota restant",
+    "Cuota restante",
+    "Verbleibendes Kontingent",
+    "剩余配额",
+    "クォータの残量"
   ],
   "Respinta": [
     "Rejected",
@@ -8201,6 +8697,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Umbenennen",
     "重命名",
     "名前を変更"
+  ],
+  "Riprendi": [
+    "Resume",
+    "Reprendre",
+    "Reanudar",
+    "Fortsetzen",
+    "继续",
+    "再開"
   ],
   "Ripristina": [
     "Restore",
@@ -8970,6 +9474,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "卡片已复制。",
     "カードを複製しました。"
   ],
+  "Scheda esistente": [
+    "Existing card",
+    "Carte existante",
+    "Tarjeta existente",
+    "Vorhandene Karte",
+    "现有卡片",
+    "既存のカード"
+  ],
   "Scheda importata non valida o limite di 10000 schede superato.": [
     "Invalid imported card or limit of 10,000 cards exceeded.",
     "Carte importée non valide ou limite de 10 000 cartes dépassée.",
@@ -9442,6 +9954,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "你的账户会话",
     "アカウントのセッション"
   ],
+  "Settimana": [
+    "Week",
+    "Semaine",
+    "Semana",
+    "Woche",
+    "周",
+    "週"
+  ],
   "Settimana contenente": [
     "Week containing",
     "Semaine contenant",
@@ -9594,6 +10114,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "为新项目留出空间。",
     "新しいプロジェクトを始めよう。"
   ],
+  "Spazio cache insufficiente. Riprova più tardi.": [
+    "Insufficient cache space. Try again later.",
+    "Espace de cache insuffisant. Réessayez plus tard.",
+    "Espacio de caché insuficiente. Vuelve a intentarlo más tarde.",
+    "Nicht genügend Cache-Speicher. Versuche es später erneut.",
+    "缓存空间不足。请稍后重试。",
+    "キャッシュの空き容量が不足しています。後でもう一度お試しください。"
+  ],
   "Spazio di lavoro": [
     "Workspace",
     "Espace de travail",
@@ -9601,6 +10129,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Arbeitsbereich",
     "工作区",
     "ワークスペース"
+  ],
+  "Spazio disponibile sul filesystem": [
+    "Available filesystem space",
+    "Espace disponible sur le système de fichiers",
+    "Espacio disponible en el sistema de archivos",
+    "Verfügbarer Speicherplatz im Dateisystem",
+    "文件系统可用空间",
+    "ファイルシステムの空き容量"
   ],
   "Specifica un testo di ricerca valido (max 200 caratteri).": [
     "Enter valid search text (up to 200 characters).",
@@ -10162,6 +10698,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "备注文本无效。",
     "メモの内容が無効です。"
   ],
+  "TiB": [
+    "TiB",
+    "TiB",
+    "TiB",
+    "TiB",
+    "TiB",
+    "TiB"
+  ],
   "Timer avviato. Resta disponibile su questo dispositivo anche dopo un ricaricamento.": [
     "Timer started. It remains available on this device after a reload.",
     "Minuteur démarré. Il reste disponible sur cet appareil même après un rechargement.",
@@ -10321,6 +10865,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Zurück zum Sprint",
     "返回冲刺",
     "スプリントに戻る"
+  ],
+  "Totale conservato": [
+    "Total retained",
+    "Total conservé",
+    "Total conservado",
+    "Insgesamt aufbewahrt",
+    "保留总量",
+    "保持されている合計"
   ],
   "Totali capacità": [
     "Capacity totals",
@@ -10545,6 +11097,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Letzte Aktivität: {2}",
     "最近活动：{2}",
     "最終アクティビティ：{2}"
+  ],
+  "Ultimo aggiornamento: {0}": [
+    "Last updated: {0}",
+    "Dernière mise à jour : {0}",
+    "Última actualización: {0}",
+    "Zuletzt aktualisiert: {0}",
+    "上次更新：{0}",
+    "最終更新：{0}"
   ],
   "Un membro": [
     "A member",
@@ -11682,6 +12242,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "← 向左移动",
     "← 左へ移動"
   ],
+  "↑ ↓ ← → / Home / End": [
+    "↑ ↓ ← → / Home / End",
+    "↑ ↓ ← → / Début / Fin",
+    "↑ ↓ ← → / Inicio / Fin",
+    "↑ ↓ ← → / Pos1 / Ende",
+    "↑ ↓ ← → / Home / End",
+    "↑ ↓ ← → / Home / End"
+  ],
   "⌘ / Ctrl + K": [
     "⌘ / Ctrl + K",
     "⌘ / Ctrl + K",
@@ -11689,6 +12257,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "⌘ / Strg + K",
     "⌘ / Ctrl + K",
     "⌘ / Ctrl + K"
+  ],
+  "⌘ / Ctrl + Shift + P": [
+    "⌘ / Ctrl + Shift + P",
+    "⌘ / Ctrl + Maj + P",
+    "⌘ / Ctrl + Mayús + P",
+    "⌘ / Strg + Umschalt + P",
+    "⌘ / Ctrl + Shift + P",
+    "⌘ / Ctrl + Shift + P"
   ],
   "⌘ K": [
     "⌘ K",

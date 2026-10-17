@@ -1,0 +1,186 @@
+{
+  "Agenda": [
+    "Agenda",
+    "Agenda",
+    "Agenda",
+    "Agenda",
+    "日程",
+    "予定一覧"
+  ],
+  "Bozze delle schede": [
+    "Card drafts",
+    "Brouillons de cartes",
+    "Borradores de tarjetas",
+    "Kartenentwürfe",
+    "卡片草稿",
+    "カードの下書き"
+  ],
+  "Bozze locali delle schede per questo account. La riapertura verifica i permessi sul server. Le bozze di revisioni, commenti e moduli restano nei rispettivi editor.": [
+    "Local card drafts for this account. Reopening checks permissions on the server. Review, comment and form drafts remain in their respective editors.",
+    "Brouillons locaux de cartes pour ce compte. La réouverture vérifie les autorisations sur le serveur. Les brouillons de révisions, de commentaires et de formulaires restent dans leurs éditeurs respectifs.",
+    "Borradores locales de tarjetas de esta cuenta. Al reabrirlos se comprueban los permisos en el servidor. Los borradores de revisiones, comentarios y formularios permanecen en sus respectivos editores.",
+    "Lokale Kartenentwürfe für dieses Konto. Beim erneuten Öffnen werden die Berechtigungen auf dem Server geprüft. Entwürfe für Reviews, Kommentare und Formulare bleiben in den jeweiligen Editoren.",
+    "此账户在本地保存的卡片草稿。重新打开时会在服务器上检查权限。评审、评论和表单的草稿仍保留在各自的编辑器中。",
+    "このアカウントのカードのローカル下書きです。再度開く際にサーバーで権限を確認します。レビュー、コメント、フォームの下書きは、それぞれのエディターに保持されます。"
+  ],
+  "Calendario schede": [
+    "Card calendar",
+    "Calendrier des cartes",
+    "Calendario de tarjetas",
+    "Kartenkalender",
+    "卡片日历",
+    "カードのカレンダー"
+  ],
+  "Cerca comandi": [
+    "Search commands",
+    "Rechercher des commandes",
+    "Buscar comandos",
+    "Befehle suchen",
+    "搜索命令",
+    "コマンドを検索"
+  ],
+  "Comandi": [
+    "Commands",
+    "Commandes",
+    "Comandos",
+    "Befehle",
+    "命令",
+    "コマンド"
+  ],
+  "Controlla i campi indicati.": [
+    "Check the highlighted fields.",
+    "Vérifiez les champs indiqués.",
+    "Comprueba los campos indicados.",
+    "Prüfe die markierten Felder.",
+    "请检查标出的字段。",
+    "表示された項目を確認してください。"
+  ],
+  "Data di riferimento": [
+    "Reference date",
+    "Date de référence",
+    "Fecha de referencia",
+    "Bezugsdatum",
+    "参考日期",
+    "基準日"
+  ],
+  "Disconnessione da un’altra scheda del browser. Accedi di nuovo.": [
+    "You signed out in another browser tab. Sign in again.",
+    "Vous vous êtes déconnecté dans un autre onglet du navigateur. Reconnectez-vous.",
+    "Has cerrado sesión en otra pestaña del navegador. Inicia sesión de nuevo.",
+    "Du wurdest in einem anderen Browser-Tab abgemeldet. Melde dich erneut an.",
+    "你已在浏览器的另一个标签页退出登录。请重新登录。",
+    "ブラウザーの別のタブでログアウトしました。もう一度ログインしてください。"
+  ],
+  "La bozza è cambiata. Aggiorna l’elenco prima di eliminarla.": [
+    "The draft has changed. Refresh the list before deleting it.",
+    "Le brouillon a changé. Actualisez la liste avant de le supprimer.",
+    "El borrador ha cambiado. Actualiza la lista antes de eliminarlo.",
+    "Der Entwurf wurde geändert. Aktualisiere die Liste, bevor du ihn löschst.",
+    "草稿已更改。请刷新列表后再删除。",
+    "下書きが変更されました。削除する前に一覧を更新してください。"
+  ],
+  "Mese": [
+    "Month",
+    "Mois",
+    "Mes",
+    "Monat",
+    "月",
+    "月"
+  ],
+  "Nessun comando disponibile.": [
+    "No commands available.",
+    "Aucune commande disponible.",
+    "No hay comandos disponibles.",
+    "Keine Befehle verfügbar.",
+    "没有可用的命令。",
+    "使用できるコマンドはありません。"
+  ],
+  "Nessuna bozza di scheda disponibile.": [
+    "No card drafts available.",
+    "Aucun brouillon de carte disponible.",
+    "No hay borradores de tarjetas disponibles.",
+    "Keine Kartenentwürfe verfügbar.",
+    "没有可用的卡片草稿。",
+    "カードの下書きはありません。"
+  ],
+  "Periodo del calendario": [
+    "Calendar period",
+    "Période du calendrier",
+    "Período del calendario",
+    "Kalenderzeitraum",
+    "日历时段",
+    "カレンダーの期間"
+  ],
+  "Periodo precedente": [
+    "Previous period",
+    "Période précédente",
+    "Período anterior",
+    "Vorheriger Zeitraum",
+    "上一时段",
+    "前の期間"
+  ],
+  "Periodo successivo": [
+    "Next period",
+    "Période suivante",
+    "Período siguiente",
+    "Nächster Zeitraum",
+    "下一时段",
+    "次の期間"
+  ],
+  "Riprendi": [
+    "Resume",
+    "Reprendre",
+    "Reanudar",
+    "Fortsetzen",
+    "继续",
+    "再開"
+  ],
+  "Scheda esistente": [
+    "Existing card",
+    "Carte existante",
+    "Tarjeta existente",
+    "Vorhandene Karte",
+    "现有卡片",
+    "既存のカード"
+  ],
+  "Settimana": [
+    "Week",
+    "Semaine",
+    "Semana",
+    "Woche",
+    "周",
+    "週"
+  ],
+  "Naviga fra le schede; Ctrl + Home / End va alla prima o ultima scheda.": [
+    "Navigate between cards; Ctrl + Home / End goes to the first or last card.",
+    "Naviguez entre les cartes ; Ctrl + Home / End va à la première ou à la dernière carte.",
+    "Navega entre las tarjetas; Ctrl + Inicio / Fin va a la primera o a la última tarjeta.",
+    "Zwischen Karten navigieren; Strg + Pos1 / Ende springt zur ersten oder letzten Karte.",
+    "在卡片之间导航；Ctrl + Home / End 跳转到第一张或最后一张卡片。",
+    "カード間を移動します。Ctrl + Home / End で最初または最後のカードに移動します。"
+  ],
+  "Carica altri": [
+    "Load more",
+    "Charger plus",
+    "Cargar más",
+    "Weitere laden",
+    "加载更多",
+    "さらに読み込む"
+  ],
+  "↑ ↓ ← → / Home / End": [
+    "↑ ↓ ← → / Home / End",
+    "↑ ↓ ← → / Début / Fin",
+    "↑ ↓ ← → / Inicio / Fin",
+    "↑ ↓ ← → / Pos1 / Ende",
+    "↑ ↓ ← → / Home / End",
+    "↑ ↓ ← → / Home / End"
+  ],
+  "⌘ / Ctrl + Shift + P": [
+    "⌘ / Ctrl + Shift + P",
+    "⌘ / Ctrl + Maj + P",
+    "⌘ / Ctrl + Mayús + P",
+    "⌘ / Strg + Umschalt + P",
+    "⌘ / Ctrl + Shift + P",
+    "⌘ / Ctrl + Shift + P"
+  ]
+}

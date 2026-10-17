@@ -67,7 +67,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev libssl-dev pkg-config
       - name: Install OpenSSL build metadata (macOS)
         if: runner.os == 'macOS'
-        run: brew install openssl@3 pkg-config
+        run: |
+          brew install openssl@3 pkg-config
+          echo "OPENBOARD_OPENSSL=$(brew --prefix openssl@3)/bin/openssl" >> "$GITHUB_ENV"
       - name: Build environment
         run: |
           python3 --version
@@ -105,6 +107,16 @@ jobs:
         run: docker compose config --quiet
       - name: Build all five hardened images
         run: docker compose build app frontend postgres mongo npm
+      - name: Install native external-storage test drivers
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev libssl-dev libpq-dev libmongoc-dev pkg-config
+      - name: Build native external-storage test binary
+        run: make EXTERNAL_STORAGE=1
+      - name: Test all external-storage scenarios in fresh isolated databases
+        run: python3 scripts/test-cloud-stack.py
+      - name: Verify complete encrypted application and proxy recovery
+        env:
+          OPENBOARD_RECOVERY_TEST: '1'
+        run: python3 -m unittest discover -s tests -p 'test_backup_recovery.py' -v
       - name: Verify database image authentication and backup tools
         env:
           OPENBOARD_POSTGRES_IMAGE: openboard-postgres:0.6.1

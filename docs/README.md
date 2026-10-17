@@ -12,6 +12,7 @@ OpenBoard 0.6.1 is an early preview. Start with the guide that matches your task
 | [Troubleshooting](TROUBLESHOOTING.md) | Setup, ports, origin, authentication and storage errors |
 | [Architecture](ARCHITECTURE.md) | API/frontend separation, consistency and trust boundaries |
 | [Roadmap](ROADMAP.md) | Current capabilities, limitations and proposed work |
+| [Next 100 improvements](IMPROVEMENTS_NEXT_100.md) | Item-by-item implementation status, evidence and outstanding work |
 | [Support](../SUPPORT.md) | Questions, bug reports and feature requests |
 
 ## Develop and integrate

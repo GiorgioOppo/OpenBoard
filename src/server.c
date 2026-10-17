@@ -9,6 +9,7 @@
 #include "reviews.h"
 #include "sprints.h"
 #include "teamwork.h"
+#include "storage.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -751,6 +752,7 @@ int ob_worker_init(void) {
     sqlite3_busy_timeout(db, ob_config.busy_timeout_ms);
     if (sqlite3_exec(db, "PRAGMA foreign_keys=ON", NULL, NULL, NULL) != SQLITE_OK)
         return -1;
+    if (ob_storage_configure_cache()) return -1;
     register_functions();
     return 0;
 }
@@ -810,6 +812,9 @@ int ob_initialize_database(void) {
         version = next;
     }
     auth_schema(db);
+    sql_exec("CREATE INDEX IF NOT EXISTS idempotency_created_at ON idempotency(created_at)");
+    sql_exec("CREATE INDEX IF NOT EXISTS attachments_retained_size ON attachments(size)");
+    reviews_install_content_guard(db);
     /* Repair legacy primary labels produced before the multi-label seed was
      * introduced. */
     sql_exec("BEGIN IMMEDIATE;UPDATE boards SET "
@@ -2047,9 +2052,19 @@ static Response search_api(Request *r) {
             characters++;
     if (characters > 200)
         return error_response(400, "Il testo di ricerca può contenere al massimo 200 caratteri.");
-    sqlite3_stmt *s = prepare("SELECT json_object('cards',json((SELECT "
-                              "json_group_array(json(item))FROM(SELECT "
-                              "json_object('id',k.id,'title',k.title,'board_id',b.id,'board_"
+    char limit_text[32], cursor_text[32];
+    int has_limit = ob_query(r, "limit", limit_text, sizeof limit_text);
+    int has_cursor = ob_query(r, "before", cursor_text, sizeof cursor_text);
+    int64_t limit = has_limit == 1 ? parse_id(limit_text) : 30;
+    int64_t before = has_cursor == 1 ? parse_id(cursor_text) : 0;
+    if (has_limit < 0 || has_cursor < 0 || limit < 1 || limit > 200 ||
+        (has_cursor == 1 && before < 1))
+        return error_response(400, "Paginazione non valida: limit 1–200 e before positivo.");
+    bool paged = has_limit == 1 || has_cursor == 1;
+    /* An explicit cursor opts into immutable ID ordering; the legacy call
+     * retains its updated-at ordering. ACLs always apply before LIMIT. */
+    const char *prefix = paged ? "WITH page AS(SELECT k.id cursor_id," : "SELECT json_object('cards',json((SELECT json_group_array(json(item))FROM(SELECT ";
+    const char *rows = "json_object('id',k.id,'title',k.title,'board_id',b.id,'board_"
                               "name',b.name,'column_title',c.title,'"
                               "priority',k.priority,'due_date',k.due_date)item FROM cards k "
                               "JOIN columns c ON c.id=k.column_id JOIN "
@@ -2059,9 +2074,26 @@ static Response search_api(Request *r) {
                               "ob_allowed(b.id) "
                               "AND(instr(lower(k.title),lower(?1))>0 OR "
                               "instr(lower(k.description),lower(?1))>0 OR "
-                              "instr(lower(k.assignee),lower(?1))>0)ORDER BY k.updated_at DESC "
-                              "LIMIT 200))))");
+                              "instr(lower(k.assignee),lower(?1))>0)";
+    const char *suffix = paged ?
+        "AND (?2=0 OR k.id<?2) ORDER BY k.id DESC LIMIT ?3) SELECT "
+        "json_object('cards',json((SELECT json_group_array(json(item)) FROM "
+        "(SELECT item FROM page ORDER BY cursor_id DESC LIMIT ?4))),'next_cursor',CASE WHEN "
+        "(SELECT count(*) FROM page)>?4 THEN (SELECT cursor_id "
+        "FROM page ORDER BY cursor_id DESC LIMIT 1 OFFSET ?5) ELSE NULL END)" :
+        "ORDER BY k.updated_at DESC,k.id DESC LIMIT 200))))";
+    char sql[4096];
+    int length = snprintf(sql, sizeof sql, "%s%s%s", prefix, rows, suffix);
+    if (length < 0 || (size_t)length >= sizeof sql)
+        return error_response(503, "Ricerca temporaneamente non disponibile.");
+    sqlite3_stmt *s = prepare(sql);
     bind_text(s, 1, term);
+    if (paged) {
+        sqlite3_bind_int64(s, 2, before);
+        sqlite3_bind_int64(s, 3, limit + 1);
+        sqlite3_bind_int64(s, 4, limit);
+        sqlite3_bind_int64(s, 5, limit - 1);
+    }
     Response result = sqlite3_step(s) == SQLITE_ROW
                           ? json_response(200, (const char *)sqlite3_column_text(s, 0))
                           : error_response(503, "Ricerca temporaneamente non disponibile.");
@@ -3621,6 +3653,20 @@ static bool replay_idempotency(Request *r, Response *out) {
     sqlite3_finalize(s);
     return found;
 }
+/* Zero preserves the historical unlimited replay contract. Expiration is an
+ * explicit operator choice: after that interval a key may cause a new action.
+ * Cleanup shares the mutation transaction and rolls back with a failed write. */
+static void expire_idempotency(void) {
+    if (!ob_config.idempotency_ttl) return;
+    sqlite3_stmt *s = prepare("DELETE FROM idempotency WHERE created_at<="
+                              "strftime('%Y-%m-%dT%H:%M:%fZ','now','-'||?1||' seconds')");
+    sqlite3_bind_int(s, 1, ob_config.idempotency_ttl);
+    if (sqlite3_step(s) != SQLITE_DONE) {
+        sqlite3_finalize(s);
+        db_die("Idempotency expiration failed");
+    }
+    sqlite3_finalize(s);
+}
 static void store_idempotency(Request *r, Response *out) {
     sqlite3_stmt *s = prepare("INSERT INTO "
                               "idempotency(user_id,path,key,request_body,status,"
@@ -3685,12 +3731,20 @@ Response ob_route(Request *r) {
     Response result;
     /* Refresh before every SQLite-backed callback, including authentication and
      * session reads: those callbacks can also commit session changes. */
+    if (!get && !ob_storage_cache_write_allowed()) {
+        result = error_response(503, "Spazio cache insufficiente. Riprova più tardi.");
+        goto done;
+    }
     if (cloud_request_begin(db)) {
         result = error_response(503, "Archivio esterno temporaneamente non disponibile. Riprova.");
         goto done;
     }
     cloud_request_active = true;
     cloud_changes_before = sqlite3_total_changes64(db);
+    if (!get && !ob_storage_cache_write_allowed()) {
+        result = error_response(503, "Spazio cache insufficiente. Riprova più tardi.");
+        goto done;
+    }
     if (!get && !post && !patch && !del) {
         result = error_response(405, "Metodo non consentito.");
         goto done;
@@ -3732,6 +3786,12 @@ Response ob_route(Request *r) {
             goto done;
         }
         outer_transaction = true;
+        if (!ob_storage_cache_write_allowed()) {
+            sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
+            outer_transaction = false;
+            result = error_response(503, "Spazio cache insufficiente. Riprova più tardi.");
+            goto done;
+        }
         /* Session and global role may have changed while this request waited
          * for SQLite's writer lock. Recheck under the lock before any action. */
         if (!auth_authorize(r, &result)) {
@@ -3739,6 +3799,7 @@ Response ob_route(Request *r) {
             outer_transaction = false;
             goto done;
         }
+        if (post) expire_idempotency();
         if (post && r->idempotency_key[0] && replay_idempotency(r, &result)) {
             sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
             outer_transaction = false;
@@ -3784,6 +3845,8 @@ Response ob_route(Request *r) {
         ) : error_response(405, "Metodo non consentito.");
     } else if (!strcmp(r->path, "/api/metrics")) {
         result = get ? ob_metrics(r) : error_response(405, "Metodo non consentito.");
+    } else if (!strcmp(r->path, "/api/admin/storage")) {
+        result = get ? ob_storage_inventory(r) : error_response(405, "Metodo non consentito.");
     } else if (!sprints_handle(r, &result) && !intake_handle(r, &result) &&
                !reviews_handle(r, &result) && !portfolio_handle(r, &result) &&
                !teamwork_handle(r, &result) && !collaboration_handle(r, &result)) {

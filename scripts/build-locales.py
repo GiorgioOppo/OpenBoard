@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-PARTS = ('common', 'core', 'planning', 'workflows', 'errors', 'extra-errors', 'counts', 'activity')
+PARTS = ('common', 'core', 'planning', 'workflows', 'errors', 'extra-errors', 'counts', 'activity', 'experience', 'capacity')
 
 
 def build():

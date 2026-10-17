@@ -1,6 +1,7 @@
 /* OpenBoard account, session and board authorization. SPDX-License-Identifier: MIT */
 #define _POSIX_C_SOURCE 200809L
 #include "auth.h"
+#include "storage.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -17,6 +18,7 @@
 #define PASSWORD_ITERATIONS 600000
 #define SESSION_LIFETIME (8 * 60 * 60)
 #define SESSION_IDLE (30 * 60)
+#define SESSION_TOUCH_INTERVAL 60
 #define RATE_WINDOW 300
 #define RATE_ROWS 4
 #define RATE_PEER_SLOTS 2048
@@ -167,6 +169,11 @@ typedef struct { bool outer, begun; } AuthTransaction;
 static AuthTransaction transaction_begin(void) {
     AuthTransaction t = { sqlite3_get_autocommit(db) != 0, false };
     t.begun = sqlite3_exec(db, t.outer ? "BEGIN IMMEDIATE" : "SAVEPOINT auth_op", NULL, NULL, NULL) == SQLITE_OK;
+    if (t.begun && !ob_storage_cache_write_allowed()) {
+        sqlite3_exec(db, t.outer ? "ROLLBACK" : "ROLLBACK TO auth_op", NULL, NULL, NULL);
+        if (!t.outer) sqlite3_exec(db, "RELEASE auth_op", NULL, NULL, NULL);
+        t.begun = false;
+    }
     return t;
 }
 static bool transaction_end(AuthTransaction t, bool ok) {
@@ -228,17 +235,18 @@ static bool session_load(Request *r, char csrf[65], char hash[65]) {
     char token[65]; time_t now = time(NULL);
     if (!session_cookie(r, token) || !token_digest(token, hash)) return false;
     OPENSSL_cleanse(token, sizeof token);
-    sqlite3_stmt *s = prepare("SELECT u.id,u.role,s.csrf FROM sessions s JOIN users u ON u.id=s.user_id "
+    sqlite3_stmt *s = prepare("SELECT u.id,u.role,s.csrf,s.last_seen FROM sessions s JOIN users u ON u.id=s.user_id "
         "WHERE s.token_hash=?1 AND u.active=1 AND s.expires_at>?2 AND s.last_seen>?3");
     bind_text(s, 1, hash); sqlite3_bind_int64(s, 2, now); sqlite3_bind_int64(s, 3, now - SESSION_IDLE);
     bool valid = sqlite3_step(s) == SQLITE_ROW;
+    bool touch = valid && sqlite3_column_int64(s, 3) <= now - SESSION_TOUCH_INTERVAL;
     if (valid) {
         r->user_id = sqlite3_column_int64(s, 0);
         snprintf(r->role, sizeof r->role, "%s", sqlite3_column_text(s, 1));
         snprintf(csrf, 65, "%s", sqlite3_column_text(s, 2));
     }
     sqlite3_finalize(s);
-    if (valid) {
+    if (touch && ob_storage_cache_write_allowed()) {
         s = prepare("UPDATE sessions SET last_seen=?2 WHERE token_hash=?1 AND last_seen<?2");
         bind_text(s, 1, hash); sqlite3_bind_int64(s, 2, now); sqlite3_step(s); sqlite3_finalize(s);
     }

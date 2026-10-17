@@ -4,7 +4,13 @@ Version sections describe the code's development history. They do not imply that
 
 ## Unreleased
 
+Add an administrator storage panel and API, retained-file count/payload quotas that include trash, history accounting, configurable cache tmpfs sizing, SQLite page limits and minimum-free-space write admission. Preserve existing files when quotas are lowered. Add bounded Prometheus response/latency histograms, storage-operation timing/errors and confirmed publication-row counters. Local and offline-driver regressions cover quotas, rollback, pressure and telemetry; real-store capacity and container operation still require validation.
+
 Refresh the pinned MongoDB `8.0.34-noble` multi-platform base image to the upstream rebuild published on 2026-10-17. Preserve MongoDB 8.0.34, its data format and the existing rebuilt tools and hardening. The OCI base-digest label follows the new pin. Historical audit measurements and the published `v0.6.1` tag continue to identify their original artifacts.
+
+Begin the [next 100 improvements](docs/IMPROVEMENTS_NEXT_100.md), recording completed, partial and outstanding scope explicitly. Publish changed SQL rows and verify reused MongoDB documents; retain serialization and full stale-cache reconstruction. Coalesce session activity, add opt-in idempotency retention and private file-backed storage credentials, and invalidate review votes atomically after relevant card-content edits.
+
+Add paginated global search, a contextual command palette, month/week calendar, card draft center, browser-tab logout coordination and keyboard/field-error/forced-color/IME improvements. Add pseudolocalization without changing user content. Extend backup tooling with verified manifests, standard CMS encryption, retention/scheduling and isolated installation recovery tools. Pin the remaining Docker bases, configure full disposable cloud CI and add a bounded local benchmark with explicit budgets. Container recovery, fresh image scans, external capacity and the remaining enterprise features are not claimed complete.
 
 ## 0.6.1 — 2026-10-16 (Early preview)
 

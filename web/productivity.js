@@ -94,7 +94,84 @@
     return {labels,priorities,covers:[...value.covers],fieldTypes:Object.fromEntries(value.custom_field_types.map((item) => [item.value,tr(item.label)]))};
   }
   function storageLabel(value) { return value === 'sqlite' ? 'SQLite' : value === 'postgresql+mongodb' ? 'PostgreSQL + MongoDB' : ''; }
-  const helpers = {safeURL,markdown,csvCell,csv,icsText,calendar,foldLine,dateText,shouldDiscardDraft,fieldValue,fieldText,planningPayload,fieldCell,fieldMatches,worklogCSV,storageLabel,catalog};
+  function graphemes(value, language = locale()) {
+    const text = String(value ?? '');
+    return typeof Intl.Segmenter === 'function' ? [...new Intl.Segmenter(language,{granularity:'grapheme'}).segment(text)].map(item=>item.segment) : Array.from(text);
+  }
+  function initials(value, language = locale()) {
+    return String(value ?? '').trim().split(/\s+/u).slice(0,2).map(part=>graphemes(part,language)[0] || '').join('').toLocaleUpperCase(language);
+  }
+  function composing(event) { return !!event?.isComposing || event?.keyCode === 229; }
+  function navigateCards(columns, current, key, control = false) {
+    const grid = columns.map(items=>items.filter(Boolean)).filter(items=>items.length);
+    const x = grid.findIndex(items=>items.includes(current));
+    if (x < 0) return null;
+    const y = grid[x].indexOf(current);
+    if (key==='Home') return control ? grid[0][0] : grid[x][0];
+    if (key==='End') return control ? grid.at(-1).at(-1) : grid[x].at(-1);
+    if (key==='ArrowUp') return grid[x][Math.max(0,y-1)];
+    if (key==='ArrowDown') return grid[x][Math.min(grid[x].length-1,y+1)];
+    const next = key==='ArrowLeft' ? Math.max(0,x-1) : key==='ArrowRight' ? Math.min(grid.length-1,x+1) : -1;
+    return next < 0 ? null : grid[next][Math.min(y,grid[next].length-1)];
+  }
+  function listCardDrafts(storage, owner, now = Date.now()) {
+    if (!/^(?:local|[1-9]\d*)$/.test(String(owner))) return [];
+    const prefix = `openboard.draft.${owner}.`, items = [];
+    try {
+      for (let index=0;index<storage.length;index++) {
+        const key=storage.key(index);
+        if (typeof key!=='string' || !key.startsWith(prefix)) continue;
+        const ids=key.slice(prefix.length).match(/^([1-9]\d*)\.(new|[1-9]\d*)$/);
+        if (!ids) continue;
+        const raw=storage.getItem(key);
+        if (!raw || raw.length>2*1024*1024) continue;
+        let draft; try { draft=JSON.parse(raw); } catch { continue; }
+        if (!draft || typeof draft.data!=='object' || !draft.data || Array.isArray(draft.data) || typeof draft.data.title!=='string' || !Number.isFinite(draft.updated_at) || draft.updated_at>now+60000 || now-draft.updated_at>=30*86400000) continue;
+        const boardId=Number(ids[1]),cardId=ids[2]==='new' ? null:Number(ids[2]);
+        if (!Number.isSafeInteger(boardId) || (cardId!==null && !Number.isSafeInteger(cardId))) continue;
+        items.push({key,raw,boardId,cardId,title:draft.data.title,updatedAt:draft.updated_at});
+      }
+    } catch { return []; }
+    return items.sort((a,b)=>b.updatedAt-a.updatedAt || a.key.localeCompare(b.key));
+  }
+  function removeOwnedDraft(storage, item, owner) {
+    const prefix=`openboard.draft.${owner}.`;
+    if (!/^(?:local|[1-9]\d*)$/.test(String(owner)) || typeof item?.key!=='string' || !item.key.startsWith(prefix) || !/^([1-9]\d*)\.(new|[1-9]\d*)$/.test(item.key.slice(prefix.length)) || typeof item.raw!=='string') return false;
+    try { if (storage.getItem(item.key)!==item.raw) return false; storage.removeItem(item.key); return true; } catch { return false; }
+  }
+  function calendarPeriod(mode, anchor, shift = 0) {
+    const chosen=validDate(anchor) && anchor>='0001-01-01' ? anchor:new Date().toISOString().slice(0,10);
+    const date=new Date(chosen+'T12:00:00Z');
+    shift=Number.isSafeInteger(shift) ? shift:0;
+    if (mode==='month') { date.setUTCDate(1); date.setUTCMonth(date.getUTCMonth()+shift); }
+    else date.setUTCDate(date.getUTCDate()-((date.getUTCDay()+6)%7)+shift*7);
+    if (!Number.isFinite(date.getTime()) || date.getUTCFullYear()<1 || date.getUTCFullYear()>9999) return calendarPeriod(mode,chosen,0);
+    const focus=date.toISOString().slice(0,10), start=new Date(date);
+    if (mode==='month') start.setUTCDate(start.getUTCDate()-((start.getUTCDay()+6)%7));
+    const days=Array.from({length:mode==='month' ? 42:7},(_,index)=>{
+      const day=new Date(start);day.setUTCDate(day.getUTCDate()+index);
+      return day.getUTCFullYear()<1 || day.getUTCFullYear()>9999 ? null:day.toISOString().slice(0,10);
+    });
+    return {anchor:focus,days};
+  }
+  function tabSessionBridge({storage,channel,onLogout,id = () => globalThis.crypto?.randomUUID?.() || String(Math.random())}) {
+    const key='openboard.session-event', seen=new Set();
+    function receive(value) {
+      let message=value;
+      if (typeof message==='string') { if(message.length>200)return false;try { message=JSON.parse(message); } catch { return false; } }
+      if (!message || typeof message!=='object' || Array.isArray(message) || Object.keys(message).length!==2 || !Object.hasOwn(message,'kind') || !Object.hasOwn(message,'nonce') || message.kind!=='logout' || typeof message.nonce!=='string' || !message.nonce || message.nonce.length>100 || seen.has(message.nonce)) return false;
+      seen.add(message.nonce);if(seen.size>100)seen.delete(seen.values().next().value);
+      onLogout(); return true;
+    }
+    function publish() {
+      const message={kind:'logout',nonce:id()};seen.add(message.nonce);
+      if(seen.size>100)seen.delete(seen.values().next().value);
+      try { channel?.postMessage(message); } catch { /* Storage is the fallback. */ }
+      try { storage?.setItem(key,JSON.stringify(message)); } catch { /* Cross-tab support is optional. */ }
+    }
+    return {key,publish,receive};
+  }
+  const helpers = {safeURL,markdown,csvCell,csv,icsText,calendar,foldLine,dateText,validDate,shouldDiscardDraft,fieldValue,fieldText,planningPayload,fieldCell,fieldMatches,worklogCSV,storageLabel,catalog,graphemes,initials,composing,navigateCards,listCardDrafts,removeOwnedDraft,calendarPeriod,tabSessionBridge};
   if (typeof module !== 'undefined' && module.exports) module.exports = helpers;
   root.OpenBoardProductivity = helpers;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

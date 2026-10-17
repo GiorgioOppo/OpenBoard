@@ -1,4 +1,4 @@
-FROM debian:trixie-slim AS builder
+FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS builder
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        build-essential pkg-config libsqlite3-dev libssl-dev libpq-dev libmongoc-dev \
@@ -10,7 +10,7 @@ RUN make EXTERNAL_STORAGE=1 \
     CFLAGS="-O2 -g -std=c11 -Wall -Wextra -Wpedantic -Wformat -Werror=format-security -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=3" \
     LDFLAGS="-pie -Wl,-z,relro,-z,now,-z,noexecstack"
 
-FROM debian:trixie-slim
+FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        libsqlite3-0 libssl3t64 libpq5 libmongoc-1.0-0t64 curl ca-certificates \

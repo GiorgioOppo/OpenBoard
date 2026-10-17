@@ -42,6 +42,7 @@ function browserRuntime({stored=null,blocked=false,search='',preferences=['en-US
  return {context,selectors,status,storage,markup,change(value){selectors[0].value=value;selectors[0].change();}};
 }
 const regular=browserRuntime();assert.equal(regular.markup.innerHTML,'<p>Trash</p>');regular.change('fr');assert.equal(regular.storage.get('openboard.language'),'fr');assert.equal(regular.context.reloads,1);
+const pseudo=browserRuntime({search:'?pseudo=1'});assert.equal(pseudo.markup.innerHTML,'<p>⟦Tràsh ···⟧</p>');assert.equal(pseudo.context.OpenBoardI18n.locale,'en');
 const guarded=browserRuntime();guarded.context.openEditor=true;guarded.change('fr');assert.equal(guarded.context.reloads,0);assert.equal(guarded.selectors[0].value,'en');assert(guarded.status.textContent.length>0);guarded.context.openEditor=false;guarded.context.state.saving=true;guarded.change('de');assert.equal(guarded.context.reloads,0);
 const unavailable=browserRuntime({blocked:true,search:'?source=test'});unavailable.change('ja');assert.equal(new URL(unavailable.context.assigned).searchParams.get('lang'),'ja');assert.equal(new URL(unavailable.context.assigned).hash,'#board/7');assert.equal(new URL(unavailable.context.assigned).searchParams.get('source'),'test');
 const explicit=browserRuntime({stored:'de',search:'?lang=fr&source=test'});assert.equal(explicit.context.OpenBoardI18n.locale,'fr');explicit.change('en');assert(!new URL(explicit.context.assigned).searchParams.has('lang'));assert.equal(new URL(explicit.context.assigned).searchParams.get('source'),'test');
