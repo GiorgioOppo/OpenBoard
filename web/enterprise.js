@@ -47,7 +47,7 @@ const OpenBoardEnterprise = (() => {
       const user = owner(), result = await api('/api/catalog');
       const parsed = {};
       for (const key of ['review_statuses','review_policies','review_decisions','portfolio_statuses']) {
-        if (!Array.isArray(result[key]) || !result[key].length || result[key].some((item) => !item || typeof item.value !== 'string' || !/^[a-z_]{1,40}$/.test(item.value) || typeof item.label !== 'string')) throw new Error(tr('Catalogo revisioni/report non disponibile. Aggiorna il server.'));
+        if (!Array.isArray(result[key]) || !result[key].length || result[key].some((item) => !item || typeof item.value !== 'string' || !/^[a-z_]{1,40}$/.test(item.value) || typeof item.label !== 'string')) throw new OpenBoardI18n.LocalizedError(tr('Catalogo revisioni/report non disponibile. Aggiorna il server.'));
         parsed[key] = result[key].map((item) => ({value:item.value,label:tr(item.label)}));
       }
       if (owner() === user) memory.catalog = parsed;

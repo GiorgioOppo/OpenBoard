@@ -162,6 +162,28 @@ class LocalBootstrap(unittest.TestCase):
                 self.assertEqual(self.path.read_bytes(), original_credentials)
                 self.assertFalse(any(method in ("PUT","DELETE") for _,method,_ in self.stack.calls))
 
+    def test_pre_version_proxy_upgrade_requires_opt_in_and_exact_previous_configuration(self):
+        bootstrap_local.bootstrap(self.stack.npm, self.stack.app, self.path)
+        original_credentials = self.path.read_bytes()
+        previous = {**bootstrap_local.proxy_configuration(), 'id': 7,
+                    'advanced_config': bootstrap_local.PRE_VERSION_API_LOCATION}
+        self.stack.hosts = [copy.deepcopy(previous)]
+        self.stack.calls.clear()
+        with self.assertRaises(bootstrap_local.BootstrapError):
+            bootstrap_local.bootstrap(self.stack.npm, self.stack.app, self.path)
+        self.assertEqual(self.stack.hosts, [previous])
+        self.assertFalse(any(method == 'PUT' for _, method, _ in self.stack.calls))
+        self.stack.hosts[0]['advanced_config'] += '\n# owner customization'
+        with self.assertRaises(bootstrap_local.BootstrapError):
+            bootstrap_local.bootstrap(self.stack.npm, self.stack.app, self.path, upgrade_proxy=True)
+        self.assertFalse(any(method == 'PUT' for _, method, _ in self.stack.calls))
+        self.stack.hosts = [copy.deepcopy(previous)]
+        bootstrap_local.bootstrap(self.stack.npm, self.stack.app, self.path, upgrade_proxy=True)
+        self.assertEqual(self.path.read_bytes(), original_credentials)
+        self.assertEqual(self.stack.hosts, [{**bootstrap_local.proxy_configuration(), 'id': 7}])
+        self.assertEqual([call for call in self.stack.calls if call[1] == 'PUT'],
+                         [('npm', 'PUT', '/api/nginx/proxy-hosts/7')])
+
     def test_upgrade_requires_confirmed_response_from_npm(self):
         bootstrap_local.bootstrap(self.stack.npm,self.stack.app,self.path)
         self.stack.hosts = [{**bootstrap_local.proxy_configuration(legacy=True), "id":7}]

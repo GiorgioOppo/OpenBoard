@@ -21,7 +21,7 @@ PREFIX ?= /usr/local
 DESTDIR ?=
 NODE ?= node
 
-.PHONY: all build run test test-sanitize test-frontend test-security test-docs test-cloud test-vendor fuzz-build fuzz-smoke install install-frontend clean FORCE
+.PHONY: all build run test test-sanitize test-frontend test-security test-security-requirements test-docs test-cloud test-vendor fuzz-build fuzz-smoke install install-frontend clean FORCE
 all: build
 build: build/openboard
 build/.config: FORCE
@@ -43,6 +43,7 @@ test-frontend:
 	python3 scripts/build-locales.py --check
 	$(NODE) tests/test_i18n.js
 	$(NODE) tests/test_i18n_sources.js
+	$(NODE) tests/test_live_language.js
 	$(NODE) tests/test_frontend.js
 	$(NODE) tests/test_enterprise.js
 	$(NODE) tests/test_workflows.js
@@ -60,7 +61,9 @@ test-cloud: build/openboard
 	OPENBOARD_CLOUD_TEST=1 python3 -m unittest discover -s tests -p 'test_cloud.py' -v
 test-security:
 	$(NODE) tests/test_npm_limits.mjs
-test-docs:
+test-security-requirements:
+	python3 scripts/check-security-requirements.py
+test-docs: test-security-requirements
 	python3 scripts/check-docs.py
 test-vendor:
 	python3 vendor/utf8proc/check-vendor.py

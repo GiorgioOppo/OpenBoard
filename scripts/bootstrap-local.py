@@ -24,6 +24,65 @@ LEGACY_API_LOCATION = """location ^~ /api/ {
     proxy_pass http://$openboard_api;
 }
 """
+# Exact previously generated configuration, retained only for opt-in upgrades.
+# Manually changed hosts must still be reviewed by their owner.
+PRE_VERSION_API_LOCATION = """# Paste this entire file into the OpenBoard NPM Proxy Host Advanced field.
+# The OpenBoard proxy image supplies the shared zones and HTTP 429 status.
+location ^~ /api/ {
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $openboard_api app:8080;
+    client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://$openboard_api;
+}
+
+location = /api/auth/login {
+    limit_req zone=openboard_auth burst=10 nodelay;
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $openboard_api app:8080;
+    client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://$openboard_api;
+}
+
+location = /api/auth/setup {
+    limit_req zone=openboard_auth burst=10 nodelay;
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $openboard_api app:8080;
+    client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://$openboard_api;
+}
+
+location = /api/auth/password {
+    limit_req zone=openboard_auth burst=10 nodelay;
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $openboard_api app:8080;
+    client_max_body_size 2m;
+    limit_conn openboard_api_clients 8;
+    limit_conn openboard_api_total 32;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://$openboard_api;
+}
+"""
 API_LOCATION = (ROOT / "deploy/npm/openboard-api.conf").read_text(encoding="utf-8")
 
 
@@ -223,8 +282,9 @@ def bootstrap(npm, app, credential_path, *, upgrade_proxy=False):
             raise BootstrapError("Proxy openboard.localhost già presente con configurazione diversa. Nessun host modificato.")
         host = matching[0]
         if not matching_proxy(host, expected):
-            if not upgrade_proxy or not matching_proxy(host, proxy_configuration(legacy=True)):
-                raise BootstrapError("Proxy locale differente: nessun host modificato. --upgrade-proxy aggiorna soltanto la configurazione legacy OpenBoard esatta.")
+            if not upgrade_proxy or not (matching_proxy(host, proxy_configuration(legacy=True))
+                                         or matching_proxy(host, {**expected, "advanced_config": PRE_VERSION_API_LOCATION})):
+                raise BootstrapError("Proxy locale differente: nessun host modificato. --upgrade-proxy aggiorna soltanto le configurazioni precedenti OpenBoard esatte.")
             identifier = host.get("id")
             if isinstance(identifier, bool) or not isinstance(identifier, int) or identifier <= 0:
                 raise BootstrapError("Identificatore del proxy legacy non valido. Nessun host modificato.")
@@ -242,7 +302,7 @@ def bootstrap(npm, app, credential_path, *, upgrade_proxy=False):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--upgrade-proxy", action="store_true", help="Upgrade only the exact legacy local OpenBoard proxy, keeping its ID and private credentials.")
+    parser.add_argument("--upgrade-proxy", action="store_true", help="Upgrade only exact previous local OpenBoard proxy configurations, keeping the host ID and private credentials.")
     args = parser.parse_args(argv)
     try:
         origin, authority, public_port, admin_port = settings()

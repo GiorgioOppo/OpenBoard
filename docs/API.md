@@ -6,6 +6,8 @@ Sections marked **unreleased** describe the development branch, not the immutabl
 
 The API uses the same origin as the interface: by default, `http://127.0.0.1:8090` in development or `http://openboard.localhost` with Compose. The backend serves APIs only and returns `404` for HTML, CSS, JavaScript, and every non-API path. The native server listens on loopback; the container explicitly sets `--bind 0.0.0.0` on a private network. `--public-url https://board.example.com` configures the public host and origin used behind a reverse proxy. Nginx Proxy Manager terminates TLS.
 
+The unreleased development API also accepts explicit `/api/v1/...` paths. Existing `/api/...` paths remain aliases of version 1, with shared authentication, authorization, preconditions and idempotency. See [API versioning and deprecation](API_VERSIONING.md), including the required proxy upgrade.
+
 ## HTTP conventions
 
 - API responses use `application/json; charset=utf-8` and `Cache-Control: no-store`, except endpoints explicitly documented as CSV or another format.

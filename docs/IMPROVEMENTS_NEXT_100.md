@@ -36,7 +36,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 28 | SCIM provisioning | Pending | No SCIM endpoint implemented. |
 | 29 | TOTP and recovery codes | Pending | No application second-factor workflow implemented. |
 | 30 | Passkeys | Pending | No WebAuthn registration/authentication implemented. |
-| 31 | Threat model and ASVS traceability | Pending | Existing audit is not a complete requirements matrix. |
+| 31 | Threat model and ASVS traceability | Partial | Versioned ASVS 5.0.0 inventory covers all 70 L1 IDs plus 16 selected higher-level IDs, 37 scoped controls and 17 threats. Offline checker verifies provenance/evidence pointers. Eleven L1 requirements remain unassessed and known gaps are explicit; no compliance/pass claim. |
 | 32 | Native fuzzing | Implemented | Three real C libFuzzer+ASan/UBSan targets cover HTTP/query/address parsing, JSON validators and Unicode/excerpt origins. Synthetic corpus/dictionaries, bounded local campaigns, exact-source/binary reports and reproducible failure inputs; separate CI job configured. Short campaigns are not a complete or long-running security assessment. |
 | 33 | Account recovery | Pending | No recovery-token workflow implemented. |
 | 34 | Administrative reauthentication | Pending | No elevation window implemented. |
@@ -47,7 +47,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 39 | File-mounted credentials | Implemented | PostgreSQL/Mongo `_FILE` inputs, regular/private-file checks, conflict/NUL/size/symlink/FIFO regressions; inline configuration remains compatible. |
 | 40 | Guided credential rotation | Pending | No coordinated rotation/rollback tool implemented. |
 | 41 | Validated OpenAPI contract | Pending | Existing Markdown API references remain authoritative. |
-| 42 | API versioning/deprecation policy | Pending | No new versioned routing contract implemented. |
+| 42 | API versioning/deprecation policy | Implemented | Explicit /api/v1 aliases normalize once before auth, ACL, storage and idempotency; version headers/discovery and compatibility/deprecation policy. Ten normal/sanitized HTTP regressions, shared proxy zones, exact-previous bootstrap upgrades and version-aware readiness checks. No retirement date or schema change. |
 | 43 | Mandatory mutation versions | Pending | Existing optional preconditions remain. |
 | 44 | Scoped service accounts | Pending | No integration-token authentication implemented. |
 | 45 | Signed webhooks | Pending | No outgoing event delivery implemented. |
@@ -91,7 +91,7 @@ Started on 17 October 2026. IDs match the 100 proposals accepted in the developm
 | 83 | Accessible field errors | Partial | Browser constraint errors linked to fields with summary/focus; API field-level errors remain unsupported. |
 | 84 | Forced colors/high contrast | Partial | CSS support implemented; real OS/browser assessment remains. |
 | 85 | Touch targets | Partial | Main controls have 44px targets; real-device checks remain. |
-| 86 | Change language without reload | Pending | Existing reload behavior remains. |
+| 86 | Change language without reload | Implemented | Authored text/attribute provenance updates seven locales in place; dialog selectors, formats/errors and cached labels retain sources. Mounted controls, dirty values/drafts, focus/selection and sessions persist without saves. DOM VM and limited browser checks; full browser/IME matrix remains ID 99. |
 | 87 | Account language synchronization | Pending | Language preference remains local to the browser. |
 | 88 | Independent regional preferences | Pending | No account timezone/week-start settings implemented. |
 | 89 | IME compatibility | Partial | Composition guards and grapheme initials implemented/tested synthetically; real browser/IME matrix remains. |
@@ -158,4 +158,19 @@ IDs 14, 32, 69 and 73 are implemented. Their contracts are documented in the [AP
 - All JavaScript syntax, vendor checksum, documentation, Actionlint and NPM limiter checks pass. Gitleaks scanned 259 publishable source files with zero findings; private environments, ignored builds/corpora and backups were excluded.
 - The new fifth CI job has not yet run remotely. Docker/cloud checks, real-browser E2E, a complete accessibility/native-language review and a fresh dependency vulnerability scan remain outside this local validation. The preceding CI run applies only to `25da2ba`.
 
-Current ledger: **23 implemented, 13 partial, 64 pending**. The requested 100-item implementation remains incomplete.
+### Later CI confirmation for the preceding block
+
+[Run 39049801070](https://github.com/GiorgioOppo/OpenBoard/actions/runs/39049801070) at `b103d97caa38806a035d94d9a1af19bd4699ca6e` subsequently passed all five jobs: documentation/secrets, macOS, Ubuntu, containers and native fuzzing. The final commit replaces inline timeline geometry with CSP-compatible static CSS classes. This closes the remote-run gap for the preceding block; it does not validate later development changes or establish real-browser E2E, full accessibility, long-running fuzz coverage or a fresh CVE scan.
+
+## Live language, API versioning and security traceability — 18 October 2026
+
+IDs 42 and 86 are implemented; ID 31 advances to partial. API aliases require updating the saved NPM Advanced configuration before reopening public ingress. The opt-in local upgrade recognizes only exact previous project-generated configurations; manually customized hosts remain untouched. No existing deployment, database, secrets, tag or release was changed.
+
+- Full native discovery ran **338 tests: 309 passed and 29 skipped**, normally (78.708 seconds) and with ASan/UBSan (106.896 seconds). The three converter integration checks skipped because Node was not on the default PATH; rerunning those with an explicit Node binary passed all three, normally and sanitized. Combined unique coverage is **312 passed, 26 optional container/store checks unexecuted** per build.
+- The API block includes ten actual HTTP checks for version aliases, shared native login limits, CSRF/Origin/ACL/observer enforcement, cross-alias idempotency/revocation/If-Match, query handling, bounded malformed-version responses and version headers. Five development-frontend HTTP tests pass with mixed route forms. The 19 deployment and 10 bootstrap checks include version discovery, stale proxy rejection and preserving private credentials/customized hosts.
+- All **16 frontend suites** pass, including live initialization/change/app handlers, seven locales, dirty card/table/review/request controls, queued responses, nested slot ordering, reset-safe selectors, error/date/count/enum sources and hostile field/timeline text. A limited in-app-browser fixture check retained unsaved card title/comment across English/French/Japanese without server mutations. Final follow-up changes were covered by the DOM suite after browser control timed out during editor closure; no complete E2E/browser/IME assessment is claimed.
+- The ASVS checker passed offline and against the checksum-pinned official release CSV. It checks the complete 70-ID L1 inventory, selected IDs/levels, source/test symbols and threat references; it does not assess or certify the requirements. Documentation/source checks, syntax, Actionlint, proxy limiter and whitespace checks pass.
+- Gitleaks scanned a 268-file publishable source snapshot locally with zero findings; ignored environments, builds, corpora and private backups were excluded. This is a secret scan, not a dependency vulnerability scan.
+- Container/cloud execution, the new real Nginx alternating-alias quota regression, fresh dependency scans and a complete real-browser matrix remain unexecuted locally. The green remote evidence above applies to `b103d97`, before this block.
+
+Current ledger: **25 implemented, 14 partial, 61 pending**. The requested 100-item implementation remains incomplete.

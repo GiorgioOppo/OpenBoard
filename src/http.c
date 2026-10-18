@@ -440,16 +440,42 @@ static void send_response(int fd, const Request *request, Response *r,
       "Content-Security-Policy: default-src 'self'; script-src 'self'; "
       "style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src "
       "'none'; base-uri 'none'; frame-ancestors 'none'; form-action "
-      "'self'\r\n%s\r\n",
+      "'self'\r\n%s%s\r\n",
       r->status, reason(r->status),
       r->type ? r->type : "application/json; charset=utf-8", length, "no-store",
-      request->request_id, r->headers);
+      request->request_id,
+      (!strcmp(request->path, "/api") ||
+       !strncmp(request->path, "/api/", 5))
+          ? "OpenBoard-API-Version: " OB_API_VERSION "\r\n"
+          : "",
+      r->headers);
   int64_t deadline = milliseconds() + 10000;
   if (n > 0 && (size_t)n < sizeof header &&
       send_until(fd, header, (size_t)n, deadline) && !head && r->status != 304)
     send_until(fd, r->body, length, deadline);
 }
 static Response route(Request *r) {
+  /* Canonicalize the explicit version exactly once, before any route, auth,
+   * quota, ACL or idempotency classification. Keep the already split query
+   * untouched. Both public spellings consequently share the same write key.
+   * Do not decode or repeatedly strip prefixes: v1/v1 is not another alias. */
+  if (!strncmp(r->path, "/api/v", 6) &&
+      isdigit((unsigned char)r->path[6])) {
+    const char *version = r->path + 6;
+    const char *end = version;
+    while (isdigit((unsigned char)*end))
+      end++;
+    if ((*end && *end != '/') ||
+        (version[0] == '0' && end - version > 1))
+      return error_response(404, "Invalid API version path.");
+    if (end - version != 1 || version[0] != OB_API_VERSION[0])
+      return json_response(404,
+          "{\"error\":\"Unsupported API version. Use /api/v1/.\","
+          "\"code\":\"unsupported_api_version\",\"supported_versions\":[1]}");
+    if (!*end || !end[1])
+      return error_response(404, "API resource path required.");
+    memmove(r->path + 4, end, strlen(end) + 1);
+  }
   if (!strcmp(r->path, "/api/health"))
     return !strcmp(r->method, "GET")
                ? json_response(200, "{\"status\":\"ok\"}")
@@ -472,10 +498,13 @@ static Response route(Request *r) {
   if (!strcmp(r->path, "/api/version")) {
     if (strcmp(r->method, "GET"))
       return error_response(405, "Metodo non consentito.");
-    char text[256];
+    char text[512];
     snprintf(text, sizeof text,
              "{\"version\":\"%s\",\"sqlite\":\"%s\",\"auth_enabled\":%s,"
-             "\"workers\":%d,\"storage\":\"%s\"}",
+             "\"workers\":%d,\"storage\":\"%s\","
+             "\"api\":{\"version\":" OB_API_VERSION ",\"supported_versions\":[1],"
+             "\"base_path\":\"/api/v1\",\"unversioned_alias\":\"/api\","
+             "\"alias_version\":1,\"deprecated\":false,\"sunset\":null}}",
              OB_VERSION, sqlite3_libversion(),
              ob_config.auth_enabled ? "true" : "false", ob_config.workers,
              cloud_enabled() ? "postgresql+mongodb" : "sqlite");

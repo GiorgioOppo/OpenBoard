@@ -6,7 +6,9 @@ OpenBoard supports English (`en`), Italian (`it`), French (`fr`), Spanish (`es`)
 
 The selector is available in the sign-in dialog and the workspace header. An explicit `?lang=` URL takes priority, followed by the browser preference saved under `openboard.language`, then the first supported browser language. Unsupported browser languages fall back to English. Regional variants map to their supported base language; Chinese variants use Simplified Chinese.
 
-Changing language reloads the interface. Close an editor or panel first; switching is blocked while a save is pending or an editor is open. Draft storage remains scoped to the same account and resource. If the browser blocks local storage, the selector uses the `lang` URL parameter instead, preserving the board fragment and other query parameters.
+On the unreleased development branch, changing language updates the interface in place, including open card and panel editors. The selectors inside dialogs stay synchronized and retain their language after a form reset. Controls remain mounted: unsaved values, selected options, editor drafts, focus/selection, panel/view, session and revision state are preserved. Switching sends no save or API mutation and does not reload or navigate. Language remains a browser preference; account synchronization is still pending.
+
+The selected language is saved under `openboard.language` when local storage is available. An existing `lang` URL override is updated with `history.replaceState`, retaining the current history state, board/card fragment and unrelated query parameters. If storage or history is blocked, switching still works for the current page; a later reload may return to the browser language or existing URL override. Browser-supplied date pickers and validation strings follow browser/OS settings.
 
 Dates, accessible labels, feedback messages, standard catalogue labels and API errors are localized. Card summaries and selection counters use `Intl.PluralRules` and locale number formatting. Date inputs and API payloads retain ISO dates; booleans, numbers, identifiers, enum values, JSON and iCalendar protocols keep their original types and values.
 
@@ -26,7 +28,9 @@ Italian authored text acts as the translation key. Each entry in `locales/*.json
 
 Use `tr('Authored text')` for plain text and tagged `tr` templates for messages with dynamic values. Template expressions become positional placeholders such as `{0}` and `{1}`. Every translation must preserve the placeholders, though their order may change. `OpenBoardI18n.count(one, other, count, params)` selects the appropriate plural form and supplies the formatted `{count}` value.
 
-Tag HTML templates with `ui`. The runtime translates authored text and accessible attributes **before** interpolating dynamic values. It never scans rendered user data. Continue escaping user text with the existing `escapeHTML`/`e` helpers: `ui` preserves interpolated HTML fragments and does not automatically escape them. Do not pass arbitrary user content to `tr`.
+Tag HTML templates with `ui`. The runtime translates authored text and accessible attributes **before** interpolating dynamic values. It never reverse-matches rendered user data to catalogue keys. The browser runtime records authored text/attribute provenance in opaque comment ranges and attributes; a language change updates only those marked literals and explicit bindings. Dynamic slots retain their DOM nodes, including when a translation changes slot order. Initial author-marked static markup is captured once before application data renders.
+
+Continue escaping user text with the existing `escapeHTML`/`e` helpers: `ui` preserves interpolated HTML fragments and does not automatically escape them. Do not pass arbitrary user content to `tr`. The browser's global `tr` returns a locally branded string value so authored parameters survive nested templates; use `OpenBoardI18n.text(element, value)` and `.attribute(element, name, value)` for direct DOM assignments, `.join(values, separator)` for combined localized values and `.markup(value)` for escaped text in generated markup. Explicitly assigning a literal through these helpers clears any prior translation binding. `.t()` and the default `create()` API retain primitive strings for non-live integrations and exports. Do not serialize branded display values into domain data.
 
 Generate the committed browser bundle after editing catalogues:
 
@@ -44,9 +48,15 @@ node scripts/extract-i18n.cjs web/app.js web/planning.js web/enterprise.js web/w
 node scripts/extract-i18n.cjs src/*.c
 ```
 
-The frontend test target checks that the generated bundle is current, that all extracted sources are covered, and that placeholders, HTML escaping, language detection, storage fallback, switching guards, date formatting and plural rules behave correctly. Labels selected dynamically from trusted API catalogues need explicit entries as well.
+The frontend test target checks that the generated bundle is current, that all extracted sources are covered, and that placeholders, HTML escaping, language detection, storage/history fallback, in-place switching, draft/focus retention, date formatting and plural rules behave correctly. Labels selected dynamically from trusted API catalogues need explicit entries as well.
 
-## Validation for this change
+## Development-branch validation — 18 October 2026
+
+The frontend target runs 16 suites, including `test_live_language.js`. Its DOM adapter invokes actual initialization/change handlers and application renderers. It checks all seven languages, unchanged user text matching catalogue keys, mounted dirty card/table/review/request controls, typed zero/false answers, selections, drafts, late comment reads, errors/toasts, reset-safe selectors, attribute replacement, hostile field/timeline content and blocked storage/history. These checks do not replace a browser/OS/IME or native-language matrix.
+
+A limited in-app-browser check on a disposable SQLite fixture confirmed English → French and French → Japanese changes, unchanged user content, and retained unsaved card title/comment without server mutations. It identified the reset/Save-label issues subsequently covered by regressions. Browser control later timed out during editor closure; the final follow-up changes were verified by the DOM suite, rather than a completed final browser session. The complete E2E matrix (ID 99) remains pending.
+
+## Historical rollout evidence — 16 October 2026
 
 - 1,470 catalogue entries, each with six translations; Italian remains the source language.
 - Source coverage: 1,116 UI messages and 318 static C API errors.

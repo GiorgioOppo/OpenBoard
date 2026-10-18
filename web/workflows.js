@@ -21,7 +21,7 @@ const OpenBoardWorkflows = (() => {
     cancelConfirmation();
     const region=$('workflow-confirmation'),text=$('workflow-confirm-message'),previous=document.activeElement,user=account(),sequence=memory.sequence,panelSequence=state.panelSequence;
     if(!region || !text)return Promise.resolve(false);
-    text.textContent=message;region.hidden=false;$('workflow-confirm-no')?.focus();
+    OpenBoardI18n.text(text,message);region.hidden=false;$('workflow-confirm-no')?.focus();
     return new Promise((resolve) => {
       memory.confirmation={finish(accepted) {
         if(memory.confirmation!==this)return;
@@ -37,7 +37,7 @@ const OpenBoardWorkflows = (() => {
     if (memory.catalog) return memory.catalog;
     const user=account(), data=await api('/api/catalog'), result={};
     for (const name of ['sprint_states','sprint_card_statuses','intake_field_types','intake_request_states']) {
-      if (!Array.isArray(data[name]) || !data[name].length || data[name].some((item) => !item || typeof item.value !== 'string' || !/^[a-z_]{1,40}$/.test(item.value) || typeof item.label !== 'string')) throw new Error(tr('Catalogo Sprint/Richieste non disponibile. Aggiorna il server.'));
+      if (!Array.isArray(data[name]) || !data[name].length || data[name].some((item) => !item || typeof item.value !== 'string' || !/^[a-z_]{1,40}$/.test(item.value) || typeof item.label !== 'string')) throw new OpenBoardI18n.LocalizedError(tr('Catalogo Sprint/Richieste non disponibile. Aggiorna il server.'));
       result[name]=data[name].map((item) => ({value:item.value,label:tr(item.label)}));
     }
     if (user===account()) memory.catalog=result;
@@ -117,7 +117,7 @@ const OpenBoardWorkflows = (() => {
   function authForm(form) { return !!state.auth?.user && (!form.dataset.owner || form.dataset.owner===account()); }
   function write(action,refresh,message=tr('Modifica salvata.'),form=null) {
     const user=account(),sequence=memory.sequence;
-    return perform(() => committed(async () => { if(user!==account() || !state.auth?.user || (form && !authForm(form))) throw new Error(tr('L’account è cambiato. Riapri la vista prima di salvare.')); const result=await action(); if(user===account() && form) clearDraft(form); return result; },async(result) => { if(user===account() && sequence===memory.sequence && $('panel-dialog').open) await refresh?.(result); },message),'','panel-error');
+    return perform(() => committed(async () => { if(user!==account() || !state.auth?.user || (form && !authForm(form))) throw new OpenBoardI18n.LocalizedError(tr('L’account è cambiato. Riapri la vista prima di salvare.')); const result=await action(); if(user===account() && form) clearDraft(form); return result; },async(result) => { if(user===account() && sequence===memory.sequence && $('panel-dialog').open) await refresh?.(result); },message),'','panel-error');
   }
   function fieldsSprint(data={}) { return ui`<label>Nome Sprint<input name="name" required maxlength="120" value="${e(data.name ?? '')}"></label><label>Obiettivo<textarea name="goal" rows="3" maxlength="4000">${e(data.goal ?? '')}</textarea></label><div class="form-grid"><label>Inizio<input name="start_date" type="date" required value="${e(data.start_date ?? '')}"></label><label>Fine<input name="end_date" type="date" required value="${e(data.end_date ?? '')}"></label></div>`; }
   async function showSprints(before=null,append=false) {
@@ -126,18 +126,18 @@ const OpenBoardWorkflows = (() => {
     await load('workflows-sprints',tr('Sprint della bacheca'),async(valid) => {
       const [choices,result]=await Promise.all([catalog(),api(`/api/boards/${n(boardId)}/sprints?${query(filter,before)}`)]); if(!valid())return '';
       memory.catalog=choices; memory.context={type:'sprints',boardId}; memory.items=append ? [...memory.items,...(result.items || [])]:(result.items || []);
-      return tabs('sprints')+(canManage() ? b(tr('Crea Sprint'),'sprint-new','','primary'):'')+ui`<form id="workflow-sprint-filter" data-owner="${e(account())}" class="workflow-filter"><div class="form-grid"><label>Cerca Sprint<input name="q" type="search" maxlength="200" value="${e(filter.q || '')}"></label><label>Stato<select name="state">${options(choices.sprint_states,filter.state)}</select></label></div><label class="inline-check"><input name="include_deleted" type="checkbox" ${filter.include_deleted ? 'checked':''}>Includi cestino</label><button class="button secondary" type="submit">Applica filtri</button></form>`+list(memory.items,(item) => row(b(item.name,'sprint',n(item.id),'text-button'),ui`<p>${e(name('sprint_states',item.state))} · ${e(OpenBoardI18n.isoDate(item.start_date))} → ${e(OpenBoardI18n.isoDate(item.end_date))}${item.deleted_at ? (' · '+tr('Nel cestino')):''}</p><p>${e(item.goal || tr('Nessun obiettivo aggiunto.'))}</p>`,'',!!item.deleted_at),tr('Nessuno Sprint corrisponde ai filtri.'))+(result.next_cursor ? b(tr('Carica altri Sprint'),'sprints-more',n(result.next_cursor)):'');
+      return tabs('sprints')+(canManage() ? b(tr('Crea Sprint'),'sprint-new','','primary'):'')+ui`<form id="workflow-sprint-filter" data-owner="${e(account())}" class="workflow-filter"><div class="form-grid"><label>Cerca Sprint<input name="q" type="search" maxlength="200" value="${e(filter.q || '')}"></label><label>Stato<select name="state">${options(choices.sprint_states,filter.state)}</select></label></div><label class="inline-check"><input name="include_deleted" type="checkbox" ${filter.include_deleted ? 'checked':''}>Includi cestino</label><button class="button secondary" type="submit">Applica filtri</button></form>`+list(memory.items,(item) => row(b(item.name,'sprint',n(item.id),'text-button'),ui`<p>${e(name('sprint_states',item.state))} · ${e(OpenBoardI18n.isoDate(item.start_date))} → ${e(OpenBoardI18n.isoDate(item.end_date))}${item.deleted_at ? ui` · ${tr('Nel cestino')}`:''}</p><p>${e(item.goal || tr('Nessun obiettivo aggiunto.'))}</p>`,'',!!item.deleted_at),tr('Nessuno Sprint corrisponde ai filtri.'))+(result.next_cursor ? b(tr('Carica altri Sprint'),'sprints-more',n(result.next_cursor)):'');
     },boardId);
   }
   async function showSprintEditor(id=null) {
     const boardId=state.board?.id; if(!boardId || !canManage()) return;
     await load('workflows-sprint-edit',id ? tr('Modifica Sprint'):tr('Crea Sprint'),async(valid) => {
-      const source=id ? await api(`/api/sprints/${n(id)}?include_deleted=1`):{}; if(!valid())return ''; if(id && !source.permissions?.manage) throw new Error(tr('Non puoi modificare questo Sprint.'));
+      const source=id ? await api(`/api/sprints/${n(id)}?include_deleted=1`):{}; if(!valid())return ''; if(id && !source.permissions?.manage) throw new OpenBoardI18n.LocalizedError(tr('Non puoi modificare questo Sprint.'));
       const info=draft('sprint',id || `new-${boardId}`,source); memory.sprint=id ? source:null; memory.context={type:'sprint-edit',boardId,id:n(id)};
       return b(tr('Torna agli Sprint'),'sprints')+conflict(info.stale)+dataForm('sprint-edit',fieldsSprint(info.data),{entity:id,version:id ? info.version:undefined,kind:'sprint',draftId:id || `new-${boardId}`});
     },boardId);
   }
-  function sprintDetails(item) { return ui`<article class="workflow-detail"><p class="workflow-kicker">${e(name('sprint_states',item.state))}${item.deleted_at ? (' · '+tr('Nel cestino')):''}</p><h3>${e(item.name)}</h3><p class="workflow-prose">${e(item.goal || tr('Nessun obiettivo aggiunto.'))}</p><dl class="workflow-meta"><div><dt>Inizio</dt><dd>${e(OpenBoardI18n.isoDate(item.start_date))}</dd></div><div><dt>Fine</dt><dd>${e(OpenBoardI18n.isoDate(item.end_date))}</dd></div><div><dt>Versione</dt><dd>${n(item.version)}</dd></div></dl></article>`; }
+  function sprintDetails(item) { return ui`<article class="workflow-detail"><p class="workflow-kicker">${e(name('sprint_states',item.state))}${item.deleted_at ? ui` · ${tr('Nel cestino')}`:''}</p><h3>${e(item.name)}</h3><p class="workflow-prose">${e(item.goal || tr('Nessun obiettivo aggiunto.'))}</p><dl class="workflow-meta"><div><dt>Inizio</dt><dd>${e(OpenBoardI18n.isoDate(item.start_date))}</dd></div><div><dt>Fine</dt><dd>${e(OpenBoardI18n.isoDate(item.end_date))}</dd></div><div><dt>Versione</dt><dd>${n(item.version)}</dd></div></dl></article>`; }
   async function showSprint(id) {
     await load('workflows-sprint',tr('Dettagli Sprint'),async(valid) => {
       const [choices,item]=await Promise.all([catalog(),api(`/api/sprints/${n(id)}?include_deleted=1`)]); const progress=item.deleted_at ? null:await api(`/api/sprints/${n(id)}/progress`); if(!valid())return '';
@@ -192,25 +192,25 @@ const OpenBoardWorkflows = (() => {
     await load('workflows-forms',tr('Moduli di richiesta'),async(valid) => {
       const [choices,result]=await Promise.all([catalog(),api(`/api/boards/${n(boardId)}/intake/forms?${query(filter,before)}`)]); if(!valid())return '';
       memory.catalog=choices; memory.context={type:'forms',boardId};memory.items=append ? [...memory.items,...(result.items || [])]:(result.items || []);
-      return tabs('forms')+(canManage() ? b(tr('Crea modulo'),'form-new','','primary'):'')+ui`<form id="workflow-form-filter" data-owner="${e(account())}" class="workflow-filter">${canManage() ? ui`<label class="inline-check"><input name="include_deleted" type="checkbox" ${filter.include_deleted ? 'checked':''}>Includi cestino</label><button class="button secondary" type="submit">Applica</button>`:ui`<p class="helper-text">I moduli eliminati sono visibili solo agli amministratori.</p>`}</form>`+list(memory.items,(form) => row(b(form.name,'form',n(form.id),'text-button'),ui`<p>${form.published ? tr('Pubblicato'):tr('In pausa')}${form.deleted_at ? (' · '+tr('Nel cestino')):''}</p><p>${e(form.description || '')}</p>`,'',!!form.deleted_at),tr('Nessun modulo disponibile.'))+(result.next_cursor ? b(tr('Carica altri moduli'),'forms-more',n(result.next_cursor)):'');
+      return tabs('forms')+(canManage() ? b(tr('Crea modulo'),'form-new','','primary'):'')+ui`<form id="workflow-form-filter" data-owner="${e(account())}" class="workflow-filter">${canManage() ? ui`<label class="inline-check"><input name="include_deleted" type="checkbox" ${filter.include_deleted ? 'checked':''}>Includi cestino</label><button class="button secondary" type="submit">Applica</button>`:ui`<p class="helper-text">I moduli eliminati sono visibili solo agli amministratori.</p>`}</form>`+list(memory.items,(form) => row(b(form.name,'form',n(form.id),'text-button'),ui`<p>${form.published ? tr('Pubblicato'):tr('In pausa')}${form.deleted_at ? ui` · ${tr('Nel cestino')}`:''}</p><p>${e(form.description || '')}</p>`,'',!!form.deleted_at),tr('Nessun modulo disponibile.'))+(result.next_cursor ? b(tr('Carica altri moduli'),'forms-more',n(result.next_cursor)):'');
     },boardId);
   }
   async function showFormEditor(id=null) {
     const boardId=state.board?.id;if(!boardId || !canManage())return;
     await load('workflows-form-edit',id ? tr('Modifica modulo'):tr('Crea modulo'),async(valid) => {
-      const [source,board]=await Promise.all([id ? api(`/api/intake/forms/${n(id)}?include_deleted=1`):Promise.resolve({}),api(`/api/boards/${n(boardId)}`)]);if(!valid())return '';if(id && !source.can_manage)throw new Error(tr('Non puoi modificare questo modulo.'));
+      const [source,board]=await Promise.all([id ? api(`/api/intake/forms/${n(id)}?include_deleted=1`):Promise.resolve({}),api(`/api/boards/${n(boardId)}`)]);if(!valid())return '';if(id && !source.can_manage)throw new OpenBoardI18n.LocalizedError(tr('Non puoi modificare questo modulo.'));
       const info=draft('form',id || `new-${boardId}`,source);memory.form=id ? source:null;memory.context={type:'form-edit',boardId,id:n(id)};
       return b(tr('Torna ai moduli'),'forms')+conflict(info.stale)+dataForm('form-edit',fieldsForm(info.data,(board.board || board).columns || []),{entity:id,version:id ? info.version:undefined,kind:'form',draftId:id || `new-${boardId}`});
     },boardId);
   }
   function fieldRows(form) {
     const active=(form.fields || []).filter((field) => !field.deleted_at);
-    return list(form.fields || [],(field) => row(`${e(field.name)}${field.required ? ui` <span class="planning-badge">Obbligatorio</span>`:''}`,ui`<p>${e(name('intake_field_types',field.type))} · ${e(field.key)}${field.deleted_at ? (' · '+tr('Nel cestino')):''}</p>${field.type==='select' ? ui`<p>${e((field.options || []).join(' · '))}</p>`:''}`,form.can_manage && !form.deleted_at ? (field.deleted_at ? b(tr('Ripristina campo'),'field-action',`restore:${n(field.id)}:${n(field.version)}`):b(tr('Modifica campo'),'field-edit',n(field.id))+b(tr('Elimina campo'),'field-action',`delete:${n(field.id)}:${n(field.version)}`,'danger-subtle')+(active.indexOf(field)>0 ? b(tr('Sposta su'),'field-move',`${n(field.id)}:-1`):'')+(active.indexOf(field)<active.length-1 ? b(tr('Sposta giù'),'field-move',`${n(field.id)}:1`):'')):'',!!field.deleted_at),tr('Il modulo non ha ancora campi personalizzati.'));
+    return list(form.fields || [],(field) => row(`${e(field.name)}${field.required ? ui` <span class="planning-badge">Obbligatorio</span>`:''}`,ui`<p>${e(name('intake_field_types',field.type))} · ${e(field.key)}${field.deleted_at ? ui` · ${tr('Nel cestino')}`:''}</p>${field.type==='select' ? ui`<p>${e((field.options || []).join(' · '))}</p>`:''}`,form.can_manage && !form.deleted_at ? (field.deleted_at ? b(tr('Ripristina campo'),'field-action',`restore:${n(field.id)}:${n(field.version)}`):b(tr('Modifica campo'),'field-edit',n(field.id))+b(tr('Elimina campo'),'field-action',`delete:${n(field.id)}:${n(field.version)}`,'danger-subtle')+(active.indexOf(field)>0 ? b(tr('Sposta su'),'field-move',`${n(field.id)}:-1`):'')+(active.indexOf(field)<active.length-1 ? b(tr('Sposta giù'),'field-move',`${n(field.id)}:1`):'')):'',!!field.deleted_at),tr('Il modulo non ha ancora campi personalizzati.'));
   }
   async function showForm(id) {
     await load('workflows-form',tr('Dettagli modulo'),async(valid) => {
       const [choices,item]=await Promise.all([catalog(),api(`/api/intake/forms/${n(id)}${canManage() ? '?include_deleted=1':''}`)]);if(!valid())return '';memory.catalog=choices;memory.form=item;memory.context={type:'form',id:n(id),boardId:item.board_id};
-      return tabs('forms')+ui`<article class="workflow-detail"><p class="workflow-kicker">${item.published ? tr('Pubblicato'):tr('In pausa')}${item.deleted_at ? (' · '+tr('Nel cestino')):''}</p><h3>${e(item.name)}</h3><p class="workflow-prose">${e(item.description || '')}</p>${!item.column_id ? ui`<p class="notice">Lista rimossa: scegli una nuova destinazione nelle impostazioni del modulo.</p>`:''}</article>`+(!item.deleted_at && item.published ? b(tr('Compila richiesta'),'request-new',id,'primary'):'')+(item.can_manage ? ui`<div class="workflow-actions">${item.deleted_at ? b(tr('Ripristina modulo'),'form-action','restore'):b(tr('Modifica modulo'),'form-edit',id)+b(item.published ? tr('Metti in pausa'):tr('Pubblica modulo'),'form-action',item.published ? 'pause':'publish')+b(tr('Aggiungi campo'),'field-new')+b(tr('Sposta nel cestino'),'form-action','delete','danger-subtle')}</div>`:'')+fieldRows(item);
+      return tabs('forms')+ui`<article class="workflow-detail"><p class="workflow-kicker">${item.published ? tr('Pubblicato'):tr('In pausa')}${item.deleted_at ? ui` · ${tr('Nel cestino')}`:''}</p><h3>${e(item.name)}</h3><p class="workflow-prose">${e(item.description || '')}</p>${!item.column_id ? ui`<p class="notice">Lista rimossa: scegli una nuova destinazione nelle impostazioni del modulo.</p>`:''}</article>`+(!item.deleted_at && item.published ? b(tr('Compila richiesta'),'request-new',id,'primary'):'')+(item.can_manage ? ui`<div class="workflow-actions">${item.deleted_at ? b(tr('Ripristina modulo'),'form-action','restore'):b(tr('Modifica modulo'),'form-edit',id)+b(item.published ? tr('Metti in pausa'):tr('Pubblica modulo'),'form-action',item.published ? 'pause':'publish')+b(tr('Aggiungi campo'),'field-new')+b(tr('Sposta nel cestino'),'form-action','delete','danger-subtle')}</div>`:'')+fieldRows(item);
     });
   }
   async function showFieldEditor(id=null) {
@@ -230,7 +230,7 @@ const OpenBoardWorkflows = (() => {
       else if(field.type==='select') input=ui`<select ${attrs} ${required}>${options((field.options || []).map((option) => ({value:option,label:option})),value,tr('Seleziona'))}</select>`;
       else if(field.type==='text') input=ui`<textarea ${attrs} ${required} maxlength="10000" rows="3">${e(value)}</textarea>`;
       else input=ui`<input ${attrs} type="${field.type==='number' ? 'number':field.type==='date' ? 'date':'text'}" ${field.type==='number' ? 'step="any"':''} ${required} value="${e(value)}">`;
-      return ui`<label for="${id}">${e(field.name)}${field.required ? (' · '+tr('Obbligatorio')):''}${input}</label>`;
+      return ui`<label for="${id}">${e(field.name)}${field.required ? ui` · ${tr('Obbligatorio')}`:''}${input}</label>`;
     }).join('');
   }
   function typedAnswers(form) {
@@ -238,8 +238,8 @@ const OpenBoardWorkflows = (() => {
     for(const input of Array.from(form.elements || [])) {
       if(!input.dataset?.answerKey)continue;const value=input.value,type=input.dataset.answerType;
       if(value==='')continue;
-      if(type==='boolean') {if(value!=='true' && value!=='false')throw new Error(tr('Seleziona Sì o No.'));answers[input.dataset.answerKey]=value==='true';}
-      else if(type==='number') {if(!Number.isFinite(Number(value)))throw new Error(tr('Inserisci un numero valido.'));answers[input.dataset.answerKey]=Number(value);}
+      if(type==='boolean') {if(value!=='true' && value!=='false')throw new OpenBoardI18n.LocalizedError(tr('Seleziona Sì o No.'));answers[input.dataset.answerKey]=value==='true';}
+      else if(type==='number') {if(!Number.isFinite(Number(value)))throw new OpenBoardI18n.LocalizedError(tr('Inserisci un numero valido.'));answers[input.dataset.answerKey]=Number(value);}
       else answers[input.dataset.answerKey]=value;
     }
     return answers;
@@ -247,13 +247,13 @@ const OpenBoardWorkflows = (() => {
   function draftAnswers(values,fields) { return Object.fromEntries(Object.entries(values).filter(([key]) => key.startsWith('answer:')).map(([key,value]) => { const field=(fields || []).find((item) => item.key===key.slice(7)); return [key.slice(7),field?.type==='boolean' ? (value==='true' ? true:value==='false' ? false:value):value]; })); }
   async function showRequestEditor(id=null,formId=null) {
     await load('workflows-request-edit',id ? tr('Modifica la tua richiesta'):tr('Compila una richiesta'),async(valid) => {
-      const source=id ? await api(`/api/intake/requests/${n(id)}?include_deleted=1`):await api(`/api/intake/forms/${n(formId)}`);if(!valid())return '';if(id && !source.can_edit)throw new Error(tr('Questa richiesta non è modificabile.'));
+      const source=id ? await api(`/api/intake/requests/${n(id)}?include_deleted=1`):await api(`/api/intake/forms/${n(formId)}`);if(!valid())return '';if(id && !source.can_edit)throw new OpenBoardI18n.LocalizedError(tr('Questa richiesta non è modificabile.'));
       const fields=id ? source.schema_snapshot || []:(source.fields || []).filter((field) => !field.deleted_at),identity=id || `new-${formId}`,info=draft('request',identity,id ? source:{version:source.version}),signature=schemaSignature(fields),staleSchema=!!info.data.schema && info.data.schema!==signature,answers=Object.keys(info.data).some((key) => key.startsWith('answer:')) ? draftAnswers(info.data,fields):source.answers || {};
       memory.request=id ? source:null;memory.form=id ? memory.form:source;memory.context={type:'request-edit',id:n(id),formId:n(id ? source.form_id:formId),schema:fields};
       return b(id ? tr('Torna alla richiesta'):tr('Torna al modulo'),id ? 'request':'form',id || formId)+conflict(info.stale)+(staleSchema ? ui`<p class="notice" role="alert">Il modulo è cambiato dalla bozza. La bozza precedente resta conservata: scartala per compilare i campi aggiornati.</p>`:'')+(source.form_changed ? ui`<p class="notice">Il modulo è cambiato: questa richiesta usa i campi e le opzioni originali.</p>`:'')+dataForm('request-edit',ui`<label>Titolo della richiesta<input name="title" required maxlength="300" value="${e(info.data.title ?? (id ? source.title:''))}"></label>${answerFields(fields,answers)}${staleSchema ? ui`<p class="form-error">Scarta la bozza prima di inviare.</p>`:''}`,{entity:id,version:id ? info.version:source.version,kind:'request',draftId:identity,schema:staleSchema ? info.data.schema:signature});
     });
   }
-  function requestRows(items) { return list(items,(item) => row(b(item.title,'request',n(item.id),'text-button'),ui`<p>${e(name('intake_request_states',item.state))} · ${e(item.author || '')}${item.deleted_at ? (' · '+tr('Nel cestino')):''}${item.converted_card_id ? (' · '+tr('Convertita in scheda')):''}</p><p>${e(formatDate(item.created_at))}</p>`,'',!!item.deleted_at),tr('Nessuna richiesta corrisponde ai filtri.')); }
+  function requestRows(items) { return list(items,(item) => row(b(item.title,'request',n(item.id),'text-button'),ui`<p>${e(name('intake_request_states',item.state))} · ${e(item.author || '')}${item.deleted_at ? ui` · ${tr('Nel cestino')}`:''}${item.converted_card_id ? ui` · ${tr('Convertita in scheda')}`:''}</p><p>${e(formatDate(item.created_at))}</p>`,'',!!item.deleted_at),tr('Nessuna richiesta corrisponde ai filtri.')); }
   async function showRequests(scope='board',before=null,append=false) {
     const boardId=state.board?.id;if(scope==='board' && !boardId){toast(tr('Apri una bacheca per vedere le richieste.'),true);return;}
     const identity=scope==='mine' ? 'mine':boardId,filter=saved('request-filter',identity),path=scope==='mine' ? '/api/me/intake/requests':`/api/boards/${n(boardId)}/intake/requests`;
@@ -263,7 +263,7 @@ const OpenBoardWorkflows = (() => {
     },scope==='board' ? boardId:null);
   }
   function requestDetails(item) {
-    return ui`<article class="workflow-detail"><p class="workflow-kicker">${e(name('intake_request_states',item.state))}${item.deleted_at ? (' · '+tr('Nel cestino')):''}</p><h3>${e(item.title)}</h3><p>${e(item.author || '')} · ${e(formatDate(item.created_at))}</p>${item.form_changed ? ui`<p class="notice">Il modulo attuale è cambiato. Le risposte qui sotto usano lo schema originale della richiesta.</p>`:''}<dl class="workflow-meta">${(item.schema_snapshot || []).map((field) => ui`<div><dt>${e(field.name)} <span class="helper-text">${e(name('intake_field_types',field.type))}</span></dt><dd class="workflow-prose">${Object.hasOwn(item.answers || {},field.key) ? e(typeof item.answers[field.key]==='boolean' ? (item.answers[field.key] ? tr('Sì'):tr('No')):item.answers[field.key]):tr('Non specificato')}</dd></div>`).join('')}</dl></article>`;
+    return ui`<article class="workflow-detail"><p class="workflow-kicker">${e(name('intake_request_states',item.state))}${item.deleted_at ? ui` · ${tr('Nel cestino')}`:''}</p><h3>${e(item.title)}</h3><p>${e(item.author || '')} · ${e(formatDate(item.created_at))}</p>${item.form_changed ? ui`<p class="notice">Il modulo attuale è cambiato. Le risposte qui sotto usano lo schema originale della richiesta.</p>`:''}<dl class="workflow-meta">${(item.schema_snapshot || []).map((field) => ui`<div><dt>${e(field.name)} <span class="helper-text">${e(name('intake_field_types',field.type))}</span></dt><dd class="workflow-prose">${Object.hasOwn(item.answers || {},field.key) ? e(typeof item.answers[field.key]==='boolean' ? (item.answers[field.key] ? tr('Sì'):tr('No')):item.answers[field.key]):tr('Non specificato')}</dd></div>`).join('')}</dl></article>`;
   }
   async function showRequest(id) {
     await load('workflows-request',tr('Dettagli richiesta'),async(valid) => {
@@ -283,15 +283,15 @@ const OpenBoardWorkflows = (() => {
     const user=account();
     await perform(async () => {
       let csv,filename;
-      if(scope==='sprint') {const result=await api(`/api/sprints/${n(id)}/export`);if(result.truncated || result.next_cursor)throw new Error(tr('Il CSV restituito è incompleto. Restringi l’esportazione.'));csv=result.csv;filename=result.filename;}
+      if(scope==='sprint') {const result=await api(`/api/sprints/${n(id)}/export`);if(result.truncated || result.next_cursor)throw new OpenBoardI18n.LocalizedError(tr('Il CSV restituito è incompleto. Restringi l’esportazione.'));csv=result.csv;filename=result.filename;}
       else {
         const controller=new AbortController(),timeout=setTimeout(() => controller.abort(),15000);let response;try{response=await fetch(`/api/boards/${n(id)}/intake/export`,{headers:{Accept:'text/csv'},credentials:'same-origin',cache:'no-store',signal:controller.signal});}finally{clearTimeout(timeout);}
         if(!response.ok) {let message=tr('Esportazione non riuscita.');try{message=(await response.json()).error || message;}catch{}throw new Error(message);}
-        if(!String(response.headers.get('Content-Type') || '').toLowerCase().includes('text/csv'))throw new Error(tr('Il server non ha restituito un CSV valido.'));
+        if(!String(response.headers.get('Content-Type') || '').toLowerCase().includes('text/csv'))throw new OpenBoardI18n.LocalizedError(tr('Il server non ha restituito un CSV valido.'));
         csv=await response.text();filename=`openboard-richieste-${n(id)}.csv`;
       }
       if(user!==account())return;
-      if(typeof csv!=='string')throw new Error(tr('Esportazione CSV non valida.'));
+      if(typeof csv!=='string')throw new OpenBoardI18n.LocalizedError(tr('Esportazione CSV non valida.'));
       const safeName=typeof filename==='string' && /^[A-Za-z0-9_.-]{1,120}\.csv$/.test(filename) ? filename:`openboard-${scope}-${n(id)}.csv`;
       downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),safeName);toast(tr('CSV completo scaricato (massimo 1000 righe).'));
     },'','panel-error');

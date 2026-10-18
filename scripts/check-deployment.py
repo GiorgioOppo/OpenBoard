@@ -327,7 +327,9 @@ def nginx_preflight(settings, source):
     api = [children for args, children in locations if args in (("^~", "/api/"), ("/api/",))]
     if len(api) != 1:
         raise DeploymentError("Il virtual host deve avere un unico blocco API OpenBoard riconoscibile.")
-    permitted = {("^~", "/api/"), ("/api/",), *( ("=", "/api/auth/" + name) for name in ("login", "setup", "password") )}
+    auth_routes = tuple(prefix + name for prefix in ("/api/auth/", "/api/v1/auth/")
+                        for name in ("login", "setup", "password"))
+    permitted = {("^~", "/api/"), ("/api/",), *(("=", route) for route in auth_routes)}
     for args, children in locations:
         if args not in permitted and any(value.startswith("/api/") for value in args):
             raise DeploymentError("Una location API aggiuntiva può aggirare i limiti; usa i blocchi OpenBoard previsti.")
@@ -351,11 +353,10 @@ def nginx_preflight(settings, source):
         if effective(location, "limit_conn_status") != [("limit_conn_status", "429")]:
             raise DeploymentError("Il proxy deve rispondere 429 quando supera i limiti di connessione API.")
     api_controls(api[0])
-    auth_routes = ("/api/auth/login", "/api/auth/setup", "/api/auth/password")
     for route in auth_routes:
         exact = [children for args, children in locations if args == ("=", route)]
         if len(exact) != 1:
-            raise DeploymentError("Login e setup devono avere location esatte con limiti di autenticazione.")
+            raise DeploymentError("Entrambi i percorsi API di login, setup e password richiedono location esatte con limiti condivisi.")
         api_controls(exact[0])
         req = effective(exact[0], "limit_req")
         if not any("zone=openboard_auth" in words and "burst=10" in words and "nodelay" in words for words in req):
@@ -374,20 +375,34 @@ def readiness(settings, backend_get, proxy_get, npm_get, runtime_origin, binding
     nginx_preflight(settings, nginx_source)
     if json_response(*backend_get("/api/ready"), "Storage backend").get("status") != "ready":
         raise DeploymentError("Lo storage del backend attivo non è pronto; verifica i database prima della pubblicazione.")
-    ready_auth(*backend_get("/api/auth/session"), "Backend")
+    def ready_version(status, body, label):
+        metadata = json_response(status, body, label).get("api")
+        if (not isinstance(metadata, dict) or type(metadata.get("version")) is not int
+                or metadata["version"] != 1 or metadata.get("supported_versions") != [1]
+                or metadata.get("base_path") != "/api/v1" or metadata.get("unversioned_alias") != "/api"
+                or type(metadata.get("alias_version")) is not int or metadata["alias_version"] != 1):
+            raise DeploymentError("Il backend attivo non conferma il contratto API v1; ricostruisci e ricrea l'app prima della pubblicazione.")
+    ready_version(*backend_get("/api/v1/version"), "Versione API backend")
+    for path in ("/api/auth/session", "/api/v1/auth/session"):
+        ready_auth(*backend_get(path), "Backend")
     npm = json_response(*npm_get("/api/"), "Console NPM")
     if npm.get("setup") is not True:
         raise DeploymentError("Completa il primo amministratore NPM sulla console loopback prima della pubblicazione.")
     status, body, headers = proxy_get("/", settings["https"])
     if status != 200 or "text/html" not in headers.get("content-type", "").lower() or b"OpenBoard" not in body:
         raise DeploymentError("Il proxy non serve il frontend previsto per l'origine configurata.")
-    status, body, _ = proxy_get("/api/auth/session", settings["https"])
-    ready_auth(status, body, "API attraverso il proxy")
-    if settings["https"]:
-        status, _, headers = proxy_get("/api/auth/session", False)
-        expected = settings["origin"] + "/api/auth/session"
-        if status not in (301, 308) or headers.get("location") != expected:
-            raise DeploymentError("Il proxy deve forzare HTTP verso l'origine HTTPS esatta anche per le API.")
+    status, body, headers = proxy_get("/api/v1/version", settings["https"])
+    ready_version(status, body, "Versione API attraverso il proxy")
+    if headers.get("openboard-api-version") != "1":
+        raise DeploymentError("Il proxy non inoltra l'identificatore della versione API v1.")
+    for path in ("/api/auth/session", "/api/v1/auth/session"):
+        status, body, _ = proxy_get(path, settings["https"])
+        ready_auth(status, body, "API attraverso il proxy")
+        if settings["https"]:
+            status, _, headers = proxy_get(path, False)
+            expected = settings["origin"] + path
+            if status not in (301, 308) or headers.get("location") != expected:
+                raise DeploymentError("Il proxy deve forzare HTTP verso l'origine HTTPS esatta anche per le API.")
 
 
 class Compose:

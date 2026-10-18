@@ -70,9 +70,9 @@ function renderPlanningFilters() {
   if (input.value !== (state.customQuery ?? '')) input.value = state.customQuery ?? '';
   input.disabled = !field || presence; $('custom-filter-value-label').hidden = presence;
   const error = state.customKey && !field ? tr('Il campo del filtro non è più disponibile.') : field && op && !customFilterCondition(field) ? tr('Il filtro richiede un valore valido per il tipo di campo.') : '';
-  const message = $('custom-filter-error'); message.textContent = error; message.hidden = !error;
+  const message = $('custom-filter-error'); OpenBoardI18n.text(message,error); message.hidden = !error;
   if (error) input.setAttribute('aria-invalid','true'); else input.removeAttribute('aria-invalid');
-  const hint = $('custom-filter-hint'); hint.textContent = field && (op === 'contains' || (field.type === 'text' && ['eq','ne'].includes(op))) ? tr('Il filtro distingue maiuscole e minuscole.') : ''; hint.hidden = !hint.textContent;
+  const hint = $('custom-filter-hint'); OpenBoardI18n.text(hint,field && (op === 'contains' || (field.type === 'text' && ['eq','ne'].includes(op))) ? tr('Il filtro distingue maiuscole e minuscole.') : ''); hint.hidden = !hint.textContent;
 }
 function planningCustomValue(card,key) { return card.custom_values && Object.hasOwn(card.custom_values,key) ? card.custom_values[key]:undefined; }
 function planningBadges(card) {
@@ -90,8 +90,8 @@ function fillPlanningCard(data) {
   if (data.milestone_key && !milestones.some((item) => item.key === data.milestone_key)) milestones.push({key:data.milestone_key,title:milestoneName(data.milestone_key)+tr(' (eliminato)')});
   $('card-milestone').innerHTML = ui`<option value="">Nessuno</option>`+milestones.map((item) => ui`<option value="${escapeHTML(item.key)}">${escapeHTML(item.title)}</option>`).join(''); $('card-milestone').value = data.milestone_key || '';
   $('card-custom-fields').innerHTML = activeFields().map((field) => ui`<label class="form-field" for="custom-${Number(field.id)}"><span class="field-label">${escapeHTML(field.name)}</span>${customInput(field,planningCustomValue(data,field.key))}</label>`).join('') || ui`<p class="helper-text">Definisci campi nella sezione Pianificazione della bacheca.</p>`;
-  state.cardEditor.bookmarkReady = false; state.cardEditor.bookmarkLoading = !!state.cardEditor.id; $('bookmark-card').hidden = !state.cardEditor.id || !state.auth?.user; $('bookmark-card').dataset.bookmarked = 'false'; $('bookmark-card').setAttribute('aria-pressed','false'); $('bookmark-card').textContent = tr('Salva scheda');
-  $('worklogs-section').hidden = !state.cardEditor.id; $('worklogs-list').innerHTML = ''; $('card-time-summary').textContent = ''; $('worklog-date').value = todayISO(); $('worklog-minutes').value = ''; $('worklog-note').value = ''; $('worklog-deleted').checked = false;
+  state.cardEditor.bookmarkReady = false; state.cardEditor.bookmarkLoading = !!state.cardEditor.id; $('bookmark-card').hidden = !state.cardEditor.id || !state.auth?.user; $('bookmark-card').dataset.bookmarked = 'false'; $('bookmark-card').setAttribute('aria-pressed','false'); OpenBoardI18n.text($('bookmark-card'),tr('Salva scheda'));
+  $('worklogs-section').hidden = !state.cardEditor.id; $('worklogs-list').innerHTML = ''; OpenBoardI18n.text($('card-time-summary'),''); $('worklog-date').value = todayISO(); $('worklog-minutes').value = ''; $('worklog-note').value = ''; $('worklog-deleted').checked = false;
   $('comments-author').innerHTML = ui`<option value="">Tutti</option>`; $('comments-query').value = '';
 }
 function readCustomValues() {
@@ -168,7 +168,7 @@ async function tableRefreshSavedBoard(editor,context) {
     const result = await api(`/api/boards/${editor.boardId}?summary=1${state.archived || state.archivedBoards ? '&include_archived=1':''}`);
     if (!current()) return;
     const board = result.board || result;
-    if (Number(board.id) !== editor.boardId) throw new Error(tr('Riga salvata. Aggiorna la bacheca per vedere i dati più recenti.'));
+    if (Number(board.id) !== editor.boardId) throw new OpenBoardI18n.LocalizedError(tr('Riga salvata. Aggiorna la bacheca per vedere i dati più recenti.'));
     board.columns = board.columns || []; board.columns.forEach(column => { column.cards = column.cards || []; });
     state.board = board; state.loadError = false;
     if (typeof renderHeader === 'function') renderHeader();
@@ -281,7 +281,7 @@ async function tableSave(token) {
     if (error.status === 412) editor.conflict = true;
     if (error.status === 403 || error.status === 401) editor.forbidden = true;
     if (error.status === 404) editor.unavailable = true;
-    editor.error = error.message; tablePersist(editor);
+    editor.error = (error.localizedMessage || error.message); tablePersist(editor);
   } finally {
     const current = tableCurrent(editor,context); editor.busy = false;
     if (committed && state.tableEditor === editor && sessionCurrent(context.session) && state.board?.id === editor.boardId && state.view === 'table' && !state.loading && (state.panelSequence || 0) === context.panel) {
@@ -308,7 +308,7 @@ async function tableReload(token) {
     if (!tableCurrent(editor,context) || error.staleSession) return;
     if (error.status === 403 || error.status === 401) editor.forbidden = true;
     if (error.status === 404) editor.unavailable = true;
-    editor.error = error.message;
+    editor.error = (error.localizedMessage || error.message);
   } finally { editor.busy = false; tableRender(editor,context); }
 }
 function planningTabs(current) { return ui`<nav class="panel-tabs" aria-label="Pianificazione">${[['overview',tr('Traguardi')],['fields',tr('Campi')],['guidelines',tr('Linee guida')],['workload',tr('Carico')]].map(([id,label]) => ui`<button type="button" class="button ${id === current ? 'primary':'secondary'}" data-planning-tab="${id}" ${id === current ? 'aria-current="page"':''}>${label}</button>`).join('')}</nav>`; }
@@ -364,11 +364,11 @@ async function loadBookmarkStatus(cardId,boardId = state.board?.id,sequence = st
     const result = await api(`/api/cards/${cardId}/bookmark`);
     if (current()) { editor.bookmarkReady = true; setBookmark(!!result.bookmarked); }
   } catch (error) {
-    if (current()) { editor.bookmarkReady = false; $('bookmark-card').textContent = tr('Riprova stato segnalibro'); $('bookmark-card').title = error.message; }
+    if (current()) { editor.bookmarkReady = false; OpenBoardI18n.text($('bookmark-card'),tr('Riprova stato segnalibro')); OpenBoardI18n.attribute($('bookmark-card'),'title',error.localizedMessage || error.message); }
   } finally { if (current()) { editor.bookmarkLoading = false; updateBusy(); } }
 }
 function pendingWorklog() { const minutes = $('worklog-minutes').value, note = $('worklog-note').value; return {minutes,note,date:minutes || note ? $('worklog-date').value : ''}; }
-function setBookmark(value) { $('bookmark-card').dataset.bookmarked = String(value); $('bookmark-card').setAttribute('aria-pressed',String(value)); $('bookmark-card').textContent = value ? tr('Scheda salvata ★') : tr('Salva scheda'); }
+function setBookmark(value) { $('bookmark-card').dataset.bookmarked = String(value); $('bookmark-card').setAttribute('aria-pressed',String(value)); OpenBoardI18n.text($('bookmark-card'),value ? tr('Scheda salvata ★') : tr('Salva scheda')); }
 async function loadWorklogs(cardId,before = null,append = false) {
   const editor = state.cardEditor; if (!editor || editor.id !== cardId) return;
   const generation = editor.worklogSequence = (editor.worklogSequence || 0)+1, cardSequence = state.cardSequence, deleted = $('worklog-deleted').checked;
@@ -377,11 +377,11 @@ async function loadWorklogs(cardId,before = null,append = false) {
     const [result,summary] = await Promise.all([api(`/api/cards/${cardId}/worklogs?limit=20${before ? '&before='+Number(before):''}${deleted ? '&include_deleted=1':''}`),api(`/api/cards/${cardId}/time-summary`)]);
     if (!current()) return;
     editor.worklogs = append ? [...(editor.worklogs || []),...(result.items || [])] : (result.items || []);
-    $('card-time-summary').textContent = tr`${Number(summary.manual_minutes)||0} min manuali + ${Number(summary.logged_minutes)||0} min registrati = ${Number(summary.total_minutes)||0} min totali`;
+    OpenBoardI18n.text($('card-time-summary'),tr`${Number(summary.manual_minutes)||0} min manuali + ${Number(summary.logged_minutes)||0} min registrati = ${Number(summary.total_minutes)||0} min totali`);
     $('worklogs-list').innerHTML = editor.worklogs.map((log) => ui`<article class="worklog-row ${log.deleted_at ? 'deleted':''}"><div><strong>${Number(log.minutes)} min · ${escapeHTML(productivity.dateText(log.date))}</strong><p>${escapeHTML(log.author || tr('Workspace locale'))}${log.deleted_at ? tr(' · Eliminato'):''}</p><p>${escapeHTML(log.note || '')}</p></div>${canWrite() && (!state.auth?.enabled || Number(log.user_id) === state.auth?.user?.id || state.auth?.user?.role === 'admin') ? ui`<div>${log.deleted_at ? ui`<button type="button" class="button secondary" data-log-restore="${Number(log.id)}" data-log-version="${Number(log.version)}" data-write>Ripristina registrazione</button>` : ui`<button type="button" class="subtle-button" data-log-edit="${Number(log.id)}" data-write>Modifica tempo</button><button type="button" class="button danger-subtle" data-log-delete="${Number(log.id)}" data-log-version="${Number(log.version)}" data-write>Elimina registrazione</button>`}</div>`:''}</article>`).join('') || ui`<p class="helper-text">Nessuna registrazione del tempo.</p>`;
     if (result.next_cursor) $('worklogs-list').insertAdjacentHTML('beforeend',ui`<button type="button" class="button secondary" data-logs-more="${Number(result.next_cursor)}">Carica registrazioni precedenti</button>`);
     updateBusy();
-  } catch (error) { if (current()) $('worklogs-list').textContent = error.message; }
+  } catch (error) { if (current()) OpenBoardI18n.text($('worklogs-list'),(error.localizedMessage || error.message)); }
 }
 function showEditWorklog(id) {
   const log = state.cardEditor?.worklogs?.find((item) => item.id === Number(id)); if (!log) return;
@@ -395,7 +395,7 @@ async function showTimeReport(personal = false) {
   await showPanel(personal ? tr('La tua settimana di lavoro') : tr('Tempo del team'),async () => {
     const suffix = new URLSearchParams(); if (personal) { if (filter.week) suffix.set('week',filter.week); } else { if (filter.from) suffix.set('from',filter.from); if (filter.to) suffix.set('to',filter.to); }
     const result = await api(`${personal ? '/api/me/time-report' : `/api/boards/${boardId}/time-report`}?${suffix}`);
-    return ui`<nav class="panel-tabs"><button type="button" id="time-team" class="button ${!personal ? 'primary':'secondary'}">Team</button>${state.auth?.user ? ui`<button type="button" id="time-personal" class="button ${personal ? 'primary':'secondary'}">La mia settimana</button>`:''}</nav><form id="time-filter-form"><div class="form-grid">${personal ? ui`<label>Settimana contenente<input name="week" type="date" value="${escapeHTML(filter.week || todayISO())}"></label>` : ui`<label>Dal giorno<input name="from" type="date" value="${escapeHTML(filter.from || '')}"></label><label>Al giorno<input name="to" type="date" value="${escapeHTML(filter.to || '')}"></label>`}</div><button class="button secondary" type="submit">Applica intervallo</button>${!personal ? ui`<button id="time-export" class="button secondary" type="button">Esporta registro CSV</button>`:''}</form>${result.truncated ? ui`<p class="notice">Risultato limitato a 10000 registrazioni. Riduci l’intervallo per un report completo.</p>`:''}<h3>${personal ? `${escapeHTML(productivity.dateText(result.week_start))} — ${escapeHTML(productivity.dateText(result.week_end))}`:escapeHTML(tr`Tempo per persona · ${productivity.dateText(result.from)} — ${productivity.dateText(result.to)}`)}</h3><p><strong>${Number(personal ? result.total_minutes : result.totals?.logged_minutes)||0} minuti registrati</strong></p>${personal ? ui`<div class="stat-grid">${(result.daily || []).map((day) => ui`<div><strong>${Number(day.minutes)||0}</strong><span>${escapeHTML(productivity.dateText(day.date))}</span></div>`).join('')}</div>` : ui`<div class="report-users">${(result.by_user || []).map((user) => ui`<div class="stat-line"><span>${escapeHTML(user.author || tr('Workspace locale'))}</span><strong>${Number(user.minutes)||0} min</strong></div>`).join('')}</div>`}${timeRows(result.rows || [])}<p id="panel-error" class="form-error" role="alert"></p>`;
+    return ui`<nav class="panel-tabs"><button type="button" id="time-team" class="button ${!personal ? 'primary':'secondary'}">Team</button>${state.auth?.user ? ui`<button type="button" id="time-personal" class="button ${personal ? 'primary':'secondary'}">La mia settimana</button>`:''}</nav><form id="time-filter-form"><div class="form-grid">${personal ? ui`<label>Settimana contenente<input name="week" type="date" value="${escapeHTML(filter.week || todayISO())}"></label>` : ui`<label>Dal giorno<input name="from" type="date" value="${escapeHTML(filter.from || '')}"></label><label>Al giorno<input name="to" type="date" value="${escapeHTML(filter.to || '')}"></label>`}</div><button class="button secondary" type="submit">Applica intervallo</button>${!personal ? ui`<button id="time-export" class="button secondary" type="button">Esporta registro CSV</button>`:''}</form>${result.truncated ? ui`<p class="notice">Risultato limitato a 10000 registrazioni. Riduci l’intervallo per un report completo.</p>`:''}<h3>${personal ? ui`${escapeHTML(productivity.dateText(result.week_start))} — ${escapeHTML(productivity.dateText(result.week_end))}`:escapeHTML(tr`Tempo per persona · ${productivity.dateText(result.from)} — ${productivity.dateText(result.to)}`)}</h3><p><strong>${Number(personal ? result.total_minutes : result.totals?.logged_minutes)||0} minuti registrati</strong></p>${personal ? ui`<div class="stat-grid">${(result.daily || []).map((day) => ui`<div><strong>${Number(day.minutes)||0}</strong><span>${escapeHTML(productivity.dateText(day.date))}</span></div>`).join('')}</div>` : ui`<div class="report-users">${(result.by_user || []).map((user) => ui`<div class="stat-line"><span>${escapeHTML(user.author || tr('Workspace locale'))}</span><strong>${Number(user.minutes)||0} min</strong></div>`).join('')}</div>`}${timeRows(result.rows || [])}<p id="panel-error" class="form-error" role="alert"></p>`;
   },'time-report');
 }
 async function showBookmarks(before = null,append = false) {
@@ -503,7 +503,7 @@ document.addEventListener('click',(event) => {
     }
     case 'add-worklog': {
       const cardId = state.cardEditor?.id, minutes = Number($('worklog-minutes').value); if (!cardId) break;
-      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1000000 || !$('worklog-date').value) { $('card-form-error').textContent = tr('Inserisci un giorno e un numero intero di minuti tra 1 e 1000000.'); break; }
+      if (!Number.isInteger(minutes) || minutes < 1 || minutes > 1000000 || !$('worklog-date').value) { OpenBoardI18n.text($('card-form-error'),tr('Inserisci un giorno e un numero intero di minuti tra 1 e 1000000.')); break; }
       const data = {date:$('worklog-date').value,minutes,note:$('worklog-note').value.trim()};
       planningWrite(() => api(`/api/cards/${cardId}/worklogs`,'POST',data),async () => { if (state.cardEditor?.id !== cardId) return; $('worklog-minutes').value = ''; $('worklog-note').value = ''; saveDraft(); await loadWorklogs(cardId); },tr('Tempo registrato sul server.'),'card-form-error'); break;
     }

@@ -31,7 +31,7 @@ const ICONS = {
 };
 const $ = (id) => document.getElementById(id);
 const icon = (name) => ui`<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ICONS.card}</svg>`;
-const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const escapeHTML = (value) => OpenBoardI18n.escape(value);
 const labels = Object.create(null);
 const priorities = Object.create(null);
 const productivity = OpenBoardProductivity;
@@ -58,7 +58,7 @@ function hydrateIcons(root = document) { root.querySelectorAll('[data-icon]').fo
 hydrateIcons();
 
 class APIError extends Error {
-  constructor(message, status = 0) { super(message); this.name = 'APIError'; this.status = status; }
+  constructor(message, status = 0) { super(message); this.name = 'APIError'; this.status = status; this.localizedMessage = message; }
 }
 const pendingPosts = new Map();
 function sessionOwner(session = state.auth) { return session?.enabled === false ? 'local' : String(session?.user?.id || 'signed-out'); }
@@ -132,7 +132,7 @@ async function api(path, method = 'GET', body, options = {}) {
 }
 function toast(message, isError = false) {
   clearTimeout(state.toastTimer);
-  $('toast-message').textContent = message;
+  OpenBoardI18n.text($('toast-message'),message);
   $('toast').classList.toggle('error',isError);
   $('toast').classList.add('visible');
   state.toastTimer = setTimeout(() => $('toast').classList.remove('visible'),isError ? 7000 : 4500);
@@ -158,19 +158,19 @@ function updateBusy() {
   $('edit-board').disabled = state.saving || state.loading || !state.board || !canWrite();
   $('export-board').disabled = state.loading || !state.board;
   $('members-board').disabled = state.loading || !state.board;
-  $('save-status').textContent = state.saving ? tr('Salvataggio in corso…') : state.loadError ? tr('Connessione da verificare · bozza locale conservata') : tr`Salvataggio sul server${state.storageLabel ? ' · '+state.storageLabel : ''}`;
+  OpenBoardI18n.text($('save-status'),state.saving ? tr('Salvataggio in corso…') : state.loadError ? tr('Connessione da verificare · bozza locale conservata') : tr`Salvataggio sul server${state.storageLabel ? ' · '+state.storageLabel : ''}`);
   document.body.setAttribute('aria-busy',String(state.saving));
 }
 async function perform(action, successMessage = '', errorId) {
   if (state.saving) return;
   state.saving = true;
-  if (errorId) $(errorId).textContent = '';
+  if (errorId) OpenBoardI18n.text($(errorId),'');
   updateBusy();
   try { const result = await action(); if (successMessage) toast(successMessage); return result; }
   catch (error) {
     if (error.staleSession) return;
-    if (errorId && $(errorId)?.closest('dialog')?.open) $(errorId).textContent = error.message;
-    else toast(error.message,true);
+    if (errorId && $(errorId)?.closest('dialog')?.open) OpenBoardI18n.text($(errorId),error.localizedMessage || error.message);
+    else toast(error.localizedMessage || error.message,true);
   } finally { state.saving = false; updateBusy(); }
 }
 async function committed(write, refresh, message) {
@@ -194,7 +194,7 @@ function boardLink(board) {
   return ui`<button type="button" class="board-link ${state.board?.id === board.id ? 'selected' : ''}" data-select-board="${Number(board.id)}" ${state.board?.id === board.id ? 'aria-current="page"' : ''}><span class="board-color ${covers.includes(board.color) ? board.color : 'sage'}"></span><span>${escapeHTML(board.name)}${board.archived ? tr(' · Archivio') : ''}</span></button>`;
 }
 function renderSidebar() {
-  $('board-count').textContent = state.boards.length;
+  OpenBoardI18n.text($('board-count'),state.boards.length);
   $('board-links').innerHTML = state.boards.map(boardLink).join('');
   const starred = state.boards.filter((board) => board.starred);
   $('starred-boards').innerHTML = starred.length ? starred.map(boardLink).join('') : ui`<p class="empty-starred">Aggiungi una stella alle bacheche che usi più spesso.</p>`;
@@ -202,25 +202,25 @@ function renderSidebar() {
 }
 function renderHeader() {
   const board = state.board;
-  $('board-title').textContent = board?.name || tr('Le tue idee, in ordine.');
-  $('breadcrumb-board').textContent = board?.name || tr('Bacheche');
-  $('board-description').textContent = board?.description || tr('Il prossimo progetto inizia da una piccola scheda.');
-  document.title = board ? `${board.name} · OpenBoard` : tr('OpenBoard · Il tuo lavoro, in ordine');
+  OpenBoardI18n.text($('board-title'),board?.name || tr('Le tue idee, in ordine.'));
+  OpenBoardI18n.text($('breadcrumb-board'),board?.name || tr('Bacheche'));
+  OpenBoardI18n.text($('board-description'),board?.description || tr('Il prossimo progetto inizia da una piccola scheda.'));
+  OpenBoardI18n.title(document,board ? `${board.name} · OpenBoard` : tr('OpenBoard · Il tuo lavoro, in ordine'));
   $('star-board').classList.toggle('starred',!!board?.starred);
-  $('star-board').setAttribute('aria-label',board?.starred ? tr('Rimuovi dai preferiti') : tr('Aggiungi ai preferiti'));
+  OpenBoardI18n.attribute($('star-board'),'aria-label',board?.starred ? tr('Rimuovi dai preferiti') : tr('Aggiungi ai preferiti'));
   $('star-board').setAttribute('aria-pressed',String(!!board?.starred));
-  $('privacy-badge').textContent = board?.archived ? tr('Archiviata') : state.auth?.enabled ? tr`Team · ${roleLabel(board?.role || state.auth.user?.role)}` : tr('Workspace locale');
-  $('archive-board').textContent = board?.archived ? tr('Ripristina dall’archivio') : tr('Archivia bacheca');
+  OpenBoardI18n.text($('privacy-badge'),board?.archived ? tr('Archiviata') : state.auth?.enabled ? tr`Team · ${roleLabel(board?.role || state.auth.user?.role)}` : tr('Workspace locale'));
+  OpenBoardI18n.text($('archive-board'),board?.archived ? tr('Ripristina dall’archivio') : tr('Archivia bacheca'));
   $('notifications').hidden = !state.auth?.enabled || !state.auth?.user;
   $('watch-board').hidden = !state.auth?.enabled || !state.auth?.user;
-  $('account-menu').textContent = initials(state.auth?.user?.name || 'Studio');
-  $('account-menu').setAttribute('aria-label',tr`Account e preferenze${state.auth?.user ? ': '+state.auth.user.name : ''}`);
+  OpenBoardI18n.text($('account-menu'),initials(state.auth?.user?.name || 'Studio'));
+  OpenBoardI18n.attribute($('account-menu'),'aria-label',tr`Account e preferenze${state.auth?.user ? ': '+state.auth.user.name : ''}`);
   $('avatar-stack').innerHTML = assignees().slice(0,4).map(avatar).join('');
   $('assignee-filter').innerHTML = ui`<option value="">Responsabile</option><option value="__none">Non assegnate</option>` + assignees().map((name) => ui`<option value="${escapeHTML(name)}">${escapeHTML(name)}</option>`).join('');
   $('assignee-filter').value = state.assignee;
   $('assignee-options').innerHTML = assignees().map((name) => ui`<option value="${escapeHTML(name)}">`).join('');
   document.documentElement.dataset.boardColor = covers.includes(board?.color) ? board.color : 'sage';
-  $('show-archived-boards').textContent = state.archivedBoards ? tr('Nascondi bacheche archiviate') : tr('Bacheche archiviate');
+  OpenBoardI18n.text($('show-archived-boards'),state.archivedBoards ? tr('Nascondi bacheche archiviate') : tr('Bacheche archiviate'));
   renderPlanningFilters(); updateFilters(); updateBusy();
 }
 function todayISO() { const date = new Date(); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
@@ -243,10 +243,10 @@ function sorted(cards) {
 function hasFilters() { return !!(state.query || state.label || state.assignee || state.priority || state.status || state.sort !== 'manual' || state.milestone || state.customKey); }
 function updateFilters() {
   const cards = allCards();
-  $('total-cards').textContent = cards.length;
-  $('card-summary').textContent = hasFilters()
+  OpenBoardI18n.text($('total-cards'),cards.length);
+  OpenBoardI18n.text($('card-summary'),hasFilters()
     ? OpenBoardI18n.count('{shown} di {count} scheda','{shown} di {count} schede',cards.length,{shown:OpenBoardI18n.number(cards.filter(matches).length)})
-    : `${OpenBoardI18n.count('{count} scheda','{count} schede',cards.length)} · ${OpenBoardI18n.count('{count} completata','{count} completate',cards.filter((card) => card.completed).length)}`;
+    : OpenBoardI18n.join([OpenBoardI18n.count('{count} scheda','{count} schede',cards.length),OpenBoardI18n.count('{count} completata','{count} completate',cards.filter((card) => card.completed).length)],' · '));
   $('clear-filters').classList.toggle('selected',!hasFilters());
   ['label','assignee','priority','status'].forEach((key) => $(`${key}-filter`).classList.toggle('filter-active',!!state[key]));
   ['board','list','calendar','stats','table','timeline'].forEach((view) => { const button = $(`view-${view}`); button.classList.toggle('selected',state.view === view); button.setAttribute('aria-pressed',String(state.view === view)); });
@@ -255,7 +255,7 @@ function dueDate(card) {
   if (!card.due_date || !/^\d{4}-\d{2}-\d{2}$/.test(card.due_date)) return '';
   const date = new Date(`${card.due_date}T12:00:00`);
   const status = card.completed ? 'done' : overdue(card) ? 'overdue' : card.due_date === todayISO() ? 'soon' : '';
-  return ui`<span class="card-due ${status}" title="Scadenza: ${escapeHTML(card.due_date)}${overdue(card) ? tr(' · Scaduta') : ''}">${icon(card.completed ? 'check-circle' : 'calendar')}${escapeHTML(date.toLocaleDateString(OpenBoardI18n.locale,{day:'numeric',month:'short'}))}</span>`;
+  return ui`<span class="card-due ${status}" title="Scadenza: ${escapeHTML(card.due_date)}${overdue(card) ? tr(' · Scaduta') : ''}">${icon(card.completed ? 'check-circle' : 'calendar')}${escapeHTML(OpenBoardI18n.date(date,{day:'numeric',month:'short'}))}</span>`;
 }
 function checklistBadge(card) {
   const total = card.checklist_total ?? (card.checklist || []).length;
@@ -284,7 +284,7 @@ function renderList() {
 function renderCalendarAgenda() {
   const cards = allCards().filter(matches);
   const dates = [...new Set(cards.map((card) => card.due_date || ''))].sort((a,b) => (a || '9999').localeCompare(b || '9999'));
-  return ui`<div class="calendar-view">${dates.length ? dates.map((date) => ui`<section class="calendar-day"><h2>${date ? escapeHTML(new Date(`${date}T12:00:00`).toLocaleDateString(OpenBoardI18n.locale,{weekday:'long',day:'numeric',month:'long',year:'numeric'})) : tr('Senza scadenza')}</h2>${cards.filter((card) => (card.due_date || '') === date).map(renderCard).join('')}</section>`).join('') : ui`<p>Nessuna scheda con questi filtri.</p>`}</div>`;
+  return ui`<div class="calendar-view">${dates.length ? dates.map((date) => ui`<section class="calendar-day"><h2>${date ? escapeHTML(OpenBoardI18n.date(new Date(`${date}T12:00:00`),{weekday:'long',day:'numeric',month:'long',year:'numeric'})) : tr('Senza scadenza')}</h2>${cards.filter((card) => (card.due_date || '') === date).map(renderCard).join('')}</section>`).join('') : ui`<p>Nessuna scheda con questi filtri.</p>`}</div>`;
 }
 async function renderStats() {
   const context = sessionContext(), boardId = state.board?.id;
@@ -295,7 +295,7 @@ async function renderStats() {
     const stats = result.stats || result;
     const groups = (value) => Array.isArray(value) ? value.map((item) => [item.label || item.assignee || item.name || tr('Non assegnata'),item.count ?? item.total ?? 0]) : Object.entries(value || {});
     $('board-canvas').innerHTML = ui`<div class="dashboard"><div class="stat-grid"><div><strong>${Number(stats.total)||0}</strong><span>Schede totali</span></div><div><strong>${Number(stats.completed)||0}</strong><span>Completate</span></div><div><strong>${Number(stats.overdue)||0}</strong><span>Scadute</span></div><div><strong>${Math.round((stats.completed||0)/Math.max(stats.total||0,1)*100)}%</strong><span>Completamento</span></div></div>${[[tr('Etichette'),stats.by_label],[tr('Responsabili'),stats.by_assignee]].map(([title,value]) => ui`<section class="stats-group"><h2>${title}</h2>${groups(value).map(([name,count]) => ui`<div class="stat-line"><span>${escapeHTML(labels[name] || name || tr('Non assegnata'))}</span><meter min="0" max="${Math.max(stats.total||0,1)}" value="${Number(count)||0}">${Number(count)||0}</meter><strong>${Number(count)||0}</strong></div>`).join('') || ui`<p>Nessun dato disponibile.</p>`}</section>`).join('')}</div>`;
-  } catch (error) { if (sessionCurrent(context) && !error.staleSession && state.view === 'stats' && state.board?.id === boardId) $('board-canvas').innerHTML = ui`<div class="canvas-message"><h2>Statistiche non disponibili</h2><p>${escapeHTML(error.message)}</p></div>`; }
+  } catch (error) { if (sessionCurrent(context) && !error.staleSession && state.view === 'stats' && state.board?.id === boardId) $('board-canvas').innerHTML = ui`<div class="canvas-message"><h2>Statistiche non disponibili</h2><p>${escapeHTML((error.localizedMessage || error.message))}</p></div>`; }
 }
 function renderBoard() {
   const focusedCard = document.activeElement?.closest?.('[data-card-id]')?.dataset.cardId;
@@ -340,7 +340,7 @@ async function selectBoard(id, {quiet = false,reset = true,navigate = true} = {}
 }
 function showLoadError(error) {
   state.loadError = true;
-  $('board-canvas').innerHTML = ui`<div class="canvas-message"><span class="message-icon">${icon('alert-circle')}</span><h2>La bacheca non è disponibile.</h2><p>${escapeHTML(error.message)}</p><button class="button primary" id="retry-load" type="button">${icon('refresh')}Riprova</button></div>`;
+  $('board-canvas').innerHTML = ui`<div class="canvas-message"><span class="message-icon">${icon('alert-circle')}</span><h2>La bacheca non è disponibile.</h2><p>${escapeHTML((error.localizedMessage || error.message))}</p><button class="button primary" id="retry-load" type="button">${icon('refresh')}Riprova</button></div>`;
   updateBusy();
 }
 async function loadCatalog() {
@@ -491,7 +491,7 @@ function renderChecklist() {
   updateChecklistProgress();
   if (index !== undefined) { const next = document.querySelector(`[data-checklist-text="${Math.min(Number(index),items.length-1)}"]`); if (next) { next.focus(); next.setSelectionRange(...selection); } }
 }
-function updateChecklistProgress() { const items = state.cardEditor.checklist; $('checklist-progress').textContent = items.length ? tr`${items.filter((item) => item.done).length} di ${items.length} completate` : ''; }
+function updateChecklistProgress() { const items = state.cardEditor.checklist; OpenBoardI18n.text($('checklist-progress'),items.length ? tr`${items.filter((item) => item.done).length} di ${items.length} completate` : ''); }
 function addChecklistItem() {
   const text = $('checklist-new').value.trim();
   if (!text) { $('checklist-new').focus(); return; }
@@ -521,16 +521,16 @@ async function openCard(cardId, columnId, {navigate = true} = {}) {
     if (card && !state.board.columns.some((column) => column.id === card.column_id)) throw new APIError(tr('Questa scheda appartiene a un’altra bacheca. Aprila dalla ricerca globale.'));
     const editor=state.cardEditor = {id:card?.id || null,version:card?.version,cover:card?.cover || '',checklist:[],archived:!!card?.archived,pending:null,persistedMilestone:card?.milestone_key || '',baseData:card && typeof OpenBoardConflicts !== 'undefined' ? OpenBoardConflicts.snapshot(card):null,baseVersion:card?.version || null};
     $('card-form').reset();
-    $('card-dialog-context').textContent = card ? tr('DETTAGLI DELLA SCHEDA') : tr('UNA NUOVA IDEA');
+    OpenBoardI18n.text($('card-dialog-context'),card ? tr('DETTAGLI DELLA SCHEDA') : tr('UNA NUOVA IDEA'));
     $('card-column').innerHTML = state.board.columns.map((column) => ui`<option value="${Number(column.id)}">${escapeHTML(column.title)}</option>`).join('');
     fillCard(card || {column_id:columnId || state.board.columns[0].id});
     $('delete-card').hidden = !card;
     ['move-card','duplicate-card','archive-card'].forEach((id) => { $(id).hidden = !card; });
-    $('archive-card').textContent = card?.archived ? tr('Ripristina') : tr('Archivia');
+    OpenBoardI18n.text($('archive-card'),card?.archived ? tr('Ripristina') : tr('Archivia'));
     $('comments-section').hidden = !card;
     $('comments-list').innerHTML = '';
-    $('save-card').innerHTML = `${card ? tr('Salva modifiche') : tr('Crea scheda')}${icon('arrow-right')}`;
-    $('card-form-error').textContent = ''; $('conflict-notice').hidden = true;
+    $('save-card').innerHTML = ui`${card ? tr('Salva modifiche') : tr('Crea scheda')}${icon('arrow-right')}`;
+    OpenBoardI18n.text($('card-form-error'),''); $('conflict-notice').hidden = true;
     state.cardEditor.original = cardSnapshot();
     $('draft-notice').hidden = !readDraft();
     openDialog('card-dialog'); $('card-title').focus();
@@ -538,7 +538,7 @@ async function openCard(cardId, columnId, {navigate = true} = {}) {
     loadProductivityCard(cardId,boardId,sequence);
     if (cardId) loadComments(cardId);
     return editor;
-  } catch (error) { if (!error.staleSession) toast(error.message,true); }
+  } catch (error) { if (!error.staleSession) toast(error.localizedMessage || error.message,true); }
 }
 function boardData() { return {name:$('board-name').value.trim(),description:$('board-description-input').value.trim(),color:$('board-color').value}; }
 function columnData() { return {title:$('column-title').value.trim(),wip_limit:Number($('column-wip').value)||0,position:Math.max(0,Number($('column-position').value)-1)}; }
@@ -546,12 +546,12 @@ function openBoardEditor(board = null) {
   if (state.saving || state.loading || !(board ? canWrite() : canCreateBoard())) return;
   state.boardRequest = {};
   state.boardEditor = board ? {...board} : null;
-  $('board-form').reset(); $('board-dialog-context').textContent = board ? tr('LA TUA BACHECA') : tr('NUOVA BACHECA');
-  $('board-dialog-heading').textContent = board ? tr('Diamo forma al tuo progetto.') : tr('Spazio a un nuovo progetto.');
+  $('board-form').reset(); OpenBoardI18n.text($('board-dialog-context'),board ? tr('LA TUA BACHECA') : tr('NUOVA BACHECA'));
+  OpenBoardI18n.text($('board-dialog-heading'),board ? tr('Diamo forma al tuo progetto.') : tr('Spazio a un nuovo progetto.'));
   $('board-name').value = board?.name || ''; $('board-description-input').value = board?.description || '';
   $('board-color').value = covers.includes(board?.color) && board.color ? board.color : 'sage';
-  $('delete-board').hidden = !board; $('save-board').innerHTML = `${board ? tr('Salva modifiche') : tr('Crea bacheca')}${icon('arrow-right')}`;
-  $('board-form-error').textContent = ''; state.boardOriginal = JSON.stringify(boardData());
+  $('delete-board').hidden = !board; $('save-board').innerHTML = ui`${board ? tr('Salva modifiche') : tr('Crea bacheca')}${icon('arrow-right')}`;
+  OpenBoardI18n.text($('board-form-error'),''); state.boardOriginal = JSON.stringify(boardData());
   $('boards-dialog').close(); openDialog('board-dialog'); $('board-name').focus();
 }
 function openColumnEditor(columnId = null) {
@@ -559,13 +559,13 @@ function openColumnEditor(columnId = null) {
   const column = state.board.columns.find((item) => item.id === Number(columnId));
   state.columnRequest = {};
   state.columnEditor = column ? {...column} : null;
-  $('column-form').reset(); $('column-dialog-context').textContent = column ? tr('MODIFICA LISTA') : tr('NUOVA LISTA');
-  $('column-dialog-heading').textContent = column ? tr('Ogni fase ha il suo nome.') : tr('Un posto per il prossimo passo.');
+  $('column-form').reset(); OpenBoardI18n.text($('column-dialog-context'),column ? tr('MODIFICA LISTA') : tr('NUOVA LISTA'));
+  OpenBoardI18n.text($('column-dialog-heading'),column ? tr('Ogni fase ha il suo nome.') : tr('Un posto per il prossimo passo.'));
   $('column-title').value = column?.title || ''; $('column-wip').value = column?.wip_limit || 0;
   $('column-position').value = column ? state.board.columns.findIndex((item) => item.id === column.id)+1 : state.board.columns.length+1;
   $('column-position').max = state.board.columns.length+(column ? 0 : 1);
-  $('delete-column').hidden = !column; $('save-column').innerHTML = `${column ? tr('Salva modifiche') : tr('Crea lista')}${icon('arrow-right')}`;
-  $('column-form-error').textContent = ''; state.columnOriginal = JSON.stringify(columnData());
+  $('delete-column').hidden = !column; $('save-column').innerHTML = ui`${column ? tr('Salva modifiche') : tr('Crea lista')}${icon('arrow-right')}`;
+  OpenBoardI18n.text($('column-form-error'),''); state.columnOriginal = JSON.stringify(columnData());
   openDialog('column-dialog'); $('column-title').focus();
 }
 function deleteColumn(columnId) {
@@ -583,25 +583,25 @@ async function loadComments(cardId) {
     state.cardEditor.comments = result.comments || [];
     renderComments();
     updateBusy();
-  } catch (error) { if (!error.staleSession && current()) $('comments-list').textContent = error.message; }
+  } catch (error) { if (!error.staleSession && current()) OpenBoardI18n.text($('comments-list'),(error.localizedMessage || error.message)); }
 }
-function formatDate(value) { if (!value) return ''; const date = new Date(String(value).includes('T') ? value : String(value).replace(' ','T')+'Z'); return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString(OpenBoardI18n.locale); }
+function formatDate(value) { if (!value) return ''; const date = new Date(String(value).includes('T') ? value : String(value).replace(' ','T')+'Z'); return Number.isNaN(date.getTime()) ? String(value) : OpenBoardI18n.date(date,{dateStyle:'short',timeStyle:'medium'}); }
 function panel(title, body, kind = null) {
   if (state.panel === 'thread') saveReplyDraft();
-  state.panelSequence = (state.panelSequence || 0)+1; state.panel = kind; $('panel-heading').textContent = title; $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); openDialog('panel-dialog');
+  state.panelSequence = (state.panelSequence || 0)+1; state.panel = kind; OpenBoardI18n.text($('panel-heading'),title); $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); openDialog('panel-dialog');
 }
 async function showPanel(title, loader, kind) {
   panel(title,ui`<p class="helper-text">Caricamento…</p>`,kind);
   const sequence = state.panelSequence;
   try { const body = await loader(); if (state.panel === kind && state.panelSequence === sequence && $('panel-dialog').open) { $('panel-body').innerHTML = body; hydrateIcons($('panel-body')); updateBusy(); } }
-  catch (error) { if (!error.staleSession && state.panel === kind && state.panelSequence === sequence) $('panel-body').innerHTML = ui`<p class="form-error" role="alert">${escapeHTML(error.message)}</p>`; }
+  catch (error) { if (!error.staleSession && state.panel === kind && state.panelSequence === sequence) $('panel-body').innerHTML = ui`<p class="form-error" role="alert">${escapeHTML((error.localizedMessage || error.message))}</p>`; }
 }
 function showAuth(setup) {
-  $('auth-heading').textContent = setup ? tr('Crea il primo amministratore') : tr('Accedi a OpenBoard');
-  $('auth-description').textContent = setup ? tr('Configura l’account che gestirà utenti e permessi.') : tr('Accedi al workspace con le tue credenziali.');
+  OpenBoardI18n.text($('auth-heading'),setup ? tr('Crea il primo amministratore') : tr('Accedi a OpenBoard'));
+  OpenBoardI18n.text($('auth-description'),setup ? tr('Configura l’account che gestirà utenti e permessi.') : tr('Accedi al workspace con le tue credenziali.'));
   $('auth-name-label').hidden = !setup; $('auth-name').hidden = !setup; $('auth-name').required = !!setup;
   $('auth-password').autocomplete = setup ? 'new-password' : 'current-password';
-  $('auth-submit').textContent = setup ? tr('Configura workspace') : tr('Accedi'); $('auth-error').textContent = '';
+  OpenBoardI18n.text($('auth-submit'),setup ? tr('Configura workspace') : tr('Accedi')); OpenBoardI18n.text($('auth-error'),'');
   state.setup = !!setup; openDialog('auth-dialog'); (setup ? $('auth-name') : $('auth-username')).focus();
 }
 function showAccount() {
@@ -647,7 +647,7 @@ function importCurrent(context) {
 function clearImportPreview() {
   state.importData = null; state.importKey = null; state.importContext = null;
   if ($('import-preview')) $('import-preview').innerHTML = '';
-  if ($('panel-error')) $('panel-error').textContent = '';
+  if ($('panel-error')) OpenBoardI18n.text($('panel-error'),'');
 }
 function changeImportFormat() {
   if (state.saving || state.panel !== 'import' || !canCreateBoard()) return;
@@ -680,17 +680,17 @@ function renderCSVMapping() {
       assignee:tr('Responsabile (testo)'),estimate_minutes:tr('Stima in minuti')};
     $('csv-import-mapping').innerHTML = ui`<p>Ogni riga crea una scheda. Seleziona le colonne da importare e prepara l’anteprima.</p><p>${csv.rowCount} righe · ${csv.width} colonne CSV</p>${OpenBoardImporters.fields.map(key=>ui`<label class="field-label" for="csv-map-${key}">${escapeHTML(names[key])}</label><select id="csv-map-${key}" data-import-mapping="${key}" data-product-create><option value="">Non importare</option>${csv.headers.map((header,index)=>ui`<option value="${index}" ${key === 'title' && index === 0 ? 'selected' : ''}>${index+1}: ${escapeHTML(header)}</option>`).join('')}</select>`).join('')}<button id="prepare-csv-import" class="button secondary" type="button" data-product-create>Prepara anteprima CSV</button>`;
     updateBusy();
-  } catch (error) { if (importCurrent(source.context)) $('panel-error').textContent = tr(error.message); }
+  } catch (error) { if (importCurrent(source.context)) OpenBoardI18n.text($('panel-error'),tr((error.localizedMessage || error.message))); }
 }
 function importPreview(result,context) {
   if (!importCurrent(context)) return;
   const data = result.data;
   if (!data || data.format !== 'openboard' || data.version !== 2 || !data.board ||
       typeof data.board !== 'object' || Array.isArray(data.board) || !Array.isArray(data.board.columns))
-    throw new Error(tr('Serve un’esportazione OpenBoard in formato versione 2.'));
-  if (new TextEncoder().encode(JSON.stringify(data)).length > 2*1024*1024) throw new Error(tr('Il file supera il limite di 2 MB.'));
+    throw new OpenBoardI18n.LocalizedError(tr('Serve un’esportazione OpenBoard in formato versione 2.'));
+  if (new TextEncoder().encode(JSON.stringify(data)).length > 2*1024*1024) throw new OpenBoardI18n.LocalizedError(tr('Il file supera il limite di 2 MB.'));
   const cards = data.board.columns.reduce((sum,column) => sum+(Array.isArray(column?.cards) ? column.cards.length : 0),0);
-  if (data.board.columns.length>100 || cards>10000) throw new Error(tr('La conversione richiede al massimo 100 liste e 10000 schede.'));
+  if (data.board.columns.length>100 || cards>10000) throw new OpenBoardI18n.LocalizedError(tr('La conversione richiede al massimo 100 liste e 10000 schede.'));
   const same = state.importData && JSON.stringify(state.importData) === JSON.stringify(data);
   state.importKey = same && state.importKey ? state.importKey:uuid();
   state.importData = data; state.importContext = context;
@@ -704,9 +704,9 @@ function importPreview(result,context) {
 function prepareCSVImport() {
   const source = state.importSource;
   if (state.saving || !source || source.format !== 'csv' || importFormat() !== 'csv' || !importCurrent(source.context)) return;
-  $('panel-error').textContent = '';
+  OpenBoardI18n.text($('panel-error'),'');
   try { importPreview(OpenBoardImporters.parseCSV(source.text,importCSVOptions()),source.context); }
-  catch (error) { if (importCurrent(source.context)) { clearImportPreview(); $('panel-error').textContent = tr(error.message); } }
+  catch (error) { if (importCurrent(source.context)) { clearImportPreview(); OpenBoardI18n.text($('panel-error'),tr((error.localizedMessage || error.message))); } }
 }
 function confirmImport() {
   const context = state.importContext, data = state.importData, key = state.importKey;
@@ -735,22 +735,22 @@ async function previewImport(file) {
   clearImportPreview(); state.importSource = null; $('csv-import-mapping').innerHTML = '';
   if (!file) return;
   try {
-    if (file.size > 2*1024*1024) throw new Error(tr('Il file supera il limite di 2 MB.'));
+    if (file.size > 2*1024*1024) throw new OpenBoardI18n.LocalizedError(tr('Il file supera il limite di 2 MB.'));
     let buffer;
     try { buffer = await file.arrayBuffer(); }
-    catch { throw new Error(tr('Impossibile leggere il file selezionato.')); }
+    catch { throw new OpenBoardI18n.LocalizedError(tr('Impossibile leggere il file selezionato.')); }
     if (!importCurrent(context)) return;
-    if (buffer.byteLength>2*1024*1024) throw new Error(tr('Il file supera il limite di 2 MB.'));
+    if (buffer.byteLength>2*1024*1024) throw new OpenBoardI18n.LocalizedError(tr('Il file supera il limite di 2 MB.'));
     let text;
     try { text = new TextDecoder('utf-8',{fatal:true}).decode(buffer); }
-    catch { throw new Error(tr('Il file non contiene testo UTF-8 valido.')); }
+    catch { throw new OpenBoardI18n.LocalizedError(tr('Il file non contiene testo UTF-8 valido.')); }
     state.importSource = {text,format,context};
     if (format === 'csv') renderCSVMapping();
     else {
       const data = JSON.parse(text.replace(/^\uFEFF/,''));
       importPreview(format === 'trello' ? OpenBoardImporters.parseTrello(data):{data},context);
     }
-  } catch (error) { if (importCurrent(context) && $('panel-error')) { clearImportPreview(); state.importSource = null; $('panel-error').textContent = error instanceof SyntaxError ? tr('Il file non contiene JSON valido.') : tr(error.message); } }
+  } catch (error) { if (importCurrent(context) && $('panel-error')) { clearImportPreview(); state.importSource = null; OpenBoardI18n.text($('panel-error'),error instanceof SyntaxError ? tr('Il file non contiene JSON valido.') : tr((error.localizedMessage || error.message))); } }
 }
 function showGlobalSearch() {
   ++globalSearchSequence; clearTimeout(searchTimer);
@@ -783,7 +783,7 @@ async function globalSearch(query,append=false) {
   } catch (error) {
     if (sessionCurrent(context) && !error.staleSession && sequence === globalSearchSequence && state.panel==='search' && state.globalSearch===search) {
       search.loading=false;
-      if(append){renderGlobalSearch();toast(error.message,true);}else $('global-results').textContent=error.message;
+      if(append){renderGlobalSearch();toast(error.localizedMessage || error.message,true);}else OpenBoardI18n.text($('global-results'),(error.localizedMessage || error.message));
     }
   }
 }
@@ -821,7 +821,7 @@ async function openContentSearchResult(key) {
       if(item.kind==='comment' && current() && state.cardEditor?.id===item.card_id)await showThread(item.id);
     } else if(item.kind==='form')await workflows.showForm(item.form_id);
     else await workflows.showRequest(item.request_id);
-  } catch(error) { if(sessionCurrent(context) && !error.staleSession)toast(error.message,true); }
+  } catch(error) { if(sessionCurrent(context) && !error.staleSession)toast(error.localizedMessage || error.message,true); }
 }
 function showMove() {
   const editor = state.cardEditor;
@@ -829,7 +829,7 @@ function showMove() {
   if (editorDirty('card-dialog')) { toast(tr('Salva le modifiche prima di spostare la scheda.'),true); return; }
   $('move-column').innerHTML = state.board.columns.map((column) => ui`<option value="${Number(column.id)}">${escapeHTML(column.title)}</option>`).join('');
   $('move-column').value = $('card-column').value;
-  updateMovePosition(); $('move-error').textContent = ''; openDialog('move-dialog'); $('move-column').focus();
+  updateMovePosition(); OpenBoardI18n.text($('move-error'),''); openDialog('move-dialog'); $('move-column').focus();
 }
 function updateMovePosition() {
   const column = state.board.columns.find((item) => item.id === Number($('move-column').value));
@@ -932,10 +932,10 @@ async function applyCardConflict() {
   comparison.plan.rows.forEach((row,index) => { if (!row.automatic) choices[index] = $(`conflict-choice-${index}`)?.value; });
   let resolved;
   try { resolved = OpenBoardConflicts.resolve(comparison.plan,choices); }
-  catch (error) { $('conflict-error').textContent = cardConflictError(error); return; }
-  if (resolved.unresolved.length) { $('conflict-error').textContent = tr('Scegli un valore per ogni campo in conflitto.'); $(`conflict-choice-${resolved.unresolved[0]}`)?.focus(); return; }
-  if (JSON.stringify(cardData()) !== comparison.snapshot) { $('conflict-error').textContent = tr('La bozza è cambiata durante il confronto. Ricarica il confronto prima di applicarlo.'); return; }
-  comparison.busy = true; $('adopt-version').disabled = true; $('conflict-error').textContent = '';
+  catch (error) { OpenBoardI18n.text($('conflict-error'),cardConflictError(error)); return; }
+  if (resolved.unresolved.length) { OpenBoardI18n.text($('conflict-error'),tr('Scegli un valore per ogni campo in conflitto.')); $(`conflict-choice-${resolved.unresolved[0]}`)?.focus(); return; }
+  if (JSON.stringify(cardData()) !== comparison.snapshot) { OpenBoardI18n.text($('conflict-error'),tr('La bozza è cambiata durante il confronto. Ricarica il confronto prima di applicarlo.')); return; }
+  comparison.busy = true; $('adopt-version').disabled = true; OpenBoardI18n.text($('conflict-error'),'');
   try {
     const current = await readCardConflict(comparison.editor,comparison.context);
     if (!current || state.cardConflict !== comparison || !cardConflictCurrent(comparison.editor,comparison.context)) return;
@@ -946,7 +946,7 @@ async function applyCardConflict() {
     fillCardConflict(resolved.data,current);
     comparison.editor.version = current.card.version; comparison.editor.baseVersion = current.card.version; comparison.editor.baseData = currentData; comparison.editor.persistedMilestone = current.card.milestone_key || ''; comparison.editor.pending = null; comparison.editor.pendingAmbiguous = false;
     $('conflict-notice').hidden = true; saveDraft(); state.cardConflict = null; closeDialog('panel-dialog',{force:true}); toast(tr('Anteprima applicata all’editor. Controlla i valori e salva esplicitamente.'));
-  } catch (error) { if (state.cardConflict === comparison && cardConflictCurrent(comparison.editor,comparison.context) && !error.staleSession) $('conflict-error').textContent = cardConflictError(error); }
+  } catch (error) { if (state.cardConflict === comparison && cardConflictCurrent(comparison.editor,comparison.context) && !error.staleSession) OpenBoardI18n.text($('conflict-error'),cardConflictError(error)); }
   finally { comparison.busy = false; if (state.cardConflict === comparison && cardConflictCurrent(comparison.editor,comparison.context)) $('adopt-version').disabled = false; }
 }
 function restoreCardConflictBase(draft) {
@@ -965,7 +965,7 @@ async function exportBoard() {
     link.href = url; link.download = `${board.name.toLocaleLowerCase(OpenBoardI18n.locale).replace(/[^a-z0-9à-ü]+/g,'-').replace(/^-|-$/g,'') || 'bacheca'}.json`;
     document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
     toast(tr('Esportazione completa versione 2 scaricata dal server.'));
-  } catch (error) { if (sessionCurrent(context) && !error.staleSession) toast(error.message,true); }
+  } catch (error) { if (sessionCurrent(context) && !error.staleSession) toast(error.localizedMessage || error.message,true); }
 }
 function stableRequest(owner, data) {
   const serialized = JSON.stringify(data);
@@ -1148,14 +1148,14 @@ $('card-form').addEventListener('submit',(event) => {
   event.preventDefault();
   if ($('comment-body').value.trim()) {
     saveDraft();
-    $('card-form-error').textContent = tr('Pubblica o cancella il commento prima di salvare la scheda. La bozza è conservata.');
+    OpenBoardI18n.text($('card-form-error'),tr('Pubblica o cancella il commento prima di salvare la scheda. La bozza è conservata.'));
     $('comment-body').focus();
     return;
   }
-  if ($('worklog-minutes').value || $('worklog-note').value.trim()) { saveDraft(); $('card-form-error').textContent = tr('Registra o cancella il tempo inserito prima di salvare la scheda. La bozza è conservata.'); $('worklog-minutes').focus(); return; }
+  if ($('worklog-minutes').value || $('worklog-note').value.trim()) { saveDraft(); OpenBoardI18n.text($('card-form-error'),tr('Registra o cancella il tempo inserito prima di salvare la scheda. La bozza è conservata.')); $('worklog-minutes').focus(); return; }
   if ($('checklist-new').value.trim()) {
     saveDraft();
-    $('card-form-error').textContent = tr('Aggiungi l’attività alla checklist oppure cancella il testo prima di salvare la scheda. La bozza è conservata.');
+    OpenBoardI18n.text($('card-form-error'),tr('Aggiungi l’attività alla checklist oppure cancella il testo prima di salvare la scheda. La bozza è conservata.'));
     $('checklist-new').focus();
     return;
   }
@@ -1203,7 +1203,7 @@ $('delete-board').addEventListener('click',() => {
 });
 $('column-form').addEventListener('submit',(event) => {
   event.preventDefault(); const data = columnData(); const editor = state.columnEditor;
-  if (!data.title) { $('column-form-error').textContent = tr('Scegli un nome per la lista.'); return; }
+  if (!data.title) { OpenBoardI18n.text($('column-form-error'),tr('Scegli un nome per la lista.')); return; }
   state.columnRequest = state.columnRequest || {};
   perform(() => committed(async () => {
     await api(editor ? `/api/columns/${editor.id}` : `/api/boards/${state.board.id}/columns`,editor ? 'PATCH' : 'POST',data,{version:editor?.version,key:stableRequest(state.columnRequest,data)});
@@ -1307,7 +1307,7 @@ async function pollRevision() {
 function updateSelection() {
   $('bulk-toolbar').hidden = !state.selectionMode;
   $('selection-mode').setAttribute('aria-pressed',String(state.selectionMode));
-  $('selection-count').textContent = OpenBoardI18n.count('{count} scheda selezionata','{count} schede selezionate',state.selectedCards.size);
+  OpenBoardI18n.text($('selection-count'),OpenBoardI18n.count('{count} scheda selezionata','{count} schede selezionate',state.selectedCards.size));
   $('bulk-complete').disabled = $('bulk-archive').disabled = !canWrite() || !state.selectedCards.size || state.saving;
 }
 function dateOffset(days) { const date = new Date(); date.setDate(date.getDate()+days); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
@@ -1321,9 +1321,9 @@ function renderTimer() {
   if (!state.cardEditor || !$('card-dialog').open) return;
   const timer = readTimer();
   $('timer-toggle').disabled = !state.cardEditor.id || !canWrite() || state.saving;
-  $('timer-toggle').textContent = timer ? tr('Ferma e aggiungi minuti') : tr('Avvia timer');
+  OpenBoardI18n.text($('timer-toggle'),timer ? tr('Ferma e aggiungi minuti') : tr('Avvia timer'));
   const seconds = timer ? Math.max(0,Math.floor((Date.now()-timer.started)/1000)) : 0;
-  $('timer-value').textContent = timer ? tr`${Math.floor(seconds/3600)}:${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')} · in corso` : state.cardEditor.id ? tr('Fermo') : tr('Salva la scheda per usare il timer');
+  OpenBoardI18n.text($('timer-value'),timer ? tr`${Math.floor(seconds/3600)}:${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')} · in corso` : state.cardEditor.id ? tr('Fermo') : tr('Salva la scheda per usare il timer'));
 }
 function fillProductivityCard(data) {
   $('card-start-date').value = data.start_date || '';
@@ -1351,7 +1351,7 @@ async function loadProductivityCard(cardId,boardId,sequence) {
   const isCurrent = () => state.board?.id === boardId && state.cardSequence === sequence && state.cardEditor?.id === (Number(cardId)||null) && $('card-dialog').open;
   if (state.auth?.enabled) {
     try { const members = await api(`/api/boards/${boardId}/members`); if (isCurrent()) renderMemberAssignments(members.members || []); }
-    catch (error) { if (!error.staleSession && isCurrent()) $('card-assignees').textContent = error.message; }
+    catch (error) { if (!error.staleSession && isCurrent()) OpenBoardI18n.text($('card-assignees'),(error.localizedMessage || error.message)); }
   } else if (isCurrent()) renderMemberAssignments([]);
   if (isCurrent()) loadPlanningCard(Number(cardId)||null,boardId,sequence);
   if (!cardId || !isCurrent()) return;
@@ -1367,7 +1367,7 @@ async function loadDependencies(cardId) {
     const used = new Set(dependencies.map((card) => card.id));
     $('dependency-card').innerHTML = allCards().filter((card) => card.id !== cardId && !card.archived && !used.has(card.id)).map((card) => ui`<option value="${Number(card.id)}">${escapeHTML(card.title)}</option>`).join('');
     updateBusy();
-  } catch (error) { if (!error.staleSession && state.cardEditor?.id === cardId) $('dependencies-list').textContent = error.message; }
+  } catch (error) { if (!error.staleSession && state.cardEditor?.id === cardId) OpenBoardI18n.text($('dependencies-list'),(error.localizedMessage || error.message)); }
 }
 async function refreshEditorVersion(cardId) {
   const result = await api(`/api/cards/${cardId}`);
@@ -1385,7 +1385,7 @@ async function loadAttachments(cardId) {
     if (state.cardEditor?.id !== cardId || !$('card-dialog').open) return;
     $('attachments-list').innerHTML = (result.attachments || []).map((file) => ui`<div class="attachment-row"><div><strong>${escapeHTML(file.name)}</strong><span>${Math.ceil(Number(file.size)/1024)} KiB · ${file.deleted_at ? tr('Nel cestino') : escapeHTML(formatDate(file.created_at))}</span></div>${file.deleted_at ? ui`<button type="button" class="button secondary" data-restore-attachment="${Number(file.id)}" data-write>Ripristina</button>` : ui`<button type="button" class="button secondary" data-download-attachment="${Number(file.id)}">Scarica</button><button type="button" class="button danger-subtle" data-delete-attachment="${Number(file.id)}" data-write>Elimina</button>`}</div>`).join('') || ui`<p class="helper-text">Nessun allegato.</p>`;
     updateBusy();
-  } catch (error) { if (!error.staleSession && state.cardEditor?.id === cardId) $('attachments-list').textContent = error.message; }
+  } catch (error) { if (!error.staleSession && state.cardEditor?.id === cardId) OpenBoardI18n.text($('attachments-list'),(error.localizedMessage || error.message)); }
 }
 function downloadBlob(blob,name) {
   const url = URL.createObjectURL(blob), link = document.createElement('a');
@@ -1414,8 +1414,8 @@ async function refreshWatchState(cardId = null) {
   const boardId = state.board?.id;
   try {
     const result = await api('/api/me/watches');
-    if (state.board?.id === boardId) { state.boardWatching = (result.boards || []).some((board) => board.id === boardId); $('watch-board').textContent = state.boardWatching ? tr('Non seguire più la bacheca') : tr('Segui bacheca'); }
-    if (cardId && state.cardEditor?.id === cardId) { state.cardWatching = (result.cards || []).some((card) => card.id === cardId); $('watch-card').textContent = state.cardWatching ? tr('Non seguire') : tr('Segui scheda'); }
+    if (state.board?.id === boardId) { state.boardWatching = (result.boards || []).some((board) => board.id === boardId); OpenBoardI18n.text($('watch-board'),state.boardWatching ? tr('Non seguire più la bacheca') : tr('Segui bacheca')); }
+    if (cardId && state.cardEditor?.id === cardId) { state.cardWatching = (result.cards || []).some((card) => card.id === cardId); OpenBoardI18n.text($('watch-card'),state.cardWatching ? tr('Non seguire') : tr('Segui scheda')); }
   } catch { /* A subscription failure never hides the current board. */ }
 }
 async function toggleWatch(card) {
@@ -1426,7 +1426,7 @@ async function toggleWatch(card) {
 }
 async function refreshNotifications() {
   if (!state.auth?.enabled || !state.auth?.user || document.hidden) return;
-  try { const result = await api('/api/notifications/unread-count'); const count = Number(result.unread_count)||0; $('unread-count').textContent = count > 99 ? '99+' : String(count); $('unread-count').hidden = !count; $('notifications').setAttribute('aria-label',tr`Notifiche: ${count} non lette`); } catch { /* Keep the last verified badge when offline. */ }
+  try { const result = await api('/api/notifications/unread-count'); const count = Number(result.unread_count)||0; OpenBoardI18n.text($('unread-count'),count > 99 ? '99+' : String(count)); $('unread-count').hidden = !count; OpenBoardI18n.attribute($('notifications'),'aria-label',tr`Notifiche: ${count} non lette`); } catch { /* Keep the last verified badge when offline. */ }
 }
 async function showNotifications(before = null,append = false) { return showFilteredNotifications(before,append); }
 function activityLabel(action) {
@@ -1509,7 +1509,7 @@ async function bulkCards(action) {
 async function showSessions() {
   await showPanel(tr('Sessioni del tuo account'),async () => {
     const result = await api('/api/me/sessions');
-    const date = (value) => new Date(Number(value)*1000).toLocaleString(OpenBoardI18n.locale);
+    const date = (value) => OpenBoardI18n.date(new Date(Number(value)*1000),{dateStyle:'short',timeStyle:'medium'});
     return ui`<p>Revoca l’accesso da altri dispositivi. Questa sessione resta aperta.</p><button id="revoke-other-sessions" class="button secondary" type="button">Revoca tutte le altre sessioni</button>${(result.sessions || []).map((session) => ui`<div class="session-row"><div><strong>${session.current ? tr('Questa sessione') : tr('Altra sessione')}</strong><span>Accesso: ${escapeHTML(date(session.created_at))}<br>Ultima attività: ${escapeHTML(date(session.last_seen))}<br>Scade: ${escapeHTML(date(session.expires_at))}</span></div>${!session.current ? ui`<button class="button danger-subtle" type="button" data-revoke-session="${escapeHTML(session.id)}">Revoca</button>` : ''}</div>`).join('')}<p id="panel-error" class="form-error" role="alert"></p>`;
   },'sessions');
 }
@@ -1619,13 +1619,11 @@ setInterval(refreshNotifications,15000);
 
 setInterval(pollRevision,5000);
 document.addEventListener('visibilitychange',() => { if (!document.hidden) pollRevision(); });
-document.addEventListener('openboard:languagechange',(event) => {
-  const openEditor=document.querySelector('dialog[open]:not(#auth-dialog)');
-  if(state.saving || openEditor) {
-    event.preventDefault();
-    const message=state.saving ? tr('Attendi il completamento del salvataggio prima di cambiare lingua.'):tr('Chiudi l’editor o il pannello prima di cambiare lingua. Le bozze restano conservate.');
-    document.querySelectorAll('[data-language-status]').forEach(node=>{node.textContent=message;});
-  }
+document.addEventListener('openboard:languagechanged',() => {
+  // Existing controls and editors stay mounted. Cached command labels retain
+  // their authored source, so subsequent searches use the selected language.
+  state.commandActions=commandActions();
+  document.querySelectorAll('[data-language-status]').forEach(node=>OpenBoardI18n.text(node,''));
 });
 document.addEventListener('DOMContentLoaded',loadInitial,{once:true});
 
@@ -1679,8 +1677,8 @@ function renderCalendar() {
   const anchor=state.calendarAnchor || todayISO();
   if (mode==='agenda') return calendarControls(mode,anchor)+renderCalendarAgenda();
   const period=productivity.calendarPeriod(mode,anchor),cards=allCards().filter(matches);
-  const title=mode==='month' ? new Intl.DateTimeFormat(OpenBoardI18n.locale,{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(period.anchor+'T12:00:00Z')):period.days.filter(Boolean).filter((day,index,days)=>index===0 || index===days.length-1).map(productivity.dateText).join(' – ');
-  const weekdays=period.days.slice(0,7).map(day=>day ? new Intl.DateTimeFormat(OpenBoardI18n.locale,{weekday:'short',timeZone:'UTC'}).format(new Date(day+'T12:00:00Z')):'');
+  const title=mode==='month' ? OpenBoardI18n.date(new Date(period.anchor+'T12:00:00Z'),{month:'long',year:'numeric',timeZone:'UTC'}):OpenBoardI18n.join(period.days.filter(Boolean).filter((day,index,days)=>index===0 || index===days.length-1).map(productivity.dateText),' – ');
+  const weekdays=period.days.slice(0,7).map(day=>day ? OpenBoardI18n.date(new Date(day+'T12:00:00Z'),{weekday:'short',timeZone:'UTC'}):'');
   return calendarControls(mode,anchor)+ui`<h2 class="calendar-heading">${escapeHTML(title)}</h2><div class="calendar-grid-scroll" tabindex="0" role="region" aria-label="Calendario schede"><div class="calendar-grid">${weekdays.map(day=>ui`<div class="calendar-weekday">${escapeHTML(day)}</div>`).join('')}${period.days.map(day=>day ? ui`<section class="calendar-cell ${day.slice(0,7)!==period.anchor.slice(0,7) ? 'outside-period':''}"><h3><time datetime="${day}">${escapeHTML(productivity.dateText(day))}</time></h3>${cards.filter(card=>card.due_date===day).map(renderCard).join('')}</section>`:ui`<div aria-hidden="true"></div>`).join('')}</div></div><section class="calendar-undated"><h2>Senza scadenza</h2>${cards.filter(card=>!card.due_date).map(renderCard).join('')}</section>`;
 }
 function commandActions() {
@@ -1713,7 +1711,7 @@ function fieldError(input,message) {
   const id=input.id+'-validation';
   let error=$(id);
   if (!error) { error=document.createElement('span');error.id=id;error.className='field-validation';input.insertAdjacentElement('afterend',error); }
-  error.textContent=message;
+  OpenBoardI18n.text(error,message);
   input.setAttribute('aria-invalid','true');
   const descriptions=new Set((input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));descriptions.add(id);
   input.setAttribute('aria-describedby',[...descriptions].join(' '));
@@ -1748,7 +1746,7 @@ document.addEventListener('click',event=>{
   if(target.id==='commands-nav' || target.hasAttribute('data-show-commands'))showCommandPalette();
   if(target.id==='global-more' && state.globalSearch?.query===$('global-query').value.trim())globalSearch(state.globalSearch.query,true);
   if(target.dataset.errorField)$(target.dataset.errorField)?.focus();
-  if(target.dataset.draftResume!==undefined)resumeCardDraft(Number(target.dataset.draftResume)).catch(error=>{if(!error.staleSession)toast(error.message,true);});
+  if(target.dataset.draftResume!==undefined)resumeCardDraft(Number(target.dataset.draftResume)).catch(error=>{if(!error.staleSession)toast(error.localizedMessage || error.message,true);});
   if(target.dataset.draftDiscard!==undefined){const center=state.draftCenter,item=center?.items[Number(target.dataset.draftDiscard)];if(item && sessionCurrent(center.context)){const removed=productivity.removeOwnedDraft(tabStorage,item,sessionOwner());if(!removed)toast(tr('La bozza è cambiata. Aggiorna l’elenco prima di eliminarla.'),true);showDraftCenter();}}
   if(target.dataset.command){if(state.panel!=='commands' || !sessionCurrent(state.commandContext))return;const action=commandActions().find(item=>item.id===target.dataset.command);if(action){closeDialog('panel-dialog',{force:true});action.run();}}
   if(target.dataset.calendarMode && ['agenda','month','week'].includes(target.dataset.calendarMode)){state.calendarMode=target.dataset.calendarMode;refreshCalendarControl(`[data-calendar-mode="${target.dataset.calendarMode}"]`);}
@@ -1778,13 +1776,13 @@ function storageCount(value) {
 }
 function storageBytes(value) {
   if(!Number.isSafeInteger(value) || value<0)return tr('Non disponibile');
-  if(value<1024)return new Intl.NumberFormat(OpenBoardI18n.locale,{style:'unit',unit:'byte',unitDisplay:'short',maximumFractionDigits:0}).format(value);
+  if(value<1024)return OpenBoardI18n.number(value,{style:'unit',unit:'byte',unitDisplay:'short',maximumFractionDigits:0});
   const units=[tr('KiB'),tr('MiB'),tr('GiB'),tr('TiB'),tr('PiB')];let amount=value/1024,index=0;
   while(amount>=1024 && index<units.length-1){amount/=1024;index++;}
-  return OpenBoardI18n.number(amount,{maximumFractionDigits:2})+' '+units[index];
+  return OpenBoardI18n.join([OpenBoardI18n.number(amount,{maximumFractionDigits:2}),units[index]],' ');
 }
 function storageBytesCell(value) {
-  const exact=Number.isSafeInteger(value) && value>=0 ? new Intl.NumberFormat(OpenBoardI18n.locale,{style:'unit',unit:'byte',unitDisplay:'short',maximumFractionDigits:0}).format(value):tr('Non disponibile');
+  const exact=Number.isSafeInteger(value) && value>=0 ? OpenBoardI18n.number(value,{style:'unit',unit:'byte',unitDisplay:'short',maximumFractionDigits:0}):tr('Non disponibile');
   return ui`<span title="${escapeHTML(exact)}">${escapeHTML(storageBytes(value))}</span>`;
 }
 function renderStorageCapacity(result) {
@@ -1823,16 +1821,16 @@ async function refreshStorageCapacity() {
   if(!canInspectStorage() || state.panel!=='storage-capacity' || !$('panel-dialog').open)return;
   const context=sessionContext(),panelSequence=state.panelSequence,sequence=state.storageSequence=(state.storageSequence || 0)+1;
   const current=()=>canInspectStorage() && sessionCurrent(context) && state.panel==='storage-capacity' && state.panelSequence===panelSequence && state.storageSequence===sequence && $('panel-dialog').open;
-  $('storage-refresh').disabled=true;$('storage-content').setAttribute('aria-busy','true');$('storage-status').textContent=tr('Caricamento…');$('storage-error').textContent='';
+  $('storage-refresh').disabled=true;$('storage-content').setAttribute('aria-busy','true');OpenBoardI18n.text($('storage-status'),tr('Caricamento…'));OpenBoardI18n.text($('storage-error'),'');
   try {
     const result=await api('/api/admin/storage');
     if(!current())return;
     $('storage-content').innerHTML=renderStorageCapacity(result);
-    $('storage-status').textContent=tr`Ultimo aggiornamento: ${formatDate(new Date().toISOString())}`;
+    OpenBoardI18n.text($('storage-status'),tr`Ultimo aggiornamento: ${formatDate(new Date().toISOString())}`);
   } catch(error) {
     if(!current() || error.staleSession)return;
     if(error.status===401 || error.status===403)$('storage-content').innerHTML='';
-    $('storage-error').textContent=error.message;$('storage-status').textContent=tr('Misure non aggiornate.');
+    OpenBoardI18n.text($('storage-error'),(error.localizedMessage || error.message));OpenBoardI18n.text($('storage-status'),tr('Misure non aggiornate.'));
   } finally {
     if(current()){$('storage-refresh').disabled=false;$('storage-content').setAttribute('aria-busy','false');}
   }

@@ -1,7 +1,7 @@
 /* Pure formatting helpers shared by the buildless UI and its tests. */
 (function (root) {
   'use strict';
-  const tr = (source) => root.OpenBoardI18n?.t(source) || source;
+  const tr = (source) => (root.OpenBoardI18n?.message || root.OpenBoardI18n?.t)?.(source) || source;
   const locale = () => root.OpenBoardI18n?.locale || 'it';
   const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function safeURL(value) { try { const url = new URL(String(value)); return ['http:','https:'].includes(url.protocol) && !url.username && !url.password ? url.href : ''; } catch { return ''; } }
@@ -34,7 +34,7 @@
       else if (line.trim()) output += `<p>${inline(line)}</p>`;
     }
     closeList(); if (code) output += `<pre><code>${escape(codeLines.join('\n'))}</code></pre>`;
-    return output || `<p class="helper-text">${escape(tr('Nessuna descrizione.'))}</p>`;
+    return output || (root.ui ? root.ui`<p class="helper-text">Nessuna descrizione.</p>`:`<p class="helper-text">${escape(tr('Nessuna descrizione.'))}</p>`);
   }
   function csvCell(value) { let text = String(value ?? ''); if (/^[\s\uFEFF]*[=+@-]/u.test(text) || /^[\t\r\n]/.test(text)) text = "'"+text; return '"'+text.replace(/"/g,'""')+'"'; }
   function csv(board) {
@@ -60,9 +60,9 @@
   function shouldDiscardDraft(current, owned, ambiguous) { return !!owned && current === owned && !ambiguous; }
   function fieldValue(type, value) {
     if (value === '' || value === null || value === undefined) return null;
-    if (type === 'number') { const number = Number(value); if (!Number.isFinite(number) || Math.abs(number) > 1e12) throw new Error(tr('Inserisci un numero finito.')); return number; }
-    if (type === 'boolean') { if (value === true || value === 'true') return true; if (value === false || value === 'false') return false; throw new Error(tr('Scegli Sì o No.')); }
-    if (type === 'date' && !validDate(value)) throw new Error(tr('Inserisci una data valida.'));
+    if (type === 'number') { const number = Number(value); if (!Number.isFinite(number) || Math.abs(number) > 1e12) throw new (root.OpenBoardI18n?.LocalizedError || Error)(tr('Inserisci un numero finito.')); return number; }
+    if (type === 'boolean') { if (value === true || value === 'true') return true; if (value === false || value === 'false') return false; throw new (root.OpenBoardI18n?.LocalizedError || Error)(tr('Scegli Sì o No.')); }
+    if (type === 'date' && !validDate(value)) throw new (root.OpenBoardI18n?.LocalizedError || Error)(tr('Inserisci una data valida.'));
     return String(value);
   }
   function fieldText(value) { return value === true ? tr('Sì') : value === false ? tr('No') : value === null || value === undefined ? '—' : String(value); }
@@ -72,7 +72,7 @@
     if (result.milestone_key && result.milestone_key === originalMilestone && !(milestones || []).some((item) => !item.deleted_at && item.key === result.milestone_key)) delete result.milestone_key;
     return result;
   }
-  function fieldCell(value) { return escape(fieldText(value)); }
+  function fieldCell(value) { const text=fieldText(value);return root.OpenBoardI18n?.markup ? root.OpenBoardI18n.markup(text):escape(text); }
   function fieldMatches(value, query) { return value !== null && value !== undefined && fieldText(value).toLocaleLowerCase(locale()).includes(String(query).trim().toLocaleLowerCase(locale())); }
   // Exact typed semantics shared with the field-search API. Text matching is
   // case-sensitive. Missing/null values are unset; explicit null equality
@@ -102,7 +102,7 @@
     return '\uFEFF'+[['ID',tr('Giorno'),tr('Autore'),tr('Bacheca'),tr('Scheda'),tr('Minuti'),tr('Nota')],...rows.map((row) => [row.id,row.date,row.author,row.board_name,row.card_title,row.minutes,row.note])].map((row) => row.map(csvCell).join(',')).join('\r\n')+'\r\n';
   }
   function catalog(value) {
-    const failure = () => { throw new Error(tr('Catalogo del server non valido.')); };
+    const failure = () => { throw new (root.OpenBoardI18n?.LocalizedError || Error)(tr('Catalogo del server non valido.')); };
     if (!value || typeof value !== 'object' || Array.isArray(value)) failure();
     function names(map) {
       if (!map || typeof map !== 'object' || Array.isArray(map)) failure();

@@ -27,25 +27,8 @@ assert.equal(create({catalog:{Cestino:['Trash']},locale:'ja'}).t('Cestino'),'Tra
 assert.equal(create({locale:'ja'}).isoDate('2026-02-30'),'2026-02-30');
 assert.equal(create({locale:'en'}).isoDate(''),'');
 assert(create({locale:'ja'}).isoDate('2026-10-16').includes('年'));
-function browserRuntime({stored=null,blocked=false,search='',preferences=['en-US']}={}) {
- const listeners={},selectors=[0,1].map(()=>({value:'',attributes:{},setAttribute(key,value){this.attributes[key]=value;},addEventListener(name,callback){this[name]=callback;}}));
- const status={textContent:''},markup={innerHTML:'<p>Cestino</p>',hasAttribute(){return false;}},storage=new Map(stored ? [['openboard.language',stored]]:[]);
- const context={URL,URLSearchParams,Intl,OpenBoardLocales:sources,navigator:{languages:preferences},state:{saving:false},openEditor:false,reloads:0,
-  localStorage:{getItem:key=>storage.get(key)||null,setItem(key,value){if(blocked)throw new Error('blocked');storage.set(key,value);}},
-  location:{search,href:'http://local.test/'+search+'#board/7',reload(){context.reloads++;},assign(value){context.assigned=value;}},
-  CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail;this.defaultPrevented=false;}preventDefault(){this.defaultPrevented=true;}},
-  document:{readyState:'interactive',documentElement:{},querySelector(){return context.openEditor ? {}:null;},querySelectorAll(selector){return selector==='[data-i18n-static]' ? [markup]:selector==='[data-language-selector]' ? selectors:[status];},addEventListener(name,callback){listeners[name]=callback;},dispatchEvent(event){listeners[event.type]?.(event);return !event.defaultPrevented;}}
- };
- vm.createContext(context);vm.runInContext(fs.readFileSync(path.join(__dirname,'../web/i18n.js'),'utf8'),context);
- const guard=fs.readFileSync(path.join(__dirname,'../web/app.js'),'utf8').match(/document\.addEventListener\('openboard:languagechange',[\s\S]*?\n\}\);/)[0];
- vm.runInContext(guard,context);
- return {context,selectors,status,storage,markup,change(value){selectors[0].value=value;selectors[0].change();}};
-}
-const regular=browserRuntime();assert.equal(regular.markup.innerHTML,'<p>Trash</p>');regular.change('fr');assert.equal(regular.storage.get('openboard.language'),'fr');assert.equal(regular.context.reloads,1);
-const pseudo=browserRuntime({search:'?pseudo=1'});assert.equal(pseudo.markup.innerHTML,'<p>⟦Tràsh ···⟧</p>');assert.equal(pseudo.context.OpenBoardI18n.locale,'en');
-const guarded=browserRuntime();guarded.context.openEditor=true;guarded.change('fr');assert.equal(guarded.context.reloads,0);assert.equal(guarded.selectors[0].value,'en');assert(guarded.status.textContent.length>0);guarded.context.openEditor=false;guarded.context.state.saving=true;guarded.change('de');assert.equal(guarded.context.reloads,0);
-const unavailable=browserRuntime({blocked:true,search:'?source=test'});unavailable.change('ja');assert.equal(new URL(unavailable.context.assigned).searchParams.get('lang'),'ja');assert.equal(new URL(unavailable.context.assigned).hash,'#board/7');assert.equal(new URL(unavailable.context.assigned).searchParams.get('source'),'test');
-const explicit=browserRuntime({stored:'de',search:'?lang=fr&source=test'});assert.equal(explicit.context.OpenBoardI18n.locale,'fr');explicit.change('en');assert(!new URL(explicit.context.assigned).searchParams.has('lang'));assert.equal(new URL(explicit.context.assigned).searchParams.get('source'),'test');
+// Browser initialization and live switching run against DOM nodes and actual
+// app handlers in test_live_language.js.
 const catalogContext={};vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../web/locales.js'),'utf8'),catalogContext);
 const catalog=catalogContext.OpenBoardLocales;
 assert(Object.keys(catalog).length>500);

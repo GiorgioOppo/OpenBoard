@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #define OB_VERSION "0.6.1"
+#define OB_API_VERSION "1"
 #define OB_HEADER_LIMIT 16384
 #define OB_BODY_LIMIT 2097152
 

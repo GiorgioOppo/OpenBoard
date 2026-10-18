@@ -10,7 +10,7 @@ OpenBoard organizes work into boards, lists and cards. Start with a small board 
 4. **Add and move cards.** Use **Add card**, enter a title such as “Draft launch checklist”, and choose a list. Open the card to add a description, checklist, due date, labels and assignees. Move it between lists by dragging it or editing its list. WIP limits can prevent moves that would exceed a list's capacity.
 5. **Review progress.** Filter or search the board, use list/calendar/table views, and mark completed work. Follow a board or card for internal notifications. Use the activity log to inspect changes and the trash to recover supported deleted items.
 
-Labels may vary with the selected language.
+Labels may vary with the selected language. The unreleased development interface changes language without reloading. Use the selector in the header or an editor/panel dialog; unsaved fields and drafts remain in place. Switching does not save them. Language is still a browser preference, with no account synchronization.
 
 The unreleased interface adds a command palette (`Ctrl`/`Command` + `Shift` + `P`), monthly/weekly calendar navigation and a personal center for saved card drafts. Open these through the account panel; drafts still require current server access when reopened. Arrow keys and Home/End navigate card controls. Signing out in one tab also invalidates the interface in the account's other tabs. `?pseudo=1` is a developer text-expansion mode; it does not translate user content or add a supported language.
 

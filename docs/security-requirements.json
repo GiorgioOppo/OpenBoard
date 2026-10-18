@@ -1,0 +1,1735 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-18",
+  "project_baseline": "b103d97caa38806a035d94d9a1af19bd4699ca6e",
+  "assessment_scope": "Complete pinned Level 1 identifier inventory; selected requirements traced to scoped observations and existing regression scenarios. No complete ASVS compliance assessment.",
+  "standard": {
+    "name": "OWASP ASVS",
+    "version": "5.0.0",
+    "release_tag": "v5.0.0_release",
+    "commit": "5cf9b032440be53ce345ab3c130fda46ba1ce7a2",
+    "source_url": "https://raw.githubusercontent.com/OWASP/ASVS/5cf9b032440be53ce345ab3c130fda46ba1ce7a2/5.0/docs_en/OWASP_Application_Security_Verification_Standard_5.0.0_en.csv",
+    "sha256": "98c8fe911b9edb403af8ee05d3ce8201ecac2659e313b053890a62847cdcf680",
+    "catalog_requirement_count": 345,
+    "level1_requirement_count": 70,
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://github.com/OWASP/ASVS/blob/5cf9b032440be53ce345ab3c130fda46ba1ce7a2/LICENSE.md"
+  },
+  "chapters": [
+    {
+      "id": "V1",
+      "scope": "C/JSON, SQL/BSON and frontend output contexts; XML is not an application input parser.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V2",
+      "scope": "Server validators and application workflows; input/flow inventory remains incomplete.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V3",
+      "scope": "Browser rendering, cookies, security headers and CSRF across the complete origin.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V4",
+      "scope": "HTTP JSON API and static routing; no application WebSocket endpoint.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V5",
+      "scope": "Attachments, imports, exports and backup/recovery archive boundaries.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V6",
+      "scope": "OpenBoard passwords/bootstrap and the separate NPM administration authentication surface.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V7",
+      "scope": "OpenBoard reference sessions; NPM session/token behavior requires separate assessment.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V8",
+      "scope": "Global/board roles, personal resources and ancestry; SaaS tenant separation is absent.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V9",
+      "scope": "OpenBoard does not use self-contained sessions; NPM administration token implementation is unassessed.",
+      "assessment": "unassessed"
+    },
+    {
+      "id": "V10",
+      "scope": "No OpenBoard OAuth/OIDC integration; full upstream/proxy provider applicability remains unassessed.",
+      "assessment": "unassessed"
+    },
+    {
+      "id": "V11",
+      "scope": "Application hashing/randomness and optional backup encryption; upstream crypto/key inventory incomplete.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V12",
+      "scope": "Public TLS is operator configured; internal connections are unencrypted in supplied Compose.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V13",
+      "scope": "Build/runtime configuration, environment files, selected runtime assets and effective port/routing policy.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V14",
+      "scope": "Credential/data placement, browser drafts, exports, logs and private snapshot custody.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V15",
+      "scope": "Dependency management, safe coding, typed input, concurrency and availability boundaries.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V16",
+      "scope": "Application/proxy/database logs and errors; protected security-event collection is incomplete.",
+      "assessment": "scoped"
+    },
+    {
+      "id": "V17",
+      "scope": "No application WebRTC functionality; revisit if a media/realtime integration is added.",
+      "assessment": "not_applicable"
+    }
+  ],
+  "controls": [
+    {
+      "id": "OB-C01",
+      "requirements": [
+        "v5.0.0-1.2.1",
+        "v5.0.0-1.2.2",
+        "v5.0.0-1.2.3",
+        "v5.0.0-3.2.2"
+      ],
+      "status": "partial",
+      "observation": "Frontend escapes text/attributes, restricts rendered reference protocols and uses local scripts. JSON response construction escapes strings.",
+      "sources": [
+        "src/server.c",
+        "web/app.js",
+        "web/planning.js",
+        "web/timeline.js",
+        "web/i18n.js"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_frontend.js",
+          "symbol": null
+        },
+        {
+          "path": "tests/test_timeline.js",
+          "symbol": null
+        },
+        {
+          "path": "tests/test_live_language.js",
+          "symbol": null
+        }
+      ],
+      "threats": [
+        "TM-06",
+        "TM-08"
+      ],
+      "remaining_work": "Review every output context and exercise actual browsers; VM assertions cover selected sinks only.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C02",
+      "requirements": [
+        "v5.0.0-1.2.4"
+      ],
+      "status": "partial",
+      "observation": "Application values use prepared SQLite statements; the cloud adapter binds SQL data and converts supported JSON to literal typed BSON.",
+      "sources": [
+        "src/server.c",
+        "src/auth.c",
+        "src/cloud.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_cloud.py",
+          "symbol": "test_json_extended_operator_keys_remain_literal_and_typed"
+        },
+        {
+          "path": "tests/test_cloud.py",
+          "symbol": "test_unsupported_json_is_rejected_before_mutating_external_data"
+        }
+      ],
+      "threats": [
+        "TM-08"
+      ],
+      "remaining_work": "Review all current and future queries, dynamic identifier allowlists and raw database clients; named tests are selected injection/type scenarios.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C03",
+      "requirements": [
+        "v5.0.0-1.2.5"
+      ],
+      "status": "partial",
+      "observation": "Operational scripts use subprocess argument vectors; the domain API does not provide an OS command execution endpoint.",
+      "sources": [
+        "scripts/backup_tools.py",
+        "scripts/check-deployment.py",
+        "scripts/fuzz.py"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_backup_tools.py",
+          "symbol": "test_proxy_archive_rejects_traversal_symlinks_devices_and_invalid_sqlite"
+        }
+      ],
+      "threats": [
+        "TM-08",
+        "TM-14"
+      ],
+      "remaining_work": "Audit every command invocation, argument interpretation and tool override; safe archive extraction alone does not prove command-injection resistance.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C04",
+      "requirements": [
+        "v5.0.0-1.3.2"
+      ],
+      "status": "partial",
+      "observation": "Application JavaScript is supplied as static local assets; CSP excludes unsafe-eval.",
+      "sources": [
+        "deploy/frontend.conf",
+        "src/http.c",
+        "web/app.js"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_frontend_static.py",
+          "symbol": "test_security_headers_and_static_write_rejection"
+        }
+      ],
+      "threats": [
+        "TM-06"
+      ],
+      "remaining_work": "Review all dynamic execution sites in application, proxy and dependencies; the test verifies static response policy rather than every interpreter.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C05",
+      "requirements": [
+        "v5.0.0-1.5.1"
+      ],
+      "status": "not_applicable",
+      "observation": "The OpenBoard API/importers accept JSON or CSV and do not parse user XML; opaque uploaded attachments are downloaded as files. This statement does not assess PostgreSQL XML or every NPM dependency.",
+      "sources": [
+        "src/server.c",
+        "web/importers.js",
+        "src/collaboration.c"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-08"
+      ],
+      "remaining_work": "Reassess if XML/SAML/SVG parsing is introduced; independently review XML-capable upstream components when assessing the full stack.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C06",
+      "requirements": [
+        "v5.0.0-2.1.1",
+        "v5.0.0-2.2.1",
+        "v5.0.0-2.2.2"
+      ],
+      "status": "partial",
+      "observation": "Documented typed bounds are enforced by backend validators and transaction logic; frontend checks improve feedback.",
+      "sources": [
+        "docs/API.md",
+        "src/server.c",
+        "src/intake.c",
+        "src/reviews.c",
+        "src/sprints.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_domain.py",
+          "symbol": "test_export_import_roundtrip_and_atomic_invalid_import"
+        },
+        {
+          "path": "tests/test_field_filters.py",
+          "symbol": "test_rejects_type_coercion_removed_fields_and_bad_query_parameters"
+        }
+      ],
+      "threats": [
+        "TM-08",
+        "TM-10"
+      ],
+      "remaining_work": "Complete an endpoint/field inventory and verify all security/business inputs against the documented contract; fuzzing does not establish exhaustive validation.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C07",
+      "requirements": [
+        "v5.0.0-2.3.1"
+      ],
+      "status": "partial",
+      "observation": "Review votes, invalidation and domain mutations are transactional; material edits invalidate approval.",
+      "sources": [
+        "src/reviews.c",
+        "src/server.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_growth.py",
+          "symbol": "test_material_card_change_invalidates_approval_atomically"
+        },
+        {
+          "path": "tests/test_growth.py",
+          "symbol": "test_review_invalidation_rolls_back_when_a_write_fails"
+        }
+      ],
+      "threats": [
+        "TM-05",
+        "TM-09"
+      ],
+      "remaining_work": "Assess every business flow and forbidden step transition. Existing approvals do not automatically enforce a completion gate.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C08",
+      "requirements": [
+        "v5.0.0-3.2.1",
+        "v5.0.0-4.1.1"
+      ],
+      "status": "partial",
+      "observation": "API replies use JSON UTF-8 and nosniff; file exports/downloads use attachment disposition. Static frontend serves an explicit asset set.",
+      "sources": [
+        "src/http.c",
+        "src/server.c",
+        "deploy/frontend.conf",
+        "src/collaboration.c",
+        "src/intake.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_frontend_static.py",
+          "symbol": "test_unknown_assets_secrets_and_api_are_not_served"
+        },
+        {
+          "path": "tests/test_frontend_static.py",
+          "symbol": "test_security_headers_and_static_write_rejection"
+        },
+        {
+          "path": "tests/test_collaboration.py",
+          "symbol": "test_attachment_binary_round_trip_soft_delete_restore_and_permissions"
+        }
+      ],
+      "threats": [
+        "TM-06",
+        "TM-10"
+      ],
+      "remaining_work": "Review every response type and direct-navigation context, including attachment MIME handling and error responses in the complete proxy chain.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C09",
+      "requirements": [
+        "v5.0.0-3.3.1"
+      ],
+      "status": "gap",
+      "observation": "HTTPS origins add Secure to the HttpOnly/SameSite Strict ob_session cookie; its name has no required security prefix. Local HTTP intentionally omits Secure.",
+      "sources": [
+        "src/auth.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_https_public_url_sets_secure_session_cookie"
+        }
+      ],
+      "threats": [
+        "TM-03",
+        "TM-16"
+      ],
+      "remaining_work": "Design and migrate to an appropriate __Host-/__Secure- cookie for HTTPS, handle old cookies/duplicate names and test actual browsers. Local evaluation cannot satisfy this public deployment property.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C10",
+      "requirements": [
+        "v5.0.0-3.4.1"
+      ],
+      "status": "gap",
+      "observation": "The shipped frontend/API security headers do not guarantee HSTS on every public response.",
+      "sources": [
+        "deploy/frontend.conf",
+        "src/http.c",
+        "scripts/check-deployment.py"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_security_deployment.py",
+          "symbol": "test_https_readiness_checks_exact_redirect_without_following_it"
+        }
+      ],
+      "threats": [
+        "TM-16"
+      ],
+      "remaining_work": "Define a production HSTS policy after validating HTTPS and domain/subdomain ownership, enforce it at ingress and verify all response classes. A redirect test is not an HSTS test.",
+      "owner": "operator and maintainer"
+    },
+    {
+      "id": "OB-C11",
+      "requirements": [
+        "v5.0.0-3.4.2",
+        "v5.0.0-3.5.1",
+        "v5.0.0-3.5.3"
+      ],
+      "status": "partial",
+      "observation": "Exact Host/Origin checks and authenticated-write CSRF tokens protect the same-origin API; domain mutations use modifying methods.",
+      "sources": [
+        "src/http.c",
+        "src/auth.c",
+        "src/server.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_anonymous_and_csrf_and_cross_origin_protection"
+        },
+        {
+          "path": "tests/test_transport.py",
+          "symbol": "test_duplicate_security_headers_are_rejected"
+        }
+      ],
+      "threats": [
+        "TM-04"
+      ],
+      "remaining_work": "Inventory all endpoints, aliases, public bootstrap capabilities and proxy error responses; test CORS policy and safe-method side effects comprehensively.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C12",
+      "requirements": [
+        "v5.0.0-4.4.1"
+      ],
+      "status": "not_applicable",
+      "observation": "OpenBoard currently polls HTTP APIs and exposes no application WebSocket endpoint.",
+      "sources": [
+        "src/http.c",
+        "web/app.js"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-04"
+      ],
+      "remaining_work": "Reassess before adding realtime WebSockets or another upstream service with WebSocket routing.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C13",
+      "requirements": [
+        "v5.0.0-5.2.1",
+        "v5.0.0-5.3.1",
+        "v5.0.0-5.3.2"
+      ],
+      "status": "partial",
+      "observation": "HTTP/file/card limits and retained-file admission bound selected resources. Files are database payloads downloaded through authorized APIs. Backup extraction rejects unsafe paths/types.",
+      "sources": [
+        "src/server.c",
+        "src/storage.c",
+        "scripts/backup_tools.py",
+        "src/collaboration.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_storage_capacity.py",
+          "symbol": "test_exact_byte_boundary_and_retained_trash"
+        },
+        {
+          "path": "tests/test_storage_capacity.py",
+          "symbol": "test_concurrent_upload_admission_and_idempotency_replay"
+        },
+        {
+          "path": "tests/test_backup_tools.py",
+          "symbol": "test_proxy_archive_rejects_traversal_symlinks_devices_and_invalid_sqlite"
+        },
+        {
+          "path": "tests/test_collaboration.py",
+          "symbol": "test_attachment_strict_base64_names_mime_size_and_both_quotas"
+        }
+      ],
+      "threats": [
+        "TM-10",
+        "TM-12",
+        "TM-14"
+      ],
+      "remaining_work": "Measure process memory/physical external storage and all generated filesystem paths; do not infer antivirus or complete DoS resistance from logical quotas.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C14",
+      "requirements": [
+        "v5.0.0-5.2.2"
+      ],
+      "status": "gap",
+      "observation": "Attachments have metadata/size validation and attachment disposition, but no general extension-to-magic/content validation or antivirus scanner.",
+      "sources": [
+        "src/collaboration.c"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-10"
+      ],
+      "remaining_work": "Classify supported file uses and implement suitable content validation/quarantine where needed; downloads can still harm recipient devices.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C15",
+      "requirements": [
+        "v5.0.0-6.1.1",
+        "v5.0.0-6.3.1"
+      ],
+      "status": "partial",
+      "observation": "SECURITY.md records backend fixed-window quotas and nginx/NPM limits; regressions check trusted identity, isolation, expiry and concurrent reservations.",
+      "sources": [
+        "SECURITY.md",
+        "src/auth.c",
+        "deploy/npm/auth-rate-limit.mjs",
+        "deploy/npm/openboard-api.conf"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth_rate_limits.py",
+          "symbol": "test_bounded_limiter_collision_expiry_isolation_and_concurrent_reservations"
+        },
+        {
+          "path": "tests/test_npm_limits.mjs",
+          "symbol": null
+        }
+      ],
+      "threats": [
+        "TM-02",
+        "TM-04",
+        "TM-12"
+      ],
+      "remaining_work": "Distributed authentication quotas and adaptive anti-abuse remain absent. Review backend replicas, IPv6/network aggregation and perimeter capacity.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C16",
+      "requirements": [
+        "v5.0.0-6.2.1"
+      ],
+      "status": "partial",
+      "observation": "The backend requires valid UTF-8 passwords of 12 to 256 bytes. This is a byte rule, not a minimum Unicode character-count rule.",
+      "sources": [
+        "src/auth.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_username_casefold_and_password_bounds"
+        }
+      ],
+      "threats": [
+        "TM-02"
+      ],
+      "remaining_work": "Adopt and test a character-count policy consistent with the chosen authentication assurance; 12 UTF-8 bytes can represent fewer than eight characters.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C17",
+      "requirements": [
+        "v5.0.0-6.2.2",
+        "v5.0.0-6.2.3",
+        "v5.0.0-6.2.5",
+        "v5.0.0-6.2.8"
+      ],
+      "status": "partial",
+      "observation": "Users can change passwords using current/new values; backend preserves UTF-8 bytes without composition rules or case transformation. Other sessions are revoked on success.",
+      "sources": [
+        "src/auth.c",
+        "web/app.js"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_password_change_revokes_other_sessions_and_logout"
+        },
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_username_casefold_and_password_bounds"
+        }
+      ],
+      "threats": [
+        "TM-02",
+        "TM-03"
+      ],
+      "remaining_work": "Review all setup/admin/password paths, Unicode edge cases and exact-byte handling; assess current-token rotation separately.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C18",
+      "requirements": [
+        "v5.0.0-6.2.4"
+      ],
+      "status": "gap",
+      "observation": "No common-password or breached-password blocklist is consulted at setup, user creation or password change.",
+      "sources": [
+        "src/auth.c"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-02"
+      ],
+      "remaining_work": "Add a maintained local blocklist compatible with the password policy, without transmitting submitted passwords to an external service.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C19",
+      "requirements": [
+        "v5.0.0-6.2.6",
+        "v5.0.0-6.2.7"
+      ],
+      "status": "partial",
+      "observation": "Frontend password controls mask entry and do not intentionally block paste or password managers.",
+      "sources": [
+        "web/index.html",
+        "web/app.js"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-02",
+        "TM-03"
+      ],
+      "remaining_work": "Run real-browser keyboard, paste, autocomplete and password-manager checks for every authentication/password control.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C20",
+      "requirements": [
+        "v5.0.0-6.3.2",
+        "v5.0.0-6.4.1"
+      ],
+      "status": "partial",
+      "observation": "The app ships without seeded accounts; private bootstrap generates distinct random administrator passwords rather than shared defaults.",
+      "sources": [
+        "src/auth.c",
+        "scripts/bootstrap-local.py",
+        "scripts/init-env.py"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_bootstrap_local.py",
+          "symbol": "test_fresh_stack_private_credentials_and_safe_rerun"
+        }
+      ],
+      "threats": [
+        "TM-01",
+        "TM-13"
+      ],
+      "remaining_work": "Generated bootstrap passwords do not expire or require first-use replacement. Evaluate initial-secret lifecycle and all upstream default accounts before public service.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C21",
+      "requirements": [
+        "v5.0.0-6.4.2"
+      ],
+      "status": "partial",
+      "observation": "OpenBoard has no password-hint or knowledge-question recovery flow.",
+      "sources": [
+        "src/auth.c"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-02"
+      ],
+      "remaining_work": "Review upstream NPM recovery behavior separately and preserve this restriction when account recovery is introduced.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C22",
+      "requirements": [
+        "v5.0.0-7.2.1",
+        "v5.0.0-7.2.2",
+        "v5.0.0-7.2.3"
+      ],
+      "status": "partial",
+      "observation": "Backend verifies dynamically generated 256-bit reference tokens using stored SHA-256 hashes and current active-account/session state.",
+      "sources": [
+        "src/auth.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_setup_session_and_hashed_storage"
+        },
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_session_idle_absolute_expiry_and_duplicate_cookie"
+        }
+      ],
+      "threats": [
+        "TM-03"
+      ],
+      "remaining_work": "Review RNG failure paths, token handling across all consumers and upstream NPM tokens; statistical or fixture checks do not establish entropy by themselves.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C23",
+      "requirements": [
+        "v5.0.0-7.2.4"
+      ],
+      "status": "gap",
+      "observation": "Login issues a fresh token but does not generally revoke the caller existing session. Password change retains the current token while revoking other sessions.",
+      "sources": [
+        "src/auth.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_password_change_revokes_other_sessions_and_logout"
+        }
+      ],
+      "threats": [
+        "TM-03"
+      ],
+      "remaining_work": "Design session rotation on authentication/reauthentication and sensitive factor changes without breaking explicit multi-device sessions; add fixation/reuse regressions.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C24",
+      "requirements": [
+        "v5.0.0-7.4.1",
+        "v5.0.0-7.4.2",
+        "v5.0.0-7.3.1",
+        "v5.0.0-7.3.2"
+      ],
+      "status": "partial",
+      "observation": "Logout, deactivation and idle/absolute expiry prevent subsequent backend use. Protected writes recheck after lock waits.",
+      "sources": [
+        "src/auth.c",
+        "src/server.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_deactivation_revokes_sessions_and_reactivation_requires_login"
+        },
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_session_idle_absolute_expiry_and_duplicate_cookie"
+        },
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_revoked_admin_cannot_create_users_after_waiting_for_a_writer"
+        },
+        {
+          "path": "tests/test_growth.py",
+          "symbol": "test_session_reads_coalesce_without_extending_absolute_lifetime"
+        }
+      ],
+      "threats": [
+        "TM-03",
+        "TM-05"
+      ],
+      "remaining_work": "Assess every mutation/replay/replica path and document the timeout risk decision for the target deployment; no federated-session claim applies.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C25",
+      "requirements": [
+        "v5.0.0-8.1.1",
+        "v5.0.0-8.2.1",
+        "v5.0.0-8.2.2",
+        "v5.0.0-8.3.1",
+        "v5.0.0-15.4.2"
+      ],
+      "status": "partial",
+      "observation": "Backend function/data ACLs, ownership/live ancestry and transactional authorization cover protected writes and cached domain replay.",
+      "sources": [
+        "SECURITY.md",
+        "src/auth.c",
+        "src/server.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_observers_read_only_but_personal_stars_are_allowed"
+        },
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_membership_read_isolation_and_board_creation_owner"
+        },
+        {
+          "path": "tests/test_security_domain.py",
+          "symbol": "test_restored_resource_replay_checks_live_ancestry_and_unknown_paths_fail_closed"
+        },
+        {
+          "path": "tests/test_security_domain.py",
+          "symbol": "test_global_admin_demotion_cannot_replay_a_private_board_operation"
+        }
+      ],
+      "threats": [
+        "TM-05"
+      ],
+      "remaining_work": "Keep a route/action/role inventory and test negative cases for new aliases/replay families; selected TOCTOU regressions do not assess every race.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C26",
+      "requirements": [
+        "v5.0.0-8.4.1"
+      ],
+      "status": "gap",
+      "observation": "Board ACLs operate within one installation; global administrators can read all boards. No workspace/SaaS tenant boundary is implemented.",
+      "sources": [
+        "src/auth.c",
+        "docs/ARCHITECTURE.md"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_membership_read_isolation_and_board_creation_owner"
+        }
+      ],
+      "threats": [
+        "TM-05"
+      ],
+      "remaining_work": "Implement an explicit tenant model and cross-tenant controls before promising SaaS tenant isolation. Board membership tests cannot substitute for this design.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C27",
+      "requirements": [
+        "v5.0.0-11.3.1",
+        "v5.0.0-11.3.2",
+        "v5.0.0-11.3.3",
+        "v5.0.0-11.4.1",
+        "v5.0.0-11.4.2",
+        "v5.0.0-11.5.1"
+      ],
+      "status": "partial",
+      "observation": "Backend uses OpenSSL PBKDF2-HMAC-SHA256, SHA-256, RAND_bytes and constant-time password comparison. Optional backup encryption uses OpenSSL CMS AES-256-GCM with RSA-OAEP.",
+      "sources": [
+        "src/auth.c",
+        "scripts/backup_tools.py"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_setup_session_and_hashed_storage"
+        },
+        {
+          "path": "tests/test_backup_tools.py",
+          "symbol": "test_real_authenticated_encryption_and_wrong_key_permissions"
+        },
+        {
+          "path": "tests/test_backup_tools.py",
+          "symbol": "test_ciphertext_tampering_fails_even_if_sidecar_checksum_is_changed"
+        }
+      ],
+      "threats": [
+        "TM-02",
+        "TM-03",
+        "TM-14"
+      ],
+      "remaining_work": "Maintain a complete crypto/key inventory and review upstream TLS/token implementations, parameter upgrades and key custody. Optional backup encryption does not encrypt live databases or every export.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C28",
+      "requirements": [
+        "v5.0.0-12.1.1",
+        "v5.0.0-12.2.1",
+        "v5.0.0-12.2.2"
+      ],
+      "status": "deployment_required",
+      "observation": "Public access requires an exact HTTPS origin, trusted certificate and exact redirect. Preflight verifies the certificate using public-hostname SNI through loopback.",
+      "sources": [
+        "docs/DEPLOYMENT.md",
+        "scripts/check-deployment.py"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_security_deployment.py",
+          "symbol": "test_tls_connects_only_to_loopback_but_verifies_public_hostname"
+        },
+        {
+          "path": "tests/test_security_deployment.py",
+          "symbol": "test_https_readiness_checks_exact_redirect_without_following_it"
+        }
+      ],
+      "threats": [
+        "TM-04",
+        "TM-16"
+      ],
+      "remaining_work": "Operator must supply actual TLS configuration and runtime evidence for the exact deployment; test enabled protocol/cipher policy, all ingress paths and renewal. Local HTTP is evaluation only.",
+      "owner": "operator"
+    },
+    {
+      "id": "OB-C29",
+      "requirements": [
+        "v5.0.0-12.3.1",
+        "v5.0.0-12.3.3"
+      ],
+      "status": "gap",
+      "observation": "The supplied Docker networks isolate services, but internal API and database connections do not configure transport encryption.",
+      "sources": [
+        "compose.yaml",
+        "deploy/npm/openboard-api.conf"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-16"
+      ],
+      "remaining_work": "Design authenticated internal TLS and trust/key rotation if the deployment requires protection against host/network peers; private networking is not cryptography.",
+      "owner": "operator and maintainer"
+    },
+    {
+      "id": "OB-C30",
+      "requirements": [
+        "v5.0.0-13.4.1"
+      ],
+      "status": "partial",
+      "observation": "Runtime images copy selected binaries/assets; static routes allow only explicit public files. Git/environment/build exclusions protect the build context.",
+      "sources": [
+        "Dockerfile",
+        "Dockerfile.frontend",
+        ".dockerignore",
+        "deploy/frontend.conf"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_frontend_static.py",
+          "symbol": "test_unknown_assets_secrets_and_api_are_not_served"
+        }
+      ],
+      "threats": [
+        "TM-13",
+        "TM-15"
+      ],
+      "remaining_work": "Inspect each final release filesystem/layer and effective web routing; a source recipe or one frontend test is not a complete artifact inspection.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C31",
+      "requirements": [
+        "v5.0.0-14.2.1"
+      ],
+      "status": "partial",
+      "observation": "Sessions use cookies and CSRF uses a request header; passwords and submitted domain data use request bodies.",
+      "sources": [
+        "src/auth.c",
+        "web/app.js"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_setup_session_and_hashed_storage"
+        }
+      ],
+      "threats": [
+        "TM-03",
+        "TM-13"
+      ],
+      "remaining_work": "Review all URL parameters, referrers and ingress logs. Search queries can contain sensitive project terms even without credentials.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C32",
+      "requirements": [
+        "v5.0.0-14.3.1"
+      ],
+      "status": "gap",
+      "observation": "Logout/account changes clear visible authenticated state and reject late responses, but account-scoped recovery drafts intentionally remain in browser storage.",
+      "sources": [
+        "web/app.js"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_frontend.js",
+          "symbol": null
+        },
+        {
+          "path": "tests/test_experience.js",
+          "symbol": null
+        }
+      ],
+      "threats": [
+        "TM-07"
+      ],
+      "remaining_work": "Define and implement an explicit secure erasure/retention policy for DOM, drafts, caches and downloads appropriate to shared profiles; current isolation is not complete storage erasure.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C33",
+      "requirements": [
+        "v5.0.0-15.1.1",
+        "v5.0.0-15.2.1"
+      ],
+      "status": "gap",
+      "observation": "The project tracks pinned inputs and dated dependency findings but has no documented risk-based dependency remediation deadlines or complete current artifact assessment.",
+      "sources": [
+        "SECURITY.md",
+        "docs/SECURITY_REMEDIATION_2026-10-16.md",
+        "THIRD_PARTY_NOTICES.md",
+        ".github/dependabot.yml"
+      ],
+      "tests": [],
+      "threats": [
+        "TM-15"
+      ],
+      "remaining_work": "Agree realistic risk-based update/remediation time frames and triage exact candidate image findings. Existing best-effort support and old scan counts do not satisfy these requirements.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C34",
+      "requirements": [
+        "v5.0.0-15.3.1"
+      ],
+      "status": "partial",
+      "observation": "Account responses select public account fields; domain endpoints use shaped JSON responses and ACL-filtered summaries rather than exposing raw database tables.",
+      "sources": [
+        "src/auth.c",
+        "src/server.c",
+        "src/search.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_auth.py",
+          "symbol": "test_catalog_requires_session_and_matches_domain_values"
+        },
+        {
+          "path": "tests/test_storage_capacity.py",
+          "symbol": "test_inventory_acl_limits_history_and_no_sensitive_metadata"
+        }
+      ],
+      "threats": [
+        "TM-05",
+        "TM-13"
+      ],
+      "remaining_work": "Inventory every endpoint/schema and every response field, especially administrative exports, summaries, personal resources and diagnostic errors.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C35",
+      "requirements": [
+        "v5.0.0-15.3.4"
+      ],
+      "status": "partial",
+      "observation": "The exact trusted peer may supply one canonical numeric client address; NPM replaces incoming identity headers with the TCP client address.",
+      "sources": [
+        "src/http.c",
+        "deploy/npm/harden.py",
+        "deploy/npm/openboard-api.conf"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_transport.py",
+          "symbol": "test_trusted_proxy_accepts_only_one_numeric_client_address"
+        },
+        {
+          "path": "tests/test_transport.py",
+          "symbol": "test_forwarded_headers_from_untrusted_peer_are_ignored"
+        },
+        {
+          "path": "tests/test_transport.py",
+          "symbol": "test_proxy_ipv6_and_mapped_ipv4_spellings_share_quotas"
+        }
+      ],
+      "threats": [
+        "TM-04"
+      ],
+      "remaining_work": "Validate the full running ingress chain after any proxy/CDN/topology change; distributed NAT/VPN users can still share an address.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C36",
+      "requirements": [
+        "v5.0.0-15.3.6"
+      ],
+      "status": "partial",
+      "observation": "Custom-field merge/planning lookups check own properties, including legitimate constructor/prototype keys.",
+      "sources": [
+        "web/conflicts.js",
+        "web/planning.js",
+        "web/app.js"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_conflict_resolution.js",
+          "symbol": null
+        },
+        {
+          "path": "tests/test_field_filters.js",
+          "symbol": null
+        }
+      ],
+      "threats": [
+        "TM-08"
+      ],
+      "remaining_work": "Review all JavaScript object merges, imported JSON and transitive proxy dependencies; selected special-key regressions are not a whole-program prototype-pollution audit.",
+      "owner": "maintainer"
+    },
+    {
+      "id": "OB-C37",
+      "requirements": [
+        "v5.0.0-16.2.5",
+        "v5.0.0-16.4.1",
+        "v5.0.0-16.5.1",
+        "v5.0.0-16.5.2",
+        "v5.0.0-16.5.3"
+      ],
+      "status": "partial",
+      "observation": "Request logs escape paths and omit bodies/tokens; telemetry uses bounded fixed labels. Configuration and persistence failures return sanitized errors, roll back and invalidate failed cache state.",
+      "sources": [
+        "src/http.c",
+        "src/telemetry.c",
+        "src/cloud.c",
+        "src/secrets.c"
+      ],
+      "tests": [
+        {
+          "path": "tests/test_cloud.py",
+          "symbol": "test_partial_cloud_configuration_fails_without_exposing_uri"
+        },
+        {
+          "path": "tests/test_cloud.py",
+          "symbol": "test_incremental_sql_failure_rolls_back_publication_and_invalidates_cache"
+        },
+        {
+          "path": "tests/test_telemetry.py",
+          "symbol": "test_real_responses_histogram_labels_legacy_names_and_no_user_data"
+        }
+      ],
+      "threats": [
+        "TM-11",
+        "TM-13",
+        "TM-17"
+      ],
+      "remaining_work": "Review all log layers, query-string exposure, proxy/driver diagnostics, failure modes and remote log protection. Add a complete security-event inventory and protected audit/alert channel.",
+      "owner": "maintainer"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "v5.0.0-1.2.1",
+      "level": 1,
+      "chapter": "V1",
+      "status": "partial",
+      "control": "OB-C01"
+    },
+    {
+      "id": "v5.0.0-1.2.2",
+      "level": 1,
+      "chapter": "V1",
+      "status": "partial",
+      "control": "OB-C01"
+    },
+    {
+      "id": "v5.0.0-1.2.3",
+      "level": 1,
+      "chapter": "V1",
+      "status": "partial",
+      "control": "OB-C01"
+    },
+    {
+      "id": "v5.0.0-1.2.4",
+      "level": 1,
+      "chapter": "V1",
+      "status": "partial",
+      "control": "OB-C02"
+    },
+    {
+      "id": "v5.0.0-1.2.5",
+      "level": 1,
+      "chapter": "V1",
+      "status": "partial",
+      "control": "OB-C03"
+    },
+    {
+      "id": "v5.0.0-1.3.1",
+      "level": 1,
+      "chapter": "V1",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-1.3.2",
+      "level": 1,
+      "chapter": "V1",
+      "status": "partial",
+      "control": "OB-C04"
+    },
+    {
+      "id": "v5.0.0-1.5.1",
+      "level": 1,
+      "chapter": "V1",
+      "status": "not_applicable",
+      "control": "OB-C05"
+    },
+    {
+      "id": "v5.0.0-2.1.1",
+      "level": 1,
+      "chapter": "V2",
+      "status": "partial",
+      "control": "OB-C06"
+    },
+    {
+      "id": "v5.0.0-2.2.1",
+      "level": 1,
+      "chapter": "V2",
+      "status": "partial",
+      "control": "OB-C06"
+    },
+    {
+      "id": "v5.0.0-2.2.2",
+      "level": 1,
+      "chapter": "V2",
+      "status": "partial",
+      "control": "OB-C06"
+    },
+    {
+      "id": "v5.0.0-2.3.1",
+      "level": 1,
+      "chapter": "V2",
+      "status": "partial",
+      "control": "OB-C07"
+    },
+    {
+      "id": "v5.0.0-3.2.1",
+      "level": 1,
+      "chapter": "V3",
+      "status": "partial",
+      "control": "OB-C08"
+    },
+    {
+      "id": "v5.0.0-3.2.2",
+      "level": 1,
+      "chapter": "V3",
+      "status": "partial",
+      "control": "OB-C01"
+    },
+    {
+      "id": "v5.0.0-3.3.1",
+      "level": 1,
+      "chapter": "V3",
+      "status": "gap",
+      "control": "OB-C09"
+    },
+    {
+      "id": "v5.0.0-3.4.1",
+      "level": 1,
+      "chapter": "V3",
+      "status": "gap",
+      "control": "OB-C10"
+    },
+    {
+      "id": "v5.0.0-3.4.2",
+      "level": 1,
+      "chapter": "V3",
+      "status": "partial",
+      "control": "OB-C11"
+    },
+    {
+      "id": "v5.0.0-3.5.1",
+      "level": 1,
+      "chapter": "V3",
+      "status": "partial",
+      "control": "OB-C11"
+    },
+    {
+      "id": "v5.0.0-3.5.2",
+      "level": 1,
+      "chapter": "V3",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-3.5.3",
+      "level": 1,
+      "chapter": "V3",
+      "status": "partial",
+      "control": "OB-C11"
+    },
+    {
+      "id": "v5.0.0-4.1.1",
+      "level": 1,
+      "chapter": "V4",
+      "status": "partial",
+      "control": "OB-C08"
+    },
+    {
+      "id": "v5.0.0-4.4.1",
+      "level": 1,
+      "chapter": "V4",
+      "status": "not_applicable",
+      "control": "OB-C12"
+    },
+    {
+      "id": "v5.0.0-5.2.1",
+      "level": 1,
+      "chapter": "V5",
+      "status": "partial",
+      "control": "OB-C13"
+    },
+    {
+      "id": "v5.0.0-5.2.2",
+      "level": 1,
+      "chapter": "V5",
+      "status": "gap",
+      "control": "OB-C14"
+    },
+    {
+      "id": "v5.0.0-5.3.1",
+      "level": 1,
+      "chapter": "V5",
+      "status": "partial",
+      "control": "OB-C13"
+    },
+    {
+      "id": "v5.0.0-5.3.2",
+      "level": 1,
+      "chapter": "V5",
+      "status": "partial",
+      "control": "OB-C13"
+    },
+    {
+      "id": "v5.0.0-6.1.1",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C15"
+    },
+    {
+      "id": "v5.0.0-6.2.1",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C16"
+    },
+    {
+      "id": "v5.0.0-6.2.2",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C17"
+    },
+    {
+      "id": "v5.0.0-6.2.3",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C17"
+    },
+    {
+      "id": "v5.0.0-6.2.4",
+      "level": 1,
+      "chapter": "V6",
+      "status": "gap",
+      "control": "OB-C18"
+    },
+    {
+      "id": "v5.0.0-6.2.5",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C17"
+    },
+    {
+      "id": "v5.0.0-6.2.6",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C19"
+    },
+    {
+      "id": "v5.0.0-6.2.7",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C19"
+    },
+    {
+      "id": "v5.0.0-6.2.8",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C17"
+    },
+    {
+      "id": "v5.0.0-6.3.1",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C15"
+    },
+    {
+      "id": "v5.0.0-6.3.2",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C20"
+    },
+    {
+      "id": "v5.0.0-6.4.1",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C20"
+    },
+    {
+      "id": "v5.0.0-6.4.2",
+      "level": 1,
+      "chapter": "V6",
+      "status": "partial",
+      "control": "OB-C21"
+    },
+    {
+      "id": "v5.0.0-7.2.1",
+      "level": 1,
+      "chapter": "V7",
+      "status": "partial",
+      "control": "OB-C22"
+    },
+    {
+      "id": "v5.0.0-7.2.2",
+      "level": 1,
+      "chapter": "V7",
+      "status": "partial",
+      "control": "OB-C22"
+    },
+    {
+      "id": "v5.0.0-7.2.3",
+      "level": 1,
+      "chapter": "V7",
+      "status": "partial",
+      "control": "OB-C22"
+    },
+    {
+      "id": "v5.0.0-7.2.4",
+      "level": 1,
+      "chapter": "V7",
+      "status": "gap",
+      "control": "OB-C23"
+    },
+    {
+      "id": "v5.0.0-7.3.1",
+      "level": 2,
+      "chapter": "V7",
+      "status": "partial",
+      "control": "OB-C24"
+    },
+    {
+      "id": "v5.0.0-7.3.2",
+      "level": 2,
+      "chapter": "V7",
+      "status": "partial",
+      "control": "OB-C24"
+    },
+    {
+      "id": "v5.0.0-7.4.1",
+      "level": 1,
+      "chapter": "V7",
+      "status": "partial",
+      "control": "OB-C24"
+    },
+    {
+      "id": "v5.0.0-7.4.2",
+      "level": 1,
+      "chapter": "V7",
+      "status": "partial",
+      "control": "OB-C24"
+    },
+    {
+      "id": "v5.0.0-8.1.1",
+      "level": 1,
+      "chapter": "V8",
+      "status": "partial",
+      "control": "OB-C25"
+    },
+    {
+      "id": "v5.0.0-8.2.1",
+      "level": 1,
+      "chapter": "V8",
+      "status": "partial",
+      "control": "OB-C25"
+    },
+    {
+      "id": "v5.0.0-8.2.2",
+      "level": 1,
+      "chapter": "V8",
+      "status": "partial",
+      "control": "OB-C25"
+    },
+    {
+      "id": "v5.0.0-8.3.1",
+      "level": 1,
+      "chapter": "V8",
+      "status": "partial",
+      "control": "OB-C25"
+    },
+    {
+      "id": "v5.0.0-8.4.1",
+      "level": 2,
+      "chapter": "V8",
+      "status": "gap",
+      "control": "OB-C26"
+    },
+    {
+      "id": "v5.0.0-9.1.1",
+      "level": 1,
+      "chapter": "V9",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-9.1.2",
+      "level": 1,
+      "chapter": "V9",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-9.1.3",
+      "level": 1,
+      "chapter": "V9",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-9.2.1",
+      "level": 1,
+      "chapter": "V9",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-10.4.1",
+      "level": 1,
+      "chapter": "V10",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-10.4.2",
+      "level": 1,
+      "chapter": "V10",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-10.4.3",
+      "level": 1,
+      "chapter": "V10",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-10.4.4",
+      "level": 1,
+      "chapter": "V10",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-10.4.5",
+      "level": 1,
+      "chapter": "V10",
+      "status": "unassessed",
+      "owner": "maintainer",
+      "remaining_work": "Assess the complete pinned requirement against every applicable application/proxy/deployment layer and add evidence or an explicit applicability rationale."
+    },
+    {
+      "id": "v5.0.0-11.3.1",
+      "level": 1,
+      "chapter": "V11",
+      "status": "partial",
+      "control": "OB-C27"
+    },
+    {
+      "id": "v5.0.0-11.3.2",
+      "level": 1,
+      "chapter": "V11",
+      "status": "partial",
+      "control": "OB-C27"
+    },
+    {
+      "id": "v5.0.0-11.3.3",
+      "level": 2,
+      "chapter": "V11",
+      "status": "partial",
+      "control": "OB-C27"
+    },
+    {
+      "id": "v5.0.0-11.4.1",
+      "level": 1,
+      "chapter": "V11",
+      "status": "partial",
+      "control": "OB-C27"
+    },
+    {
+      "id": "v5.0.0-11.4.2",
+      "level": 2,
+      "chapter": "V11",
+      "status": "partial",
+      "control": "OB-C27"
+    },
+    {
+      "id": "v5.0.0-11.5.1",
+      "level": 2,
+      "chapter": "V11",
+      "status": "partial",
+      "control": "OB-C27"
+    },
+    {
+      "id": "v5.0.0-12.1.1",
+      "level": 1,
+      "chapter": "V12",
+      "status": "deployment_required",
+      "control": "OB-C28"
+    },
+    {
+      "id": "v5.0.0-12.2.1",
+      "level": 1,
+      "chapter": "V12",
+      "status": "deployment_required",
+      "control": "OB-C28"
+    },
+    {
+      "id": "v5.0.0-12.2.2",
+      "level": 1,
+      "chapter": "V12",
+      "status": "deployment_required",
+      "control": "OB-C28"
+    },
+    {
+      "id": "v5.0.0-12.3.1",
+      "level": 2,
+      "chapter": "V12",
+      "status": "gap",
+      "control": "OB-C29"
+    },
+    {
+      "id": "v5.0.0-12.3.3",
+      "level": 2,
+      "chapter": "V12",
+      "status": "gap",
+      "control": "OB-C29"
+    },
+    {
+      "id": "v5.0.0-13.4.1",
+      "level": 1,
+      "chapter": "V13",
+      "status": "partial",
+      "control": "OB-C30"
+    },
+    {
+      "id": "v5.0.0-14.2.1",
+      "level": 1,
+      "chapter": "V14",
+      "status": "partial",
+      "control": "OB-C31"
+    },
+    {
+      "id": "v5.0.0-14.3.1",
+      "level": 1,
+      "chapter": "V14",
+      "status": "gap",
+      "control": "OB-C32"
+    },
+    {
+      "id": "v5.0.0-15.1.1",
+      "level": 1,
+      "chapter": "V15",
+      "status": "gap",
+      "control": "OB-C33"
+    },
+    {
+      "id": "v5.0.0-15.2.1",
+      "level": 1,
+      "chapter": "V15",
+      "status": "gap",
+      "control": "OB-C33"
+    },
+    {
+      "id": "v5.0.0-15.3.1",
+      "level": 1,
+      "chapter": "V15",
+      "status": "partial",
+      "control": "OB-C34"
+    },
+    {
+      "id": "v5.0.0-15.3.4",
+      "level": 2,
+      "chapter": "V15",
+      "status": "partial",
+      "control": "OB-C35"
+    },
+    {
+      "id": "v5.0.0-15.3.6",
+      "level": 2,
+      "chapter": "V15",
+      "status": "partial",
+      "control": "OB-C36"
+    },
+    {
+      "id": "v5.0.0-15.4.2",
+      "level": 3,
+      "chapter": "V15",
+      "status": "partial",
+      "control": "OB-C25"
+    },
+    {
+      "id": "v5.0.0-16.2.5",
+      "level": 2,
+      "chapter": "V16",
+      "status": "partial",
+      "control": "OB-C37"
+    },
+    {
+      "id": "v5.0.0-16.4.1",
+      "level": 2,
+      "chapter": "V16",
+      "status": "partial",
+      "control": "OB-C37"
+    },
+    {
+      "id": "v5.0.0-16.5.1",
+      "level": 2,
+      "chapter": "V16",
+      "status": "partial",
+      "control": "OB-C37"
+    },
+    {
+      "id": "v5.0.0-16.5.2",
+      "level": 2,
+      "chapter": "V16",
+      "status": "partial",
+      "control": "OB-C37"
+    },
+    {
+      "id": "v5.0.0-16.5.3",
+      "level": 2,
+      "chapter": "V16",
+      "status": "partial",
+      "control": "OB-C37"
+    }
+  ]
+}

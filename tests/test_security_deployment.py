@@ -42,6 +42,8 @@ def fixture_bindings(settings):
 
 
 AUTH = json.dumps({'enabled': True, 'setup_required': False, 'user': None, 'csrf': ''}).encode()
+VERSION = json.dumps({'api': {'version': 1, 'supported_versions': [1], 'base_path': '/api/v1',
+                            'unversioned_alias': '/api', 'alias_version': 1}}).encode()
 
 
 def fixture_nginx(host='openboard.localhost'):
@@ -52,10 +54,10 @@ def fixture_nginx(host='openboard.localhost'):
         limit_conn openboard_api_clients 8;
         limit_conn openboard_api_total 32;
         proxy_pass http://$openboard_api;'''
-    auth = '\n'.join(f'''location = /api/auth/{name} {{
+    auth = '\n'.join(f'''location = {prefix}{name} {{
         limit_req zone=openboard_auth burst=10 nodelay;
         {controls}
-    }}''' for name in ('login', 'setup', 'password'))
+    }}''' for prefix in ('/api/auth/', '/api/v1/auth/') for name in ('login', 'setup', 'password'))
     return f'''# configuration file /etc/nginx/nginx.conf:
 events {{ worker_connections 1024; }}
 http {{
@@ -158,6 +160,23 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
         with self.assertRaises(CHECK.DeploymentError):
             CHECK.nginx_preflight(settings, unrelated)
 
+    def test_shipped_proxy_configs_cover_both_api_versions_and_reject_stale_limits(self):
+        settings = CHECK.configuration(fixture_config())
+        source = fixture_nginx()
+        start = source.index('    location ^~ /api/')
+        end = source.index('    location / { proxy_pass http://frontend:8080; }')
+        actual = source[:start] + (ROOT/'deploy/npm/openboard-api.conf').read_text() + '\n' + source[end:]
+        CHECK.nginx_preflight(settings, actual)
+        standalone = '# configuration file /etc/nginx/nginx.conf:\n' + (ROOT/'deploy/nginx.conf.example').read_text()
+        CHECK.nginx_preflight({'origin': 'https://board.example.com', 'https': True}, standalone)
+        for name in ('login', 'setup', 'password'):
+            # A deployment using the old snippet would expose the new route
+            # through the unrestricted API block. The readiness guard rejects it.
+            stale = actual.replace('location = /api/v1/auth/' + name,
+                                   'location = /stale-' + name)
+            with self.subTest(missing=name), self.assertRaises(CHECK.DeploymentError):
+                CHECK.nginx_preflight(settings, stale)
+
     def test_nginx_controls_fail_closed_for_spoofed_ip_and_missing_limits(self):
         settings = CHECK.configuration(fixture_config())
         source = fixture_nginx()
@@ -170,6 +189,9 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
             ('limit_conn_status 429;', ''),
             ('location = /api/auth/login', 'location = /different'),
             ('location = /api/auth/password', 'location = /other'),
+            ('location = /api/v1/auth/login', 'location = /versioned-other'),
+            ('location = /api/v1/auth/setup', 'location = /versioned-setup-other'),
+            ('location = /api/v1/auth/password', 'location = /versioned-password-other'),
             ('limit_req zone=openboard_auth burst=10 nodelay;', '# limiter disabled'),
             ('limit_conn_zone $binary_remote_addr', 'limit_conn_zone $http_x_forwarded_for'),
             ('events {', 'set_real_ip_from 172.16.0.0/12; events {'),
@@ -189,7 +211,7 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
             CHECK.nginx_configuration('# configuration file /etc/nginx/nginx.conf:\ninclude nginx.conf;')
 
     def ready(self, settings, backend=(200, AUTH), npm=(200, b'{"setup":true}'), origin=None, bindings=None, proxy=None, diagnostics=None,
-              storage=(200, b'{"status":"ready"}')):
+              storage=(200, b'{"status":"ready"}'), version=(200, VERSION)):
         calls = []
         def proxy_get(path, tls):
             calls.append((path, tls))
@@ -199,8 +221,10 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
                 return 301, b'', {'location': settings['origin'] + path}
             if path == '/':
                 return 200, b'<html>OpenBoard</html>', {'content-type': 'text/html; charset=utf-8'}
+            if path == '/api/v1/version':
+                return 200, VERSION, {'content-type': 'application/json', 'openboard-api-version': '1'}
             return 200, AUTH, {'content-type': 'application/json'}
-        CHECK.readiness(settings, lambda path: storage if path == '/api/ready' else backend, proxy_get, lambda path: npm,
+        CHECK.readiness(settings, lambda path: storage if path == '/api/ready' else version if path == '/api/v1/version' else backend, proxy_get, lambda path: npm,
                         settings['origin'] if origin is None else origin,
                         fixture_bindings(settings) if bindings is None else bindings,
                         fixture_nginx(urlsplit(settings['origin']).hostname),
@@ -209,7 +233,7 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
 
     def test_readiness_requires_both_admins_and_authenticated_api_routing(self):
         settings = CHECK.configuration(fixture_config())
-        self.assertEqual(self.ready(settings), [('/', False), ('/api/auth/session', False)])
+        self.assertEqual(self.ready(settings), [('/', False), ('/api/v1/version', False), ('/api/auth/session', False), ('/api/v1/auth/session', False)])
         cases = ({'backend': (200, b'{"enabled":true,"setup_required":true}')},
                  {'backend': (200, b'{"enabled":false,"setup_required":false}')},
                  {'backend': (200, b'{"enabled":true,"setup_required":false,"user":{"id":1}}')},
@@ -219,6 +243,12 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
                  {'diagnostics': {'auth_enabled': True, 'trusted_proxy': ''}},
                  {'storage': (503, b'{"status":"unavailable"}')},
                  {'storage': (200, b'{"status":"unavailable"}')},
+                 {'version': (404, b'{"error":"old backend"}')},
+                 {'version': (200, b'{"version":"0.6.1"}')},
+                 {'version': (200, VERSION.replace(b'"version": 1', b'"version": true'))},
+                 {'version': (200, VERSION.replace(b'"base_path": "/api/v1"', b'"base_path": "/api/v2"'))},
+                 {'proxy': lambda path, tls: (200, VERSION, {}) if path == '/api/v1/version' else
+                  (200, b'<html>OpenBoard</html>', {'content-type': 'text/html'}) if path == '/' else (200, AUTH, {})},
                  {'proxy': lambda path, tls: (200, b'private wrong endpoint', {'content-type': 'text/plain'})})
         for case in cases:
             with self.subTest(case=case):
@@ -227,12 +257,14 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
 
     def test_https_readiness_checks_exact_redirect_without_following_it(self):
         settings = CHECK.configuration(fixture_config(True))
-        self.assertEqual(self.ready(settings), [('/', True), ('/api/auth/session', True), ('/api/auth/session', False)])
+        self.assertEqual(self.ready(settings), [('/', True), ('/api/v1/version', True), ('/api/auth/session', True), ('/api/auth/session', False), ('/api/v1/auth/session', True), ('/api/v1/auth/session', False)])
         def bad_redirect(path, tls):
             if not tls:
                 return 301, b'', {'location': 'https://attacker.example.test' + path}
             if path == '/':
                 return 200, b'OpenBoard', {'content-type': 'text/html'}
+            if path == '/api/v1/version':
+                return 200, VERSION, {'openboard-api-version': '1'}
             return 200, AUTH, {}
         with self.assertRaises(CHECK.DeploymentError):
             self.ready(settings, proxy=bad_redirect)
@@ -266,12 +298,12 @@ location ^~ /api/ { proxy_pass http://app:8080; } }
         paths = []
         def backend(path):
             paths.append(path)
-            return (200, b'{"status":"ready"}') if path == '/api/ready' else (200, AUTH)
+            return (200, b'{"status":"ready"}') if path == '/api/ready' else (200, VERSION) if path == '/api/v1/version' else (200, AUTH)
         def proxy(path, tls):
-            return (200, b'OpenBoard', {'content-type':'text/html'}) if path == '/' else (200, AUTH, {})
+            return (200, b'OpenBoard', {'content-type':'text/html'}) if path == '/' else (200, VERSION, {'openboard-api-version':'1'}) if path == '/api/v1/version' else (200, AUTH, {})
         CHECK.readiness(settings, backend, proxy, lambda path:(200,b'{"setup":true}'), settings['origin'],
                         fixture_bindings(settings), fixture_nginx(), result)
-        self.assertEqual(paths, ['/api/ready', '/api/auth/session'])
+        self.assertEqual(paths, ['/api/ready', '/api/v1/version', '/api/auth/session', '/api/v1/auth/session'])
 
     def test_tls_connects_only_to_loopback_but_verifies_public_hostname(self):
         with patch.object(CHECK.socket, 'create_connection') as connect, patch.object(CHECK.ssl, 'create_default_context') as context:

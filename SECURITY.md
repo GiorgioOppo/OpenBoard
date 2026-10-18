@@ -49,3 +49,5 @@ Attachments are validated and downloaded as files rather than executed. Limits a
 CSV exports guard against spreadsheet formulas, rendered Markdown escapes HTML, and reference links accept HTTP/HTTPS. Notifications, reports, reviews, sprints and forms enforce current account and board permissions. Publishing an internal form makes it available to eligible board members, not anonymous Internet users.
 
 The project has no SSO, SaaS tenant isolation, automatic retention policy or high-availability guarantee. Dependency findings remain documented even when the affected execution component is absent. A later image rebuild can change packages and must be reviewed and tested as a new artifact. The recorded scans do not establish a clean scan of every final release image.
+
+The development [threat model](docs/THREAT_MODEL.md) records assets, trust boundaries and residual risks. The [ASVS traceability](docs/SECURITY_REQUIREMENTS.md) separates source/test evidence from unassessed requirements and known gaps; it is not a compliance or certification statement.

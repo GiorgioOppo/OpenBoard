@@ -90,6 +90,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "我们要做什么？",
     "何に取り組みますか？"
   ],
+  "API resource path required.": [
+    "API resource path required.",
+    "Un chemin de ressource API est requis.",
+    "Se requiere una ruta de recurso de API.",
+    "API-Ressourcenpfad erforderlich.",
+    "必须提供 API 资源路径。",
+    "API リソースのパスが必要です。"
+  ],
   "Accedi": [
     "Sign in",
     "Se connecter",
@@ -5041,6 +5049,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Zeitraum auf sichtbares Fenster begrenzt",
     "范围已裁剪至可见时间窗口",
     "表示期間に合わせて範囲を切り詰めています"
+  ],
+  "Invalid API version path.": [
+    "Invalid API version path.",
+    "Chemin de version API non valide.",
+    "Ruta de versión de API no válida.",
+    "Ungültiger API-Versionspfad.",
+    "API 版本路径无效。",
+    "API バージョンのパスが無効です。"
   ],
   "Invia decisione": [
     "Submit decision",
@@ -12353,6 +12369,14 @@ globalThis.OpenBoardLocales = Object.freeze({
     "Automatisch zusammengeführt: Serveränderung.",
     "自动合并：服务器更改。",
     "自動マージ：サーバーの変更。"
+  ],
+  "Unsupported API version. Use /api/v1/.": [
+    "Unsupported API version. Use /api/v1/.",
+    "Version API non prise en charge. Utilisez /api/v1/.",
+    "Versión de API no compatible. Usa /api/v1/.",
+    "Nicht unterstützte API-Version. Verwenden Sie /api/v1/.",
+    "不支持此 API 版本。请使用 /api/v1/。",
+    "サポートされていない API バージョンです。/api/v1/ を使用してください。"
   ],
   "Un’altra scheda del browser ha aggiornato la bozza locale. I valori di questo editor restano in memoria.": [
     "Another browser tab has updated the local draft. The values in this editor remain in memory.",

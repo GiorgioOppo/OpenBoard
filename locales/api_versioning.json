@@ -1,0 +1,26 @@
+{
+  "Invalid API version path.": [
+    "Invalid API version path.",
+    "Chemin de version API non valide.",
+    "Ruta de versión de API no válida.",
+    "Ungültiger API-Versionspfad.",
+    "API 版本路径无效。",
+    "API バージョンのパスが無効です。"
+  ],
+  "API resource path required.": [
+    "API resource path required.",
+    "Un chemin de ressource API est requis.",
+    "Se requiere una ruta de recurso de API.",
+    "API-Ressourcenpfad erforderlich.",
+    "必须提供 API 资源路径。",
+    "API リソースのパスが必要です。"
+  ],
+  "Unsupported API version. Use /api/v1/.": [
+    "Unsupported API version. Use /api/v1/.",
+    "Version API non prise en charge. Utilisez /api/v1/.",
+    "Versión de API no compatible. Usa /api/v1/.",
+    "Nicht unterstützte API-Version. Verwenden Sie /api/v1/.",
+    "不支持此 API 版本。请使用 /api/v1/。",
+    "サポートされていない API バージョンです。/api/v1/ を使用してください。"
+  ]
+}
