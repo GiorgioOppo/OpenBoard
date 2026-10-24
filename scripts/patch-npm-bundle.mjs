@@ -11,7 +11,7 @@ import {createRequire} from 'node:module';
 const directory = '/usr/lib/node_modules/npm';
 const require = createRequire(`${directory}/package.json`);
 const application = JSON.parse(fs.readFileSync(`${directory}/package.json`, 'utf8'));
-assert.equal(application.version, '12.2.0');
+assert.equal(application.version, '12.2.1');
 const pacote = require('pacote');
 const Arborist = require('@npmcli/arborist');
 const patches = {
@@ -21,9 +21,9 @@ const patches = {
     integrity: 'sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==',
   },
   'undici': {
-    version: '6.28.1',
-    url: 'https://registry.npmjs.org/undici/-/undici-6.28.1.tgz',
-    integrity: 'sha512-zWpdTVD54H48CIybL0rWQ3ukpb9d23wM7eH5RtfdmeP70cWHNjtfo7P4vZX+5CoDcO53J4Pu5uXp7lNfjc6DRA==',
+    version: '6.29.1',
+    url: 'https://registry.npmjs.org/undici/-/undici-6.29.1.tgz',
+    integrity: 'sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==',
   },
   'http-cache-semantics': {
     version: '4.3.0',
@@ -61,7 +61,7 @@ try {
     assert.equal(lock.packages[`node_modules/${name}`].integrity, patch.integrity);
   }
   fs.writeFileSync(`${directory}/OPENBOARD_PATCHES.json`, `${JSON.stringify(patches, null, 2)}\n`);
-  console.log('npm bundled code and runtime lock updated: brace-expansion 5.0.12, undici 6.28.1, http-cache-semantics 4.3.0');
+  console.log('npm bundled code and runtime lock updated: brace-expansion 5.0.12, undici 6.29.1, http-cache-semantics 4.3.0');
 } finally {
   fs.rmSync(temporary, {recursive: true, force: true});
 }

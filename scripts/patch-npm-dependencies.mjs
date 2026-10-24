@@ -9,6 +9,6 @@ application.resolutions = {
   'proxy-addr': '2.0.8',
   'basic-ftp': '6.2.3',
   'brace-expansion': '5.0.12',
-  '**/node-gyp/undici': '6.28.1',
+  '**/node-gyp/undici': '6.29.1',
 };
 fs.writeFileSync(path, `${JSON.stringify(application, null, 2)}\n`);

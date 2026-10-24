@@ -4,6 +4,8 @@ Version sections describe the code's development history. They do not imply that
 
 ## Unreleased
 
+Refresh compatible dependency pins on 24 October 2026: Debian/PostgreSQL image indexes, Go 1.26.10, x/net 0.61.0, Node.js 22.23.4, npm 12.2.1, undici 6.29.1, pip 26.2.2 and setup-python 7.1.0. Preserve PostgreSQL 17/MongoDB 8.0/NPM 2.16 data and application lines, verified artifact hashes and runtime smoke tests. Keep the container integration runner on Ubuntu 24.04 and record its kernel to avoid the known MongoDB/Ubuntu 26.04 startup rejection. See the [dependency report](docs/DEPENDENCY_UPDATE_2026-10-24.md) for selected versions, unchanged compatible releases and actual validation boundaries.
+
 Change language in place across all seven locales, including dialog selectors, while preserving mounted editors, unsaved values, drafts, focus, current view and session. Track authored labels, formats and errors explicitly; preserve user content and escape public text markup. Language remains local to the browser.
 
 Add explicit `/api/v1/...` aliases, native version response headers and discovery metadata, with a [compatibility/deprecation policy](docs/API_VERSIONING.md). Canonicalize before authentication, authorization and idempotency so both route forms share controls. Extend both proxy snippets, exact-previous local proxy upgrades and runtime preflight to cover v1; an existing NPM host needs its saved Advanced configuration updated before public ingress reopens.

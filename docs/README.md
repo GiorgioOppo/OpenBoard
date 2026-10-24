@@ -40,7 +40,7 @@ OpenBoard 0.6.1 is an early preview. Start with the guide that matches your task
 - [Threat model](THREAT_MODEL.md) and [ASVS traceability and gaps](SECURITY_REQUIREMENTS.md).
 - [Initial audit, 16 October 2026](SECURITY_AUDIT_2026-10-16.md) and [original inventory](SECURITY_SCAN_2026-10-16.json).
 - [Remediation report](SECURITY_REMEDIATION_2026-10-16.md) and [follow-up inventory](SECURITY_SCAN_REMEDIATION_2026-10-16.json).
-- [Third-party licenses and provenance](../THIRD_PARTY_NOTICES.md).
+- [Third-party licenses and provenance](../THIRD_PARTY_NOTICES.md) and [dependency refresh, 24 October 2026](DEPENDENCY_UPDATE_2026-10-24.md).
 - [Changelog](../CHANGELOG.md), [release process](RELEASING.md) and [publication checklist](PUBLICATION.md).
 - [Publication preparation review, 16 October 2026](PUBLICATION_REVIEW_2026-10-16.md).
 - [Maintainers](../MAINTAINERS.md) and [code of conduct](../CODE_OF_CONDUCT.md).

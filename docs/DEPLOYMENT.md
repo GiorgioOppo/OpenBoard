@@ -23,7 +23,7 @@ Compose builds five project images: `openboard:0.6.1`, `openboard-frontend:0.6.1
 
 The unreleased MongoDB base refresh of 2026-10-17 retains server version 8.0.34 and updates the index digest in [Dockerfile.mongo](../Dockerfile.mongo). The published `v0.6.1` tag retains its original pin. The dated security inventories describe the earlier artifacts; their vulnerability counts are not new scan results for this rebuild.
 
-The frontend uses `nginxinc/nginx-unprivileged:1.30.6-alpine-slim` with distribution updates and starts Nginx directly with temporary directories in `/tmp`. PostgreSQL 17 persists in `/var/lib/postgresql/data`; upgrading to PostgreSQL 18 requires a migration plan. See the [PostgreSQL image documentation](https://hub.docker.com/_/postgres) and the [frontend image documentation](https://github.com/nginx/docker-nginx-unprivileged/blob/main/README.md).
+The frontend uses `nginxinc/nginx-unprivileged:1.31.7-alpine-slim` with distribution updates and starts Nginx directly with temporary directories in `/tmp`. PostgreSQL 17 persists in `/var/lib/postgresql/data`; upgrading to PostgreSQL 18 requires a migration plan. See the [PostgreSQL image documentation](https://hub.docker.com/_/postgres) and the [frontend image documentation](https://github.com/nginx/docker-nginx-unprivileged/blob/main/README.md).
 
 ## First local start
 
@@ -182,6 +182,12 @@ location = /api/v1/auth/password {
 `proxy_pass` without a path preserves `/api/...` and its query string. `$http_host` preserves the domain and port, including nonstandard public ports. The Docker resolver and upstream variable let Nginx refresh the `app` address after container recreation. See the Nginx [`proxy_pass`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass) and [`resolver`](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver) directives. Exact authentication locations apply a per-client rate limit and share connection limits with other API routes. Keep these blocks and avoid additional API locations that bypass their controls. See [NPM 2.16.0 location configuration](https://github.com/NginxProxyManager/nginx-proxy-manager/blob/v2.16.0/backend/templates/_location.conf).
 
 NPM 2.16.0 displays its setup wizard when no users exist and no initial credentials are configured. This stack uses that path instead of a shared administrator password. The `/data` and `/etc/letsencrypt` volumes retain proxy configuration and certificates. See [NPM setup](https://nginxproxymanager.com/setup/) and the [2.16.0 initialization implementation](https://github.com/NginxProxyManager/nginx-proxy-manager/blob/v2.16.0/backend/setup.js).
+
+### Dependency refresh and container host compatibility
+
+The [24 October dependency refresh](DEPENDENCY_UPDATE_2026-10-24.md) retains PostgreSQL 17.11, MongoDB 8.0.34 and NPM 2.16.0, while refreshing published base indexes, rebuilt tools and compatible Node/npm/pip dependencies. It introduces no application schema migration. Create and verify a coherent backup, rebuild the affected images and run the deployment/image checks before updating an installation; do not delete volumes.
+
+MongoDB 8.0.34 performs an early host-kernel compatibility check, including for `mongod --version`. The supplied container CI job uses `ubuntu-24.04` because the previous `ubuntu-latest` run was assigned Ubuntu 26.04 and failed during Mongo image construction. The host kernel is shared by containers: the `mongo:8.0.34-noble` userspace pin alone does not determine compatibility. Keep the kernel/Ubuntu-specific upstream restriction in view when choosing a Docker host. The CI pin does not change or validate an existing installation's kernel; see the [MongoDB notice](https://www.mongodb.com/docs/v8.0/release-notes/8.0/) and [Ubuntu correction](https://jira.mongodb.org/browse/SERVER-131779).
 
 ### Proxy address and configuration upgrades
 

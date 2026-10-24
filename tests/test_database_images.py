@@ -121,7 +121,7 @@ class PostgresImage(DatabaseImage, unittest.TestCase):
 
     def test_server_privileges_and_password_authentication(self):
         self.assertIn('17.', self.exec('postgres', '--version').stdout)
-        self.assertIn('go1.26.9', self.exec('gosu', '--version').stdout)
+        self.assertIn('go1.26.10', self.exec('gosu', '--version').stdout)
         result = self.exec('sh', '-ec', 'PGPASSWORD="$POSTGRES_APP_PASSWORD" psql -h 127.0.0.1 -U openboard -d openboard -Atqc "SELECT rolsuper, rolcreatedb, rolcreaterole, rolreplication FROM pg_roles WHERE rolname=current_user"')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), 'f|f|f|f')
@@ -177,14 +177,14 @@ class MongoImage(DatabaseImage, unittest.TestCase):
             command=['mongod', '--config', '/etc/openboard-mongod.yaml'])
 
     def test_tools_authentication_and_yaml_bundle(self):
-        self.assertIn('go1.26.9', self.exec('gosu', '--version').stdout)
+        self.assertIn('go1.26.10', self.exec('gosu', '--version').stdout)
         self.assertIn('v8.0.', self.exec('mongod', '--version').stdout)
         for tool in ['bsondump', 'mongodump', 'mongorestore', 'mongoimport',
                      'mongoexport', 'mongostat', 'mongotop', 'mongofiles']:
             with self.subTest(tool=tool):
                 result = self.exec(tool, '--version')
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn('go1.26.9', result.stdout)
+                self.assertIn('go1.26.10', result.stdout)
         result = self.exec('mongosh', '--quiet', '--nodb', '--eval', 'load("/js-yaml.js"); const config = jsyaml.load("net:\\n  port: 27017\\n"); if (config.net.port !== 27017) quit(1)')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertNotEqual(self.exec('mongosh', '--quiet', '--eval', 'db.getSiblingDB("openboard").auth("openboard", "wrong")').returncode, 0)

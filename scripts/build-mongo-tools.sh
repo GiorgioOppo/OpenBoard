@@ -8,14 +8,18 @@ printf '%s  %s\n' 5f8bbd54e76804985d73b66313d7485724396a6ae47135e9bcb57a8a49f427
 tar -xzf /tmp/tools.tgz --strip-components=1 -C /src/mongo-tools
 cd /src/mongo-tools
 # The release vendors x/net 0.59.0. Use a checksum-verified module download
-# instead; 0.60.0 contains the October security corrections.
-go mod edit -require=golang.org/x/net@v0.60.0
+# instead; 0.61.0 includes the October security corrections and maintenance fixes.
+go mod edit -require=golang.org/x/net@v0.61.0
+GOFLAGS=-mod=mod go mod download golang.org/x/net
 GOFLAGS=-mod=mod go mod download
+# Pin the selected module's official checksum as well as checking the cache.
+grep -Fx 'golang.org/x/net v0.61.0 h1:RR+6j/BTBCrggOLugxa+66R8FvoN6MHlzDlZIbN9YFw=' go.sum
+grep -Fx 'golang.org/x/net v0.61.0/go.mod h1:WgDCOTH8iwtB66T4/GfI94AHo/hhdb7Hah9NDseQfiI=' go.sum
 go mod verify
 for tool in bsondump mongodump mongorestore mongoimport mongoexport mongostat mongotop mongofiles; do
     CGO_ENABLED=1 go build -mod=mod -trimpath -buildvcs=false -buildmode=pie \
         -tags=gssapi,failpoints \
-        -ldflags='-X main.VersionStr=100.19.1-openboard.1 -X main.GitCommit=9348e032419d906e40966f477278cce647b9b1eb' \
+        -ldflags='-X main.VersionStr=100.19.1-openboard.2 -X main.GitCommit=9348e032419d906e40966f477278cce647b9b1eb' \
         -o "/out/bin/$tool" "$tool/main/$tool.go"
     go version -m "/out/bin/$tool"
     "/out/bin/$tool" --version

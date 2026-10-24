@@ -26,7 +26,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.14'
       - name: Verify local documentation links and code fences
@@ -56,7 +56,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.14'
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.14'
       - name: Install native fuzzer prerequisites
@@ -116,7 +116,10 @@ jobs:
           if-no-files-found: error
           retention-days: 7
   container:
-    runs-on: ubuntu-latest
+    # MongoDB 8.0.34 rejects Ubuntu 26.04's kernel release string before
+    # even processing --version (SERVER-131779). Keep this integration host
+    # on the working LTS until the compatible MongoDB 8.0 patch is published.
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
       COMPOSE_PROJECT_NAME: openboard-ci-${{ github.run_id }}-${{ github.run_attempt }}
@@ -124,9 +127,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.14'
+      - name: Record container host compatibility
+        run: |
+          uname -sr
+          if [ -r /proc/version_signature ]; then cat /proc/version_signature; fi
+          docker version --format '{{.Server.Version}}'
       - name: Generate private Compose configuration
         run: python3 scripts/init-env.py --http-port 8088 --https-port 8443 --admin-port 8181
       - name: Validate Compose

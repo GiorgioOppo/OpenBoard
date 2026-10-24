@@ -58,8 +58,8 @@ def replace_references(value, replacements):
 
 
 def main():
-    if importlib.metadata.version('pip') != '26.2.1':
-        raise SystemExit('Expected pip 26.2.1; review vendoring before changing the base')
+    if importlib.metadata.version('pip') != '26.2.2':
+        raise SystemExit('Expected pip 26.2.2; review vendoring before changing the base')
     vendor = Path(pip._vendor.__file__).parent
     bom = json.loads((vendor / 'bom.cdx.json').read_text())
     requirements = (vendor / 'vendor.txt').read_text()

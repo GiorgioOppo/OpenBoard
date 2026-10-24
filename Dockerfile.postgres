@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.26.9-bookworm@sha256:d9c68c2c51161e12fd77e4c6320687c9cd86e1af1e3ad6e6cd63ff970641453c AS gosu-build
+FROM golang:1.26.10-bookworm@sha256:632dff7351799a5a9954a48dc06670ade72ee44e8c351cdc0e5a57af2fea21af AS gosu-build
 COPY scripts/build-gosu.sh /usr/local/bin/build-gosu.sh
 RUN sh /usr/local/bin/build-gosu.sh
 
 # Keep the PostgreSQL 17 data format, entrypoint and backup tools unchanged.
-FROM postgres:17.11-trixie@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3 AS patched
+FROM postgres:17.11-trixie@sha256:b8faeff7712663c2773a190181e1246e37e364b887611c04658c28b44e2408fe AS patched
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -21,7 +21,7 @@ ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/p
     PG_VERSION=17.11-1.pgdg13+2 PGDATA=/var/lib/postgresql/data
 LABEL org.opencontainers.image.title="OpenBoard PostgreSQL 17" \
     org.opencontainers.image.base.name="postgres:17.11-trixie" \
-    org.opencontainers.image.base.digest="sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3"
+    org.opencontainers.image.base.digest="sha256:b8faeff7712663c2773a190181e1246e37e364b887611c04658c28b44e2408fe"
 VOLUME /var/lib/postgresql/data
 STOPSIGNAL SIGINT
 EXPOSE 5432

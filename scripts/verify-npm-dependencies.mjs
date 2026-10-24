@@ -3,16 +3,17 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
 
+assert.equal(process.versions.node, '22.23.4', 'NPM Node.js runtime');
 const require = createRequire('/app/package.json');
 for (const [path, version] of [
   ['/app/package.json', '2.16.0'],
   ['/app/node_modules/proxy-addr/package.json', '2.0.8'],
   ['/app/node_modules/basic-ftp/package.json', '6.2.3'],
   ['/app/node_modules/brace-expansion/package.json', '5.0.12'],
-  ['/app/node_modules/node-gyp/node_modules/undici/package.json', '6.28.1'],
-  ['/usr/lib/node_modules/npm/package.json', '12.2.0'],
+  ['/app/node_modules/node-gyp/node_modules/undici/package.json', '6.29.1'],
+  ['/usr/lib/node_modules/npm/package.json', '12.2.1'],
   ['/usr/lib/node_modules/npm/node_modules/brace-expansion/package.json', '5.0.12'],
-  ['/usr/lib/node_modules/npm/node_modules/undici/package.json', '6.28.1'],
+  ['/usr/lib/node_modules/npm/node_modules/undici/package.json', '6.29.1'],
   ['/usr/lib/node_modules/npm/node_modules/http-cache-semantics/package.json', '4.3.0'],
 ]) assert.equal(JSON.parse(fs.readFileSync(path, 'utf8')).version, version, path);
 
