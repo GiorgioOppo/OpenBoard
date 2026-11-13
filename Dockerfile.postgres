@@ -4,7 +4,7 @@ COPY scripts/build-gosu.sh /usr/local/bin/build-gosu.sh
 RUN sh /usr/local/bin/build-gosu.sh
 
 # Keep the PostgreSQL 17 data format, entrypoint and backup tools unchanged.
-FROM postgres:17.11-trixie@sha256:b8faeff7712663c2773a190181e1246e37e364b887611c04658c28b44e2408fe AS patched
+FROM postgres:17.11-trixie@sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f AS patched
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
