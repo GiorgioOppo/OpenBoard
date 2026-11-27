@@ -12,7 +12,7 @@ COPY scripts/build-mongo-tools.sh /usr/local/bin/build-mongo-tools.sh
 RUN sh /usr/local/bin/build-mongo-tools.sh
 
 # Preserve the 8.0 server format, initialization and administration binaries.
-FROM mongo:8.0.34-noble@sha256:c2d54fddfb3738fb27fe117f51692e3f44e640a3e7aeb8da3937ee9cd33a650b AS patched
+FROM mongo:8.0.38-noble@sha256:52afee5c058069f3b4c1517eaf65a8326d9f58ce4ef4fd076043b8eab6905112 AS patched
 RUN apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
